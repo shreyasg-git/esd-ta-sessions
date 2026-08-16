@@ -309,6 +309,61 @@ footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.
 
   <p>Creating a branch wrote 41 bytes and changed one line in <code>HEAD</code>. Nothing was copied. This is why teams create and delete branches dozens of times a week without thinking about it.</p>
 
+  <figure class="board">
+    <svg viewBox="0 0 780 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Before: main and feature both point at commit C. After committing on feature: feature points at a new commit D, main has not moved.">
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="16">BEFORE — BOTH BRANCHES POINT AT THE SAME COMMIT</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="87" y1="66" x2="173" y2="66"/><line x1="207" y1="66" x2="293" y2="66"/>
+      </g>
+      <g>
+        <circle cx="70" cy="66" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="190" cy="66" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="310" cy="66" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" fill="#5A6B67" text-anchor="middle">
+        <text x="70" y="70">A</text><text x="190" y="70">B</text><text x="310" y="70">C</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="1.5">
+        <line x1="304" y1="83" x2="286" y2="104"/><line x1="316" y1="83" x2="384" y2="104"/>
+      </g>
+      <rect x="240" y="104" width="92" height="26" fill="#101614"/>
+      <text x="286" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">main</text>
+      <rect x="340" y="104" width="92" height="26" fill="#101614"/>
+      <text x="386" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">feature</text>
+      <text x="446" y="122" font-family="IBM Plex Mono, monospace" font-size="11" fill="#0B5D51">← HEAD is here</text>
+
+      <line x1="0" y1="158" x2="780" y2="158" stroke="#C4CFCB" stroke-width="1"/>
+
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="186">AFTER ONE COMMIT ON FEATURE — ONLY THE CURRENT BRANCH MOVED</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="87" y1="234" x2="173" y2="234"/><line x1="207" y1="234" x2="293" y2="234"/><line x1="327" y1="234" x2="413" y2="234"/>
+      </g>
+      <g>
+        <circle cx="70" cy="234" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="190" cy="234" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="310" cy="234" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="430" cy="234" r="17" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" fill="#5A6B67" text-anchor="middle">
+        <text x="70" y="238">A</text><text x="190" y="238">B</text><text x="310" y="238">C</text>
+      </g>
+      <text x="430" y="238" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#0B5D51">D</text>
+      <g stroke="#5A6B67" stroke-width="1.5">
+        <line x1="310" y1="251" x2="310" y2="266"/><line x1="430" y1="251" x2="430" y2="266"/>
+      </g>
+      <rect x="264" y="266" width="92" height="26" fill="#101614"/>
+      <text x="310" y="284" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">main</text>
+      <rect x="384" y="266" width="92" height="26" fill="#101614"/>
+      <text x="430" y="284" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">feature</text>
+      <text x="490" y="284" font-family="IBM Plex Mono, monospace" font-size="11" fill="#0B5D51">← HEAD followed feature</text>
+    </svg>
+    <figcaption>Committing moves the branch you are on. Every other branch stays exactly where it was.</figcaption>
+  </figure>
+
   <div class="mention">
     <div class="mrow"><b>HEAD</b><span>"Where I am now." Normally contains <code>ref: refs/heads/&lt;branch&gt;</code> — a pointer to a pointer.</span></div>
     <div class="mrow"><b>Committing</b><span>Writes a new commit object, then rewrites the current branch file to point at it. The branch moves; you don't.</span></div>
@@ -485,6 +540,73 @@ version two
 <span class="p">$</span> git fetch origin
 <span class="p">$</span> git rebase origin/main</div>
 
+  <figure class="board">
+    <svg viewBox="0 0 780 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Before rebase: main has moved to E while feature has C and D branching from B. After rebase: feature's commits are replayed after E as new commits C prime and D prime, giving a single straight line.">
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="16">BEFORE — THE BRANCHES HAVE DIVERGED</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="87" y1="62" x2="173" y2="62"/>
+        <line x1="207" y1="62" x2="293" y2="62"/>
+        <line x1="203" y1="76" x2="295" y2="118"/>
+        <line x1="327" y1="126" x2="413" y2="126"/>
+      </g>
+      <g>
+        <circle cx="70" cy="62" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="190" cy="62" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="310" cy="62" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="310" cy="126" r="17" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <circle cx="430" cy="126" r="17" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="#5A6B67">
+        <text x="70" y="66">A</text><text x="190" y="66">B</text><text x="310" y="66">E</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="#0B5D51">
+        <text x="310" y="130">C</text><text x="430" y="130">D</text>
+      </g>
+      <rect x="344" y="49" width="86" height="26" fill="#101614"/>
+      <text x="387" y="67" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">main</text>
+      <rect x="464" y="113" width="98" height="26" fill="#101614"/>
+      <text x="513" y="131" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">feature</text>
+      <text x="576" y="131" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5A6B67">branched from B</text>
+      <text x="576" y="67" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5A6B67">main moved on without you</text>
+
+      <line x1="0" y1="176" x2="780" y2="176" stroke="#C4CFCB" stroke-width="1"/>
+
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="204">AFTER  git rebase origin/main  — REPLAYED ON TOP, AS NEW COMMITS</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="87" y1="252" x2="173" y2="252"/><line x1="207" y1="252" x2="293" y2="252"/>
+        <line x1="327" y1="252" x2="413" y2="252"/><line x1="447" y1="252" x2="533" y2="252"/>
+      </g>
+      <g>
+        <circle cx="70" cy="252" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="190" cy="252" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="310" cy="252" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="430" cy="252" r="17" fill="#F5C518" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="550" cy="252" r="17" fill="#F5C518" stroke="#0F1A18" stroke-width="2"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="#5A6B67">
+        <text x="70" y="256">A</text><text x="190" y="256">B</text><text x="310" y="256">E</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="#0F1A18" font-weight="600">
+        <text x="430" y="256">C'</text><text x="550" y="256">D'</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="1.5">
+        <line x1="310" y1="269" x2="310" y2="284"/><line x1="550" y1="269" x2="550" y2="284"/>
+      </g>
+      <rect x="267" y="284" width="86" height="26" fill="#101614"/>
+      <text x="310" y="302" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">main</text>
+      <rect x="501" y="284" width="98" height="26" fill="#101614"/>
+      <text x="550" y="302" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">feature</text>
+      <rect x="612" y="238" width="160" height="30" fill="#F5C518"/>
+      <text x="692" y="257" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#0F1A18" font-weight="600">yellow = new hashes</text>
+      <text x="612" y="302" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5A6B67">C and D are gone from the branch</text>
+    </svg>
+    <figcaption>Same changes, same messages, different commits. The old C and D still exist in the object database — reachable through the reflog — but nothing points at them any more.</figcaption>
+  </figure>
+
   <p>Git sets your commits aside, moves your branch pointer to <code>origin/main</code>, then replays each of your commits on top, one at a time. If a replay hits a conflict it pauses, you resolve it exactly as in section 04, and continue.</p>
 
   <div class="mention">
@@ -549,6 +671,67 @@ version two
 <span class="p">$</span> git log --oneline
 <span class="o">a1b2c3d Add feature</span>          <span class="cm"># one clean commit</span></div>
 
+  <figure class="board">
+    <svg viewBox="0 0 780 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Before: four messy commits on the cleanup branch. After an interactive rebase with fixup: one clean commit.">
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="16">BEFORE — FOUR COMMITS, THREE OF THEM NOISE</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="57" y1="62" x2="123" y2="62"/><line x1="157" y1="62" x2="223" y2="62"/>
+        <line x1="257" y1="62" x2="323" y2="62"/><line x1="357" y1="62" x2="423" y2="62"/>
+        <line x1="457" y1="62" x2="523" y2="62"/>
+      </g>
+      <g>
+        <circle cx="40" cy="62" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="140" cy="62" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="240" cy="62" r="17" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <circle cx="340" cy="62" r="17" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <circle cx="440" cy="62" r="17" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <circle cx="540" cy="62" r="17" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" text-anchor="middle" fill="#5A6B67">
+        <text x="40" y="66">A</text><text x="140" y="66">B</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" text-anchor="middle" fill="#0B5D51">
+        <text x="240" y="66">C</text><text x="340" y="66">D</text><text x="440" y="66">E</text><text x="540" y="66">F</text>
+      </g>
+      <g font-family="IBM Plex Sans, sans-serif" font-size="11" text-anchor="middle" fill="#5A6B67">
+        <text x="240" y="96">"Add feature"</text>
+        <text x="340" y="96">"wip"</text>
+        <text x="440" y="96">"fix typo"</text>
+        <text x="540" y="96">"actually fix it"</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" text-anchor="middle" fill="#8A6D08">
+        <text x="240" y="118">pick</text><text x="340" y="118">fixup</text><text x="440" y="118">fixup</text><text x="540" y="118">fixup</text>
+      </g>
+      <rect x="574" y="49" width="98" height="26" fill="#101614"/>
+      <text x="623" y="67" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">cleanup</text>
+
+      <line x1="0" y1="158" x2="780" y2="158" stroke="#C4CFCB" stroke-width="1"/>
+
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="186">AFTER  git rebase -i HEAD~4  — SAME CODE, ONE COMMIT</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="57" y1="234" x2="123" y2="234"/><line x1="157" y1="234" x2="223" y2="234"/>
+      </g>
+      <g>
+        <circle cx="40" cy="234" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="140" cy="234" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="240" cy="234" r="17" fill="#F5C518" stroke="#0F1A18" stroke-width="2"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" text-anchor="middle" fill="#5A6B67">
+        <text x="40" y="238">A</text><text x="140" y="238">B</text>
+      </g>
+      <text x="240" y="238" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#0F1A18" font-weight="600">C'</text>
+      <text x="240" y="268" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="#5A6B67">"Add feature"</text>
+      <rect x="274" y="221" width="98" height="26" fill="#101614"/>
+      <text x="323" y="239" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">cleanup</text>
+      <text x="392" y="239" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="#0F1A18">The files on disk are identical. Only the history changed.</text>
+    </svg>
+    <figcaption><code>fixup</code> folds a commit into the one above and throws its message away. <code>squash</code> does the same but lets you combine the messages.</figcaption>
+  </figure>
+
   <h3>The autosquash workflow</h3>
   <p>Once you're comfortable, this is faster than editing the list by hand. When you spot a mistake in an earlier commit:</p>
   <div class="cmd"><span class="p">$</span> git add .
@@ -608,6 +791,63 @@ version two
 <span class="p">$</span> git cherry-pick a1b2c3d^..e4f5g6h <span class="cm"># or a range</span>
 <span class="p">$</span> git cherry-pick -x a1b2c3d        <span class="cm"># record where it came from in the message</span></div>
 
+  <figure class="board">
+    <svg viewBox="0 0 780 310" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Before: commit D sits on the feature branch. After cherry-picking: a copy of D with a new hash sits on main, and the original stays where it was.">
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="16">BEFORE — THE FIX YOU WANT IS ON THE OTHER BRANCH</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="87" y1="60" x2="173" y2="60"/>
+        <line x1="203" y1="74" x2="295" y2="116"/>
+        <line x1="327" y1="124" x2="413" y2="124"/><line x1="447" y1="124" x2="533" y2="124"/>
+      </g>
+      <g>
+        <circle cx="70" cy="60" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="190" cy="60" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="310" cy="124" r="17" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <circle cx="430" cy="124" r="17" fill="#E4EEEB" stroke="#0B5D51" stroke-width="3"/>
+        <circle cx="550" cy="124" r="17" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="#5A6B67">
+        <text x="70" y="64">A</text><text x="190" y="64">B</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="#0B5D51">
+        <text x="310" y="128">C</text><text x="430" y="128">D</text><text x="550" y="128">E</text>
+      </g>
+      <rect x="224" y="47" width="86" height="26" fill="#101614"/>
+      <text x="267" y="65" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">main</text>
+      <rect x="584" y="111" width="98" height="26" fill="#101614"/>
+      <text x="633" y="129" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">feature</text>
+      <text x="430" y="164" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#0B5D51">↑ the one commit you need</text>
+
+      <line x1="0" y1="188" x2="780" y2="188" stroke="#C4CFCB" stroke-width="1"/>
+
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="216">AFTER  git cherry-pick D  ON MAIN — COPIED, NOT MOVED</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="87" y1="258" x2="173" y2="258"/><line x1="207" y1="258" x2="293" y2="258"/>
+        <line x1="203" y1="272" x2="295" y2="296"/>
+      </g>
+      <g>
+        <circle cx="70" cy="258" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="190" cy="258" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="310" cy="258" r="17" fill="#F5C518" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="310" cy="300" r="14" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="#5A6B67">
+        <text x="70" y="262">A</text><text x="190" y="262">B</text>
+      </g>
+      <text x="310" y="262" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#0F1A18" font-weight="600">D'</text>
+      <text x="310" y="304" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#0B5D51">C…</text>
+      <text x="340" y="304" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5A6B67">feature is untouched — D is still there too</text>
+      <rect x="344" y="245" width="86" height="26" fill="#101614"/>
+      <text x="387" y="263" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">main</text>
+      <text x="446" y="263" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="#0F1A18">Same changes, new hash, different parent.</text>
+    </svg>
+    <figcaption>The change now exists twice in the repository as two unrelated commits. That's fine once; it's the reason cherry-picking shouldn't become a routine.</figcaption>
+  </figure>
+
   <p>Like rebase, it creates a <strong>new commit with a new hash</strong> — same changes, different identity, different parent.</p>
 
   <h3>When it's the right tool</h3>
@@ -644,6 +884,86 @@ version two
 <span class="o">3c4d5e6 HEAD@{2}: checkout: moving from main to feature</span>
 <span class="o">7a8b9c0 HEAD@{3}: commit: Add login form</span>
 <span class="o">2d3e4f5 HEAD@{4}: reset: moving to HEAD~3</span></div>
+
+  <figure class="board">
+    <svg viewBox="0 0 780 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three stages: main pointing at D; after a hard reset main points at B while C and D are orphaned but still stored; after recovering from the reflog main points at D again.">
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="16">1 — BEFORE</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="87" y1="58" x2="173" y2="58"/><line x1="207" y1="58" x2="293" y2="58"/><line x1="327" y1="58" x2="413" y2="58"/>
+      </g>
+      <g>
+        <circle cx="70" cy="58" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="190" cy="58" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="310" cy="58" r="17" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <circle cx="430" cy="58" r="17" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="#5A6B67">
+        <text x="70" y="62">A</text><text x="190" y="62">B</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="#0B5D51">
+        <text x="310" y="62">C</text><text x="430" y="62">D</text>
+      </g>
+      <rect x="464" y="45" width="86" height="26" fill="#101614"/>
+      <text x="507" y="63" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">main</text>
+
+      <line x1="0" y1="102" x2="780" y2="102" stroke="#C4CFCB" stroke-width="1"/>
+
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="130">2 — AFTER  git reset --hard HEAD~2</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="87" y1="176" x2="173" y2="176"/>
+      </g>
+      <g stroke="#B0BCB8" stroke-width="2" stroke-dasharray="5 4">
+        <line x1="207" y1="176" x2="293" y2="176"/><line x1="327" y1="176" x2="413" y2="176"/>
+      </g>
+      <g>
+        <circle cx="70" cy="176" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="190" cy="176" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="310" cy="176" r="17" fill="#FFFFFF" stroke="#B0BCB8" stroke-width="2" stroke-dasharray="5 3"/>
+        <circle cx="430" cy="176" r="17" fill="#FFFFFF" stroke="#B0BCB8" stroke-width="2" stroke-dasharray="5 3"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="#5A6B67">
+        <text x="70" y="180">A</text><text x="190" y="180">B</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="#B0BCB8">
+        <text x="310" y="180">C</text><text x="430" y="180">D</text>
+      </g>
+      <rect x="147" y="204" width="86" height="26" fill="#101614"/>
+      <text x="190" y="222" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">main</text>
+      <line x1="190" y1="193" x2="190" y2="204" stroke="#5A6B67" stroke-width="1.5"/>
+      <text x="480" y="170" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="#0F1A18">Nothing points at C or D any more —</text>
+      <text x="480" y="188" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="#0F1A18">but both are still in <tspan font-family="IBM Plex Mono, monospace" font-size="11.5">.git/objects</tspan>.</text>
+      <text x="480" y="212" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8A6D08">git reflog still knows their hashes</text>
+
+      <line x1="0" y1="252" x2="780" y2="252" stroke="#C4CFCB" stroke-width="1"/>
+
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="280">3 — AFTER  git reset --hard HEAD@{1}</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="87" y1="326" x2="173" y2="326"/><line x1="207" y1="326" x2="293" y2="326"/><line x1="327" y1="326" x2="413" y2="326"/>
+      </g>
+      <g>
+        <circle cx="70" cy="326" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="190" cy="326" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="310" cy="326" r="17" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <circle cx="430" cy="326" r="17" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="#5A6B67">
+        <text x="70" y="330">A</text><text x="190" y="330">B</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="#0B5D51">
+        <text x="310" y="330">C</text><text x="430" y="330">D</text>
+      </g>
+      <rect x="464" y="313" width="86" height="26" fill="#101614"/>
+      <text x="507" y="331" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">main</text>
+      <text x="576" y="331" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="#0F1A18">Identical hashes. Nothing was rebuilt.</text>
+    </svg>
+    <figcaption>A reset moves a pointer. It doesn't delete objects — which is why almost every "I lost a day's work" story is really a "didn't know about the reflog" story.</figcaption>
+  </figure>
 
   <div class="dothis">
     <h4>Do this now — destroy some work and get it back</h4>
@@ -777,6 +1097,92 @@ version two
     <div class="mrow"><b>Squash and merge</b><span>Collapses the entire branch into <strong>one</strong> commit on main. Clean linear history, intermediate steps discarded.</span></div>
     <div class="mrow"><b>Rebase and merge</b><span>Replays your commits onto main individually, no merge commit. Linear <em>and</em> every commit preserved — but only sane if each commit independently builds and passes tests.</span></div>
   </div>
+
+  <figure class="board">
+    <svg viewBox="0 0 780 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="One pull request with two commits, landed three different ways: a merge commit keeping both plus a join; a squash producing one new commit; and rebase-and-merge replaying both commits onto main.">
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="16">THE PULL REQUEST — TWO COMMITS ON A BRANCH</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="87" y1="58" x2="173" y2="58"/>
+        <line x1="203" y1="72" x2="295" y2="106"/>
+        <line x1="327" y1="114" x2="413" y2="114"/>
+      </g>
+      <g>
+        <circle cx="70" cy="58" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="190" cy="58" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="310" cy="114" r="17" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <circle cx="430" cy="114" r="17" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="#5A6B67"><text x="70" y="62">A</text><text x="190" y="62">B</text></g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="#0B5D51"><text x="310" y="118">C</text><text x="430" y="118">D</text></g>
+      <rect x="224" y="45" width="86" height="26" fill="#101614"/>
+      <text x="267" y="63" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">main</text>
+      <rect x="464" y="101" width="98" height="26" fill="#101614"/>
+      <text x="513" y="119" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">feature</text>
+
+      <line x1="0" y1="152" x2="780" y2="152" stroke="#C4CFCB" stroke-width="1"/>
+
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="180">CREATE A MERGE COMMIT — everything kept, plus a join</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="87" y1="222" x2="173" y2="222"/>
+        <line x1="203" y1="212" x2="295" y2="196"/><line x1="327" y1="196" x2="413" y2="212"/>
+        <line x1="203" y1="232" x2="415" y2="232"/>
+      </g>
+      <g>
+        <circle cx="70" cy="222" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="190" cy="222" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="310" cy="192" r="15" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <circle cx="250" cy="192" r="15" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <circle cx="432" cy="222" r="18" fill="#101614" stroke="#101614" stroke-width="2"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle" fill="#0B5D51"><text x="250" y="196">C</text><text x="310" y="196">D</text></g>
+      <text x="432" y="227" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#F5C518" font-weight="600">M</text>
+      <rect x="466" y="209" width="86" height="26" fill="#101614"/>
+      <text x="509" y="227" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">main</text>
+      <text x="570" y="227" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5A6B67">4 commits land, history branches</text>
+
+      <line x1="0" y1="256" x2="780" y2="256" stroke="#C4CFCB" stroke-width="1"/>
+
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="284">SQUASH AND MERGE — one commit, linear</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="87" y1="322" x2="173" y2="322"/><line x1="207" y1="322" x2="293" y2="322"/>
+      </g>
+      <g>
+        <circle cx="70" cy="322" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="190" cy="322" r="17" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="310" cy="322" r="17" fill="#F5C518" stroke="#0F1A18" stroke-width="2"/>
+      </g>
+      <text x="310" y="326" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#0F1A18" font-weight="600">S</text>
+      <rect x="344" y="309" width="86" height="26" fill="#101614"/>
+      <text x="387" y="327" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">main</text>
+      <text x="446" y="327" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5A6B67">C and D collapsed into one — revert is trivial</text>
+
+      <line x1="0" y1="352" x2="780" y2="352" stroke="#C4CFCB" stroke-width="1"/>
+
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="380">REBASE AND MERGE — both commits kept, still linear</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="87" y1="414" x2="173" y2="414"/><line x1="207" y1="414" x2="293" y2="414"/><line x1="327" y1="414" x2="413" y2="414"/>
+      </g>
+      <g>
+        <circle cx="70" cy="414" r="16" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="190" cy="414" r="16" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="310" cy="414" r="16" fill="#F5C518" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="430" cy="414" r="16" fill="#F5C518" stroke="#0F1A18" stroke-width="2"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" text-anchor="middle" fill="#0F1A18" font-weight="600"><text x="310" y="418">C'</text><text x="430" y="418">D'</text></g>
+      <rect x="464" y="401" width="86" height="26" fill="#101614"/>
+      <text x="507" y="419" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">main</text>
+      <text x="566" y="419" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5A6B67">each commit must stand alone</text>
+    </svg>
+    <figcaption>Same pull request, three different histories. Yellow means a new hash — squash and rebase both rewrite, which is why your local branch is stale afterwards.</figcaption>
+  </figure>
 
   <div class="cue work"><p class="cue-k">Squash is the most common default</p><p>Because it makes <strong>one PR equal one commit on main</strong>, which makes <code>git revert</code> and <code>git bisect</code> trivial. Broke production? Revert one commit, the whole feature is gone.</p><p>If you can't say which strategy your team uses, ask in your first week. It changes how you should structure your commits: under squash, your intermediate commits are getting collapsed so don't agonise over them. Under rebase-and-merge, every commit is going on main and must stand alone.</p></div>
 
