@@ -1115,7 +1115,7 @@ Thumbs.db</div>
 <span class="p">$</span> git commit -h           <span class="cm"># short summary of the options</span></div>
   <p>And searching is completely legitimate. Paste the exact error message into a search engine — Git has been around for twenty years, and whatever you've hit, several thousand people have hit it before you and written it up.</p>
 
-  <div class="cue calm"><p class="cue-k">Asking for help is a skill, not a failure</p><p>When you're stuck, post in the class group with <strong>a screenshot of your terminal showing <code>git status</code> and the error message</strong>. That single screenshot usually makes the answer obvious in seconds.</p><p>Asking early with good information is a professional skill that people get promoted for. Silently struggling for two days is not.</p></div>
+  <div class="cue calm"><p class="cue-k">Asking for help is a skill, not a failure</p><p>When you're properly stuck, ask someone — and have <strong>a screenshot of your terminal showing <code>git status</code> and the error message</strong> ready when you do. That single screenshot usually makes the answer obvious in seconds.</p><p>Asking early with good information is a professional skill that people get promoted for. Silently struggling for two days is not.</p></div>
 
   <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 17 complete</span></label>
 </section>
@@ -1291,14 +1291,20 @@ Thumbs.db</div>
 </section>
 
 <div class="finish">
-  <h2>Submit this to finish</h2>
-  <p>Two things in the class group. It's how we know you're ready, and it's the only thing you need to hand in.</p>
+  <h2>How to know you're ready</h2>
+  <p><strong>There is nothing to submit.</strong> No form, no upload, nothing to send anywhere. This is preparation for your own benefit, and the only person who needs to be satisfied by it is you.</p>
+  <p>Run this inside your practice repository:</p>
   <div class="cmd"><span class="p">$</span> git log --oneline</div>
+  <p>You're ready for the session if all of these are true:</p>
   <ol>
-    <li><strong>A screenshot of that output</strong>, showing at least three commits with real messages.</li>
-    <li><strong>The link to your <code>git-practice</code> repository</strong> on GitHub.</li>
+    <li>That command shows <strong>at least three commits of your own</strong>, each with a message you'd be happy for someone else to read.</li>
+    <li>You can go through <code>status → add → commit → push</code> without looking anything up.</li>
+    <li>You know what to do when <code>git status</code> shows a filename in red.</li>
+    <li>Your laptop is logged into GitHub, so <code>git push</code> never asks you for a password.</li>
+    <li>The word "branch" doesn't worry you, even though you've only used one.</li>
   </ol>
-  <p style="margin-top:16px">Then you're done. You can clone, stage, commit, push, pull, rename, delete, ignore files, undo mistakes, read history, write a README, and you know what a branch actually is. That is a real, employable skill and you now have it.</p>
+  <p>If any of those feels shaky, go back to the section it came from and do it once more. Nobody is checking, so there's no reason to pretend otherwise to yourself.</p>
+  <p style="margin-top:16px">Once they're all true, you can clone, stage, commit, push, pull, rename, delete, ignore files, undo mistakes, read history, write a README, and you know what a branch actually is. That is a real, employable skill and you now have it.</p>
   <p><strong>The session starts where this document ends.</strong> Branches, merging, stashing, rebasing, worktrees and pull requests all assume exactly what you've just learned and nothing more.</p>
 
   <h2 style="margin-top:30px;font-size:20px">The everyday loop</h2>
@@ -1378,7 +1384,7 @@ Thumbs.db</div>
              'Good start — section 04 is the one that matters most.',
              'Past halfway. The hard conceptual part is behind you.',
              'Nearly there. The practice run is where it sticks.',
-             'Done. Post your git log screenshot in the group.'];
+             "All done — nothing to hand in. You're ready for the session."];
   function update(){
     var n=checks.filter(function(c){return c.checked}).length;
     var pct=checks.length?n/checks.length:0;
