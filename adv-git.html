@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Advanced Git — branches, worktrees &amp; the agent era</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+.cue.work{border-left-color:var(--ink);background:var(--surface)}
+.cue.work .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.d{color:var(--signal)}
+.tx{color:#FFFFFF}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 178px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 168px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> Advanced Git</p>
+  <h1>Branches, worktrees<br>&amp; the <em>agent era</em></h1>
+  <p class="lede">The part nobody teaches at college and everybody assumes you know at work. It starts by opening up the <code>.git</code> folder so that branches stop being magic, and builds towards worktrees — which went from an obscure feature to standard tooling in about two years, for a reason worth understanding rather than copying.</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">0</span> sections</div>
+      <div class="tracker-msg" id="msg">Work through it at whatever pace suits you.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p>This assumes you can already clone, stage, commit, push and pull without thinking. If any of that is shaky, go and fix it first — everything here builds on it and none of it will stick otherwise.</p>
+  <p><strong>The centre of gravity is sections 13 to 18</strong> — bare repositories, worktrees, and why parallel coding agents made an obscure 2015 feature suddenly mainstream. Everything before it is the groundwork that makes worktrees obvious rather than mysterious. Everything after is how teams actually work.</p>
+  <p><strong>There is no time limit and nothing to submit.</strong> Run every command on a throwaway repository rather than something you care about — the whole point of this material is that you'll be doing things that rewrite history, and you should do that somewhere it doesn't matter first.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — sections build on each other, so go in order the first time</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">What's actually inside .git</span></a>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">Branches and HEAD are pointers</span></a>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">Fast-forward vs merge commit</span></a>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">Merge conflicts, properly</span></a>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">Rebase</span></a>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">Interactive rebase &amp; force-pushing</span></a>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">Stash</span></a>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">Cherry-pick</span></a>
+  <a class="rrow" href="#s9"><span class="rt">09</span><span class="rw">Reflog — nothing is really lost</span></a>
+  <a class="rrow" href="#s10"><span class="rt">10</span><span class="rw">Remotes, fetch vs pull</span></a>
+  <a class="rrow" href="#s11"><span class="rt">11</span><span class="rw">Forks and pull requests</span></a>
+  <a class="rrow" href="#s12"><span class="rt">12</span><span class="rw">The three merge buttons</span></a>
+  <a class="rrow" href="#s13"><span class="rt">13</span><span class="rw">Bare repositories</span></a>
+  <a class="rrow" href="#s14"><span class="rt">14</span><span class="rw">Worktrees</span></a>
+  <a class="rrow" href="#s15"><span class="rt">15</span><span class="rw">The bare-root layout</span></a>
+  <a class="rrow" href="#s16"><span class="rt">16</span><span class="rw">Worktree gotchas</span></a>
+  <a class="rrow" href="#s17"><span class="rt">17</span><span class="rw">How coding agents actually work</span></a>
+  <a class="rrow" href="#s18"><span class="rt">18</span><span class="rw">Worktrees + agents</span></a>
+  <a class="rrow" href="#s19"><span class="rt">19</span><span class="rw">How the industry actually uses Git</span></a>
+  <a class="rrow" href="#s20"><span class="rt">20</span><span class="rw">What LLMs changed</span></a>
+  <a class="rrow" href="#s21"><span class="rt">21</span><span class="rw">Practice run, unaided</span></a>
+  <a class="rrow" href="#s22"><span class="rt">22</span><span class="rw">Final checkpoint</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; command card</span></a>
+</nav>
+
+<!-- ================= 01 ================= -->
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>What's actually inside .git</h2><span class="tagline">demystify it first</span></div>
+
+  <p>Everything in this document becomes easy once you've looked inside the folder. Git is a much simpler system than its interface suggests, and five minutes of poking around removes most of the fear.</p>
+
+  <div class="dothis">
+    <h4>Do this now — make a scratch repo and open the box</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> mkdir -p ~/code/git-lab && cd ~/code/git-lab
+<span class="p">$</span> git init
+<span class="p">$</span> echo "hello" &gt; a.txt
+<span class="p">$</span> git add . && git commit -m "First commit"
+<span class="p">$</span> ls .git
+
+<span class="o">HEAD  config  description  hooks/  index  info/  logs/  objects/  refs/</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>objects/</b><span>Every version of every file, every directory listing, and every commit you have ever made. This is the actual database.</span></div>
+    <div class="mrow"><b>refs/</b><span>Branches and tags. Each one is a tiny text file containing a commit hash.</span></div>
+    <div class="mrow"><b>HEAD</b><span>A one-line file saying which branch you're currently on.</span></div>
+    <div class="mrow"><b>index</b><span>The staging area. A binary file listing what's queued for the next commit.</span></div>
+    <div class="mrow"><b>config</b><span>Settings for this repository — remotes, branch tracking, local overrides.</span></div>
+    <div class="mrow"><b>logs/</b><span>The reflog: a record of everywhere HEAD has been. Section 09 is entirely about why this saves you.</span></div>
+    <div class="mrow"><b>hooks/</b><span>Scripts that run at certain moments — before commit, after merge. Sample files only until you enable them.</span></div>
+  </div>
+
+  <h3>Four kinds of object, and that's all</h3>
+  <div class="mention">
+    <div class="mrow"><b>blob</b><span>The contents of one file. Just bytes — no filename, no permissions.</span></div>
+    <div class="mrow"><b>tree</b><span>A directory listing: names, permissions, and pointers to blobs and other trees.</span></div>
+    <div class="mrow"><b>commit</b><span>A pointer to one tree (the whole project at that moment), plus author, message, and pointers to its parent commit(s).</span></div>
+    <div class="mrow"><b>tag</b><span>An annotated pointer to a commit, with its own message. Used for releases.</span></div>
+  </div>
+
+  <p>Every object is stored under the SHA-1 hash of its own contents. That's what "content-addressed" means, and it has a neat consequence: <strong>two identical files anywhere in your history are stored exactly once.</strong> Same content, same hash, same object.</p>
+
+  <div class="dothis">
+    <h4>Do this now — read your own commit</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> git log --oneline
+<span class="o">3f9a1c4 First commit</span>
+
+<span class="p">$</span> git cat-file -p 3f9a1c4
+<span class="o">tree 2b8f0d1a9c...</span>
+<span class="o">author Shreyas &lt;you@example.com&gt; 1755300000 +0530</span>
+<span class="o">committer Shreyas &lt;you@example.com&gt; 1755300000 +0530</span>
+
+<span class="o">First commit</span>
+
+<span class="p">$</span> git cat-file -p 2b8f0d1a9c        <span class="cm"># the tree it points to</span>
+<span class="o">100644 blob e965047ad7...    a.txt</span>
+
+<span class="p">$</span> git cat-file -p e965047ad7        <span class="cm"># the blob</span>
+<span class="o">hello</span></div>
+
+  <p>That's the whole storage model. A commit points at a tree, a tree points at blobs and other trees, and every pointer is a hash. Follow them down and you arrive at your text.</p>
+
+  <div class="cue"><p class="cue-k">Why a commit hash can't be faked</p><p>A commit's hash is computed from its content — <em>including its parent's hash</em>. Change anything about an old commit and its hash changes, which changes its child's hash, and so on all the way to the tip.</p><p>That's why history rewriting always produces new hashes (section 05), and it's the same idea a blockchain uses. Git got there first, in 2005.</p></div>
+
+  <div class="cue watch"><p class="cue-k">Snapshots, not diffs</p><p>Git stores a complete snapshot of the project at each commit, not a list of changes. Unchanged files are simply pointed at again rather than re-stored, so it costs far less than it sounds — and periodically Git compresses loose objects into <strong>packfiles</strong>, which do use delta compression internally.</p><p>The diffs you see in <code>git log -p</code> are <em>computed on demand</em> by comparing two snapshots. They aren't stored.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>You commit a 5 MB image, then in the next commit delete it. How much space does the repository use?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>Still around 5 MB, forever.</strong> The blob remains in <code>objects/</code> because the first commit still references it, and that commit is still in your history.</p>
+      <p>This is why large files in Git are a genuine problem, why <code>.gitignore</code> matters, and why removing a committed secret requires rewriting history rather than just deleting the file.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete</span></label>
+</section>
+
+<!-- ================= 02 ================= -->
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>Branches and HEAD are pointers</h2><span class="tagline">41 bytes each</span></div>
+
+  <p>Most people carry the mental model "a branch is a copy of my project". It's wrong, and it's why merging feels dangerous.</p>
+
+  <div class="cue"><p class="cue-k">The accurate version</p><p><strong>A branch is a pointer to one commit.</strong> A file containing a 40-character hash and a newline. That's the entire implementation.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — look at one</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> cat .git/refs/heads/main
+<span class="o">3f9a1c4b8d2e05f7a91c3e6b27d4f80a1c5e2b93</span>
+
+<span class="p">$</span> cat .git/HEAD
+<span class="o">ref: refs/heads/main</span>
+
+<span class="p">$</span> git switch -c feature
+<span class="p">$</span> cat .git/HEAD
+<span class="o">ref: refs/heads/feature</span>
+
+<span class="p">$</span> ls .git/refs/heads
+<span class="o">feature  main</span></div>
+
+  <p>Creating a branch wrote 41 bytes and changed one line in <code>HEAD</code>. Nothing was copied. This is why teams create and delete branches dozens of times a week without thinking about it.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>HEAD</b><span>"Where I am now." Normally contains <code>ref: refs/heads/&lt;branch&gt;</code> — a pointer to a pointer.</span></div>
+    <div class="mrow"><b>Committing</b><span>Writes a new commit object, then rewrites the current branch file to point at it. The branch moves; you don't.</span></div>
+    <div class="mrow"><b>Switching</b><span>Changes HEAD, then makes your working directory match that commit's tree.</span></div>
+  </div>
+
+  <h3>Detached HEAD</h3>
+  <p>Check out a commit hash directly rather than a branch and HEAD holds a raw hash instead of a branch reference. Git calls this <strong>detached HEAD</strong> and warns you loudly.</p>
+
+  <div class="cmd"><span class="p">$</span> git switch --detach 3f9a1c4
+<span class="p">$</span> cat .git/HEAD
+<span class="o">3f9a1c4b8d2e05f7a91c3e6b27d4f80a1c5e2b93</span>   <span class="cm"># no "ref:" — that's detached</span>
+
+<span class="p">$</span> git switch -                       <span class="cm"># back to where you were</span></div>
+
+  <p>It isn't broken and it isn't dangerous to be in. It's useful for looking at an old state. The risk is that any commits you make while detached belong to no branch — switch away and there's nothing pointing at them, so they eventually get garbage-collected. If you did work there, give it a branch before you leave: <code>git switch -c rescue</code>.</p>
+
+  <div class="cue"><p class="cue-k">switch and restore, not checkout</p><p><code>git checkout</code> historically did two unrelated jobs — moving between branches and throwing away file changes — which is why it confused everyone. Modern Git split them: <code>git switch</code> for branches, <code>git restore</code> for files. Use those. <code>checkout</code> still works and you'll see it everywhere in older documentation.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q2</b>You're on <code>main</code> and run <code>git switch -c feature</code>, then make three commits. Where is <code>main</code> pointing now?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>Exactly where it was.</strong> Committing moves the branch you're <em>on</em>. <code>main</code> hasn't moved, so it still points at the commit you branched from.</p>
+      <p>That gap between the two pointers is your feature's work — and it's precisely what determines whether the merge later will be a fast-forward.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 complete</span></label>
+</section>
+
+<!-- ================= 03 ================= -->
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>Fast-forward vs merge commit</h2><span class="tagline">the one interviewers ask</span></div>
+
+  <p>You branch off, make commits, and merge back. What happens depends entirely on one question: <strong>did the base branch move while you were working?</strong></p>
+
+  <figure class="board">
+    <svg viewBox="0 0 780 350" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram comparing a fast-forward merge with a three-way merge that creates a merge commit">
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="14" fill="#0F1A18">
+        <text x="0" y="16">MAIN DIDN'T MOVE → FAST-FORWARD</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="60" y1="64" x2="140" y2="64"/><line x1="180" y1="64" x2="260" y2="64"/>
+        <line x1="300" y1="64" x2="380" y2="64"/>
+      </g>
+      <g>
+        <circle cx="40" cy="64" r="16" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="160" cy="64" r="16" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="280" cy="64" r="16" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <circle cx="400" cy="64" r="16" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" fill="#5A6B67" text-anchor="middle">
+        <text x="40" y="98">A</text><text x="160" y="98">B</text><text x="280" y="98">C</text><text x="400" y="98">D</text>
+      </g>
+      <text x="220" y="122" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="#0B5D51">C and D are your branch's commits</text>
+      <rect x="450" y="48" width="98" height="32" fill="#F5C518"/>
+      <text x="499" y="69" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="#0F1A18">main slides →</text>
+      <text x="0" y="152" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#0F1A18">Git just moves the main pointer from B to D. No new commit. Perfectly linear. Conflicts are impossible.</text>
+
+      <line x1="0" y1="182" x2="780" y2="182" stroke="#C4CFCB" stroke-width="1"/>
+
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="14" fill="#0F1A18">
+        <text x="0" y="212">MAIN MOVED → THREE-WAY MERGE, NEW MERGE COMMIT</text>
+      </g>
+      <g stroke="#5A6B67" stroke-width="2">
+        <line x1="60" y1="268" x2="140" y2="268"/>
+        <line x1="174" y1="256" x2="266" y2="234"/><line x1="306" y1="234" x2="386" y2="254"/>
+        <line x1="174" y1="280" x2="266" y2="302"/><line x1="306" y1="302" x2="386" y2="282"/>
+      </g>
+      <g>
+        <circle cx="40" cy="268" r="16" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="160" cy="268" r="16" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="286" cy="228" r="16" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <circle cx="286" cy="308" r="16" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <circle cx="406" cy="268" r="18" fill="#101614" stroke="#101614" stroke-width="2"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" fill="#5A6B67">
+        <text x="30" y="302">A</text><text x="150" y="302">B</text>
+        <text x="316" y="222">E — someone else's commit</text><text x="316" y="338">C — yours</text>
+      </g>
+      <text x="406" y="273" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="#F5C518">M</text>
+      <text x="440" y="272" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="#0F1A18">merge commit — two parents</text>
+    </svg>
+    <figcaption>The only variable is whether the base moved. Everything else follows from that.</figcaption>
+  </figure>
+
+  <div class="mention">
+    <div class="mrow"><b>Fast-forward</b><span>Your branch already contains every commit on the base. Merging is just moving a pointer forward. No merge commit, and <strong>conflicts are impossible</strong>.</span></div>
+    <div class="mrow"><b>Three-way merge</b><span>Both sides have new commits. Git compares each against the common ancestor and writes a merge commit with two parents. This is the only situation where conflicts can happen.</span></div>
+  </div>
+
+  <div class="cmd"><span class="p">$</span> git merge feature                <span class="cm"># fast-forward if possible, else merge commit</span>
+<span class="p">$</span> git merge --ff-only feature       <span class="cm"># refuse rather than create a merge commit</span>
+<span class="p">$</span> git merge --no-ff feature         <span class="cm"># always create one, even when avoidable</span></div>
+
+  <p><code>--no-ff</code> looks pointless but has a real use: it keeps a visible record that a group of commits belonged to one feature, which some teams want in their history.</p>
+
+  <div class="cue watch"><p class="cue-k">Where accidental merge commits come from</p><p>You have unpushed local commits, the remote has moved, and you run <code>git pull</code>. Git silently merges and creates a commit called <em>"Merge branch 'main' of github.com…"</em>. Six of those in a pull request and your reviewer cannot read the diff.</p><p>Set this once and the problem disappears permanently:</p></div>
+  <div class="cmd"><span class="p">$</span> git config --global pull.rebase true</div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 complete</span></label>
+</section>
+
+<!-- ================= 04 ================= -->
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>Merge conflicts, properly</h2><span class="tagline">not as scary as advertised</span></div>
+
+  <p>A conflict happens when <strong>the same lines of the same file changed on both sides</strong>. That's the whole trigger. Two people editing different files, or different parts of one file, merge silently and automatically.</p>
+
+  <div class="dothis">
+    <h4>Do this now — cause one on purpose</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> git switch main
+<span class="p">$</span> echo "version one" &gt; conflict.txt
+<span class="p">$</span> git add . && git commit -m "Add conflict file"
+
+<span class="p">$</span> git switch -c other
+<span class="p">$</span> echo "version two" &gt; conflict.txt
+<span class="p">$</span> git commit -am "Change to version two"
+
+<span class="p">$</span> git switch main
+<span class="p">$</span> echo "version three" &gt; conflict.txt
+<span class="p">$</span> git commit -am "Change to version three"
+
+<span class="p">$</span> git merge other
+<span class="rr">CONFLICT (content): Merge conflict in conflict.txt</span>
+<span class="o">Automatic merge failed; fix conflicts and then commit the result.</span></div>
+
+  <p>Open the file:</p>
+  <div class="cmd"><span class="rr">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span>
+version three
+<span class="rr">=======</span>
+version two
+<span class="rr">&gt;&gt;&gt;&gt;&gt;&gt;&gt; other</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</b><span>Start of <strong>your</strong> version — the branch you're currently on.</span></div>
+    <div class="mrow"><b>=======</b><span>The divider. Not part of either version.</span></div>
+    <div class="mrow"><b>&gt;&gt;&gt;&gt;&gt;&gt;&gt; other</b><span>End of the <strong>incoming</strong> version, labelled with where it came from.</span></div>
+  </div>
+
+  <h3>Resolving is just editing</h3>
+  <p>There's no special mode and no magic. Edit the file until it says what you want, delete all three marker lines, save. You can keep one side, keep both, or write something new — Git doesn't care, it just wants the markers gone.</p>
+
+  <div class="cmd"><span class="p">$</span> git status                <span class="cm"># lists "both modified" files</span>
+<span class="cm">... edit the file, remove all markers ...</span>
+<span class="p">$</span> git add conflict.txt       <span class="cm"># "add" here means "I've resolved this"</span>
+<span class="p">$</span> git commit                 <span class="cm"># completes the merge</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>git merge --abort</b><span>Cancels the whole thing and puts you back exactly as you were. Your escape hatch — use it freely.</span></div>
+    <div class="mrow"><b>git diff</b><span>During a conflict, shows a combined diff of the conflicting regions.</span></div>
+    <div class="mrow"><b>git checkout --ours file</b><span>Take your side wholesale for that file.</span></div>
+    <div class="mrow"><b>git checkout --theirs file</b><span>Take the incoming side wholesale.</span></div>
+    <div class="mrow"><b>git merge --continue</b><span>Same as committing, once everything is resolved.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">"ours" and "theirs" flip during a rebase</p><p>In a merge, <em>ours</em> is your branch. In a rebase, Git is replaying your commits <em>onto</em> the other branch, so <em>ours</em> becomes the branch you're rebasing onto and <em>theirs</em> is your own work. This reversal catches almost everybody once.</p><p>When in doubt, don't use those flags — read the markers and edit by hand.</p></div>
+
+  <div class="cue"><p class="cue-k">VS Code makes this much nicer</p><p>Open a conflicted file in VS Code and you get "Accept Current / Accept Incoming / Accept Both / Compare" buttons above each conflict, plus a three-way merge editor. It's editing the same markers, just with a decent interface. Use it — there's no purity points for doing it in vim.</p></div>
+
+  <div class="cue"><p class="cue-k">How to have fewer conflicts</p><p>Conflicts scale with how long a branch lives and how much it overlaps with others. Short-lived branches merged within a day or two rarely conflict. A branch that sat for three weeks while five people worked on the same files will be painful, and no tool fixes that — it's a process problem, not a Git problem.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 complete</span></label>
+</section>
+
+<!-- ================= 05 ================= -->
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>Rebase</h2><span class="tagline">rewriting, not moving</span></div>
+
+  <p>Merge joins two histories. <strong>Rebase replays yours on top of a new base</strong>, as though you had started from there all along.</p>
+
+  <div class="cmd"><span class="p">$</span> git switch feature
+<span class="p">$</span> git fetch origin
+<span class="p">$</span> git rebase origin/main</div>
+
+  <p>Git sets your commits aside, moves your branch pointer to <code>origin/main</code>, then replays each of your commits on top, one at a time. If a replay hits a conflict it pauses, you resolve it exactly as in section 04, and continue.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>git rebase --continue</b><span>After resolving a conflict, carry on with the next commit.</span></div>
+    <div class="mrow"><b>git rebase --skip</b><span>Drop the commit currently being replayed. Occasionally what you want when a change is already upstream.</span></div>
+    <div class="mrow"><b>git rebase --abort</b><span>Put everything back exactly as it was before you started. This is why rebasing is far less frightening than its reputation.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">The critical detail</p><p><strong>Replayed commits are new commits with new hashes.</strong> Same changes, same messages, different identity — because a commit's hash includes its parent's hash, and the parent changed.</p><p>The originals still exist in the object database for a while, reachable through the reflog, but they are no longer on your branch. This is history rewriting, and it's the reason for the rule below.</p></div>
+
+  <h3>The golden rule</h3>
+  <div class="cue"><p class="cue-k">Memorise this sentence</p><p><strong>Never rebase commits that other people have based work on.</strong> Rebase your own branch, before or during review. Never rebase <code>main</code>. Never rebase a branch someone else has pulled.</p></div>
+
+  <p>The reason is mechanical rather than stylistic. If a colleague has your old commits and you replace them with new hashes, their next pull tries to reconcile two versions of the same work. They get duplicated commits or conflicts they cannot explain, and the fix involves you both on a call.</p>
+
+  <h3>Merge or rebase — the actual answer</h3>
+  <div class="mention">
+    <div class="mrow"><b>Rebase your feature branch</b><span>To pick up the latest <code>main</code> before review. Keeps your pull request diff clean and small, showing only your work.</span></div>
+    <div class="mrow"><b>Merge into main</b><span>Via the pull request button, using whatever strategy your team has chosen. Not your decision to make unilaterally.</span></div>
+    <div class="mrow"><b>git pull --rebase</b><span>Your everyday pull. Set <code>pull.rebase true</code> globally and stop thinking about it.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">Why teams argue about this</p><p>Merge-always keeps a perfectly truthful record of what happened, including the messy parts. Rebase-always produces a clean linear history that's far easier to read and to bisect, at the cost of being a tidied-up story rather than a literal one.</p><p>Both positions are defensible. What matters is that your team picks one and everyone follows it — mixed strategies produce the worst of both.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 complete</span></label>
+</section>
+
+<!-- ================= 06 ================= -->
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>Interactive rebase &amp; force-pushing</h2><span class="tagline">the weekly tool</span></div>
+
+  <p>This is the one you'll actually reach for most often — cleaning up your own commits before anyone reviews them.</p>
+
+  <div class="cmd"><span class="p">$</span> git rebase -i origin/main
+<span class="cm"># or, to rework just the last five commits:</span>
+<span class="p">$</span> git rebase -i HEAD~5</div>
+
+  <p>An editor opens with one line per commit, <strong>oldest at the top</strong>. Change the first word on any line:</p>
+
+  <div class="mention">
+    <div class="mrow"><b>pick</b><span>Keep it as-is. The default for every line.</span></div>
+    <div class="mrow"><b>reword</b><span>Keep the change, edit the message.</span></div>
+    <div class="mrow"><b>squash</b><span>Fold into the commit above, and let you combine both messages.</span></div>
+    <div class="mrow"><b>fixup</b><span>Fold into the commit above and discard this message entirely. What you want for "fix typo" commits.</span></div>
+    <div class="mrow"><b>edit</b><span>Pause at this commit so you can change the actual files, then <code>git rebase --continue</code>.</span></div>
+    <div class="mrow"><b>drop</b><span>Remove the commit completely.</span></div>
+    <div class="mrow"><b>reorder</b><span>No keyword — just move the lines. They get replayed in the new order.</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Do this now — turn four commits into two</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> git switch -c cleanup
+<span class="p">$</span> echo 1 &gt; f.txt && git add . && git commit -m "Add feature"
+<span class="p">$</span> echo 2 &gt;&gt; f.txt && git commit -am "wip"
+<span class="p">$</span> echo 3 &gt;&gt; f.txt && git commit -am "fix typo"
+<span class="p">$</span> echo 4 &gt;&gt; f.txt && git commit -am "actually fix it"
+
+<span class="p">$</span> git rebase -i HEAD~4
+<span class="cm"># change the last three lines from "pick" to "fixup", save, close</span>
+
+<span class="p">$</span> git log --oneline
+<span class="o">a1b2c3d Add feature</span>          <span class="cm"># one clean commit</span></div>
+
+  <h3>The autosquash workflow</h3>
+  <p>Once you're comfortable, this is faster than editing the list by hand. When you spot a mistake in an earlier commit:</p>
+  <div class="cmd"><span class="p">$</span> git add .
+<span class="p">$</span> git commit --fixup a1b2c3d        <span class="cm"># target the commit it belongs to</span>
+<span class="p">$</span> git rebase -i --autosquash HEAD~5 <span class="cm"># lines pre-arranged for you</span></div>
+  <p>Set <code>git config --global rebase.autosquash true</code> and the flag becomes automatic.</p>
+
+  <h3>Force-pushing, safely</h3>
+  <p>After any rewrite, your branch has diverged from its copy on the remote, so a normal push is rejected. You have to overwrite it:</p>
+
+  <div class="cmd"><span class="p">$</span> git push --force-with-lease</div>
+
+  <div class="cue watch"><p class="cue-k">Never plain <code>--force</code></p><p><code>--force</code> overwrites the remote branch no matter what happened there — including a colleague's commits pushed five minutes ago, which are then gone from the branch.</p><p><code>--force-with-lease</code> first checks the remote is still where you last saw it, and refuses if anyone pushed in the meantime. Same command, one word longer, and it is the difference between a normal Tuesday and an apology in the team channel.</p><p>Make it the default: <code>git config --global alias.pushf "push --force-with-lease"</code></p></div>
+
+  <div class="cue"><p class="cue-k">Is force-pushing to a PR branch rude?</p><p>No — it's normal and expected on a branch that only you work on. GitHub handles it: the pull request updates, and it can still show reviewers what changed between force-pushes.</p><p>What's rude is force-pushing to a shared branch, or rewriting after a reviewer has already commented, which can orphan their comments.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 complete</span></label>
+</section>
+
+<!-- ================= 07 ================= -->
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>Stash</h2><span class="tagline">a shelf for half-finished work</span></div>
+
+  <p>You're midway through something and need to switch branches urgently. Git won't let you switch with uncommitted changes that would be overwritten. Stash puts them on a shelf.</p>
+
+  <div class="cmd"><span class="p">$</span> git stash push -m "half-done login form"
+<span class="p">$</span> git switch main                   <span class="cm"># clean working directory, free to move</span>
+<span class="cm">... deal with the urgent thing ...</span>
+<span class="p">$</span> git switch feature
+<span class="p">$</span> git stash pop                     <span class="cm"># changes come back, stash entry removed</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>git stash list</b><span>Show everything on the shelf. Entries are <code>stash@{0}</code>, <code>stash@{1}</code> — newest first.</span></div>
+    <div class="mrow"><b>git stash pop</b><span>Apply the newest and delete it from the list.</span></div>
+    <div class="mrow"><b>git stash apply</b><span>Apply but <strong>keep</strong> it in the list. Safer when you're unsure — you can retry.</span></div>
+    <div class="mrow"><b>git stash push -u</b><span>Include untracked files. Without <code>-u</code> new files are left behind, which surprises people constantly.</span></div>
+    <div class="mrow"><b>git stash show -p</b><span>See what's actually in a stash before applying it.</span></div>
+    <div class="mrow"><b>git stash drop</b><span>Delete an entry. <code>git stash clear</code> deletes all of them.</span></div>
+    <div class="mrow"><b>git stash branch new-name</b><span>Create a branch from the commit the stash was made on and apply it there. The clean fix when a stash won't apply.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">The stash is where work goes to be forgotten</p><p>Stashes have no branch, no message unless you wrote one, and don't show up in any normal command. A stash from three weeks ago is functionally lost — nobody ever scrolls <code>git stash list</code>.</p><p><strong>Prefer a scratch commit.</strong> <code>git commit -m "wip: half-done login"</code> on your branch is visible, pushable, survives, and can be squashed away later with an interactive rebase. Use stash for the next ten minutes, not the next ten days.</p></div>
+
+  <div class="cue watch"><p class="cue-k">And it becomes actively dangerous with worktrees</p><p>Remember this for section 16: <strong>the stash is shared across all worktrees of a repository.</strong> Stash in one, and you can pop it in another — including by accident. This is one of the strongest practical arguments for the scratch-commit habit.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 complete</span></label>
+</section>
+
+<!-- ================= 08 ================= -->
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>Cherry-pick</h2><span class="tagline">one commit, somewhere else</span></div>
+
+  <p>Take a single commit from anywhere in the repository and apply it to your current branch.</p>
+
+  <div class="cmd"><span class="p">$</span> git switch release-1.2
+<span class="p">$</span> git cherry-pick a1b2c3d           <span class="cm"># apply that one commit here</span>
+<span class="p">$</span> git cherry-pick a1b2c3d^..e4f5g6h <span class="cm"># or a range</span>
+<span class="p">$</span> git cherry-pick -x a1b2c3d        <span class="cm"># record where it came from in the message</span></div>
+
+  <p>Like rebase, it creates a <strong>new commit with a new hash</strong> — same changes, different identity, different parent.</p>
+
+  <h3>When it's the right tool</h3>
+  <div class="mention">
+    <div class="mrow"><b>Hotfix to a release branch</b><span>The classic case. A bug is fixed on <code>main</code>, and the same fix needs to go onto <code>release-1.2</code> without dragging everything else on main with it.</span></div>
+    <div class="mrow"><b>Rescuing one commit</b><span>You built something useful on a branch that's being abandoned. Cherry-pick the good commit out before deleting.</span></div>
+    <div class="mrow"><b>Wrong branch</b><span>You committed to <code>main</code> by accident. Cherry-pick it onto a proper branch, then reset <code>main</code> back.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">Use <code>-x</code> on release branches</p><p>It appends <em>"(cherry picked from commit a1b2c3d)"</em> to the message. Six months later, when someone is working out whether a fix made it into version 1.2, that one line answers the question immediately.</p></div>
+
+  <div class="cue watch"><p class="cue-k">Don't make it a habit</p><p>Cherry-picking duplicates work. The same change now exists as two commits with different hashes, and when those branches eventually merge, Git may or may not notice they're the same — often producing a conflict where the change appears twice.</p><p>If you find yourself cherry-picking regularly between the same two branches, your branching strategy is wrong. That's a signal, not a workflow.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q3</b>You cherry-pick a commit from <code>feature</code> onto <code>main</code>. Later you merge <code>feature</code> into <code>main</code>. What happens?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p>Usually it merges cleanly — Git's three-way merge sees that the content already matches and there's nothing to apply. But if the surrounding lines have drifted at all, you get a conflict where the same change looks like it's being added twice.</p>
+      <p>Which is the point of the warning above: cherry-picking creates duplicate history, and duplicate history has to be reconciled eventually.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 complete</span></label>
+</section>
+
+<!-- ================= 09 ================= -->
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>Reflog — nothing is really lost</h2><span class="tagline">the section that saves your job</span></div>
+
+  <p>Git records every movement of HEAD in a local log — every commit, checkout, merge, rebase and reset. Even when a commit is no longer reachable from any branch, it's still in the object database, and the reflog remembers where it was.</p>
+
+  <div class="cmd"><span class="p">$</span> git reflog
+<span class="o">a1b2c3d HEAD@{0}: rebase (finish): returning to refs/heads/feature</span>
+<span class="o">9f8e7d6 HEAD@{1}: rebase (pick): Add validation</span>
+<span class="o">3c4d5e6 HEAD@{2}: checkout: moving from main to feature</span>
+<span class="o">7a8b9c0 HEAD@{3}: commit: Add login form</span>
+<span class="o">2d3e4f5 HEAD@{4}: reset: moving to HEAD~3</span></div>
+
+  <div class="dothis">
+    <h4>Do this now — destroy some work and get it back</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> git switch -c doomed
+<span class="p">$</span> echo "important" &gt; important.txt
+<span class="p">$</span> git add . && git commit -m "Very important work"
+
+<span class="p">$</span> git switch main
+<span class="p">$</span> git branch -D doomed              <span class="cm"># deleted, no confirmation</span>
+
+<span class="p">$</span> git reflog                        <span class="cm"># find the commit hash</span>
+<span class="p">$</span> git switch -c doomed &lt;that-hash&gt;  <span class="cm"># and it's back, intact</span></div>
+
+  <h3>The three recoveries worth knowing</h3>
+  <div class="mention">
+    <div class="mrow"><b>Deleted a branch</b><span>Find its last commit in the reflog, then <code>git switch -c &lt;name&gt; &lt;hash&gt;</code>.</span></div>
+    <div class="mrow"><b>Bad <code>git reset --hard</code></b><span><code>git reset --hard HEAD@{1}</code> puts you back where you were before the reset.</span></div>
+    <div class="mrow"><b>Rebase went wrong and you already finished</b><span>The reflog shows the state before the rebase started. Reset to it.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">The limits, stated honestly</p><p>The reflog is <strong>local only</strong> — it isn't pushed or cloned, so it can't help on a different machine. Entries expire (90 days by default for reachable commits, 30 for unreachable), and <code>git gc</code> eventually deletes truly orphaned objects.</p><p>And it only covers things that were <strong>committed</strong> at some point. Uncommitted changes destroyed by <code>git restore</code> or <code>git checkout .</code> are genuinely gone. That's the real argument for committing often — a commit makes work recoverable.</p></div>
+
+  <div class="cue calm"><p class="cue-k">Remember this exists</p><p>When you have visibly broken something and your stomach drops, the answer is almost always <code>git reflog</code>. Most "I lost a day's work" stories are actually "I didn't know about the reflog" stories.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 09 complete</span></label>
+</section>
+
+<!-- ================= 10 ================= -->
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>Remotes, fetch vs pull</h2><span class="tagline">what origin/main really is</span></div>
+
+  <p>A <strong>remote</strong> is a named URL pointing at another copy of the repository. <code>origin</code> is just the conventional name for the one you cloned from.</p>
+
+  <div class="cmd"><span class="p">$</span> git remote -v
+<span class="p">$</span> git remote add upstream https://github.com/original/repo.git
+<span class="p">$</span> git remote rename origin fork</div>
+
+  <h3>The thing most people get wrong</h3>
+  <div class="cue"><p class="cue-k">origin/main is a local pointer</p><p><code>origin/main</code> is not on GitHub. It's a file on your disk at <code>.git/refs/remotes/origin/main</code>, recording <strong>where GitHub's main was the last time you talked to it</strong>.</p><p>It can be hours out of date. It only updates when you fetch.</p></div>
+
+  <div class="mention">
+    <div class="mrow"><b>git fetch</b><span>Download new commits and update your <code>origin/*</code> pointers. <strong>Changes nothing about your branches or files.</strong> Completely safe, always.</span></div>
+    <div class="mrow"><b>git pull</b><span><code>fetch</code> followed by <code>merge</code> (or <code>rebase</code>). Changes your branch and your files.</span></div>
+    <div class="mrow"><b>git fetch --prune</b><span>Also delete local <code>origin/*</code> pointers for branches that no longer exist on the remote. Worth running weekly, or set <code>fetch.prune true</code>.</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Do this now — build the habit</h4>
+    <p>Rather than pulling blindly, look before you leap:</p>
+  </div>
+  <div class="cmd"><span class="p">$</span> git fetch
+<span class="p">$</span> git log --oneline HEAD..origin/main    <span class="cm"># what they have that I don't</span>
+<span class="p">$</span> git log --oneline origin/main..HEAD    <span class="cm"># what I have that they don't</span>
+<span class="p">$</span> git diff origin/main                   <span class="cm"># the actual changes</span>
+<span class="p">$</span> git rebase origin/main                 <span class="cm"># now decide</span></div>
+
+  <p>Once that's second nature, you'll never again be surprised by what a pull did to your branch.</p>
+
+  <h3>Tracking branches</h3>
+  <p>A local branch can be linked to a remote one, which is what lets you type bare <code>git push</code> and <code>git pull</code>.</p>
+  <div class="cmd"><span class="p">$</span> git push -u origin feature   <span class="cm"># -u sets the link, first push only</span>
+<span class="p">$</span> git branch -vv               <span class="cm"># show every branch and what it tracks</span></div>
+
+  <p><code>-u</code> is short for <code>--set-upstream</code>. Forget it and Git tells you exactly what to type, so this is a self-correcting mistake.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 complete</span></label>
+</section>
+
+<!-- ================= 11 ================= -->
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>Forks and pull requests</h2><span class="tagline">how code actually gets in</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>Fork</b><span>A complete copy of someone else's repository under your own account. A GitHub concept, not a Git one — to Git it's just another remote.</span></div>
+    <div class="mrow"><b>Pull request</b><span>"Here is what I changed in my copy — please pull it into yours." A request, not a command. Also a GitHub concept; GitLab calls it a merge request.</span></div>
+  </div>
+
+  <h3>Two models, and when each is used</h3>
+  <div class="mention">
+    <div class="mrow"><b>Branch in the same repo</b><span>What most companies do internally. You have write access, you push a branch, you open a PR from it. Simpler.</span></div>
+    <div class="mrow"><b>Fork and PR</b><span>What open source does, and what you'll do at any company where you don't have write access to a repository. You cannot push to theirs, so you push to your fork and ask.</span></div>
+  </div>
+
+  <div class="cmd"><span class="cm"># the fork workflow, in full</span>
+<span class="p">$</span> gh repo fork owner/project --clone
+<span class="p">$</span> cd project
+<span class="p">$</span> git remote -v
+<span class="o">origin    https://github.com/you/project.git      (your fork)</span>
+<span class="o">upstream  https://github.com/owner/project.git    (the original)</span>
+
+<span class="p">$</span> git switch -c fix/typo-in-readme
+<span class="cm">... make changes, commit ...</span>
+<span class="p">$</span> git push -u origin fix/typo-in-readme
+<span class="p">$</span> gh pr create --fill</div>
+
+  <p>Keeping a fork current is the part people miss. Your fork does not update itself:</p>
+  <div class="cmd"><span class="p">$</span> git fetch upstream
+<span class="p">$</span> git switch main
+<span class="p">$</span> git merge upstream/main       <span class="cm"># or rebase</span>
+<span class="p">$</span> git push origin main</div>
+  <p>GitHub also has a <strong>Sync fork</strong> button on the web interface that does exactly this in one click.</p>
+
+  <h3>What makes a pull request good</h3>
+  <div class="mention">
+    <div class="mrow"><b>Small</b><span>The single biggest factor in review quality. A 100-line PR gets real scrutiny; a 2,000-line PR gets "LGTM" and a rubber stamp. If it's big, split it.</span></div>
+    <div class="mrow"><b>One concern</b><span>Don't fix a bug and reformat the file and rename a variable in one PR. The reviewer can't separate the signal from the noise.</span></div>
+    <div class="mrow"><b>A description that explains why</b><span>The diff shows <em>what</em>. Only you can supply <em>why</em>, what you considered and rejected, and what you're unsure about.</span></div>
+    <div class="mrow"><b>Self-reviewed first</b><span>Read your own diff on GitHub before requesting review. You will find something — a leftover console log, a debug flag — every time.</span></div>
+    <div class="mrow"><b>Draft while in progress</b><span>Open it as a draft PR early. It's visible, CI runs on it, nobody is asked to review it yet.</span></div>
+  </div>
+
+  <div class="cue work"><p class="cue-k">Review etiquette, from both sides</p>
+    <p><strong>As the author:</strong> respond to every comment, even just with a thumbs-up or "done". Push a fix rather than arguing in the thread — and if you disagree, say so with a reason. Nobody minds disagreement; silence is what annoys people.</p>
+    <p><strong>As the reviewer:</strong> distinguish blocking issues from suggestions. Prefix optional ones — "nit:" is the near-universal convention. Approve with minor comments rather than blocking on style; a review that sits for two days costs the team more than an imperfect variable name.</p>
+  </div>
+
+  <div class="cue"><p class="cue-k">The contribution graph detail</p><p>Commits sitting on a fork don't count toward your GitHub contribution graph. Opening a PR does, and once it's merged, the commits land in the upstream repository authored by you and count too. Worth knowing if you're building a public profile before placements.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 complete</span></label>
+</section>
+
+<!-- ================= 12 ================= -->
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>The three merge buttons</h2><span class="tagline">you'll be asked to pick one</span></div>
+
+  <p>When a PR is approved, GitHub offers three ways to land it. Teams have strong opinions and house rules. Know what each does to history.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>Create a merge commit</b><span>Keeps every one of your commits plus a merge commit joining the lines. Complete history including "wip" and "fix typo". Truthful, noisy.</span></div>
+    <div class="mrow"><b>Squash and merge</b><span>Collapses the entire branch into <strong>one</strong> commit on main. Clean linear history, intermediate steps discarded.</span></div>
+    <div class="mrow"><b>Rebase and merge</b><span>Replays your commits onto main individually, no merge commit. Linear <em>and</em> every commit preserved — but only sane if each commit independently builds and passes tests.</span></div>
+  </div>
+
+  <div class="cue work"><p class="cue-k">Squash is the most common default</p><p>Because it makes <strong>one PR equal one commit on main</strong>, which makes <code>git revert</code> and <code>git bisect</code> trivial. Broke production? Revert one commit, the whole feature is gone.</p><p>If you can't say which strategy your team uses, ask in your first week. It changes how you should structure your commits: under squash, your intermediate commits are getting collapsed so don't agonise over them. Under rebase-and-merge, every commit is going on main and must stand alone.</p></div>
+
+  <div class="cue watch"><p class="cue-k">The trap after a squash merge</p><p>Squashing creates a brand-new commit on main that your local branch has never seen, while your branch still holds the originals. Pulling now produces a confusing pseudo-conflict — the same changes appear to be arriving twice with different hashes.</p><p>The fix is simple and non-obvious: <strong>after a squash merge, delete the branch and start the next one fresh from main.</strong> Don't try to reuse it. Most teams enable "automatically delete head branches" in repository settings for exactly this reason.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 12 complete</span></label>
+</section>
+
+<!-- ================= 13 ================= -->
+<section id="s13">
+  <div class="shead"><span class="chip">13</span><h2>Bare repositories</h2><span class="tagline">what GitHub physically is</span></div>
+
+  <p>From here on is the core of this document. It starts with a decomposition: a normal repository is exactly two things bolted together.</p>
+
+  <div class="cmd"><span class="d">myproject/</span>
+├── .git/          <span class="cm">← THE REPOSITORY: objects, refs, HEAD, config, index</span>
+└── src/ ...       <span class="cm">← THE WORKING TREE: the files you actually edit</span></div>
+
+  <p><strong>A bare repository is the first half without the second.</strong> The contents of <code>.git</code>, promoted to be the directory itself, with <code>core.bare = true</code> in its config. Conventionally named with a <code>.git</code> suffix.</p>
+
+  <div class="cmd"><span class="d">project.git/</span>
+├── objects/       <span class="cm">← every blob, tree, commit, tag</span>
+├── refs/
+├── HEAD
+└── config         <span class="cm">← bare = true</span></div>
+
+  <div class="dothis">
+    <h4>Do this now — make one and see</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> cd ~/code
+<span class="p">$</span> git init --bare demo.git
+<span class="p">$</span> ls demo.git
+<span class="o">HEAD  config  description  hooks/  info/  objects/  refs/</span>
+
+<span class="p">$</span> cat demo.git/config | grep bare
+<span class="o">	bare = true</span></div>
+
+  <p>No files to edit. No <code>git status</code>. Nothing to check out. It is a database and nothing else.</p>
+
+  <h3>Why they exist — one constraint explains everything</h3>
+  <div class="cue"><p class="cue-k">The rule</p><p>If you push to a branch that is <strong>currently checked out somewhere</strong>, that working tree would instantly disagree with HEAD — files on disk showing one thing, Git believing another. Git refuses, with an error mentioning <code>receive.denyCurrentBranch</code>.</p><p>A bare repository has no working tree, so there is nothing to desync. <strong>Every push target is bare.</strong></p></div>
+
+  <p>Which answers a question you may never have thought to ask: <strong>what is GitHub, physically?</strong> A warehouse of bare repositories, plus a web interface, plus permissions and review tooling on top. When you <code>git push</code>, you are writing objects into a bare repo on their servers.</p>
+
+  <div class="cue"><p class="cue-k">bare vs mirror</p><p><code>git clone --bare</code> copies branches and tags. <code>git clone --mirror</code> copies <em>all</em> refs including remote-tracking ones, and configures the refspec so <code>git remote update</code> keeps it in lockstep.</p><p>Use <strong>mirror</strong> for migrating a repository between hosts or making a true backup. Use <strong>bare</strong> for everything else — including the worktree layout in section 15.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q4</b>Why can't you just push to a colleague's normal working repository over the network?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p>Because their working directory has a branch checked out. If your push moved that branch, their files on disk would no longer match what Git thinks is checked out, and their next <code>git status</code> would show a mass of phantom changes.</p>
+      <p>Git blocks it by default. The general solution is a shared bare repository that nobody works in directly — which is exactly what GitHub is.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 13 complete</span></label>
+</section>
+
+<!-- ================= 14 ================= -->
+<section id="s14">
+  <div class="shead"><span class="chip">14</span><h2>Worktrees</h2><span class="tagline">the core of this document</span></div>
+
+  <p>A worktree inverts the same decomposition. Bare = a repository with <em>no</em> working tree. A worktree setup = <strong>one repository with several working trees.</strong></p>
+
+  <figure class="board">
+    <svg viewBox="0 0 780 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: three working directories each with their own HEAD, index and files, all sharing one object database and set of refs">
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="14">
+        <rect x="8" y="14" width="232" height="96" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <text x="124" y="42" text-anchor="middle" fill="#0F1A18">main/</text>
+        <rect x="274" y="14" width="232" height="96" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <text x="390" y="42" text-anchor="middle" fill="#0F1A18">feat-search/</text>
+        <rect x="540" y="14" width="232" height="96" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <text x="656" y="42" text-anchor="middle" fill="#0F1A18">fix-login/</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#5A6B67" text-anchor="middle">
+        <text x="124" y="66">own HEAD · own index</text>
+        <text x="124" y="86">own checked-out files</text>
+        <text x="124" y="102">.git is a FILE here</text>
+        <text x="390" y="66">own HEAD · own index</text>
+        <text x="390" y="86">own checked-out files</text>
+        <text x="390" y="102">.git is a FILE here</text>
+        <text x="656" y="66">own HEAD · own index</text>
+        <text x="656" y="86">own checked-out files</text>
+        <text x="656" y="102">.git is a FILE here</text>
+      </g>
+      <g stroke="#0B5D51" stroke-width="2.5" stroke-dasharray="7 4">
+        <line x1="124" y1="110" x2="124" y2="196"/>
+        <line x1="390" y1="110" x2="390" y2="196"/>
+        <line x1="656" y1="110" x2="656" y2="196"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" fill="#0B5D51" text-anchor="middle">
+        <text x="124" y="158">shared</text><text x="390" y="158">shared</text><text x="656" y="158">shared</text>
+      </g>
+      <rect x="8" y="196" width="764" height="86" fill="#101614" stroke="#101614" stroke-width="2"/>
+      <text x="390" y="230" text-anchor="middle" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="17" fill="#F5C518">ONE REPOSITORY</text>
+      <text x="390" y="256" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#B7C4C0">objects/  ·  refs/  ·  config  ·  stash  ·  hooks</text>
+      <text x="390" y="274" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8896A0">every commit made anywhere is instantly visible everywhere</text>
+      <text x="0" y="312" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#0F1A18">Separate: HEAD, index, checked-out files, untracked files.  Shared: history, branches, tags, stash, config.</text>
+    </svg>
+    <figcaption>Three directories you can work in simultaneously, one history behind all of them.</figcaption>
+  </figure>
+
+  <h3>The mechanism</h3>
+  <p>In a linked worktree, <code>.git</code> is <strong>a file, not a folder</strong>. It contains one line pointing back into the main repository:</p>
+
+  <div class="cmd"><span class="p">$</span> cat ../feat-search/.git
+<span class="o">gitdir: /Users/shreyas/code/project/.git/worktrees/feat-search</span></div>
+
+  <p>And inside the main repo, a small directory per worktree holding that worktree's own <code>HEAD</code>, its own <code>index</code>, and its own <code>ORIG_HEAD</code>:</p>
+
+  <div class="cmd"><span class="d">project/</span>
+├── .git/
+│   └── <span class="d">worktrees/</span>
+│       ├── <span class="d">feat-search/</span>   <span class="cm">← HEAD, index, ORIG_HEAD for that tree</span>
+│       └── <span class="d">fix-login/</span>
+└── src/ ...
+
+<span class="d">../feat-search/</span>          <span class="cm">← a linked worktree</span>
+├── .git                <span class="cm">← the pointer file above</span>
+└── src/ ...</div>
+
+  <p>That single design choice explains every property worth knowing.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>Commits are instantly visible</b><span>Commit in one worktree and every other one can see it immediately. No fetch, no push, no remote — there is only one object database.</span></div>
+    <div class="mrow"><b>Cheap after the first</b><span>A second worktree costs a checkout, not a history. On a repository with years of commits, that's a very large difference from a second <code>clone</code>.</span></div>
+    <div class="mrow"><b>One branch, one worktree</b><span>Git refuses to check out the same branch in two worktrees. That guard rail prevents an entire class of confusion — two directories silently fighting over one pointer.</span></div>
+    <div class="mrow"><b>Untracked files are NOT shared</b><span><code>node_modules</code>, <code>.env</code>, build caches, <code>target/</code>. Each worktree needs its own. This is the real tax.</span></div>
+  </div>
+
+  <h3>The commands</h3>
+  <div class="cmd"><span class="p">$</span> git worktree add ../feat-search feat/search   <span class="cm"># existing branch</span>
+<span class="p">$</span> git worktree add -b fix/login ../fix-login    <span class="cm"># create branch + worktree</span>
+<span class="p">$</span> git worktree add --detach ../review HEAD      <span class="cm"># no branch, just look</span>
+
+<span class="p">$</span> git worktree list
+<span class="o">/Users/shreyas/code/project      a1b2c3d [main]</span>
+<span class="o">/Users/shreyas/code/feat-search  9f8e7d6 [feat/search]</span>
+<span class="o">/Users/shreyas/code/fix-login    3c4d5e6 [fix/login]</span>
+
+<span class="p">$</span> git worktree remove ../fix-login
+<span class="p">$</span> git worktree prune                            <span class="cm"># tidy up after deleting a folder manually</span></div>
+
+  <div class="dothis">
+    <h4>Do this now — feel the shared-history property</h4>
+    <p>This is the moment worktrees click. Do it rather than reading it.</p>
+  </div>
+  <div class="cmd"><span class="p">$</span> cd ~/code/git-lab
+<span class="p">$</span> git worktree add -b experiment ../git-lab-experiment
+<span class="p">$</span> cd ../git-lab-experiment
+
+<span class="p">$</span> echo "from the other worktree" &gt; new.txt
+<span class="p">$</span> git add . && git commit -m "Commit made in worktree two"
+
+<span class="p">$</span> cd ../git-lab
+<span class="p">$</span> git log --oneline experiment
+<span class="o">7d8e9f0 Commit made in worktree two</span>       <span class="cm"># already here. No fetch.</span>
+
+<span class="p">$</span> ls new.txt
+<span class="o">ls: new.txt: No such file or directory</span>       <span class="cm"># but not in THIS directory</span></div>
+
+  <p>The commit is visible instantly because the history is shared. The file isn't there because the working trees are separate. That's the entire concept, in two commands.</p>
+
+  <h3>Why not just <code>git switch</code>?</h3>
+  <p>Because switching branches is a <strong>destructive, serialising</strong> operation on a directory. Your dev server dies. Your editor reindexes. Your <code>node_modules</code> may now be wrong for this branch. You must stash or commit half-finished work first.</p>
+
+  <p>That's perfectly fine when one person does one thing at a time. It stops being fine the moment two things must be in progress at once — a production hotfix while a feature is half-built, reviewing someone's PR without disturbing your uncommitted work, running a long test suite on one branch while you code on another, or three agents working simultaneously.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q5</b>You have two worktrees. In one you run <code>git branch new-idea</code>. Can the other worktree see that branch?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>Yes, immediately.</strong> Branches are refs, and refs live in the shared repository. Both worktrees read the same <code>refs/heads/</code>.</p>
+      <p>What each worktree keeps to itself is only which branch <em>it</em> has checked out (its own HEAD), its staging area, and its files.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 14 complete</span></label>
+</section>
+
+<!-- ================= 15 ================= -->
+<section id="s15">
+  <div class="shead"><span class="chip">15</span><h2>The bare-root layout</h2><span class="tagline">when no worktree is special</span></div>
+
+  <p>The setup in section 14 has an asymmetry: the original clone is the "main" worktree and the others hang off it. Delete the main one and things get awkward.</p>
+
+  <p>If no worktree should be privileged, combine the two ideas: put a <strong>bare repository at the root</strong>, and make every branch a sibling directory.</p>
+
+  <div class="cmd"><span class="d">project/</span>
+├── <span class="d">.bare/</span>          <span class="cm">← the bare repository lives here</span>
+├── .git            <span class="cm">← a FILE containing: gitdir: ./.bare</span>
+├── <span class="d">main/</span>           <span class="cm">← a worktree</span>
+├── <span class="d">feat-search/</span>    <span class="cm">← a worktree</span>
+└── <span class="d">fix-login/</span>      <span class="cm">← a worktree</span></div>
+
+  <div class="dothis">
+    <h4>Do this now — set one up</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> mkdir -p ~/code/wt-demo && cd ~/code/wt-demo
+<span class="p">$</span> git clone --bare https://github.com/YOUR-USERNAME/git-practice.git .bare
+<span class="p">$</span> echo "gitdir: ./.bare" &gt; .git
+
+<span class="cm"># IMPORTANT: a bare clone doesn't set up remote tracking properly</span>
+<span class="p">$</span> git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+<span class="p">$</span> git fetch origin
+
+<span class="p">$</span> git worktree add main
+<span class="p">$</span> git worktree add -b feat/demo feat-demo
+<span class="p">$</span> git worktree list</div>
+
+  <div class="cue watch"><p class="cue-k">Don't skip the refspec line</p><p><code>git clone --bare</code> deliberately doesn't configure remote-tracking branches — it assumes you want a pristine mirror. Without that <code>remote.origin.fetch</code> line, <code>git fetch</code> updates almost nothing and <code>git worktree add existing-branch</code> can't find remote branches.</p><p>This is the single most common reason people try the bare-root layout once, hit something inexplicable, and give up.</p></div>
+
+  <p>The <code>.git</code> file at the root is what makes Git commands work from the <code>project/</code> directory itself, so you can run <code>git worktree list</code> and <code>git fetch</code> from the top without stepping into any particular tree.</p>
+
+  <h3>What you get</h3>
+  <div class="mention">
+    <div class="mrow"><b>Branch switching becomes cd</b><span><code>cd ../feat-search</code>. Nothing is destroyed, nothing reindexes, your dev server in the other directory keeps running.</span></div>
+    <div class="mrow"><b>Nothing is special</b><span>Delete any worktree and the rest are unaffected. <code>main</code> is just another directory.</span></div>
+    <div class="mrow"><b>One history, one fetch</b><span>Fetch once at the root and every worktree sees the new commits.</span></div>
+    <div class="mrow"><b>Editors stay open</b><span>One VS Code window per worktree, each with its own terminal, each on a different branch. No context switching cost at all.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">Is this overkill for coursework?</p><p>Honestly, yes. For a single-file HTML assignment, <code>git switch</code> is fine and this is ceremony.</p><p>It earns its keep when a checkout is expensive — large repositories, slow installs, long-running dev servers — or when several things genuinely need to be in flight at once. Which, as the next sections argue, is now the normal case rather than the exception.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 15 complete</span></label>
+</section>
+
+<!-- ================= 16 ================= -->
+<section id="s16">
+  <div class="shead"><span class="chip">16</span><h2>Worktree gotchas</h2><span class="tagline">the honest list</span></div>
+
+  <p>Worktrees are genuinely useful and they have sharp edges. Knowing them in advance is the difference between adopting the pattern and abandoning it after one bad afternoon.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>The stash is shared</b><span>Surprising and occasionally destructive. <code>git stash</code> in one worktree is visible — and poppable — from all of them. Prefer scratch commits, as section 07 argued.</span></div>
+    <div class="mrow"><b>Config is shared</b><span>All worktrees read the same <code>.git/config</code>. For per-worktree settings you need <code>git config --worktree</code>, which first requires <code>git config extensions.worktreeConfig true</code>. Matters when two trees need different <code>user.email</code> or different hooks.</span></div>
+    <div class="mrow"><b>Dependencies are per-tree</b><span>Three worktrees on a Node project means three <code>node_modules</code>, three installs, three copies on disk. Write a one-line bootstrap script or you will hate this by day two.</span></div>
+    <div class="mrow"><b>Untracked config doesn't copy</b><span><code>.env</code>, local settings, editor config — none of it comes across, because none of it is tracked. Same bootstrap script should handle it.</span></div>
+    <div class="mrow"><b>Ports collide</b><span>Three dev servers want three ports. Either configure them per-tree or only run one at a time.</span></div>
+    <div class="mrow"><b>Deleting the folder isn't enough</b><span><code>rm -rf</code> on a worktree leaves stale metadata in <code>.git/worktrees/</code>. Run <code>git worktree remove</code> instead, or <code>git worktree prune</code> afterwards.</span></div>
+    <div class="mrow"><b>Submodules are awkward</b><span>Worktrees and submodules together are still rough. If your project uses submodules heavily, test carefully before committing to this workflow.</span></div>
+    <div class="mrow"><b>Hooks are shared</b><span>All worktrees run the same hooks from the same directory. Usually what you want; occasionally not.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">A bootstrap script pays for itself immediately</p></div>
+  <div class="cmd"><span class="cm">#!/usr/bin/env bash</span>
+<span class="cm"># wt — create a worktree and make it usable</span>
+<span class="cm"># usage: wt feat/search</span>
+set -euo pipefail
+branch="$1"
+dir="../$(echo "$branch" | tr '/' '-')"
+
+git worktree add -b "$branch" "$dir" origin/main
+cp .env "$dir/.env" 2>/dev/null || true
+(cd "$dir" && npm install)
+echo "ready: $dir"</div>
+
+  <div class="cue watch"><p class="cue-k">Worktrees are not isolation</p><p>Separate directories are not separate machines. An agent or a script running in one worktree can still <code>cd ..</code>, still reach your whole filesystem, still hit the network, and still push to your remote.</p><p>If you need genuine isolation — running untrusted code, or letting an agent operate unsupervised — you want a container or a VM. Worktrees solve <em>file collision</em>, not <em>security</em>. Conflating the two is a mistake worth avoiding early.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 16 complete</span></label>
+</section>
+
+<!-- ================= 17 ================= -->
+<section id="s17">
+  <div class="shead"><span class="chip">17</span><h2>How coding agents actually work</h2><span class="tagline">no magic involved</span></div>
+
+  <p>Before arguing that worktrees suit agents, it's worth being precise about what an agent is — because the mechanism is simpler than the marketing suggests, and the properties that matter follow directly from it.</p>
+
+  <div class="cue"><p class="cue-k">An agent is a loop</p><p>A language model wired to a set of tools, running in a cycle: <strong>receive context → decide on an action → the harness executes it → feed the result back → repeat</strong> until the task is done or it gives up.</p></div>
+
+  <div class="mention">
+    <div class="mrow"><b>The model</b><span>Produces text. On its own it cannot touch anything — no files, no network, no commands.</span></div>
+    <div class="mrow"><b>The harness</b><span>The program around it that actually does things: reads files, writes files, runs shell commands, and hands the output back as more text.</span></div>
+    <div class="mrow"><b>Tools</b><span>The specific actions available — read a file, edit a file, run a command, search the codebase, fetch a URL.</span></div>
+    <div class="mrow"><b>Context</b><span>Everything the model can see this turn: your instructions, files it has read, previous tool results. It is finite, and it is <em>all</em> the model knows.</span></div>
+  </div>
+
+  <h3>Four properties that follow, and they're the ones that matter</h3>
+
+  <div class="mention">
+    <div class="mrow"><b>It works in a directory, over time</b><span>A task means dozens of reads and edits across many minutes. The directory is mutated continuously and is inconsistent halfway through.</span></div>
+    <div class="mrow"><b>It has no memory between runs</b><span>Everything must be in context. Which is why repositories now carry instruction files — <code>CLAUDE.md</code>, <code>AGENTS.md</code>, <code>.cursorrules</code> — committed alongside the code so the conventions travel with the project.</span></div>
+    <div class="mrow"><b>It can be wrong confidently</b><span>Plausible code that doesn't compile, a fix for the wrong bug, an over-eager refactor of a file you didn't mention. This is not an edge case; it is a routine outcome you must design around.</span></div>
+    <div class="mrow"><b>It reads its own results</b><span>Give it the ability to run tests and it can iterate — write, run, read the failure, fix. This is why agents are far more useful in a repository with a working test suite.</span></div>
+  </div>
+
+  <div class="cue work"><p class="cue-k">Which makes Git the safety net, not an afterthought</p>
+    <p><strong>Commit before you start.</strong> A clean working tree before an agent runs means <code>git diff</code> shows you exactly what it did, and <code>git restore .</code> undoes all of it instantly.</p>
+    <p><strong>The diff is the review surface.</strong> You are not reading the agent's summary of what it did; you are reading the diff. Those are different things and the second one is authoritative.</p>
+    <p><strong>Small scoped tasks produce reviewable diffs.</strong> "Refactor the auth module" gives you 900 lines you will skim. "Extract the token validation into its own function" gives you 40 you will actually read.</p>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">And why running two in one directory fails</p><p>Two agents editing the same directory will overwrite each other's changes, and neither can tell which edits are whose. <code>git status</code> shows a mixture with no way to separate them. If one commits, it commits the other's half-finished work too.</p><p>There is no clever way around this. They need separate directories — which is precisely the problem the next section solves.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 17 complete</span></label>
+</section>
+
+<!-- ================= 18 ================= -->
+<section id="s18">
+  <div class="shead"><span class="chip">18</span><h2>Worktrees + agents</h2><span class="tagline">why an obscure feature went mainstream</span></div>
+
+  <p>Worktrees shipped in Git 2.5, in 2015, and were a niche curiosity for most of a decade. They became standard tooling in about two years. The reason is worth understanding rather than cargo-culting.</p>
+
+  <div class="cue"><p class="cue-k">The argument, in three steps</p>
+    <p><strong>1.</strong> An agent works by mutating files in a directory over many minutes (section 17).</p>
+    <p><strong>2.</strong> So two agents need two directories, or they destroy each other's work.</p>
+    <p><strong>3.</strong> But they must share one history — otherwise reviewing and combining their output means pushing and pulling through a remote for every exchange, which is slow, noisy, and fills your remote with junk branches.</p>
+    <p><strong>One repository, several isolated working directories, shared refs.</strong> That is the definition of a worktree. The tool and the problem fit exactly, which is why adoption was so fast once the problem appeared.</p>
+  </div>
+
+  <h3>What the workflow looks like</h3>
+  <div class="cmd"><span class="p">$</span> git worktree add -b feat/search    ../search
+<span class="p">$</span> git worktree add -b feat/export    ../export
+<span class="p">$</span> git worktree add -b fix/login-bug  ../login-fix
+
+<span class="cm"># one agent session per directory, running in parallel</span>
+<span class="cm"># each commits to its own branch as it goes</span>
+
+<span class="cm"># review from anywhere — no fetching, one object database</span>
+<span class="p">$</span> git log --oneline feat/search
+<span class="p">$</span> git diff main feat/export
+<span class="p">$</span> git diff main...fix/login-bug      <span class="cm"># three dots: only their changes</span></div>
+
+  <p>Three branches, all visible from any of the four directories, because there is only one repository. No fetch. No remote round trip. That immediacy is the whole benefit.</p>
+
+  <h3>Practices that have settled fairly quickly</h3>
+  <div class="mention">
+    <div class="mrow"><b>One task, one branch, one worktree</b><span>The unit is the task, not the agent. Naming the directory after the branch keeps it obvious which is which when you have four terminals open.</span></div>
+    <div class="mrow"><b>Commit often, in small steps</b><span>Every commit is a checkpoint you can return to. When an agent goes off the rails at step nine, you reset to step eight rather than starting over.</span></div>
+    <div class="mrow"><b>Clean tree before starting</b><span>So the diff is unambiguous. Uncommitted work of your own mixed with agent output is genuinely hard to untangle.</span></div>
+    <div class="mrow"><b>Review the diff, not the summary</b><span>The summary is a description. The diff is what happened. Read the diff.</span></div>
+    <div class="mrow"><b>Squash before the PR</b><span>Agent histories are noisy — "attempt", "fix attempt", "revert attempt". Interactive rebase into a few clean commits before anyone reviews it (section 06).</span></div>
+    <div class="mrow"><b>Instruction files in the repo</b><span>Conventions, architecture notes, commands to run tests. Committed, so they're shared, reviewable, and versioned like everything else.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">The costs, stated honestly</p>
+    <p><strong>Your laptop is the limit long before Git is.</strong> Three worktrees means three <code>node_modules</code>, three dev servers, three sets of RAM. Parallelism is bounded by hardware, not by the workflow.</p>
+    <p><strong>Review does not parallelise.</strong> Three agents can produce three features simultaneously; you still read three diffs one after another. If review is your bottleneck — and it usually becomes one — running more agents makes it worse, not better.</p>
+    <p><strong>Merging three parallel branches that touch the same files</strong> gives you three conflict resolutions. Parallelism works best on genuinely independent tasks, and deciding what's independent is a judgement no tool makes for you.</p>
+  </div>
+
+  <div class="cue work"><p class="cue-k">Worth saying in an interview</p><p>"I use Git worktrees to run parallel agent sessions" is a fine sentence. Being able to follow it with <em>"because the object database and refs are shared while HEAD, the index and the working files are per-tree — so commits are instantly visible across sessions without a remote round trip"</em> demonstrates that you understand Git's internals and current practice in one breath.</p><p>Very few candidates with two years of experience can do that.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q6</b>Why not just make three separate clones instead of three worktrees?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p>It works, and for some situations it's the right call. Two differences matter.</p>
+      <p><strong>Disk and time:</strong> each clone duplicates the entire history. On a large repository that's significant.</p>
+      <p><strong>Isolation of refs:</strong> separate clones have separate object databases, so a commit made in one is invisible to the others until you push and fetch through a remote. With worktrees it's already there. That immediacy is exactly what you want when reviewing and combining parallel work.</p>
+      <p>Where separate clones win: when you need genuinely different states of the repository, or when a tool doesn't understand the <code>.git</code>-as-a-file arrangement.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 18 complete</span></label>
+</section>
+
+<!-- ================= 19 ================= -->
+<section id="s19">
+  <div class="shead"><span class="chip">19</span><h2>How the industry actually uses Git</h2><span class="tagline">what to expect on day one</span></div>
+
+  <p>Everything above is mechanics. This is the culture around it, which nobody documents and everybody assumes you've absorbed.</p>
+
+  <h3>Branching strategy</h3>
+  <div class="mention">
+    <div class="mrow"><b>Trunk-based development</b><span>What most product teams do now. One long-lived branch (<code>main</code>), short-lived feature branches off it, merged within a day or two. Main is always deployable.</span></div>
+    <div class="mrow"><b>Git Flow</b><span>The 2010 model with <code>develop</code>, <code>release/*</code>, <code>hotfix/*</code> branches. Still used where releases are versioned and shipped on a schedule — desktop software, embedded, enterprise on-premise. Its own author has since said it's overkill for continuously deployed web apps.</span></div>
+    <div class="mrow"><b>Release branches</b><span>A middle ground: trunk-based, plus a branch cut per release that fixes are cherry-picked onto.</span></div>
+  </div>
+
+  <div class="cue work"><p class="cue-k">The single most important habit</p><p><strong>Keep branches short-lived.</strong> A branch merged within two days rarely conflicts. A branch that lives three weeks while five people touch the same files is a bad afternoon guaranteed.</p><p>If a feature is too big for two days, ship it in pieces behind a feature flag. That's what flags are for, and it's why they're everywhere.</p></div>
+
+  <h3>What's enforced on you</h3>
+  <div class="mention">
+    <div class="mrow"><b>Protected branches</b><span>You cannot push to <code>main</code>. Full stop. Everything arrives by pull request.</span></div>
+    <div class="mrow"><b>Required reviews</b><span>One or two approvals before merge. Often from a specific team via a <code>CODEOWNERS</code> file that auto-assigns reviewers by file path.</span></div>
+    <div class="mrow"><b>Required status checks</b><span>Automated checks must pass before the merge button unlocks — tests, linting, type checking, build. This is the point where Git meets CI, and from your side it's simply "the button is grey until the checks go green."</span></div>
+    <div class="mrow"><b>Linear history required</b><span>Some repositories reject merge commits entirely, forcing squash or rebase merges.</span></div>
+    <div class="mrow"><b>Signed commits</b><span>Increasingly common in finance and security-sensitive work. Commits must be GPG- or SSH-signed to prove authorship.</span></div>
+  </div>
+
+  <h3>Conventions you'll be expected to follow</h3>
+  <div class="mention">
+    <div class="mrow"><b>Branch naming</b><span><code>feat/</code>, <code>fix/</code>, <code>chore/</code>, <code>docs/</code> prefixes, often with a ticket number: <code>feat/PROJ-1234-add-search</code>. Frequently CI-enforced.</span></div>
+    <div class="mrow"><b>Conventional Commits</b><span><code>feat: add search filter</code>, <code>fix: handle null response</code>, <code>chore: bump deps</code>. Machine-readable, so tools can generate changelogs and version numbers automatically. Widely adopted.</span></div>
+    <div class="mrow"><b>Link the ticket</b><span>Put the issue number in the PR description. Writing <code>Closes #42</code> auto-closes the issue on merge.</span></div>
+    <div class="mrow"><b>Delete merged branches</b><span>Usually automatic. Otherwise the branch list becomes unusable within months.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">Monorepos, briefly</p><p>Many large companies keep everything in one enormous repository rather than one per service. It makes cross-cutting changes atomic and dependency management sane, at the cost of tooling complexity and very slow clones.</p><p>It's also, incidentally, where worktrees earn their keep hardest: when a checkout takes minutes, you really do not want to switch branches in place.</p></div>
+
+  <div class="cue work"><p class="cue-k">What actually gets noticed about you</p><p>Not clever Git commands. It's whether your PRs are small enough to review, whether your commit messages explain the change, whether you respond to review comments promptly, and whether you break the build. Those four things form most of a team's impression of a new engineer in the first month.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 19 complete</span></label>
+</section>
+
+<!-- ================= 20 ================= -->
+<section id="s20">
+  <div class="shead"><span class="chip">20</span><h2>What LLMs changed</h2><span class="tagline">and what they didn't</span></div>
+
+  <div class="cue watch"><p class="cue-k">A caveat worth reading</p><p>This section describes practice that is genuinely unsettled and moving quickly. Treat it as a snapshot and a way of thinking about the change, not as settled doctrine. Some of it will look dated soon; the underlying pressures probably won't.</p></div>
+
+  <h3>What didn't change</h3>
+  <p>Git itself. Not one command in this document is new. The model of commits, branches, merges and remotes is the same as it was in 2005, and the fundamentals are — if anything — <em>more</em> valuable now, because more code is passing through them faster.</p>
+
+  <h3>What did change</h3>
+
+  <div class="mention">
+    <div class="mrow"><b>Writing code stopped being the bottleneck</b><span>Producing a plausible first draft of a feature is now fast. Deciding whether it's correct, appropriate and maintainable is not. The constraint moved from generation to <strong>review and judgement</strong>.</span></div>
+    <div class="mrow"><b>The diff became the primary artifact</b><span>When you didn't type every line, reading the diff carefully is the only way you actually know what changed. Diff literacy — reading a change and reasoning about its consequences — is now the load-bearing skill.</span></div>
+    <div class="mrow"><b>Commit hygiene matters more, not less</b><span>The counterintuitive one. When volume goes up, a history of small well-described commits is what makes a codebase navigable. Ten thousand lines of "update" is now much easier to produce and much worse to live with.</span></div>
+    <div class="mrow"><b>Small PRs went from good practice to necessity</b><span>A 2,000-line PR was always hard to review. Now they're easy to generate, so the discipline of splitting work has to be deliberate.</span></div>
+    <div class="mrow"><b>Parallelism became normal</b><span>Which is the whole worktree story. One person genuinely can have three tasks in flight — and now has to manage the merge and review overhead that creates.</span></div>
+    <div class="mrow"><b>Git became the undo button for automation</b><span>Commit before running an agent; <code>git diff</code> to see what it did; <code>git restore .</code> to discard it. Version control moved from "how we collaborate" to also being "how we supervise machines".</span></div>
+    <div class="mrow"><b>Repos carry instructions for machines</b><span><code>CLAUDE.md</code>, <code>AGENTS.md</code>, <code>.cursorrules</code> — conventions and architecture notes committed alongside the code. A genuinely new category of file, versioned and reviewed like any other.</span></div>
+    <div class="mrow"><b>Attribution got murky</b><span>Some teams add trailers like <code>Co-authored-by:</code> to mark generated work. Others don't. There is no settled norm yet, and policies vary — ask rather than assume.</span></div>
+  </div>
+
+  <h3>The uncomfortable part</h3>
+  <div class="cue"><p class="cue-k">Worth thinking about honestly</p>
+    <p>If a model can produce the first draft, what is the junior engineer's job? The realistic answer, right now, is: <strong>knowing whether the draft is right</strong>, understanding the system well enough to say why an approach is wrong, and being the person accountable for what gets merged.</p>
+    <p>All of which requires understanding the fundamentals <em>better</em> than the previous generation needed to, not worse. You can't review code you don't understand, and you can't debug a framework you only know as an abstraction.</p>
+    <p>Which is the argument for reading this document properly rather than asking a model to summarise it.</p>
+  </div>
+
+  <div class="cue work"><p class="cue-k">Practical advice for your first job</p>
+    <p>Use the tools — refusing to is not a principled stand, it's just slower. But commit before you start, read every diff before you stage it, and never open a PR containing code you can't explain line by line.</p>
+    <p>"The AI wrote it" is not a defence in a review, and it certainly isn't one in an incident postmortem. Your name is on the commit.</p>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 20 complete</span></label>
+</section>
+
+<!-- ================= 21 ================= -->
+<section id="s21">
+  <div class="shead"><span class="chip">21</span><h2>Practice run, unaided</h2><span class="tagline">the part that makes it stick</span></div>
+
+  <p>Do this on a throwaway repository, <strong>without scrolling up</strong>. If you get stuck, <code>git status</code> and <code>git log --oneline --graph --all</code> will tell you where you are before any documentation does.</p>
+
+  <div class="dothis">
+    <h4>Part one — history surgery</h4>
+    <ol>
+      <li>Create a repo with five commits on <code>main</code>.</li>
+      <li>Branch to <code>feat/one</code>, add three commits, two of which are deliberately messy ("wip", "fix").</li>
+      <li>Go back to <code>main</code> and add a commit that touches the same file, so the branches diverge.</li>
+      <li>Rebase <code>feat/one</code> onto <code>main</code>. Resolve the conflict.</li>
+      <li>Interactive-rebase your three commits into one clean commit with a proper message.</li>
+      <li>Confirm with <code>git log --oneline --graph --all</code> that the history is linear.</li>
+    </ol>
+  </div>
+
+  <div class="dothis">
+    <h4>Part two — the recovery drills</h4>
+    <ol>
+      <li>Make a commit, then <code>git reset --hard HEAD~1</code> to destroy it. Recover it using the reflog.</li>
+      <li>Create a branch, commit to it, delete it with <code>-D</code>, and recover it from the reflog.</li>
+      <li>Start a rebase, hit the conflict, then <code>--abort</code>. Confirm you're exactly back where you started.</li>
+      <li>Stash some changes including an untracked file. Prove that plain <code>git stash</code> leaves the untracked file behind and <code>-u</code> doesn't.</li>
+      <li>Cherry-pick one commit from <code>feat/one</code> onto a new branch off <code>main</code>. Compare the two hashes and explain why they differ.</li>
+    </ol>
+  </div>
+
+  <div class="dothis">
+    <h4>Part three — worktrees</h4>
+    <ol>
+      <li>Add two worktrees on two different branches.</li>
+      <li>Commit in one. From the other, prove the commit is already visible with no fetch.</li>
+      <li>Try to check out the same branch in both. Read the error and explain it in your own words.</li>
+      <li>Stash something in one worktree and list stashes from the other. Confirm the sharing.</li>
+      <li><code>rm -rf</code> one worktree directory, then run <code>git worktree list</code> and see the stale entry. Clean it with <code>prune</code>.</li>
+      <li>Set up the full bare-root layout from section 15, <strong>including the refspec line</strong>, and add two worktrees to it.</li>
+    </ol>
+  </div>
+
+  <div class="cue"><p class="cue-k">How to judge yourself</p><p>You're ready if you got through it needing <code>git status</code> and <code>git log --graph</code> but not this document. Nearly ready if you looked up two or three flags — nobody remembers every option to <code>git worktree</code>.</p><p>The real test isn't the commands. It's whether you can explain, out loud, <em>why</em> a rebase produces new hashes and <em>why</em> a worktree can see another worktree's commits without fetching. If you can do that, the commands are just syntax you can look up forever.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 21 complete</span></label>
+</section>
+
+<!-- ================= 22 ================= -->
+<section id="s22">
+  <div class="shead"><span class="chip">22</span><h2>Final checkpoint</h2><span class="tagline">answer before revealing</span></div>
+
+  <p>Fifteen questions. Answer each in your head — or better, out loud — <em>before</em> opening the answer. Several of these are common interview questions.</p>
+
+  <div class="quiz"><div class="q"><b>1</b>What are the four Git object types, and what does each hold?</div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>blob</strong> — file contents. <strong>tree</strong> — a directory listing pointing at blobs and other trees. <strong>commit</strong> — a pointer to one tree plus author, message and parent(s). <strong>tag</strong> — an annotated pointer to a commit.</p><p>All stored content-addressed by hash, so identical content is stored once.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>2</b>Mechanically, what is a branch?</div>
+    <details><summary>Show answer</summary><div class="a"><p>A file containing a 40-character commit hash — 41 bytes with the newline. Committing rewrites that file to point at the new commit.</p><p>HEAD is a pointer to a branch; detached HEAD means it holds a raw hash instead.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>3</b>When is a merge a fast-forward, and when can conflicts happen?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Fast-forward when the base branch hasn't moved since you branched — your branch already contains all of its commits, so Git just slides the pointer. Conflicts are <strong>impossible</strong> in this case.</p><p>Conflicts can only occur in a three-way merge, when both sides changed the same lines of the same file.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>4</b>Why does rebasing produce new commit hashes?</div>
+    <details><summary>Show answer</summary><div class="a"><p>A commit's hash is computed from its content <em>including its parent's hash</em>. Rebasing replays commits onto a different parent, so the parent hash changes, so every replayed hash changes.</p><p>That's why it counts as history rewriting, and why the golden rule exists.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>5</b>State the golden rule of rebasing and explain the mechanical reason for it.</div>
+    <details><summary>Show answer</summary><div class="a"><p>Never rebase commits others have based work on. If a colleague holds your old commits and you replace them with new hashes, their next pull tries to reconcile two versions of the same work — producing duplicates or inexplicable conflicts.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>6</b>What's the difference between <code>--force</code> and <code>--force-with-lease</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>--force</code> overwrites the remote branch unconditionally, including commits someone else pushed since you last looked. <code>--force-with-lease</code> checks the remote is where you last saw it and refuses otherwise.</p><p>Always the second one.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>7</b>You deleted a branch with unmerged commits. Recover it.</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>git reflog</code> to find the branch tip's hash, then <code>git switch -c &lt;name&gt; &lt;hash&gt;</code>.</p><p>Works because the objects are still in the database — only the ref pointing at them was deleted. The reflog is local and entries expire, so this isn't unlimited.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>8</b>What exactly is <code>origin/main</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>A local file recording where the remote's <code>main</code> was <strong>the last time you fetched</strong>. It's on your disk, not on GitHub, and it can be arbitrarily out of date until you fetch again.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>9</b>What is a bare repository, and why is every push target bare?</div>
+    <details><summary>Show answer</summary><div class="a"><p>A repository with no working tree — the contents of <code>.git</code> as the directory itself, <code>core.bare = true</code>.</p><p>Pushing to a branch that's checked out somewhere would leave that working tree disagreeing with HEAD, so Git refuses. A bare repo has no working tree, so there's nothing to desync. GitHub is a warehouse of bare repos.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>10</b>In a worktree setup, what is shared and what is per-tree?</div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>Shared:</strong> the object database, refs (branches and tags), config, hooks, and the stash.</p><p><strong>Per-tree:</strong> HEAD, the index, the checked-out files, and all untracked files.</p><p>That split explains every property — instant visibility of commits, cheap creation, and the need for a separate <code>node_modules</code> in each.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>11</b>Why does Git refuse to check out the same branch in two worktrees?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Because both would be moving the same ref while holding different working states. Committing in one would leave the other's files inconsistent with the branch it thinks it's on.</p><p>It's the same class of problem that makes push targets bare — a guard rail, not an arbitrary limitation.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>12</b>What's the one line people forget in the bare-root worktree layout?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"</code></p><p><code>--bare</code> doesn't configure remote-tracking branches, so without it <code>git fetch</code> brings down almost nothing and worktrees can't be created from remote branches.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>13</b>Explain in three steps why worktrees suit parallel coding agents.</div>
+    <details><summary>Show answer</summary><div class="a"><p>An agent mutates files in a directory over many minutes. Two agents therefore need two directories. But they must share one history, or combining their work means a remote round trip every time.</p><p>One repository, several working directories, shared refs — that's a worktree.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>14</b>Do worktrees give you isolation for running untrusted code?</div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>No.</strong> Separate directories are not separate machines. Anything running in a worktree can reach the rest of your filesystem, the network, and your remotes.</p><p>Worktrees solve file collision. For actual isolation you want a container or VM.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>15</b>What are the three merge buttons, and why is squash the common default?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Merge commit (keeps everything plus a join), squash (collapses the branch into one commit), rebase-and-merge (replays commits individually, no merge commit).</p><p>Squash is common because one PR becomes one commit on main, which makes <code>git revert</code> and <code>git bisect</code> trivial. Note the trap: delete the branch afterwards rather than reusing it.</p></div></details></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 22 complete</span></label>
+</section>
+
+<!-- ================= GLOSSARY ================= -->
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+
+  <div class="gloss">
+    <div class="grow"><b>bare repository</b><span>A repository with no working tree. What every push target, including GitHub, actually is.</span></div>
+    <div class="grow"><b>blob</b><span>A Git object holding the contents of one file.</span></div>
+    <div class="grow"><b>cherry-pick</b><span>Apply one commit's changes onto the current branch as a new commit.</span></div>
+    <div class="grow"><b>content-addressed</b><span>Objects stored under the hash of their own contents, so identical content is stored once.</span></div>
+    <div class="grow"><b>detached HEAD</b><span>HEAD holding a commit hash directly rather than a branch reference.</span></div>
+    <div class="grow"><b>fast-forward</b><span>A merge that only moves a pointer, because the base hadn't moved. No merge commit, no conflicts.</span></div>
+    <div class="grow"><b>fetch</b><span>Download commits and update <code>origin/*</code> pointers. Changes nothing else. Always safe.</span></div>
+    <div class="grow"><b>fixup / squash</b><span>Interactive-rebase actions that fold a commit into the one above it.</span></div>
+    <div class="grow"><b>fork</b><span>A GitHub-level copy of a repository under your own account.</span></div>
+    <div class="grow"><b>HEAD</b><span>A pointer to where you are now — normally a branch reference.</span></div>
+    <div class="grow"><b>index</b><span>The staging area. A binary file listing what goes in the next commit.</span></div>
+    <div class="grow"><b>mirror</b><span>A clone copying all refs and configured to stay in lockstep. For migrations and backups.</span></div>
+    <div class="grow"><b>packfile</b><span>Compressed archive of many objects, with delta compression. Created by <code>git gc</code>.</span></div>
+    <div class="grow"><b>protected branch</b><span>A branch you can't push to directly; changes must arrive via pull request.</span></div>
+    <div class="grow"><b>rebase</b><span>Replay commits onto a new base, producing new hashes.</span></div>
+    <div class="grow"><b>ref</b><span>A named pointer to a commit. Branches and tags are refs.</span></div>
+    <div class="grow"><b>refspec</b><span>A mapping that says which remote refs to fetch and where to store them locally.</span></div>
+    <div class="grow"><b>reflog</b><span>A local log of everywhere HEAD has been. Your recovery tool.</span></div>
+    <div class="grow"><b>remote-tracking branch</b><span><code>origin/main</code> — a local record of where the remote's branch was at last contact.</span></div>
+    <div class="grow"><b>stash</b><span>A shelf for uncommitted changes. Shared across all worktrees.</span></div>
+    <div class="grow"><b>three-way merge</b><span>Combining two diverged branches by comparing both against their common ancestor.</span></div>
+    <div class="grow"><b>tree</b><span>A Git object representing a directory listing.</span></div>
+    <div class="grow"><b>trunk-based development</b><span>Short-lived branches off one always-deployable <code>main</code>. The current mainstream model.</span></div>
+    <div class="grow"><b>upstream</b><span>Either the remote branch your local branch tracks, or the conventional remote name for the original repo you forked.</span></div>
+    <div class="grow"><b>worktree</b><span>An additional working directory attached to one repository, with its own HEAD, index and files.</span></div>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Glossary read</span></label>
+</section>
+
+<div class="finish">
+  <h2>How to know you're ready</h2>
+  <p><strong>There is nothing to submit.</strong> No form, no upload, nothing to send anywhere. This is for your own benefit, and the only person who needs to be satisfied by it is you.</p>
+  <p>You're there if you can do all of these <em>without looking anything up</em>:</p>
+  <ol>
+    <li>Explain what's inside <code>.git</code> and why a commit hash can't be forged.</li>
+    <li>Say what a branch is mechanically, and what detached HEAD means.</li>
+    <li>Explain fast-forward vs three-way merge, and when conflicts are possible.</li>
+    <li>Rebase a branch, resolve a conflict, squash the result, and force-push safely.</li>
+    <li>Recover a deleted branch from the reflog without panicking.</li>
+    <li>Define a bare repository and say why every push target is one.</li>
+    <li><strong>Explain what a worktree shares and what it keeps separate</strong>, and why that makes it the right shape for parallel agent work.</li>
+    <li>Set up the bare-root layout, including the refspec line.</li>
+  </ol>
+  <p>If any of those feels shaky, go back to the section it came from and run the commands again on a scratch repo. Nobody is checking, so there's no reason to pretend otherwise to yourself.</p>
+
+  <h2 style="margin-top:30px;font-size:20px">Worktree command card</h2>
+  <div class="cmd"><span class="p">$</span> git worktree add ../dir branch          <span class="cm"># existing branch</span>
+<span class="p">$</span> git worktree add -b new ../dir origin/main
+<span class="p">$</span> git worktree add --detach ../review HEAD
+<span class="p">$</span> git worktree list
+<span class="p">$</span> git worktree remove ../dir
+<span class="p">$</span> git worktree prune                      <span class="cm"># after deleting a dir by hand</span>
+
+<span class="cm"># bare-root layout, from scratch</span>
+<span class="p">$</span> mkdir project && cd project
+<span class="p">$</span> git clone --bare &lt;url&gt; .bare
+<span class="p">$</span> echo "gitdir: ./.bare" &gt; .git
+<span class="p">$</span> git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+<span class="p">$</span> git fetch origin
+<span class="p">$</span> git worktree add main</div>
+
+  <h2 style="margin-top:24px;font-size:20px">History surgery</h2>
+  <div class="cmd"><span class="p">$</span> git rebase origin/main                  <span class="cm"># replay onto latest main</span>
+<span class="p">$</span> git rebase -i HEAD~5                    <span class="cm"># reword / squash / drop / reorder</span>
+<span class="p">$</span> git commit --fixup &lt;hash&gt;               <span class="cm"># then rebase -i --autosquash</span>
+<span class="p">$</span> git rebase --continue | --skip | --abort
+<span class="p">$</span> git push --force-with-lease
+
+<span class="p">$</span> git cherry-pick -x &lt;hash&gt;               <span class="cm"># one commit, record its origin</span>
+<span class="p">$</span> git revert &lt;hash&gt;                       <span class="cm"># safe undo of a pushed commit</span>
+<span class="p">$</span> git reset --hard HEAD@{1}               <span class="cm"># undo the last thing you did</span>
+<span class="p">$</span> git reflog                              <span class="cm"># when you have broken something</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Inspection</h2>
+  <div class="cmd"><span class="p">$</span> git log --oneline --graph --all         <span class="cm"># the shape of your history</span>
+<span class="p">$</span> git log HEAD..origin/main               <span class="cm"># what they have that I don't</span>
+<span class="p">$</span> git diff main...feature                 <span class="cm"># only the branch's own changes</span>
+<span class="p">$</span> git branch -vv                          <span class="cm"># branches and what they track</span>
+<span class="p">$</span> git cat-file -p &lt;hash&gt;                  <span class="cm"># read any object directly</span>
+<span class="p">$</span> git fetch --prune                       <span class="cm"># drop dead origin/* pointers</span></div>
+</div>
+
+<footer>M.Tech CSE · ESD · Advanced Git<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+
+</div>
+
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ----
+     Fragment hrefs get resolved against the host page URL in some
+     embedded/iframed contexts, which breaks them. Scrolling manually
+     works the same whether this file is opened locally, served from
+     a static host, or previewed inside another page. */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=['Work through it at whatever pace suits you.',
+             'Good start — the internals in 01 and 02 carry the rest.',
+             'Past halfway. Sections 13 to 18 are the core.',
+             'Nearly there. The practice run is where it sticks.',
+             "All done — nothing to hand in. You're ready."];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    msg.textContent=n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))];
+  }
+  checks.forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^[$>]\s?/,'').trimEnd()}).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>
