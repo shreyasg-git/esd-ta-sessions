@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTML, the DOM &amp; forms — from absolute zero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.tg{color:var(--term-green)}
+.at{color:var(--signal)}
+.st{color:#B7C4C0}
+.tx{color:#FFFFFF}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 172px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 150px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> HTML, the DOM &amp; forms</p>
+  <h1>HTML and the<br><em>DOM</em>, properly</h1>
+  <p class="lede">Most HTML tutorials teach you to type tags and stop there. This one spends its time on what the browser <em>does</em> with those tags — the tree it builds in memory, how you inspect it, and why that tree is the thing every framework you'll ever use is quietly manipulating. Forms come at the end, and they'll make far more sense once the tree does.</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">0</span> sections</div>
+      <div class="tracker-msg" id="msg">Work through it at whatever pace suits you.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p>HTML has a reputation for being the easy bit — "it's just tags". That reputation is why so many people who can build a React app cannot answer the question <em>"what is the DOM?"</em> in an interview. It's also why they get stuck on bugs that would be obvious if they knew.</p>
+  <p>So this document is weighted deliberately. Writing tags takes about twenty minutes to learn. Understanding the tree the browser builds from them, and being able to open it and read it, is the part that pays you back for years. <strong>Sections 07 to 11 are the important ones.</strong></p>
+  <p><strong>There is no time limit and nothing to submit.</strong> Do it in one sitting or across a week. Type every example yourself rather than pasting it — your hands need to learn this, not your eyes.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — sections build on each other, so go in order the first time</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">What a webpage actually is</span></a>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">Your first page</span></a>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">The skeleton, line by line</span></a>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">Tags, elements, attributes, nesting</span></a>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">Text, headings and lists</span></a>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">Links and images</span></a>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">The DOM — what the browser builds</span></a>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">Reading the DOM in DevTools</span></a>
+  <a class="rrow" href="#s9"><span class="rt">09</span><span class="rw">Source is not the DOM</span></a>
+  <a class="rrow" href="#s10"><span class="rt">10</span><span class="rw">div, span and semantic elements</span></a>
+  <a class="rrow" href="#s11"><span class="rt">11</span><span class="rw">id and class — the DOM's handles</span></a>
+  <a class="rrow" href="#s12"><span class="rt">12</span><span class="rw">Tables, briefly</span></a>
+  <a class="rrow" href="#s13"><span class="rt">13</span><span class="rw">Forms — the container</span></a>
+  <a class="rrow" href="#s14"><span class="rt">14</span><span class="rw">Labels and inputs</span></a>
+  <a class="rrow" href="#s15"><span class="rt">15</span><span class="rw">Input types</span></a>
+  <a class="rrow" href="#s16"><span class="rt">16</span><span class="rw">Radios, checkboxes, select, textarea</span></a>
+  <a class="rrow" href="#s17"><span class="rt">17</span><span class="rw">Buttons and what submit does</span></a>
+  <a class="rrow" href="#s18"><span class="rt">18</span><span class="rw">Validation you get for free</span></a>
+  <a class="rrow" href="#s19"><span class="rt">19</span><span class="rw">Forms in the DOM</span></a>
+  <a class="rrow" href="#s20"><span class="rt">20</span><span class="rw">Accessibility, almost for free</span></a>
+  <a class="rrow" href="#s21"><span class="rt">21</span><span class="rw">When it goes wrong</span></a>
+  <a class="rrow" href="#s22"><span class="rt">22</span><span class="rw">Practice run, unaided</span></a>
+  <a class="rrow" href="#s23"><span class="rt">23</span><span class="rw">Final checkpoint</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; reference card</span></a>
+</nav>
+
+<!-- ================= 01 ================= -->
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>What a webpage actually is</h2><span class="tagline">the whole secret</span></div>
+
+  <div class="cue"><p class="cue-k">One sentence</p><p><strong>A webpage is a text file. The browser reads it and draws it.</strong> That's it. There is nothing else going on.</p></div>
+
+  <p>That sounds too simple, and it genuinely isn't. Every website you've ever used — your bank, YouTube, GitHub — arrives at your machine as text. The browser reads that text, works out what it means, and paints pixels accordingly.</p>
+
+  <p>Three languages divide the work between them:</p>
+
+  <div class="mention">
+    <div class="mrow"><b>HTML</b><span>What things <strong>are</strong>. This is a heading, that's a paragraph, this is a text box for an email address. Structure and meaning. This document.</span></div>
+    <div class="mrow"><b>CSS</b><span>What things <strong>look like</strong>. Colours, spacing, fonts, layout. A separate language with separate files.</span></div>
+    <div class="mrow"><b>JavaScript</b><span>What things <strong>do</strong>. Reacting to clicks, fetching data, changing the page after it has loaded.</span></div>
+  </div>
+
+  <p>Keeping those three jobs separate is the oldest good idea in web development. When people mix them up — using headings because they look big, using tables to position things — everything downstream gets harder.</p>
+
+  <h3>What HTML stands for</h3>
+  <p><strong>H</strong>yper<strong>T</strong>ext <strong>M</strong>arkup <strong>L</strong>anguage. "Markup" is the useful word: you take plain text and mark parts of it up to say what they are. Like a proofreader annotating a manuscript — <em>this bit is a title, this bit is a quotation</em>.</p>
+
+  <p>Note that it is a <strong>markup</strong> language, not a programming language. There are no variables, no loops, no logic. This isn't a criticism; it's a different job. HTML describes, JavaScript decides.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Someone tells you they "wrote a program in HTML". What's wrong with that sentence?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p>HTML isn't a programming language — it has no logic, no conditionals, no loops. It's a markup language that describes structure.</p>
+      <p>Pedantic-sounding, but it matters: it tells you where to look when something is wrong. If the page is showing the wrong <em>thing</em>, that's HTML. If it's showing the right thing in the wrong <em>way</em>, that's CSS. If it's not <em>doing</em> the right thing, that's JavaScript.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete</span></label>
+</section>
+
+<!-- ================= 02 ================= -->
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>Your first page</h2><span class="tagline">hands on keyboard from here</span></div>
+
+  <p>You need almost nothing: a text editor and a browser. Use <strong>VS Code</strong> and <strong>Chrome</strong> so that what you see matches what's described here.</p>
+
+  <div class="dothis">
+    <h4>Do this now — make a folder and a file</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> mkdir -p ~/code/html-practice
+<span class="p">$</span> cd ~/code/html-practice
+<span class="p">$</span> code .</div>
+
+  <p>In VS Code, create a new file called <strong><code>index.html</code></strong>. Type this in — don't paste it:</p>
+
+  <div class="cmd"><span class="tg">&lt;!DOCTYPE html&gt;</span>
+<span class="tg">&lt;html</span> <span class="at">lang</span>=<span class="st">"en"</span><span class="tg">&gt;</span>
+<span class="tg">&lt;head&gt;</span>
+  <span class="tg">&lt;meta</span> <span class="at">charset</span>=<span class="st">"UTF-8"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;title&gt;</span><span class="tx">My first page</span><span class="tg">&lt;/title&gt;</span>
+<span class="tg">&lt;/head&gt;</span>
+<span class="tg">&lt;body&gt;</span>
+  <span class="tg">&lt;h1&gt;</span><span class="tx">Hello</span><span class="tg">&lt;/h1&gt;</span>
+  <span class="tg">&lt;p&gt;</span><span class="tx">This is my first webpage.</span><span class="tg">&lt;/p&gt;</span>
+<span class="tg">&lt;/body&gt;</span>
+<span class="tg">&lt;/html&gt;</span></div>
+
+  <p>Save it. Then double-click the file in your file manager, or drag it onto a browser window. There it is — a real webpage, made by you, running on your machine.</p>
+
+  <div class="cue watch"><p class="cue-k">Windows: turn on file extensions first</p><p>Windows hides the <code>.html</code> part of filenames by default. That means you can save something as <code>index.html</code>, Windows quietly makes it <code>index.html.txt</code>, and the browser shows you raw text with no explanation.</p><p>File Explorer → <strong>View</strong> → <strong>Show</strong> → tick <strong>File name extensions</strong>. Do it now. On Mac: Finder → Settings → Advanced → <strong>Show all filename extensions</strong>.</p></div>
+
+  <h3>Live Server — stop refreshing by hand</h3>
+  <p>In VS Code, open the Extensions panel (the four-squares icon), search <strong>Live Server</strong> by Ritwick Dey, install it. Then right-click <code>index.html</code> → <strong>Open with Live Server</strong>.</p>
+
+  <p>Your page opens in the browser at an address like <code>http://127.0.0.1:5500</code>. Now change the <code>&lt;h1&gt;</code> text and press save. <strong>The browser updates by itself.</strong> From here on, save is your refresh.</p>
+
+  <div class="cue"><p class="cue-k">Why an address instead of a file path</p><p>Live Server runs a tiny web server on your own machine. <code>127.0.0.1</code> means "this computer". You're now loading the page over HTTP, the same way a real site works — which matters later, because some browser features refuse to work on plain <code>file://</code> paths.</p></div>
+
+  <h3>Two settings worth turning on now</h3>
+  <div class="mention">
+    <div class="mrow"><b>Format on Save</b><span>Press <kbd>Ctrl</kbd>+<kbd>,</kbd>, search <em>format on save</em>, tick it. Then search <em>default formatter</em> and choose <strong>Prettier</strong> (install the extension if prompted). Your HTML will indent itself.</span></div>
+    <div class="mrow"><b>Emmet</b><span>Already built in. Type <code>!</code> then <kbd>Tab</kbd> in an empty HTML file and VS Code writes the whole skeleton for you. Useful — but read section 03 before you rely on it.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">Indentation is not decoration</p><p>Badly indented HTML is the single reason people can't find their own unclosed tag. When every element lines up with its parent, a missing <code>&lt;/div&gt;</code> is visible at a glance. When it doesn't, you're hunting through 200 lines. Turn on Format on Save and never think about it again.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 complete</span></label>
+</section>
+
+<!-- ================= 03 ================= -->
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>The skeleton, line by line</h2><span class="tagline">don't copy it blindly</span></div>
+
+  <p>Every HTML file starts the same way. Most people copy it forever without knowing what any of it does. Six lines, six explanations.</p>
+
+  <div class="cmd"><span class="tg">&lt;!DOCTYPE html&gt;</span>
+<span class="tg">&lt;html</span> <span class="at">lang</span>=<span class="st">"en"</span><span class="tg">&gt;</span>
+<span class="tg">&lt;head&gt;</span>
+  <span class="tg">&lt;meta</span> <span class="at">charset</span>=<span class="st">"UTF-8"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;meta</span> <span class="at">name</span>=<span class="st">"viewport"</span> <span class="at">content</span>=<span class="st">"width=device-width, initial-scale=1.0"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;title&gt;</span><span class="tx">Course Registration</span><span class="tg">&lt;/title&gt;</span>
+<span class="tg">&lt;/head&gt;</span>
+<span class="tg">&lt;body&gt;</span>
+  <span class="cm">&lt;!-- everything a human sees goes here --&gt;</span>
+<span class="tg">&lt;/body&gt;</span>
+<span class="tg">&lt;/html&gt;</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>&lt;!DOCTYPE html&gt;</b><span>"Use modern rules." It isn't a tag and it isn't part of the page. Historical baggage from the 1990s — leave it there and move on. Without it, browsers fall into "quirks mode" and lay things out the way they did in 1998.</span></div>
+    <div class="mrow"><b>&lt;html lang="en"&gt;</b><span>The root element — everything lives inside it. The <code>lang</code> attribute tells screen readers which language to pronounce, and browsers whether to offer translation. One attribute, real accessibility.</span></div>
+    <div class="mrow"><b>&lt;head&gt;</b><span>Information <em>about</em> the page. Nothing in here is drawn on screen. It's where the title, character encoding, stylesheets and scripts get declared.</span></div>
+    <div class="mrow"><b>&lt;meta charset="UTF-8"&gt;</b><span>Says which alphabet the file uses. Without it, ₹ and Marathi and emoji all come out as garbage. Put it first in the head.</span></div>
+    <div class="mrow"><b>&lt;meta name="viewport"&gt;</b><span>Tells phones not to pretend they're a desktop screen. Without it your page renders zoomed-out and tiny on mobile. Matters the moment you touch CSS.</span></div>
+    <div class="mrow"><b>&lt;title&gt;</b><span>The text in the browser tab, and the name used when someone bookmarks you. Also what Google shows as the clickable headline in search results.</span></div>
+    <div class="mrow"><b>&lt;body&gt;</b><span>Everything a human actually sees.</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Do this now — prove the head is invisible</h4>
+    <p>Change your <code>&lt;title&gt;</code> to your own name and save. Nothing changes on the page — but look at the browser tab. That's what "the head isn't drawn" means.</p>
+  </div>
+
+  <div class="dothis">
+    <h4>Then break the charset, deliberately</h4>
+    <p>Add a line with a rupee symbol and some non-English text, save, and look. Now delete the <code>&lt;meta charset&gt;</code> line and save again. Depending on your browser you'll see mangled characters — that's what that one line prevents.</p>
+  </div>
+
+  <div class="cmd"><span class="tg">&lt;p&gt;</span><span class="tx">Fee: ₹500 · नमस्कार · 🎓</span><span class="tg">&lt;/p&gt;</span></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Which of these will appear on the screen when the page loads?
+      <ol type="a"><li>The contents of <code>&lt;title&gt;</code></li><li>The contents of <code>&lt;body&gt;</code></li><li>Both</li></ol>
+    </div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>(b) only.</strong> The <code>&lt;title&gt;</code> shows in the browser tab, not in the page. Everything inside <code>&lt;head&gt;</code> is information about the page rather than content of it.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 complete</span></label>
+</section>
+
+<!-- ================= 04 ================= -->
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>Tags, elements, attributes, nesting</h2><span class="tagline">four words, used precisely</span></div>
+
+  <p>These four words get used interchangeably by people who don't know the difference. Learn them properly now — every error message and every piece of documentation you read assumes them.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>Tag</b><span>The marker itself. <code>&lt;p&gt;</code> is an opening tag, <code>&lt;/p&gt;</code> is a closing tag.</span></div>
+    <div class="mrow"><b>Element</b><span>The whole thing: opening tag + content + closing tag. <code>&lt;p&gt;Hello&lt;/p&gt;</code> is one paragraph element.</span></div>
+    <div class="mrow"><b>Attribute</b><span>Extra information, written inside the <em>opening</em> tag only, as <code>name="value"</code>. <code>lang="en"</code>, <code>href="..."</code>, <code>id="email"</code>.</span></div>
+    <div class="mrow"><b>Nesting</b><span>Elements inside other elements. The inner one must close before the outer one does.</span></div>
+  </div>
+
+  <div class="cmd"><span class="tg">&lt;p</span> <span class="at">id</span>=<span class="st">"intro"</span><span class="tg">&gt;</span><span class="tx">A </span><span class="tg">&lt;strong&gt;</span><span class="tx">bold</span><span class="tg">&lt;/strong&gt;</span><span class="tx"> word.</span><span class="tg">&lt;/p&gt;</span>
+<span class="cm">│    │                │                          │</span>
+<span class="cm">│    └─ attribute     └─ nested element          └─ closing tag</span>
+<span class="cm">└─ opening tag</span></div>
+
+  <h3>Nesting has to be strict</h3>
+  <div class="cmd"><span class="cm">✓ correct — inner closes first</span>
+<span class="tg">&lt;p&gt;&lt;strong&gt;</span><span class="tx">Hello</span><span class="tg">&lt;/strong&gt;&lt;/p&gt;</span>
+
+<span class="cm">✗ wrong — they cross over</span>
+<span class="tg">&lt;p&gt;&lt;strong&gt;</span><span class="tx">Hello</span><span class="tg">&lt;/p&gt;&lt;/strong&gt;</span></div>
+
+  <p>Think of them as boxes inside boxes. You can't close the outer box while the inner one is still sticking out of it. Browsers will try to guess what you meant and usually get it wrong in interesting ways — which is exactly the kind of bug that takes an hour to find.</p>
+
+  <h3>Elements with nothing inside</h3>
+  <p>Some elements have no content, so they have no closing tag. They're called <strong>void</strong> or self-closing elements:</p>
+  <div class="cmd"><span class="tg">&lt;img</span> <span class="at">src</span>=<span class="st">"logo.png"</span> <span class="at">alt</span>=<span class="st">"Logo"</span><span class="tg">&gt;</span>
+<span class="tg">&lt;br&gt;</span>
+<span class="tg">&lt;hr&gt;</span>
+<span class="tg">&lt;input</span> <span class="at">type</span>=<span class="st">"text"</span><span class="tg">&gt;</span>
+<span class="tg">&lt;meta</span> <span class="at">charset</span>=<span class="st">"UTF-8"</span><span class="tg">&gt;</span></div>
+  <p>You'll sometimes see them written <code>&lt;br /&gt;</code> with a slash. That's a leftover from XHTML; both work, and modern HTML doesn't need the slash.</p>
+
+  <h3>Comments</h3>
+  <div class="cmd"><span class="cm">&lt;!-- This is a note for humans. The browser ignores it. --&gt;</span></div>
+  <p>Useful for leaving yourself notes and for temporarily switching off a chunk of HTML while you debug. Be aware: comments are still sent to the browser and anyone can read them with View Source. Never put anything private in one.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q3</b>In <code>&lt;a href="page.html" target="_blank"&gt;Click&lt;/a&gt;</code> — name the element, the attributes, and the content.</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>Element:</strong> the anchor (<code>a</code>) element — the whole thing from <code>&lt;a</code> to <code>&lt;/a&gt;</code>.</p>
+      <p><strong>Attributes:</strong> two of them — <code>href="page.html"</code> and <code>target="_blank"</code>, both inside the opening tag.</p>
+      <p><strong>Content:</strong> the text <code>Click</code>.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 complete</span></label>
+</section>
+
+<!-- ================= 05 ================= -->
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>Text, headings and lists</h2><span class="tagline">the everyday elements</span></div>
+
+  <div class="dothis">
+    <h4>Do this now — build up your body</h4>
+    <p>Replace the contents of your <code>&lt;body&gt;</code> with this, saving as you go so you watch it grow.</p>
+  </div>
+
+  <div class="cmd"><span class="tg">&lt;h1&gt;</span><span class="tx">Course Registration</span><span class="tg">&lt;/h1&gt;</span>
+
+<span class="tg">&lt;p&gt;</span><span class="tx">Register for the coming semester. The deadline is </span><span class="tg">&lt;strong&gt;</span><span class="tx">31 August</span><span class="tg">&lt;/strong&gt;</span><span class="tx">.</span><span class="tg">&lt;/p&gt;</span>
+
+<span class="tg">&lt;h2&gt;</span><span class="tx">Available courses</span><span class="tg">&lt;/h2&gt;</span>
+<span class="tg">&lt;ul&gt;</span>
+  <span class="tg">&lt;li&gt;</span><span class="tx">Advanced Databases</span><span class="tg">&lt;/li&gt;</span>
+  <span class="tg">&lt;li&gt;</span><span class="tx">Distributed Systems</span><span class="tg">&lt;/li&gt;</span>
+  <span class="tg">&lt;li&gt;</span><span class="tx">Embedded Systems Design</span><span class="tg">&lt;/li&gt;</span>
+<span class="tg">&lt;/ul&gt;</span>
+
+<span class="tg">&lt;h2&gt;</span><span class="tx">How to register</span><span class="tg">&lt;/h2&gt;</span>
+<span class="tg">&lt;ol&gt;</span>
+  <span class="tg">&lt;li&gt;</span><span class="tx">Fill in the form below</span><span class="tg">&lt;/li&gt;</span>
+  <span class="tg">&lt;li&gt;</span><span class="tx">Check your details</span><span class="tg">&lt;/li&gt;</span>
+  <span class="tg">&lt;li&gt;</span><span class="tx">Submit before the deadline</span><span class="tg">&lt;/li&gt;</span>
+<span class="tg">&lt;/ol&gt;</span></div>
+
+  <h3>Headings are hierarchy, not size</h3>
+  <p>There are six: <code>h1</code> through <code>h6</code>. The number is the <strong>level in an outline</strong>, not how big the text looks.</p>
+
+  <div class="cue watch"><p class="cue-k">The rule people break constantly</p><p>Never pick a heading level because of how big it renders. That's CSS's job — you can make an <code>h4</code> enormous and an <code>h1</code> tiny with two lines of CSS.</p><p>Pick the level that describes the document's structure: one <code>h1</code> per page (the page's subject), <code>h2</code> for its main sections, <code>h3</code> for subsections of those. Don't skip levels — an <code>h4</code> directly inside an <code>h2</code> section is a broken outline.</p></div>
+
+  <p>This matters more than it sounds. Screen reader users navigate an unfamiliar page by jumping heading to heading, exactly the way you'd skim a textbook's contents page. A page with random heading levels is, to them, a contents page with the chapters shuffled.</p>
+
+  <h3>Lists</h3>
+  <div class="mention">
+    <div class="mrow"><b>&lt;ul&gt;</b><span>Unordered list — bullets. Use when the order doesn't matter.</span></div>
+    <div class="mrow"><b>&lt;ol&gt;</b><span>Ordered list — numbers. Use when it does: steps, rankings.</span></div>
+    <div class="mrow"><b>&lt;li&gt;</b><span>One item. Only ever goes directly inside a <code>ul</code> or <code>ol</code>.</span></div>
+  </div>
+  <p>Lists nest — put a whole <code>&lt;ul&gt;</code> <em>inside</em> an <code>&lt;li&gt;</code>, not between two of them. Getting that wrong is one of the most common structural mistakes beginners make.</p>
+
+  <h3>Emphasis, and why there are two of each</h3>
+  <div class="mention">
+    <div class="mrow"><b>&lt;strong&gt;</b><span>This content is important. Renders bold by default, but the <em>meaning</em> is importance — a screen reader may change tone for it.</span></div>
+    <div class="mrow"><b>&lt;em&gt;</b><span>This content is emphasised. Renders italic. Again, the meaning is the point.</span></div>
+    <div class="mrow"><b>&lt;b&gt; and &lt;i&gt;</b><span>Bold and italic with <em>no</em> meaning attached — for things like keywords or a ship's name. If you're unsure, you want <code>strong</code> or <code>em</code>.</span></div>
+  </div>
+
+  <p>This split — a meaningful element and a purely visual one that look identical — is a theme you'll keep meeting in HTML. The browser renders them the same. Everything else that reads your page does not.</p>
+
+  <div class="cue"><p class="cue-k">Whitespace is collapsed</p><p>Press Enter fifty times between two paragraphs and the browser shows one space. HTML collapses runs of spaces, tabs and newlines into a single space. This is why you can indent your code however you like without affecting the output — and why you can't create gaps by hitting Enter. Spacing is CSS's job.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 complete</span></label>
+</section>
+
+<!-- ================= 06 ================= -->
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>Links and images</h2><span class="tagline">the two that need paths</span></div>
+
+  <h3>Links</h3>
+  <div class="cmd"><span class="tg">&lt;a</span> <span class="at">href</span>=<span class="st">"https://developer.mozilla.org"</span><span class="tg">&gt;</span><span class="tx">MDN docs</span><span class="tg">&lt;/a&gt;</span>
+<span class="tg">&lt;a</span> <span class="at">href</span>=<span class="st">"about.html"</span><span class="tg">&gt;</span><span class="tx">About this course</span><span class="tg">&lt;/a&gt;</span>
+<span class="tg">&lt;a</span> <span class="at">href</span>=<span class="st">"#forms"</span><span class="tg">&gt;</span><span class="tx">Jump to the form below</span><span class="tg">&lt;/a&gt;</span>
+<span class="tg">&lt;a</span> <span class="at">href</span>=<span class="st">"mailto:someone@example.com"</span><span class="tg">&gt;</span><span class="tx">Email us</span><span class="tg">&lt;/a&gt;</span></div>
+
+  <p><code>href</code> means "hypertext reference" — where the link goes. Four kinds worth knowing: a full URL to another site, a relative path to another file of yours, a <code>#</code> fragment that scrolls to an element on this page, and special schemes like <code>mailto:</code>.</p>
+
+  <div class="cue watch"><p class="cue-k">Write link text that means something on its own</p><p><code>&lt;a href="..."&gt;click here&lt;/a&gt;</code> is bad, and not only stylistically. Screen reader users can pull up a list of every link on a page — a list of nine "click here" entries is useless. Say where it goes: "MDN's forms guide", "the syllabus PDF".</p></div>
+
+  <h3>Images</h3>
+  <div class="cmd"><span class="tg">&lt;img</span> <span class="at">src</span>=<span class="st">"logo.png"</span> <span class="at">alt</span>=<span class="st">"College logo"</span><span class="tg">&gt;</span>
+<span class="tg">&lt;img</span> <span class="at">src</span>=<span class="st">"images/campus.jpg"</span> <span class="at">alt</span>=<span class="st">"The main campus building"</span> <span class="at">width</span>=<span class="st">"400"</span><span class="tg">&gt;</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>src</b><span>Where the image file is. Same path rules as <code>href</code>.</span></div>
+    <div class="mrow"><b>alt</b><span>A text description. Shown if the image fails to load, and read aloud by screen readers. <strong>Not optional.</strong></span></div>
+    <div class="mrow"><b>width / height</b><span>Worth setting — it lets the browser reserve the right amount of space before the image arrives, so your page doesn't jump around while loading.</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Do this now — break an image on purpose</h4>
+    <p>Add an <code>&lt;img&gt;</code> pointing at a file that doesn't exist, with a sensible <code>alt</code>. Save and look. You'll see your alt text where the image should be. That's exactly what a blind user gets — every time, not just when it's broken.</p>
+  </div>
+
+  <div class="cue"><p class="cue-k">When alt should be empty</p><p>If an image is purely decorative and carries no information, write <code>alt=""</code> — empty, but present. That tells a screen reader to skip it silently. Leaving <code>alt</code> off entirely is different: some screen readers then read out the filename, which is worse than nothing.</p></div>
+
+  <h3>Paths — the thing that actually breaks</h3>
+  <div class="mention">
+    <div class="mrow"><b>logo.png</b><span>Same folder as this HTML file.</span></div>
+    <div class="mrow"><b>images/logo.png</b><span>In a sub-folder called <code>images</code>.</span></div>
+    <div class="mrow"><b>../logo.png</b><span>One folder up. Two dots means "the parent folder".</span></div>
+    <div class="mrow"><b>/images/logo.png</b><span>Starts from the site root. Behaves differently depending on how the page is served — avoid until you understand why.</span></div>
+    <div class="mrow"><b>https://...</b><span>A full URL to somewhere else entirely.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">Case sensitivity will catch you</p><p><code>Logo.PNG</code> and <code>logo.png</code> are the <em>same</em> file on Windows and Mac, and <em>different</em> files on Linux — which is what almost every web server runs on.</p><p>So a page that works perfectly on your laptop can show broken images the moment it's deployed. Save yourself the debugging session: use lowercase filenames with hyphens, always. <code>campus-building.jpg</code>, not <code>Campus Building.JPG</code>.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 complete</span></label>
+</section>
+
+<!-- ================= 07 ================= -->
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>The DOM — what the browser builds</h2><span class="tagline">the important one</span></div>
+
+  <p>Here's the part most tutorials skip, and it's the part that turns HTML from a set of memorised tags into something you understand.</p>
+
+  <p>When the browser receives your HTML text, it does <strong>not</strong> keep it as text. It reads it once, and builds a <strong>tree of objects in memory</strong>. That tree is called the <strong>DOM</strong> — the Document Object Model.</p>
+
+  <div class="cue"><p class="cue-k">The definition to remember</p><p><strong>The DOM is the browser's live, in-memory model of your page, shaped as a tree.</strong> Your HTML file is the recipe. The DOM is the cake.</p></div>
+
+  <p>Take this HTML:</p>
+
+  <div class="cmd"><span class="tg">&lt;html&gt;</span>
+  <span class="tg">&lt;head&gt;</span>
+    <span class="tg">&lt;title&gt;</span><span class="tx">My Page</span><span class="tg">&lt;/title&gt;</span>
+  <span class="tg">&lt;/head&gt;</span>
+  <span class="tg">&lt;body&gt;</span>
+    <span class="tg">&lt;h1&gt;</span><span class="tx">Hello</span><span class="tg">&lt;/h1&gt;</span>
+    <span class="tg">&lt;p&gt;</span><span class="tx">Welcome</span><span class="tg">&lt;/p&gt;</span>
+  <span class="tg">&lt;/body&gt;</span>
+<span class="tg">&lt;/html&gt;</span></div>
+
+  <p>The browser turns it into this:</p>
+
+  <figure class="board">
+    <svg viewBox="0 0 780 372" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A DOM tree: document contains html, which contains head and body; head contains title; body contains h1 and p; each of those contains a text node">
+      <g stroke="#5A6B67" stroke-width="1.5" fill="none">
+        <path d="M390 46 L390 78"/>
+        <path d="M390 110 L390 128 L200 128 L200 148"/>
+        <path d="M390 110 L390 128 L580 128 L580 148"/>
+        <path d="M200 180 L200 216"/>
+        <path d="M580 180 L580 200 L470 200 L470 216"/>
+        <path d="M580 180 L580 200 L690 200 L690 216"/>
+        <path d="M200 248 L200 288"/>
+        <path d="M470 248 L470 288"/>
+        <path d="M690 248 L690 288"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" text-anchor="middle">
+        <rect x="315" y="14" width="150" height="32" fill="#101614" stroke="#101614" stroke-width="2"/>
+        <text x="390" y="35" fill="#F5C518">document</text>
+
+        <rect x="330" y="78" width="120" height="32" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <text x="390" y="99" fill="#0B5D51">html</text>
+
+        <rect x="145" y="148" width="110" height="32" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <text x="200" y="169" fill="#0B5D51">head</text>
+
+        <rect x="525" y="148" width="110" height="32" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <text x="580" y="169" fill="#0B5D51">body</text>
+
+        <rect x="145" y="216" width="110" height="32" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <text x="200" y="237" fill="#0B5D51">title</text>
+
+        <rect x="415" y="216" width="110" height="32" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <text x="470" y="237" fill="#0B5D51">h1</text>
+
+        <rect x="635" y="216" width="110" height="32" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <text x="690" y="237" fill="#0B5D51">p</text>
+
+        <rect x="140" y="288" width="120" height="30" fill="#FFFFFF" stroke="#5A6B67" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="200" y="308" fill="#5A6B67" font-size="12">"My Page"</text>
+
+        <rect x="410" y="288" width="120" height="30" fill="#FFFFFF" stroke="#5A6B67" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="470" y="308" fill="#5A6B67" font-size="12">"Hello"</text>
+
+        <rect x="630" y="288" width="120" height="30" fill="#FFFFFF" stroke="#5A6B67" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="690" y="308" fill="#5A6B67" font-size="12">"Welcome"</text>
+      </g>
+      <g font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5A6B67">
+        <rect x="8" y="340" width="14" height="14" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <text x="30" y="352">element nodes</text>
+        <rect x="150" y="340" width="14" height="14" fill="#FFFFFF" stroke="#5A6B67" stroke-width="1.5" stroke-dasharray="4 2"/>
+        <text x="172" y="352">text nodes</text>
+      </g>
+    </svg>
+    <figcaption>Every box is a node. Elements contain other elements; text sits at the ends as its own kind of node.</figcaption>
+  </figure>
+
+  <h3>The vocabulary of a tree</h3>
+  <div class="mention">
+    <div class="mrow"><b>node</b><span>Any single item in the tree. Elements are nodes; so is text; so are comments.</span></div>
+    <div class="mrow"><b>element node</b><span>A node made from a tag — <code>h1</code>, <code>p</code>, <code>body</code>.</span></div>
+    <div class="mrow"><b>text node</b><span>The actual characters inside an element. <code>"Hello"</code> is a separate node <em>inside</em> the <code>h1</code>, not a property of it.</span></div>
+    <div class="mrow"><b>parent</b><span>The node directly above. <code>body</code> is the parent of <code>h1</code>.</span></div>
+    <div class="mrow"><b>child</b><span>A node directly below. <code>h1</code> and <code>p</code> are both children of <code>body</code>.</span></div>
+    <div class="mrow"><b>sibling</b><span>Nodes sharing a parent. <code>h1</code> and <code>p</code> are siblings.</span></div>
+    <div class="mrow"><b>descendant / ancestor</b><span>Any node further down / further up, at any depth. The <code>"Hello"</code> text is a descendant of <code>body</code>, and <code>html</code> is an ancestor of everything.</span></div>
+    <div class="mrow"><b>root</b><span><code>document</code> sits above everything. <code>&lt;html&gt;</code> is the root <em>element</em>.</span></div>
+  </div>
+
+  <h3>Why this is worth your attention</h3>
+  <div class="mention">
+    <div class="mrow"><b>JavaScript talks to the DOM</b><span>Not to your HTML file. Every line of JS you will ever write that changes a page is reaching into this tree and modifying nodes.</span></div>
+    <div class="mrow"><b>CSS selects through the tree</b><span><code>nav a</code> means "every anchor that is a descendant of a nav". Selectors are tree queries. They make no sense without the tree.</span></div>
+    <div class="mrow"><b>React and every other framework</b><span>All of them exist to manage this tree for you. A "virtual DOM" is a lightweight copy of it, kept so the library can work out the smallest set of real changes to apply.</span></div>
+    <div class="mrow"><b>Bugs live here</b><span>"Why is my click handler not firing?" is almost always a question about which node you actually attached it to.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">The interview question</p><p>"What is the DOM?" is asked constantly, and a surprising number of candidates with React on their CV cannot answer it. The answer is one sentence: <em>a tree of objects that the browser builds from your HTML, which JavaScript can read and modify to change what's on screen.</em></p><p>If you can say that and then point at a tree, you're ahead of a lot of people with two years of experience.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q4</b>In the tree above, what is the relationship between <code>title</code> and <code>h1</code>?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>Neither parent nor sibling — they're cousins.</strong> <code>title</code>'s parent is <code>head</code>; <code>h1</code>'s parent is <code>body</code>. They share a grandparent (<code>html</code>) but not a parent, so they aren't siblings.</p>
+      <p>This matters for CSS: a selector like <code>head + body h1</code> works on relationships, so being precise about them is practical, not pedantic.</p>
+    </div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q5</b>Is the text <code>"Hello"</code> part of the <code>h1</code> node, or a separate node?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>A separate node</strong> — a text node, which is a child of the <code>h1</code> element node.</p>
+      <p>This seems like a technicality until you meet JavaScript's <code>childNodes</code> and wonder why an apparently empty <code>&lt;div&gt;</code> reports children. Whitespace between tags becomes text nodes too.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 complete</span></label>
+</section>
+
+<!-- ================= 08 ================= -->
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>Reading the DOM in DevTools</h2><span class="tagline">go slowly here</span></div>
+
+  <p>The DOM isn't abstract. Your browser will show it to you, live, right now. This section is the one that makes you self-sufficient for the rest of your career — every bug you ever chase in a browser starts here.</p>
+
+  <div class="dothis">
+    <h4>Do this now — open it</h4>
+    <p>With your page open in Chrome, <strong>right-click any text on it</strong> and choose <strong>Inspect</strong>. Or press <kbd>F12</kbd>. A panel opens; make sure the <strong>Elements</strong> tab is selected.</p>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">The name is misleading</p><p>The panel is called "Elements", but what it shows you is <strong>the DOM tree</strong>, not your file. Keep that distinction in your head — section 09 is entirely about why it matters.</p></div>
+
+  <h3>Five things to try, in order</h3>
+
+  <div class="dothis">
+    <h4>1 — Expand and collapse</h4>
+    <p>Click the little triangles next to <code>&lt;html&gt;</code>, <code>&lt;body&gt;</code>, and your elements. You are folding and unfolding branches of the tree. Notice how the indentation matches your file's nesting exactly — this is the visual proof that nesting creates the tree.</p>
+  </div>
+
+  <div class="dothis">
+    <h4>2 — Hover a node, watch the page</h4>
+    <p>Move your mouse over <code>&lt;h1&gt;</code> in the panel. The heading highlights on the page, with a coloured overlay showing exactly how much space it occupies. Hover <code>&lt;body&gt;</code> — the whole page highlights.</p>
+    <p>This is the single fastest way to answer "which element is that thing on screen?"</p>
+  </div>
+
+  <div class="dothis">
+    <h4>3 — Go the other way</h4>
+    <p>Click the <strong>arrow-in-a-box icon</strong> at the top-left of DevTools (or press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd>), then click anything on the page. DevTools jumps straight to that node in the tree.</p>
+    <p>Page → tree, and tree → page. Once both directions are automatic, you can navigate any website in the world.</p>
+  </div>
+
+  <div class="dothis">
+    <h4>4 — Edit the live DOM</h4>
+    <p>Double-click the text inside your <code>&lt;h1&gt;</code> in the panel. Type something else. Press Enter.</p>
+    <p><strong>The page changes instantly.</strong> Now press <kbd>F5</kbd> to reload — your change is gone.</p>
+  </div>
+
+  <div class="cue"><p class="cue-k">What that just demonstrated</p><p>You edited the DOM, not the file. The DOM is a live model held in memory; reloading rebuilds it from your HTML file, which you never touched.</p><p>This also means <strong>you cannot break anything by experimenting in DevTools.</strong> Change other people's websites. Delete nodes on a news site. Refresh and it's all back. This is the safest sandbox you will ever have, and beginners under-use it enormously.</p></div>
+
+  <div class="dothis">
+    <h4>5 — Read the breadcrumb</h4>
+    <p>Click a deeply nested element and look at the bar along the bottom of the Elements panel. It shows something like <code>html › body › main › form › label</code> — the full path of ancestors from the root to your selection.</p>
+    <p>That breadcrumb <em>is</em> the tree, written on one line. When you can't work out why a CSS rule isn't applying, read it.</p>
+  </div>
+
+  <h3>The Console, and a first look at the DOM as objects</h3>
+  <p>Click the <strong>Console</strong> tab. This is a place to type JavaScript and see what happens. You're not learning JavaScript here — you're using it as a torch to look at the tree.</p>
+
+  <div class="dothis">
+    <h4>Do this now — type these one at a time and press Enter</h4>
+  </div>
+  <div class="cmd"><span class="p">&gt;</span> document.title
+<span class="o">"Course Registration"</span>
+
+<span class="p">&gt;</span> document.querySelector("h1")
+<span class="o">&lt;h1&gt;Course Registration&lt;/h1&gt;</span>
+
+<span class="p">&gt;</span> document.querySelector("h1").textContent
+<span class="o">"Course Registration"</span>
+
+<span class="p">&gt;</span> document.querySelectorAll("li").length
+<span class="o">6</span>
+
+<span class="p">&gt;</span> document.querySelector("h1").textContent = "Changed!"</div>
+
+  <p>That last one changes the heading on the page as you press Enter. You have just modified the DOM with code — which is, in essence, everything JavaScript does on a webpage.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>document</b><span>The root object. The whole tree hangs off it.</span></div>
+    <div class="mrow"><b>querySelector("h1")</b><span>"Find me the first node matching this." The thing in quotes is a CSS selector — the same syntax you'll use for styling.</span></div>
+    <div class="mrow"><b>querySelectorAll("li")</b><span>Find <em>all</em> matching nodes, as a list.</span></div>
+    <div class="mrow"><b>.textContent</b><span>A property of the node — the text inside it. Read it, or assign to it and the page updates.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">Notice what "object model" means</p><p>Each node is an <strong>object</strong> with properties you can read and change. <code>document.querySelector("h1")</code> hands you the actual object; <code>.textContent</code> is one of its properties. That's the "Object Model" half of the name, and it's why the tree is useful rather than merely descriptive.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q6</b>You edit some text in the Elements panel and it changes on screen. Your teammate reloads the same page on their laptop. Do they see your change?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>No.</strong> You changed the DOM in your own browser's memory. The HTML file is untouched, the server has no idea, and even you lose the change on reload.</p>
+      <p>Worth internalising early: DevTools edits are for experimenting and diagnosing. To make a change real, you edit the file.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 complete</span></label>
+</section>
+
+<!-- ================= 09 ================= -->
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>Source is not the DOM</h2><span class="tagline">the distinction that explains modern web</span></div>
+
+  <p>Two different things, and browsers give you a separate view of each:</p>
+
+  <div class="mention">
+    <div class="mrow"><b>View Source</b><span><kbd>Ctrl</kbd>+<kbd>U</kbd>. The original HTML text the server sent. A frozen snapshot of the file.</span></div>
+    <div class="mrow"><b>Elements panel</b><span>The DOM <em>right now</em>, including everything JavaScript has added, removed or changed since the page loaded.</span></div>
+  </div>
+
+  <p>On the simple page you just built these look identical, because nothing has modified the tree. On most real websites they look nothing alike.</p>
+
+  <div class="dothis">
+    <h4>Do this now — see them diverge</h4>
+    <p>Open any large site you use. Press <kbd>Ctrl</kbd>+<kbd>U</kbd> for the source, then <kbd>F12</kbd> for the Elements panel, and compare.</p>
+    <p>The source is often short, with a mostly empty body. The DOM is enormous. Everything in the gap was built by JavaScript after the page arrived.</p>
+  </div>
+
+  <h3>The tag that explains it</h3>
+  <p>Here is the entire <code>&lt;body&gt;</code> of a brand-new React project, as Create React App generated it for years:</p>
+
+  <div class="cmd"><span class="tg">&lt;body&gt;</span>
+  <span class="tg">&lt;noscript&gt;</span><span class="tx">You need to enable JavaScript to run this app.</span><span class="tg">&lt;/noscript&gt;</span>
+  <span class="tg">&lt;div</span> <span class="at">id</span>=<span class="st">"root"</span><span class="tg">&gt;&lt;/div&gt;</span>
+<span class="tg">&lt;/body&gt;</span></div>
+
+  <p>Before reading on: <strong>what does <code>&lt;noscript&gt;</code> do, and why does a React app need it?</strong> Sit with that for a moment.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>&lt;noscript&gt;</b><span>Its contents are shown <strong>only</strong> when the browser has JavaScript turned off or blocked. If JS is running, the browser skips it entirely.</span></div>
+    <div class="mrow"><b>&lt;div id="root"&gt;&lt;/div&gt;</b><span>Empty. Completely empty. That is the entire visible content of the file.</span></div>
+    <div class="mrow"><b>So why the noscript?</b><span>Because the whole interface is built <em>into</em> that empty div by JavaScript after loading. No JavaScript means an empty white page with no error and no explanation. The <code>&lt;noscript&gt;</code> line is the apology.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">This is the point of the section</p><p>For a React app, <strong>the source is nearly empty and the DOM is the entire application.</strong> The gap between View Source and the Elements panel <em>is</em> the framework.</p><p>Most people who have shipped a React project have never read that line and could not explain it. Now you can.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — switch JavaScript off</h4>
+    <ol>
+      <li>Open DevTools on <strong>your own page</strong>. Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>, type <em>javascript</em>, choose <strong>Disable JavaScript</strong>.</li>
+      <li>Reload. <strong>Your page works perfectly.</strong> Every heading, every list, and later every form field and its validation.</li>
+      <li>Now visit a JavaScript-heavy site with JS still disabled. Blank page, or a single apologetic sentence.</li>
+      <li><strong>Turn JavaScript back on before you forget</strong> — Live Server's auto-reload stops working otherwise and you'll waste ten minutes wondering why.</li>
+    </ol>
+  </div>
+
+  <div class="cue"><p class="cue-k">The takeaway</p><p>Your page has no JavaScript at all and it fully works. That's not because it's simple — it's because <strong>HTML is the floor</strong>. It's what works before the bundle downloads, before the framework boots, on a bad connection, on an old phone, for a search engine crawler.</p><p>React sits on top of that floor. If you don't understand the floor, you don't understand what your framework is doing for you or what it's costing you.</p></div>
+
+  <div class="cue"><p class="cue-k">One detail, if you're curious</p><p>Vite's React template doesn't include <code>&lt;noscript&gt;</code> — it was a Create React App convention that got copied around. So if a project has it, that tells you something about where its author started.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q7</b>You View Source on a site and see almost nothing, but the Elements panel shows thousands of nodes. What happened?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p>JavaScript built the page after it loaded. The server sent a near-empty shell plus a script; the script constructed the DOM in the browser.</p>
+      <p>This is called client-side rendering, and it's how most single-page applications work. The trade-offs — slower first paint, harder for crawlers to read, breaks entirely without JS — are exactly why server-side rendering keeps coming back into fashion.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 09 complete</span></label>
+</section>
+
+<!-- ================= 10 ================= -->
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>div, span and semantic elements</h2><span class="tagline">boxes with and without meaning</span></div>
+
+  <p>Now that you can see the tree, this section is about giving its branches names that mean something.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>&lt;div&gt;</b><span>A generic block-level box. Means <strong>nothing at all</strong>. Takes up a full line by default.</span></div>
+    <div class="mrow"><b>&lt;span&gt;</b><span>A generic inline box. Also means nothing. Sits within a line of text.</span></div>
+  </div>
+
+  <p>Both exist purely to group things so you can style or script them. They're the plain cardboard boxes of HTML.</p>
+
+  <h3>The same boxes, with labels on</h3>
+  <div class="mention">
+    <div class="mrow"><b>&lt;header&gt;</b><span>Introductory content for the page or a section — a title block, a logo.</span></div>
+    <div class="mrow"><b>&lt;nav&gt;</b><span>A block of navigation links.</span></div>
+    <div class="mrow"><b>&lt;main&gt;</b><span>The main content. <strong>Only one per page</strong>, and it shouldn't contain repeated things like the site header.</span></div>
+    <div class="mrow"><b>&lt;section&gt;</b><span>A thematic grouping, normally with a heading.</span></div>
+    <div class="mrow"><b>&lt;article&gt;</b><span>Something that would still make sense on its own — a blog post, a news item, a comment.</span></div>
+    <div class="mrow"><b>&lt;aside&gt;</b><span>Tangential content — a sidebar, a pull quote.</span></div>
+    <div class="mrow"><b>&lt;footer&gt;</b><span>Closing content for a page or section — credits, contact details.</span></div>
+  </div>
+
+  <p>Here's the thing worth knowing: <strong>these render exactly like a <code>div</code>.</strong> Visually, in a plain browser with no CSS, there is no difference whatsoever.</p>
+
+  <div class="dothis">
+    <h4>Do this now — wrap your page properly</h4>
+  </div>
+  <div class="cmd"><span class="tg">&lt;body&gt;</span>
+  <span class="tg">&lt;header&gt;</span>
+    <span class="tg">&lt;h1&gt;</span><span class="tx">Course Registration</span><span class="tg">&lt;/h1&gt;</span>
+    <span class="tg">&lt;p&gt;</span><span class="tx">Deadline: 31 August</span><span class="tg">&lt;/p&gt;</span>
+  <span class="tg">&lt;/header&gt;</span>
+
+  <span class="tg">&lt;main&gt;</span>
+    <span class="tg">&lt;section&gt;</span>
+      <span class="tg">&lt;h2&gt;</span><span class="tx">Available courses</span><span class="tg">&lt;/h2&gt;</span>
+      <span class="tg">&lt;ul&gt;</span>
+        <span class="tg">&lt;li&gt;</span><span class="tx">Advanced Databases</span><span class="tg">&lt;/li&gt;</span>
+      <span class="tg">&lt;/ul&gt;</span>
+    <span class="tg">&lt;/section&gt;</span>
+  <span class="tg">&lt;/main&gt;</span>
+
+  <span class="tg">&lt;footer&gt;</span>
+    <span class="tg">&lt;p&gt;</span><span class="tx">M.Tech CSE · ESD</span><span class="tg">&lt;/p&gt;</span>
+  <span class="tg">&lt;/footer&gt;</span>
+<span class="tg">&lt;/body&gt;</span></div>
+
+  <p>Save and look. <strong>The page looks identical.</strong> Now open the Elements panel — the tree is completely different. It has meaningful branch names instead of anonymous boxes.</p>
+
+  <h3>So why bother?</h3>
+  <div class="mention">
+    <div class="mrow"><b>Screen readers navigate by them</b><span>A blind user can jump straight to <code>&lt;main&gt;</code> and skip your navigation entirely. That works with <code>&lt;main&gt;</code>. It does not work with <code>&lt;div class="main"&gt;</code> — the class name is meaningless to the browser.</span></div>
+    <div class="mrow"><b>Search engines read them</b><span>Google uses structure to work out what's actually the content of a page versus boilerplate.</span></div>
+    <div class="mrow"><b>Your future self reads them</b><span>Scrolling through forty nested <code>&lt;/div&gt;</code> tags trying to work out which one you're closing is a real and common experience. <code>&lt;/main&gt;</code> tells you.</span></div>
+    <div class="mrow"><b>Reader modes and browser features</b><span>Reader view, "jump to content", and various assistive tools all key off semantic structure.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">A simple rule</p><p>Reach for the semantic element first. Fall back to <code>&lt;div&gt;</code> only when you genuinely just need a box to hang styling on and no existing element describes it.</p><p>You will still write plenty of divs. That's fine. The goal isn't zero divs, it's zero divs <em>where a meaningful element existed</em>.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q8</b>Someone says "semantic HTML doesn't matter, it looks the same either way." What's the strongest single counter?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p>It looks the same <em>to people who can see it</em>. To a screen reader, <code>&lt;main&gt;</code> is a landmark that can be jumped to and <code>&lt;div class="main"&gt;</code> is nothing at all.</p>
+      <p>The counter that lands in a workplace: it costs nothing. Typing <code>&lt;main&gt;</code> instead of <code>&lt;div&gt;</code> is the same number of keystrokes, and it's often a legal requirement for public-sector and enterprise work.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 complete</span></label>
+</section>
+
+<!-- ================= 11 ================= -->
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>id and class — the DOM's handles</h2><span class="tagline">how you grab a node</span></div>
+
+  <p>You have a tree. Now you need a way to point at one specific branch of it. That's what <code>id</code> and <code>class</code> are for — they're the handles that CSS and JavaScript grab.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>id</b><span>A name for <strong>one specific element</strong>. Must be unique in the whole document. Written <code>id="submit-button"</code>.</span></div>
+    <div class="mrow"><b>class</b><span>A label that <strong>any number of elements</strong> can share. One element can have several, space-separated: <code>class="card featured"</code>.</span></div>
+  </div>
+
+  <div class="cmd"><span class="tg">&lt;p</span> <span class="at">id</span>=<span class="st">"intro"</span> <span class="at">class</span>=<span class="st">"lead highlighted"</span><span class="tg">&gt;</span><span class="tx">Welcome.</span><span class="tg">&lt;/p&gt;</span>
+<span class="tg">&lt;p</span> <span class="at">class</span>=<span class="st">"lead"</span><span class="tg">&gt;</span><span class="tx">Another paragraph.</span><span class="tg">&lt;/p&gt;</span></div>
+
+  <p>The rule of thumb: <strong>id for one thing, class for a kind of thing.</strong> If you find yourself wanting two elements with the same id, you wanted a class.</p>
+
+  <div class="dothis">
+    <h4>Do this now — use them from the Console</h4>
+    <p>Add the two paragraphs above to your page, save, then in the Console:</p>
+  </div>
+  <div class="cmd"><span class="p">&gt;</span> document.querySelector("#intro")
+<span class="o">&lt;p id="intro" class="lead highlighted"&gt;Welcome.&lt;/p&gt;</span>
+
+<span class="p">&gt;</span> document.querySelectorAll(".lead").length
+<span class="o">2</span>
+
+<span class="p">&gt;</span> document.getElementById("intro").textContent
+<span class="o">"Welcome."</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>#name</b><span>In a selector, <code>#</code> means "the element with this id".</span></div>
+    <div class="mrow"><b>.name</b><span><code>.</code> means "every element with this class".</span></div>
+    <div class="mrow"><b>tagname</b><span>A bare word means "every element of this type" — <code>p</code>, <code>li</code>, <code>input</code>.</span></div>
+  </div>
+
+  <p>That syntax is shared between CSS and JavaScript, which is not a coincidence — both are querying the same tree. Learn it once and it works in both.</p>
+
+  <h3>ids have a second job</h3>
+  <p>An <code>id</code> also becomes a link target. Give a section an id, and you can link straight to it:</p>
+  <div class="cmd"><span class="tg">&lt;h2</span> <span class="at">id</span>=<span class="st">"registration"</span><span class="tg">&gt;</span><span class="tx">Register</span><span class="tg">&lt;/h2&gt;</span>
+...
+<span class="tg">&lt;a</span> <span class="at">href</span>=<span class="st">"#registration"</span><span class="tg">&gt;</span><span class="tx">Jump to registration</span><span class="tg">&lt;/a&gt;</span></div>
+  <p>And <code>yoursite.com/page.html#registration</code> opens the page already scrolled there. That's exactly how the contents list at the top of this document works.</p>
+
+  <div class="cue watch"><p class="cue-k">Naming rules worth following</p>
+    <p>Lowercase, hyphens between words, describe <em>what it is</em> rather than what it looks like. <code>class="error-message"</code>, not <code>class="red-text"</code> — because in six months the design changes and your red text is blue.</p>
+    <p>No spaces inside a single id or class name; a space starts a new class. And ids must be unique — duplicating one is invalid HTML, and <code>getElementById</code> will silently return only the first, which is a genuinely nasty bug to track down.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q9</b>You give five buttons <code>id="btn"</code> and then run <code>document.getElementById("btn")</code>. What comes back?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>Only the first one.</strong> No error, no warning — it just quietly ignores the other four.</p>
+      <p>ids are required to be unique. When several elements are the same kind of thing, they want a shared <code>class</code>, and you select them with <code>querySelectorAll(".btn")</code> to get all of them.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 complete</span></label>
+</section>
+
+<!-- ================= 12 ================= -->
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>Tables, briefly</h2><span class="tagline">for data, and only data</span></div>
+
+  <p>Tables are for tabular data — things with rows and columns that genuinely belong in a grid. Marks, timetables, price comparisons.</p>
+
+  <div class="cmd"><span class="tg">&lt;table&gt;</span>
+  <span class="tg">&lt;thead&gt;</span>
+    <span class="tg">&lt;tr&gt;</span>
+      <span class="tg">&lt;th&gt;</span><span class="tx">Course</span><span class="tg">&lt;/th&gt;</span>
+      <span class="tg">&lt;th&gt;</span><span class="tx">Credits</span><span class="tg">&lt;/th&gt;</span>
+    <span class="tg">&lt;/tr&gt;</span>
+  <span class="tg">&lt;/thead&gt;</span>
+  <span class="tg">&lt;tbody&gt;</span>
+    <span class="tg">&lt;tr&gt;</span>
+      <span class="tg">&lt;td&gt;</span><span class="tx">Advanced Databases</span><span class="tg">&lt;/td&gt;</span>
+      <span class="tg">&lt;td&gt;</span><span class="tx">4</span><span class="tg">&lt;/td&gt;</span>
+    <span class="tg">&lt;/tr&gt;</span>
+  <span class="tg">&lt;/tbody&gt;</span>
+<span class="tg">&lt;/table&gt;</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>&lt;tr&gt;</b><span>Table row. Everything lives inside rows.</span></div>
+    <div class="mrow"><b>&lt;th&gt;</b><span>Header cell. Bold and centred by default, and announced as a header by screen readers.</span></div>
+    <div class="mrow"><b>&lt;td&gt;</b><span>Data cell.</span></div>
+    <div class="mrow"><b>&lt;thead&gt; &lt;tbody&gt;</b><span>Group the header rows and the body rows. Optional, but they make long tables far easier to read and style.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">Never use a table for page layout</p><p>Before CSS was any good, people built entire page layouts out of invisible tables. That era ended around 2005, and using a table to position things today is the fastest way to signal that you learned from a very old tutorial. It's also genuinely bad for screen readers, which announce it as a data table and try to read it cell by cell.</p><p>Layout is CSS's job. Tables are for data.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 12 complete</span></label>
+</section>
+
+<!-- ================= 13 ================= -->
+<section id="s13">
+  <div class="shead"><span class="chip">13</span><h2>Forms — the container</h2><span class="tagline">how the web takes input</span></div>
+
+  <p>Everything you've done so far shows information. Forms are how a page <em>collects</em> it — and they are the single most common thing you'll build.</p>
+
+  <div class="cmd"><span class="tg">&lt;form</span> <span class="at">action</span>=<span class="st">"/register"</span> <span class="at">method</span>=<span class="st">"post"</span><span class="tg">&gt;</span>
+  <span class="cm">&lt;!-- fields go here --&gt;</span>
+<span class="tg">&lt;/form&gt;</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>action</b><span>The URL the data gets sent to when the form is submitted.</span></div>
+    <div class="mrow"><b>method</b><span>How to send it. <code>post</code> puts the data in the body of the request. <code>get</code> puts it in the URL as <code>?name=value&amp;other=value</code>.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">get or post?</p><p><strong>get</strong> for things that only read — a search box. The data ends up in the URL, so the results are bookmarkable and shareable.</p><p><strong>post</strong> for things that change something or are private — registering, logging in, uploading. Data in the URL gets stored in browser history and server logs, so never send a password with <code>get</code>.</p></div>
+
+  <div class="cue watch"><p class="cue-k">Nothing will happen when you submit, and that's correct</p><p>You have no server. There's nothing listening at <code>/register</code>. When you click submit you'll get a 404 or a blank page — this is expected, not a bug in your HTML.</p><p>The form itself is complete and correct; the other half of the conversation just doesn't exist yet. Backends come later in the course.</p></div>
+
+  <div class="cue"><p class="cue-k">In the DOM</p><p>A <code>&lt;form&gt;</code> becomes a node like any other — but a special one. It keeps a live list of every input inside it, which is what makes <code>form.elements</code> work in JavaScript. Section 19 comes back to this.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 13 complete</span></label>
+</section>
+
+<!-- ================= 14 ================= -->
+<section id="s14">
+  <div class="shead"><span class="chip">14</span><h2>Labels and inputs</h2><span class="tagline">get this pairing right</span></div>
+
+  <p>An input on its own is a mystery box. A label tells the user — and the browser, and assistive technology — what it's for.</p>
+
+  <div class="cmd"><span class="tg">&lt;label</span> <span class="at">for</span>=<span class="st">"fullname"</span><span class="tg">&gt;</span><span class="tx">Full name</span><span class="tg">&lt;/label&gt;</span>
+<span class="tg">&lt;input</span> <span class="at">type</span>=<span class="st">"text"</span> <span class="at">id</span>=<span class="st">"fullname"</span> <span class="at">name</span>=<span class="st">"fullname"</span><span class="tg">&gt;</span></div>
+
+  <p>Three attributes are doing three different jobs here, and confusing them is the most common forms mistake there is.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>for (on the label)</b><span>Points at an input's <code>id</code>. This is what connects the two.</span></div>
+    <div class="mrow"><b>id (on the input)</b><span>The input's unique handle — for the label, for CSS, for JavaScript.</span></div>
+    <div class="mrow"><b>name (on the input)</b><span><strong>What gets sent to the server.</strong> Nothing to do with the label. This is the key that the data arrives under.</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Do this now — watch the connection work</h4>
+    <p>Add the pair above to your form and save. Now <strong>click on the words "Full name"</strong> — not the box, the label text.</p>
+    <p>The cursor jumps into the input. That's <code>for</code> and <code>id</code> matching.</p>
+    <p>Now change the label to <code>for="fullnam"</code> — one letter off — and save. Click the label again. Nothing happens. Fix it.</p>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">The one that will bite you: <code>name</code></p><p><strong>No <code>name</code>, no data.</strong> An input without a <code>name</code> is simply not included when the form is submitted. The field looks perfect, the user fills it in, and the value silently vanishes.</p><p>There's no error and no warning. Every developer loses an hour to this at least once.</p></div>
+
+  <h3>Why labels are not optional</h3>
+  <div class="mention">
+    <div class="mrow"><b>Bigger click target</b><span>Clicking the label focuses the field. On a phone, that turns a tiny checkbox into something you can actually hit.</span></div>
+    <div class="mrow"><b>Screen readers</b><span>Reaching an unlabelled input, a screen reader can only announce "edit text, blank". The user has no idea what to type.</span></div>
+    <div class="mrow"><b>It's in the DOM</b><span>The connection becomes a real relationship between two nodes — <code>input.labels</code> exists as a property. It isn't just visual proximity.</span></div>
+  </div>
+
+  <h3>The wrapping alternative</h3>
+  <div class="cmd"><span class="tg">&lt;label&gt;</span>
+  <span class="tx">Full name</span>
+  <span class="tg">&lt;input</span> <span class="at">type</span>=<span class="st">"text"</span> <span class="at">name</span>=<span class="st">"fullname"</span><span class="tg">&gt;</span>
+<span class="tg">&lt;/label&gt;</span></div>
+  <p>Putting the input inside the label works too, and needs no <code>for</code>/<code>id</code> pair. It's tidier, but you often still want an <code>id</code> for CSS or scripting — so the explicit version is more common in real codebases. Either is correct; be consistent.</p>
+
+  <div class="cue watch"><p class="cue-k">A placeholder is not a label</p><p><code>placeholder="Full name"</code> looks like a tidy space-saving trick and it is a genuinely bad idea on its own. It disappears the moment someone types, so they can no longer check what the field was. It fails colour-contrast requirements in most designs. And screen reader support for it is inconsistent.</p><p>Use a label. Add a placeholder as well if it helps — for a format hint like <code>DD/MM/YYYY</code>. Never a placeholder alone.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q10</b>An input has <code>id="email"</code> but no <code>name</code>. The user fills it in and submits. What does the server receive?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>Nothing from that field.</strong> The <code>id</code> is for the label, CSS and JavaScript — it plays no part in submission. Only fields with a <code>name</code> are sent.</p>
+      <p>Convention is to give both the same value (<code>id="email" name="email"</code>), which is why the two get confused so often. They're doing entirely separate jobs.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 14 complete</span></label>
+</section>
+
+<!-- ================= 15 ================= -->
+<section id="s15">
+  <div class="shead"><span class="chip">15</span><h2>Input types</h2><span class="tagline">let the browser do the work</span></div>
+
+  <p>One element, <code>&lt;input&gt;</code>, changes behaviour completely depending on its <code>type</code>. Choosing the right one gives you keyboard optimisation, validation and specialised pickers for free.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>type="text"</b><span>The default. A single line of anything.</span></div>
+    <div class="mrow"><b>type="email"</b><span>Checks the format on submit, and phones show a keyboard with @ on it.</span></div>
+    <div class="mrow"><b>type="password"</b><span>Masks what's typed. Note: this hides it from someone looking over a shoulder. It is <em>not</em> encryption — the value travels as plain text unless the site uses HTTPS.</span></div>
+    <div class="mrow"><b>type="number"</b><span>Numbers only, with up/down arrows. Pairs with <code>min</code>, <code>max</code>, <code>step</code>.</span></div>
+    <div class="mrow"><b>type="tel"</b><span>Numeric keypad on mobile. Deliberately does <em>not</em> validate — phone number formats vary too much worldwide.</span></div>
+    <div class="mrow"><b>type="url"</b><span>Expects a full URL including the scheme.</span></div>
+    <div class="mrow"><b>type="date"</b><span>A real date picker, built into the browser, with zero JavaScript.</span></div>
+    <div class="mrow"><b>type="time" / "datetime-local"</b><span>Same idea for times.</span></div>
+    <div class="mrow"><b>type="file"</b><span>A file chooser. Needs <code>enctype="multipart/form-data"</code> on the form to actually upload.</span></div>
+    <div class="mrow"><b>type="color"</b><span>Opens the OS colour picker. Rarely needed, pleasant when it is.</span></div>
+    <div class="mrow"><b>type="range"</b><span>A slider. Use when the precise number doesn't matter.</span></div>
+    <div class="mrow"><b>type="hidden"</b><span>Not shown, but submitted with the form. Used for things like record ids.</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Do this now — build the top of the registration form</h4>
+  </div>
+  <div class="cmd"><span class="tg">&lt;label</span> <span class="at">for</span>=<span class="st">"fullname"</span><span class="tg">&gt;</span><span class="tx">Full name</span><span class="tg">&lt;/label&gt;</span>
+<span class="tg">&lt;input</span> <span class="at">type</span>=<span class="st">"text"</span> <span class="at">id</span>=<span class="st">"fullname"</span> <span class="at">name</span>=<span class="st">"fullname"</span><span class="tg">&gt;</span>
+
+<span class="tg">&lt;label</span> <span class="at">for</span>=<span class="st">"roll"</span><span class="tg">&gt;</span><span class="tx">Roll number</span><span class="tg">&lt;/label&gt;</span>
+<span class="tg">&lt;input</span> <span class="at">type</span>=<span class="st">"text"</span> <span class="at">id</span>=<span class="st">"roll"</span> <span class="at">name</span>=<span class="st">"roll"</span><span class="tg">&gt;</span>
+
+<span class="tg">&lt;label</span> <span class="at">for</span>=<span class="st">"email"</span><span class="tg">&gt;</span><span class="tx">Email</span><span class="tg">&lt;/label&gt;</span>
+<span class="tg">&lt;input</span> <span class="at">type</span>=<span class="st">"email"</span> <span class="at">id</span>=<span class="st">"email"</span> <span class="at">name</span>=<span class="st">"email"</span><span class="tg">&gt;</span>
+
+<span class="tg">&lt;label</span> <span class="at">for</span>=<span class="st">"start"</span><span class="tg">&gt;</span><span class="tx">Preferred start date</span><span class="tg">&lt;/label&gt;</span>
+<span class="tg">&lt;input</span> <span class="at">type</span>=<span class="st">"date"</span> <span class="at">id</span>=<span class="st">"start"</span> <span class="at">name</span>=<span class="st">"start"</span><span class="tg">&gt;</span></div>
+
+  <p>Save and click the date field. You get a full calendar picker that you did not build, that works with a keyboard, that's translated into the user's language, and that matches their operating system. That's what "let the browser do the work" means.</p>
+
+  <div class="cue watch"><p class="cue-k">Never trust the browser as your only check</p><p>All of this validation runs on the user's machine, and anyone can bypass it by opening DevTools and deleting the attribute, or by sending the request directly without a browser at all.</p><p>Client-side validation is a <strong>convenience</strong> — it tells honest users about mistakes instantly. The server must check everything again. This is one of the most common security holes in student projects and junior code.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 15 complete</span></label>
+</section>
+
+<!-- ================= 16 ================= -->
+<section id="s16">
+  <div class="shead"><span class="chip">16</span><h2>Radios, checkboxes, select, textarea</h2><span class="tagline">the choosing controls</span></div>
+
+  <h3>Radio buttons — pick exactly one</h3>
+  <div class="cmd"><span class="tg">&lt;fieldset&gt;</span>
+  <span class="tg">&lt;legend&gt;</span><span class="tx">Mode of study</span><span class="tg">&lt;/legend&gt;</span>
+
+  <span class="tg">&lt;input</span> <span class="at">type</span>=<span class="st">"radio"</span> <span class="at">id</span>=<span class="st">"fulltime"</span> <span class="at">name</span>=<span class="st">"mode"</span> <span class="at">value</span>=<span class="st">"full"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;label</span> <span class="at">for</span>=<span class="st">"fulltime"</span><span class="tg">&gt;</span><span class="tx">Full time</span><span class="tg">&lt;/label&gt;</span>
+
+  <span class="tg">&lt;input</span> <span class="at">type</span>=<span class="st">"radio"</span> <span class="at">id</span>=<span class="st">"parttime"</span> <span class="at">name</span>=<span class="st">"mode"</span> <span class="at">value</span>=<span class="st">"part"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;label</span> <span class="at">for</span>=<span class="st">"parttime"</span><span class="tg">&gt;</span><span class="tx">Part time</span><span class="tg">&lt;/label&gt;</span>
+<span class="tg">&lt;/fieldset&gt;</span></div>
+
+  <div class="cue watch"><p class="cue-k">The rule that makes radios work</p><p><strong>Same <code>name</code> = one group.</strong> That shared name is the <em>only</em> thing telling the browser these options belong together and are mutually exclusive.</p><p>Each needs a <strong>different <code>id</code></strong> (so its label can point at it), the <strong>same <code>name</code></strong> (to group them), and its own <strong><code>value</code></strong> (what gets sent when it's the one selected).</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — break it deliberately</h4>
+    <p>Change the second radio's <code>name</code> to <code>"mode2"</code> and save. Now try to select both. You can — the form is nonsense. Change it back and watch them become exclusive again.</p>
+    <p>Ninety seconds, and you'll never debug this one slowly.</p>
+  </div>
+
+  <h3>fieldset and legend</h3>
+  <p><code>&lt;fieldset&gt;</code> groups related controls; <code>&lt;legend&gt;</code> is its caption. For a radio group this isn't cosmetic — without it, a screen reader reads "Full time, radio button" with no indication of what question it answers. The legend supplies the question.</p>
+
+  <h3>Checkboxes — zero or more</h3>
+  <div class="cmd"><span class="tg">&lt;input</span> <span class="at">type</span>=<span class="st">"checkbox"</span> <span class="at">id</span>=<span class="st">"terms"</span> <span class="at">name</span>=<span class="st">"terms"</span><span class="tg">&gt;</span>
+<span class="tg">&lt;label</span> <span class="at">for</span>=<span class="st">"terms"</span><span class="tg">&gt;</span><span class="tx">I confirm these details are correct</span><span class="tg">&lt;/label&gt;</span></div>
+  <p>Independent by default. Give several the same <code>name</code> and they submit as a list of the checked values — useful for "select all that apply".</p>
+
+  <div class="cue"><p class="cue-k">A quirk worth knowing</p><p>An unchecked checkbox sends <strong>nothing at all</strong> — not "false", not an empty string. The key simply isn't in the submitted data. Server code that expects it to always be present will break, which surprises people the first time.</p></div>
+
+  <h3>Dropdowns</h3>
+  <div class="cmd"><span class="tg">&lt;label</span> <span class="at">for</span>=<span class="st">"course"</span><span class="tg">&gt;</span><span class="tx">Course</span><span class="tg">&lt;/label&gt;</span>
+<span class="tg">&lt;select</span> <span class="at">id</span>=<span class="st">"course"</span> <span class="at">name</span>=<span class="st">"course"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;option</span> <span class="at">value</span>=<span class="st">""</span><span class="tg">&gt;</span><span class="tx">-- Select a course --</span><span class="tg">&lt;/option&gt;</span>
+  <span class="tg">&lt;option</span> <span class="at">value</span>=<span class="st">"adb"</span><span class="tg">&gt;</span><span class="tx">Advanced Databases</span><span class="tg">&lt;/option&gt;</span>
+  <span class="tg">&lt;option</span> <span class="at">value</span>=<span class="st">"ds"</span><span class="tg">&gt;</span><span class="tx">Distributed Systems</span><span class="tg">&lt;/option&gt;</span>
+  <span class="tg">&lt;option</span> <span class="at">value</span>=<span class="st">"esd"</span><span class="tg">&gt;</span><span class="tx">Embedded Systems Design</span><span class="tg">&lt;/option&gt;</span>
+<span class="tg">&lt;/select&gt;</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>value vs text</b><span>The <code>value</code> is what gets submitted; the text between the tags is what the user reads. They're usually different — a short code versus a full name.</span></div>
+    <div class="mrow"><b>The empty first option</b><span>Not decoration. It's what makes <code>required</code> work on a dropdown — without it, the first real option is pre-selected and the field can never be empty.</span></div>
+    <div class="mrow"><b>selected</b><span>Pre-selects an option: <code>&lt;option value="adb" selected&gt;</code>.</span></div>
+    <div class="mrow"><b>&lt;optgroup&gt;</b><span>Groups options under a heading inside the dropdown. Useful once you have more than about ten.</span></div>
+  </div>
+
+  <h3>Multi-line text</h3>
+  <div class="cmd"><span class="tg">&lt;label</span> <span class="at">for</span>=<span class="st">"why"</span><span class="tg">&gt;</span><span class="tx">Why this course?</span><span class="tg">&lt;/label&gt;</span>
+<span class="tg">&lt;textarea</span> <span class="at">id</span>=<span class="st">"why"</span> <span class="at">name</span>=<span class="st">"why"</span> <span class="at">rows</span>=<span class="st">"4"</span> <span class="at">maxlength</span>=<span class="st">"300"</span><span class="tg">&gt;&lt;/textarea&gt;</span></div>
+
+  <div class="cue watch"><p class="cue-k">textarea is not self-closing</p><p>Unlike <code>&lt;input&gt;</code>, a textarea has an opening and closing tag — and <strong>anything between them becomes its starting content</strong>. Put a newline or spaces in there and the box starts with that text in it.</p><p>Write <code>&lt;textarea&gt;&lt;/textarea&gt;</code> with nothing at all between the tags. This catches people constantly.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q11</b>You have three radio buttons that should be one question, but the user can select all three. What's wrong?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p>They have different <code>name</code> attributes. The shared name is what makes radios mutually exclusive — give all three the same <code>name</code> and different <code>value</code>s.</p>
+      <p>The mirror-image mistake: giving them the same <code>id</code>. That's invalid, and it breaks the labels because every one will point at the first radio.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 16 complete</span></label>
+</section>
+
+<!-- ================= 17 ================= -->
+<section id="s17">
+  <div class="shead"><span class="chip">17</span><h2>Buttons and what submit does</h2><span class="tagline">an invisible default</span></div>
+
+  <div class="cmd"><span class="tg">&lt;button</span> <span class="at">type</span>=<span class="st">"submit"</span><span class="tg">&gt;</span><span class="tx">Register</span><span class="tg">&lt;/button&gt;</span>
+<span class="tg">&lt;button</span> <span class="at">type</span>=<span class="st">"reset"</span><span class="tg">&gt;</span><span class="tx">Clear form</span><span class="tg">&lt;/button&gt;</span>
+<span class="tg">&lt;button</span> <span class="at">type</span>=<span class="st">"button"</span><span class="tg">&gt;</span><span class="tx">Do something with JavaScript</span><span class="tg">&lt;/button&gt;</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>type="submit"</b><span>Validates the form, then sends it to the <code>action</code> URL. <strong>This is the default</strong> for a button inside a form.</span></div>
+    <div class="mrow"><b>type="reset"</b><span>Clears every field back to its initial value. Rarely a good idea — users hit it by accident and lose everything.</span></div>
+    <div class="mrow"><b>type="button"</b><span>Does nothing on its own. For buttons you'll wire up with JavaScript.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">The bug this causes, every time</p><p>A <code>&lt;button&gt;</code> inside a form with no <code>type</code> is a <strong>submit</strong> button. So you add a button that's meant to add a row or toggle something, click it, and the whole page reloads and your data is gone.</p><p>That's not a mysterious JavaScript problem — it's the form submitting exactly as specified. <strong>Always write <code>type</code> explicitly on every button.</strong> It costs nothing and prevents an afternoon of confusion.</p></div>
+
+  <h3>What actually happens on submit</h3>
+  <ol>
+    <li>The browser runs its built-in validation on every field. If anything fails, it stops and shows a message.</li>
+    <li>It collects the <code>name</code>/value pair from each successful control. Fields with no name are skipped. Unchecked boxes are skipped. Disabled fields are skipped.</li>
+    <li>It packages them up and sends them to <code>action</code> using <code>method</code>.</li>
+    <li>The browser navigates to the response. <strong>The page reloads.</strong></li>
+  </ol>
+
+  <p>That last step is worth sitting with. A plain HTML form submission is a full page navigation — the same as clicking a link. The smooth, no-reload form submissions you're used to on modern sites are JavaScript intercepting step 4 and doing it in the background instead.</p>
+
+  <div class="dothis">
+    <h4>Do this now — watch the data go</h4>
+    <p>Temporarily change your form to <code>&lt;form action="" method="get"&gt;</code>, fill in a few fields and submit.</p>
+    <p>The page reloads, and <strong>look at the address bar</strong>. You'll see something like <code>?fullname=Shreyas&amp;email=me%40example.com&amp;mode=full</code>.</p>
+    <p>That is your form data, encoded into a URL. Every <code>name</code> you set is a key in it. Any field you forgot to name is missing — this is the fastest way to check your form is wired correctly.</p>
+  </div>
+
+  <div class="cue"><p class="cue-k">You just learned a debugging trick</p><p>Whenever a form isn't sending what you expect, switch it to <code>method="get"</code> and read the URL. It shows you precisely what the browser collected — no server needed. Switch it back afterwards.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 17 complete</span></label>
+</section>
+
+<!-- ================= 18 ================= -->
+<section id="s18">
+  <div class="shead"><span class="chip">18</span><h2>Validation you get for free</h2><span class="tagline">no JavaScript required</span></div>
+
+  <div class="dothis">
+    <h4>Do this now — add required and try to submit</h4>
+  </div>
+  <div class="cmd"><span class="tg">&lt;input</span> <span class="at">type</span>=<span class="st">"text"</span> <span class="at">id</span>=<span class="st">"fullname"</span> <span class="at">name</span>=<span class="st">"fullname"</span> <span class="at">required</span><span class="tg">&gt;</span></div>
+  <p>Leave it blank, click Register. The browser stops the submission, scrolls to the field, focuses it and shows its own error bubble — translated into the user's language, styled by their operating system. You wrote one word.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>required</b><span>Cannot be left empty. Works on text, email, select, checkbox and radio groups.</span></div>
+    <div class="mrow"><b>minlength / maxlength</b><span>Character limits for text. <code>maxlength</code> physically stops typing past the limit.</span></div>
+    <div class="mrow"><b>min / max</b><span>For numbers and dates. <code>min="2026-08-01"</code> on a date field works exactly as you'd hope.</span></div>
+    <div class="mrow"><b>step</b><span>For numbers — <code>step="0.5"</code> allows halves only.</span></div>
+    <div class="mrow"><b>pattern</b><span>A regular expression the value must match. Powerful; pair it with a <code>title</code> explaining the expected format, because the default error message is unhelpful.</span></div>
+    <div class="mrow"><b>type itself</b><span><code>type="email"</code> validates format on its own. Choosing the right type <em>is</em> validation.</span></div>
+  </div>
+
+  <p>A worked example — a roll number that must be two letters followed by four digits:</p>
+  <div class="cmd"><span class="tg">&lt;input</span> <span class="at">type</span>=<span class="st">"text"</span> <span class="at">id</span>=<span class="st">"roll"</span> <span class="at">name</span>=<span class="st">"roll"</span>
+       <span class="at">pattern</span>=<span class="st">"[A-Za-z]{2}[0-9]{4}"</span>
+       <span class="at">title</span>=<span class="st">"Two letters followed by four digits, e.g. CS2024"</span>
+       <span class="at">required</span><span class="tg">&gt;</span></div>
+
+  <div class="cue"><p class="cue-k">Attributes with no value</p><p><code>required</code> has no <code>="something"</code>. It's a <strong>boolean attribute</strong> — its presence means true, its absence means false. There is no <code>required="false"</code>; to switch it off you delete it. Same for <code>disabled</code>, <code>checked</code>, <code>readonly</code>, <code>selected</code>.</p></div>
+
+  <div class="cue watch"><p class="cue-k">Say it once more, because it matters</p><p>Every one of these checks runs in the user's browser and can be removed by anyone in about four seconds using DevTools. <strong>The server must validate everything again.</strong></p><p>Browser validation is for helping honest users. Server validation is for security. They are not alternatives.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q12</b>You put <code>required</code> on a <code>&lt;select&gt;</code> but the form submits happily with nothing chosen. Why?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p>Your first <code>&lt;option&gt;</code> has a non-empty <code>value</code>, so it counts as a valid selection — and it's selected by default, so the field is never empty.</p>
+      <p>Fix it with an empty-valued placeholder option first: <code>&lt;option value=""&gt;-- Select --&lt;/option&gt;</code>. Now "nothing chosen" is genuinely empty and <code>required</code> has something to catch.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 18 complete</span></label>
+</section>
+
+<!-- ================= 19 ================= -->
+<section id="s19">
+  <div class="shead"><span class="chip">19</span><h2>Forms in the DOM</h2><span class="tagline">where it all connects</span></div>
+
+  <p>Back to the tree, now that there's a form in it. This section is where the first half of the document and the second half meet.</p>
+
+  <div class="dothis">
+    <h4>Do this now — inspect a form field</h4>
+    <p>Right-click one of your inputs → <strong>Inspect</strong>. Look at where it sits: <code>form › label</code>, <code>form › input</code>, siblings under the form node. Your nesting made that shape.</p>
+  </div>
+
+  <p>Now open the <strong>Console</strong> and explore the same nodes as objects:</p>
+
+  <div class="cmd"><span class="p">&gt;</span> document.querySelector("#fullname")
+<span class="o">&lt;input type="text" id="fullname" name="fullname" required&gt;</span>
+
+<span class="cm">// type something into the field on the page first, then:</span>
+<span class="p">&gt;</span> document.querySelector("#fullname").value
+<span class="o">"Shreyas"</span>
+
+<span class="p">&gt;</span> document.querySelector("#terms").checked
+<span class="o">false</span>
+
+<span class="p">&gt;</span> document.querySelector("form").elements.length
+<span class="o">9</span>
+
+<span class="p">&gt;</span> document.querySelector("#fullname").value = "Set from the console"</div>
+
+  <div class="mention">
+    <div class="mrow"><b>.value</b><span>What's currently in the field. Read it or write it. This is <em>the</em> property you'll use most in JavaScript.</span></div>
+    <div class="mrow"><b>.checked</b><span>True or false, for checkboxes and radios. Their <code>.value</code> is the value attribute, which isn't what you want here.</span></div>
+    <div class="mrow"><b>form.elements</b><span>A live collection of every control in the form. You can also reach one by name: <code>form.elements.email</code>.</span></div>
+    <div class="mrow"><b>.labels</b><span>The label elements pointing at this input — real proof that <code>for</code>/<code>id</code> creates a genuine DOM relationship.</span></div>
+  </div>
+
+  <h3>The distinction that trips people up</h3>
+  <p>Type something into the field, then in the Console:</p>
+  <div class="cmd"><span class="p">&gt;</span> document.querySelector("#fullname").value
+<span class="o">"Shreyas"</span>              <span class="cm">// the live value, right now</span>
+
+<span class="p">&gt;</span> document.querySelector("#fullname").getAttribute("value")
+<span class="o">null</span>                   <span class="cm">// the attribute in the HTML — never set</span></div>
+
+  <p>Look at the Elements panel while you type. The HTML shown there <strong>doesn't change</strong>, but <code>.value</code> does. The attribute is the <em>initial</em> value from your source. The property is the <em>current</em> value in the live DOM.</p>
+
+  <div class="cue"><p class="cue-k">This is section 09 again, in miniature</p><p>Source versus DOM, at the level of a single field. The HTML file says what a thing starts as; the DOM holds what it is now. Understanding that one distinction resolves an enormous number of "but the HTML says…" bugs.</p></div>
+
+  <h3>Why <code>name</code> matters here too</h3>
+  <p><code>id</code> is how <em>your code</em> finds the field. <code>name</code> is how <em>the data</em> is keyed when it leaves the browser. Same field, two identities, two different consumers. Missing the id means your JavaScript can't find it; missing the name means the server never sees it.</p>
+
+  <div class="cue"><p class="cue-k">What this sets up</p><p>Every form library you'll ever use — React Hook Form, Formik, whatever comes next — is a layer over exactly these properties. When you write a controlled component in React and wire up <code>value</code> and <code>onChange</code>, you are managing <code>.value</code> on a DOM node by hand.</p><p>People who learned React first find this baffling. You'll find it obvious, because you saw the node before you saw the abstraction.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q13</b>You type "hello" into a text input. In the Elements panel, the HTML still shows <code>&lt;input type="text" id="q"&gt;</code> with no value. Is something broken?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>No, that's correct behaviour.</strong> Typing changes the element's <code>value</code> <em>property</em> in the DOM. It does not rewrite the <code>value</code> <em>attribute</em>, which represents the initial state.</p>
+      <p>Check with <code>document.querySelector("#q").value</code> in the Console — it returns "hello". The attribute and the property are related but separate, and this is the classic example.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 19 complete</span></label>
+</section>
+
+<!-- ================= 20 ================= -->
+<section id="s20">
+  <div class="shead"><span class="chip">20</span><h2>Accessibility, almost for free</h2><span class="tagline">you've already done most of it</span></div>
+
+  <p>Accessibility sounds like an extra chore bolted on at the end. For HTML it mostly isn't — it's what you get automatically by writing the markup correctly, which you've been doing all along.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>Every input has a label</b><span>Section 14. This is the single biggest one for forms.</span></div>
+    <div class="mrow"><b>Headings describe structure</b><span>Section 05. Screen reader users navigate by heading, like a contents page.</span></div>
+    <div class="mrow"><b>Images have alt text</b><span>Section 06. Empty <code>alt=""</code> for decorative ones.</span></div>
+    <div class="mrow"><b>Semantic elements</b><span>Section 10. <code>&lt;main&gt;</code> and <code>&lt;nav&gt;</code> are landmarks that can be jumped to.</span></div>
+    <div class="mrow"><b>Radio groups in a fieldset</b><span>Section 16. The legend supplies the question the options answer.</span></div>
+    <div class="mrow"><b>Link text that means something</b><span>Section 06. Not "click here".</span></div>
+    <div class="mrow"><b>lang on the html element</b><span>Section 03. Tells a screen reader which pronunciation rules to use.</span></div>
+  </div>
+
+  <p>That's most of it, and every item was already the correct way to write the markup.</p>
+
+  <div class="dothis">
+    <h4>Do this now — use your page with no mouse</h4>
+    <p>Click on the page, then press <kbd>Tab</kbd> repeatedly. Focus moves through your links and form fields in order. <kbd>Shift</kbd>+<kbd>Tab</kbd> goes back. <kbd>Space</kbd> toggles a checkbox, arrow keys move within a radio group, <kbd>Enter</kbd> submits.</p>
+    <p>All of that works and you did not write a line of it. It comes from using real form elements.</p>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">Which is why "div soup" is a real problem</p><p>The moment someone builds a button out of <code>&lt;div onclick="..."&gt;</code>, all of it vanishes. It isn't focusable, Tab skips it, Enter and Space do nothing, and a screen reader announces it as meaningless text.</p><p>You can rebuild all that by hand with <code>tabindex</code>, ARIA roles and keyboard handlers — dozens of lines to reproduce what <code>&lt;button&gt;</code> gave you for free. This is the practical argument for using the right element: it's less work.</p></div>
+
+  <div class="cue"><p class="cue-k">Check it yourself</p><p>In Chrome DevTools, open the <strong>Lighthouse</strong> tab, tick Accessibility, and run it on your page. You get a score and a specific list of problems. Also worth knowing: the <strong>Accessibility</strong> pane inside the Elements panel shows you the accessibility tree — a parallel structure the browser builds alongside the DOM, which is what assistive software actually reads.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 20 complete</span></label>
+</section>
+
+<!-- ================= 21 ================= -->
+<section id="s21">
+  <div class="shead"><span class="chip">21</span><h2>When it goes wrong</h2><span class="tagline">the usual suspects</span></div>
+
+  <p>HTML has no error messages. A mistake doesn't crash anything — the browser guesses what you meant and carries on, which is helpful right up until it isn't. These are the ones you'll hit.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>The browser shows my raw code</b><span>The file isn't saved as <code>.html</code>. On Windows it's probably <code>index.html.txt</code> — turn on file extensions (section 02).</span></div>
+    <div class="mrow"><b>My change doesn't appear</b><span>You didn't save, or you're looking at a different file than the one you're editing. Check the path in the address bar.</span></div>
+    <div class="mrow"><b>Everything after a point is bold/italic/broken</b><span>An unclosed tag. Open the Elements panel — the DOM tree shows you what the browser <em>actually</em> built, and the mis-nesting will be visible as wrong indentation.</span></div>
+    <div class="mrow"><b>My image doesn't load</b><span>Wrong path, or wrong case in the filename. Check the <strong>Console</strong> tab — a failed load logs a 404 with the exact URL it tried.</span></div>
+    <div class="mrow"><b>Clicking the label does nothing</b><span><code>for</code> doesn't match any <code>id</code>. Usually a typo, sometimes a capital letter.</span></div>
+    <div class="mrow"><b>A field's value never reaches the server</b><span>No <code>name</code> attribute. Switch to <code>method="get"</code> and read the URL to see exactly what is being sent.</span></div>
+    <div class="mrow"><b>My radios aren't exclusive</b><span>Different <code>name</code> values. They must share one.</span></div>
+    <div class="mrow"><b>The page reloads when I click a button</b><span>The button has no <code>type</code>, so it defaults to submit. Add <code>type="button"</code>.</span></div>
+    <div class="mrow"><b>required does nothing on my dropdown</b><span>You need a first option with <code>value=""</code>.</span></div>
+    <div class="mrow"><b>My textarea starts with blank lines</b><span>There's whitespace between the opening and closing tags. Close it immediately: <code>&lt;textarea&gt;&lt;/textarea&gt;</code>.</span></div>
+    <div class="mrow"><b>Special characters look wrong</b><span>Missing <code>&lt;meta charset="UTF-8"&gt;</code>, or the file was saved in another encoding.</span></div>
+  </div>
+
+  <h3>How to debug HTML, generally</h3>
+  <ol>
+    <li><strong>Open the Elements panel.</strong> Compare the tree the browser built with the tree you intended. The difference is your bug.</li>
+    <li><strong>Check the Console</strong> for failed file loads.</li>
+    <li><strong>Run it through a validator</strong> — <a href="https://validator.w3.org/nu/" target="_blank" rel="noopener">validator.w3.org/nu</a> takes pasted HTML and lists every structural error with line numbers. Unclosed tags, bad nesting, duplicate ids. Two minutes, and it finds things you'd stare past for an hour.</li>
+    <li><strong>Comment out half.</strong> If the page is broken and you can't see why, comment out half the body. Still broken? The problem is in the other half. Repeat. Five rounds narrows 500 lines down to about fifteen.</li>
+  </ol>
+
+  <div class="cue calm"><p class="cue-k">Asking for help is a skill, not a failure</p><p>When you're properly stuck, ask someone — and have a screenshot of both <strong>your code</strong> and <strong>the Elements panel</strong> ready when you do. The gap between the two usually makes the answer obvious in seconds.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 21 complete</span></label>
+</section>
+
+<!-- ================= 22 ================= -->
+<section id="s22">
+  <div class="shead"><span class="chip">22</span><h2>Practice run, unaided</h2><span class="tagline">the part that makes it stick</span></div>
+
+  <p>Reading about HTML and being able to write it are different things. Do this <strong>without scrolling up</strong>. If you're stuck, open the Elements panel and look at what you've actually built before you look anything up.</p>
+
+  <div class="dothis">
+    <h4>The task — a Workshop Registration page</h4>
+    <ol>
+      <li>New file, <code>workshop.html</code>, with a complete skeleton typed from memory: doctype, lang, charset, viewport, title.</li>
+      <li>Wrap the page in <code>&lt;header&gt;</code>, <code>&lt;main&gt;</code> and <code>&lt;footer&gt;</code>.</li>
+      <li>In the header: an <code>h1</code> and a one-line description with the deadline in <code>&lt;strong&gt;</code>.</li>
+      <li>In main, a section with an <code>h2</code> and an unordered list of three workshops.</li>
+      <li>A form with <strong>at least seven fields</strong>: name, roll number, email, phone, a date, a dropdown of workshops, a radio group for morning/afternoon, a comments textarea, and a confirmation checkbox.</li>
+      <li>Every input has a matching <code>&lt;label&gt;</code>, its own <code>id</code>, and a <code>name</code>. The radio group shares one <code>name</code>.</li>
+      <li>The radio group is wrapped in a <code>&lt;fieldset&gt;</code> with a <code>&lt;legend&gt;</code>.</li>
+      <li><code>required</code> on the mandatory fields. The dropdown has an empty first option.</li>
+      <li>Two buttons, both with an explicit <code>type</code>.</li>
+      <li>A footer with your name and a link to your GitHub profile that opens in a new tab.</li>
+    </ol>
+  </div>
+
+  <div class="dothis">
+    <h4>Then verify it — this half matters as much</h4>
+    <ol>
+      <li>Click every label. Does each one focus its field?</li>
+      <li>Try to submit it empty. Does validation stop you on the right fields?</li>
+      <li>Set <code>method="get"</code>, fill it in, submit, and read the URL. <strong>Is every field present?</strong> Any missing one has no <code>name</code>.</li>
+      <li>Paste it into <a href="https://validator.w3.org/nu/" target="_blank" rel="noopener">the W3C validator</a>. Fix everything it reports.</li>
+      <li>Navigate the whole form with only <kbd>Tab</kbd>, <kbd>Space</kbd> and arrow keys.</li>
+      <li>In the Console, run <code>document.querySelector("form").elements.length</code>. Does it match the number of controls you wrote?</li>
+      <li>Open the Elements panel and read your tree from <code>html</code> down. Can you say the parent of every node out loud?</li>
+    </ol>
+  </div>
+
+  <div class="cue"><p class="cue-k">How to judge yourself</p><p>You're ready if you built it needing DevTools but not this document. Nearly ready if you looked up two or three attributes — nobody memorises every input type. If you had to reread whole sections, that's fine: do it again tomorrow rather than pushing on. Repetition is what's doing the work, not comprehension.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 22 complete</span></label>
+</section>
+
+<!-- ================= 23 ================= -->
+<section id="s23">
+  <div class="shead"><span class="chip">23</span><h2>Final checkpoint</h2><span class="tagline">answer before revealing</span></div>
+
+  <p>Fifteen questions. Answer each in your head — or better, write it down — <em>before</em> opening the answer. Getting one wrong is information, not failure; go back to the section it came from.</p>
+
+  <div class="quiz"><div class="q"><b>1</b>What are the three languages of the web, and what is each one's job?</div>
+    <details><summary>Show answer</summary><div class="a"><p>HTML — what things <em>are</em> (structure and meaning). CSS — what they <em>look like</em>. JavaScript — what they <em>do</em>.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>2</b>Define the DOM in one sentence.</div>
+    <details><summary>Show answer</summary><div class="a"><p>A tree of objects that the browser builds in memory from your HTML, which JavaScript can read and modify to change what's on screen.</p><p>Your HTML file is the recipe; the DOM is the cake.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>3</b>What's the difference between View Source and the Elements panel?</div>
+    <details><summary>Show answer</summary><div class="a"><p>View Source shows the original HTML text the server sent — a frozen snapshot. The Elements panel shows the live DOM right now, including everything JavaScript has changed since load.</p><p>On a React app the first is nearly empty and the second is the whole application.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>4</b>In <code>&lt;body&gt;&lt;h1&gt;Hi&lt;/h1&gt;&lt;p&gt;There&lt;/p&gt;&lt;/body&gt;</code> — what is <code>h1</code> to <code>p</code>, and what is <code>"Hi"</code> to <code>h1</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>h1</code> and <code>p</code> are <strong>siblings</strong> — both children of <code>body</code>.</p><p><code>"Hi"</code> is a <strong>text node</strong>, and a <strong>child</strong> of <code>h1</code> — not a property of it.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>5</b>Why is choosing <code>h3</code> because "it's the right size" a mistake?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Heading level is document structure, not size — size is CSS's job. Screen reader users navigate by heading level, so wrong levels give them a shuffled contents page. Search engines read the outline too.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>6</b>What does <code>&lt;noscript&gt;</code> do, and why did Create React App put one in every project?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Its content shows only when JavaScript is off or blocked. React apps ship an empty <code>&lt;div id="root"&gt;</code> and build the entire interface with JavaScript — so with JS disabled the user gets a blank white page and no explanation. The <code>&lt;noscript&gt;</code> line is the apology.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>7</b>Give three reasons to use <code>&lt;main&gt;</code> rather than <code>&lt;div class="main"&gt;</code>.</div>
+    <details><summary>Show answer</summary><div class="a"><p>Screen readers can jump straight to it as a landmark; search engines use it to identify real content; and your own code is far easier to read than a wall of closing divs. It also costs nothing — same number of keystrokes.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>8</b>When do you use <code>id</code> and when do you use <code>class</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>id</code> for one specific element — must be unique in the document. <code>class</code> for a kind of element that several can share.</p><p>If you want two elements with the same id, you wanted a class.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>9</b>Name the three attributes on a labelled input and say what each is for.</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>for</code> on the label points at the input's <code>id</code>. <code>id</code> is the input's unique handle for the label, CSS and JavaScript. <code>name</code> is the key the data is sent under — <strong>no name, no data</strong>.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>10</b>Three radio buttons; the user can select all three. What's wrong?</div>
+    <details><summary>Show answer</summary><div class="a"><p>They don't share a <code>name</code>. Same <code>name</code> makes them one mutually exclusive group; each still needs a different <code>id</code> and its own <code>value</code>.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>11</b>Why does a button inside a form sometimes reload the page unexpectedly?</div>
+    <details><summary>Show answer</summary><div class="a"><p>A <code>&lt;button&gt;</code> with no <code>type</code> defaults to <code>type="submit"</code>, so clicking it submits the form and navigates. Always write <code>type</code> explicitly.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>12</b>You have <code>required</code> on a dropdown but it submits empty. Fix?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Add a first option with an empty value: <code>&lt;option value=""&gt;-- Select --&gt;&lt;/option&gt;</code>. Without it the first real option is pre-selected, so the field is never actually empty.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>13</b>Is browser validation enough to keep your app safe?</div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>No.</strong> It runs on the user's machine and can be removed in seconds with DevTools, or bypassed entirely by sending a request without a browser.</p><p>Client-side validation is a convenience for honest users. The server must re-check everything. They aren't alternatives.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>14</b>You type into an input but the Elements panel shows no <code>value</code> attribute. Explain.</div>
+    <details><summary>Show answer</summary><div class="a"><p>Typing changes the <code>value</code> <em>property</em> on the live DOM node. The <code>value</code> <em>attribute</em> in the HTML represents the initial state and isn't rewritten.</p><p>Confirm with <code>element.value</code> in the Console. Attribute versus property is the source-versus-DOM distinction at the level of one field.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>15</b>Your form isn't sending a field. What's the fastest way to find out which one?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Temporarily set <code>method="get"</code>, submit, and read the query string in the address bar. Every field with a <code>name</code> appears as a key; anything missing has no <code>name</code>. No server needed.</p></div></details></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 23 complete</span></label>
+</section>
+
+<!-- ================= GLOSSARY ================= -->
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+
+  <div class="gloss">
+    <div class="grow"><b>attribute</b><span>Extra information inside an opening tag, as <code>name="value"</code>.</span></div>
+    <div class="grow"><b>boolean attribute</b><span>One with no value, where presence means true — <code>required</code>, <code>checked</code>, <code>disabled</code>.</span></div>
+    <div class="grow"><b>child / parent</b><span>A node directly below / directly above another in the tree.</span></div>
+    <div class="grow"><b>class</b><span>A shared label any number of elements can carry. Selected with <code>.name</code>.</span></div>
+    <div class="grow"><b>DevTools</b><span>The browser's built-in inspector. <kbd>F12</kbd> or right-click → Inspect.</span></div>
+    <div class="grow"><b>DOM</b><span>Document Object Model — the browser's live tree of objects built from your HTML.</span></div>
+    <div class="grow"><b>element</b><span>Opening tag + content + closing tag, taken together.</span></div>
+    <div class="grow"><b>fieldset / legend</b><span>A group of related form controls, and its caption.</span></div>
+    <div class="grow"><b>form control</b><span>Any input, select, textarea or button that can hold or send a value.</span></div>
+    <div class="grow"><b>id</b><span>A unique name for one element. Selected with <code>#name</code>.</span></div>
+    <div class="grow"><b>markup</b><span>Annotating text to say what its parts are. The M in HTML.</span></div>
+    <div class="grow"><b>name</b><span>The key a form field's value is submitted under. No name, no data.</span></div>
+    <div class="grow"><b>node</b><span>Any single item in the DOM tree — element, text or comment.</span></div>
+    <div class="grow"><b>nesting</b><span>Elements inside elements. Inner must close before outer.</span></div>
+    <div class="grow"><b>property vs attribute</b><span>Attribute = the initial value written in the HTML. Property = the current value on the live DOM node.</span></div>
+    <div class="grow"><b>selector</b><span>A pattern that matches nodes in the tree — <code>#id</code>, <code>.class</code>, <code>tag</code>. Shared by CSS and JavaScript.</span></div>
+    <div class="grow"><b>semantic element</b><span>One whose name describes its meaning — <code>main</code>, <code>nav</code>, <code>article</code> — rather than a generic <code>div</code>.</span></div>
+    <div class="grow"><b>sibling</b><span>Nodes that share a parent.</span></div>
+    <div class="grow"><b>tag</b><span>The marker itself, <code>&lt;p&gt;</code> or <code>&lt;/p&gt;</code>.</span></div>
+    <div class="grow"><b>text node</b><span>Characters inside an element, held as their own node.</span></div>
+    <div class="grow"><b>void element</b><span>One with no content and no closing tag — <code>img</code>, <code>br</code>, <code>input</code>.</span></div>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Glossary read</span></label>
+</section>
+
+<div class="finish">
+  <h2>How to know you're ready</h2>
+  <p><strong>There is nothing to submit.</strong> No form, no upload, nothing to send anywhere. This is preparation for your own benefit, and the only person who needs to be satisfied by it is you.</p>
+  <p>You're there if all of these are true:</p>
+  <ol>
+    <li>You can write a complete HTML skeleton from memory and say what each line in the head does.</li>
+    <li>You can <strong>define the DOM in one sentence</strong> and explain how it differs from your HTML file.</li>
+    <li>You can open DevTools, find any element on a page, and read its ancestors off the breadcrumb.</li>
+    <li>You can build a form where every input has a label, an <code>id</code> and a <code>name</code> — and you know which of those three does what.</li>
+    <li>You know why a radio group shares one <code>name</code>, and why a button needs an explicit <code>type</code>.</li>
+    <li>You can explain why browser validation is not enough on its own.</li>
+  </ol>
+  <p>If any of those feels shaky, go back to the section it came from and build the example again. Nobody is checking, so there's no reason to pretend otherwise to yourself.</p>
+  <p style="margin-top:16px"><strong>The thing worth taking from all this:</strong> you now know what the tree is, that you can open it, and that everything from CSS selectors to React is a way of working with it. Most people arrive at frameworks without that, and spend years working around a gap they can't name.</p>
+
+  <h2 style="margin-top:30px;font-size:20px">Page skeleton, from memory</h2>
+  <div class="cmd"><span class="tg">&lt;!DOCTYPE html&gt;</span>
+<span class="tg">&lt;html</span> <span class="at">lang</span>=<span class="st">"en"</span><span class="tg">&gt;</span>
+<span class="tg">&lt;head&gt;</span>
+  <span class="tg">&lt;meta</span> <span class="at">charset</span>=<span class="st">"UTF-8"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;meta</span> <span class="at">name</span>=<span class="st">"viewport"</span> <span class="at">content</span>=<span class="st">"width=device-width, initial-scale=1.0"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;title&gt;</span><span class="tx">Page title</span><span class="tg">&lt;/title&gt;</span>
+<span class="tg">&lt;/head&gt;</span>
+<span class="tg">&lt;body&gt;</span>
+  <span class="tg">&lt;header&gt;&lt;/header&gt;</span>
+  <span class="tg">&lt;main&gt;&lt;/main&gt;</span>
+  <span class="tg">&lt;footer&gt;&lt;/footer&gt;</span>
+<span class="tg">&lt;/body&gt;</span>
+<span class="tg">&lt;/html&gt;</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Form reference card</h2>
+  <div class="cmd"><span class="cm">text field with a label</span>
+<span class="tg">&lt;label</span> <span class="at">for</span>=<span class="st">"x"</span><span class="tg">&gt;</span><span class="tx">Label</span><span class="tg">&lt;/label&gt;</span>
+<span class="tg">&lt;input</span> <span class="at">type</span>=<span class="st">"text"</span> <span class="at">id</span>=<span class="st">"x"</span> <span class="at">name</span>=<span class="st">"x"</span> <span class="at">required</span><span class="tg">&gt;</span>
+
+<span class="cm">radio group — same name, different ids</span>
+<span class="tg">&lt;fieldset&gt;&lt;legend&gt;</span><span class="tx">Question</span><span class="tg">&lt;/legend&gt;</span>
+  <span class="tg">&lt;input</span> <span class="at">type</span>=<span class="st">"radio"</span> <span class="at">id</span>=<span class="st">"a"</span> <span class="at">name</span>=<span class="st">"g"</span> <span class="at">value</span>=<span class="st">"a"</span><span class="tg">&gt;&lt;label</span> <span class="at">for</span>=<span class="st">"a"</span><span class="tg">&gt;</span><span class="tx">A</span><span class="tg">&lt;/label&gt;</span>
+  <span class="tg">&lt;input</span> <span class="at">type</span>=<span class="st">"radio"</span> <span class="at">id</span>=<span class="st">"b"</span> <span class="at">name</span>=<span class="st">"g"</span> <span class="at">value</span>=<span class="st">"b"</span><span class="tg">&gt;&lt;label</span> <span class="at">for</span>=<span class="st">"b"</span><span class="tg">&gt;</span><span class="tx">B</span><span class="tg">&lt;/label&gt;</span>
+<span class="tg">&lt;/fieldset&gt;</span>
+
+<span class="cm">dropdown — empty first option makes required work</span>
+<span class="tg">&lt;select</span> <span class="at">id</span>=<span class="st">"s"</span> <span class="at">name</span>=<span class="st">"s"</span> <span class="at">required</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;option</span> <span class="at">value</span>=<span class="st">""</span><span class="tg">&gt;</span><span class="tx">-- Select --</span><span class="tg">&lt;/option&gt;</span>
+  <span class="tg">&lt;option</span> <span class="at">value</span>=<span class="st">"1"</span><span class="tg">&gt;</span><span class="tx">One</span><span class="tg">&lt;/option&gt;</span>
+<span class="tg">&lt;/select&gt;</span>
+
+<span class="cm">textarea — no whitespace between the tags</span>
+<span class="tg">&lt;textarea</span> <span class="at">id</span>=<span class="st">"t"</span> <span class="at">name</span>=<span class="st">"t"</span> <span class="at">rows</span>=<span class="st">"4"</span><span class="tg">&gt;&lt;/textarea&gt;</span>
+
+<span class="cm">buttons — always set type</span>
+<span class="tg">&lt;button</span> <span class="at">type</span>=<span class="st">"submit"</span><span class="tg">&gt;</span><span class="tx">Send</span><span class="tg">&lt;/button&gt;</span>
+<span class="tg">&lt;button</span> <span class="at">type</span>=<span class="st">"button"</span><span class="tg">&gt;</span><span class="tx">Do a thing</span><span class="tg">&lt;/button&gt;</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">DevTools console, for poking at the tree</h2>
+  <div class="cmd"><span class="p">&gt;</span> document.querySelector("#id")           <span class="cm">// first match</span>
+<span class="p">&gt;</span> document.querySelectorAll(".class")     <span class="cm">// all matches</span>
+<span class="p">&gt;</span> el.textContent                          <span class="cm">// text inside a node</span>
+<span class="p">&gt;</span> el.value                                <span class="cm">// current value of a field</span>
+<span class="p">&gt;</span> el.checked                              <span class="cm">// checkbox / radio state</span>
+<span class="p">&gt;</span> el.parentElement                        <span class="cm">// walk up the tree</span>
+<span class="p">&gt;</span> el.children                             <span class="cm">// walk down</span>
+<span class="p">&gt;</span> form.elements                           <span class="cm">// every control in a form</span></div>
+</div>
+
+<footer>M.Tech CSE · ESD · HTML, the DOM &amp; forms<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+
+</div>
+
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ----
+     Fragment hrefs get resolved against the host page URL in some
+     embedded/iframed contexts, which breaks them. Scrolling manually
+     works the same whether this file is opened locally, served from
+     a static host, or previewed inside another page. */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=['Work through it at whatever pace suits you.',
+             'Good start — sections 07 to 11 are the ones that matter most.',
+             'Past halfway. The DOM is behind you; forms are the easy part.',
+             'Nearly there. The practice run is where it sticks.',
+             "All done — nothing to hand in. You're ready."];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    msg.textContent=n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))];
+  }
+  checks.forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^[$>]\s?/,'').trimEnd()}).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>
