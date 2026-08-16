@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Git prerequisites — from absolute zero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 172px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 150px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> Prerequisites · complete before the Git session</p>
+  <h1>Git, from<br><em>absolute zero</em></h1>
+  <p class="lede">No prior knowledge assumed — not of Git, not of GitHub, not even of the terminal. By the end you'll have a real repository online with your own commits in it, and you'll understand what every command you typed actually did.</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">0</span> sections</div>
+      <div class="tracker-msg" id="msg">Work through it at whatever pace suits you.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p>In the poll, 37 people said they know nothing about Git. That was the useful answer, and it's why this document exists. You are not an outlier and you have not fallen behind — Git is a tool with genuinely confusing vocabulary that most colleges never teach properly. The people who look fast learned it somewhere outside a classroom.</p>
+  <p><strong>There is no time limit on this.</strong> Do it in one sitting or across a week, whatever fits around everything else you have on. Nobody is watching you and there is no prize for speed. What matters is that you arrive at the session able to commit and push without thinking about it.</p>
+  <p><strong>Type every command yourself.</strong> Don't paste whole blocks and don't just read. Your hands need to learn this, not your eyes. It'll feel slow for the first twenty commands and then it won't.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — sections build on each other, so go in order the first time</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">Git is not GitHub</span></a>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">A terminal survival kit</span></a>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">Three checks before you start</span></a>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">The four places a file can live</span></a>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">Make a repo and clone it</span></a>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">git status — your one diagnostic</span></a>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">git add — the staging area</span></a>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">git commit — save points</span></a>
+  <a class="rrow" href="#s9"><span class="rt">09</span><span class="rw">Writing messages people respect</span></a>
+  <a class="rrow" href="#s10"><span class="rt">10</span><span class="rw">git log and git diff</span></a>
+  <a class="rrow" href="#s11"><span class="rt">11</span><span class="rw">git push and git pull</span></a>
+  <a class="rrow" href="#s12"><span class="rt">12</span><span class="rw">Renaming, moving and deleting</span></a>
+  <a class="rrow" href="#s13"><span class="rt">13</span><span class="rw">.gitignore</span></a>
+  <a class="rrow" href="#s14"><span class="rt">14</span><span class="rw">Writing a README</span></a>
+  <a class="rrow" href="#s15"><span class="rt">15</span><span class="rw">Undoing things without panic</span></a>
+  <a class="rrow" href="#s16"><span class="rt">16</span><span class="rw">The same thing, in VS Code</span></a>
+  <a class="rrow" href="#s17"><span class="rt">17</span><span class="rw">When it goes wrong</span></a>
+  <a class="rrow" href="#s18"><span class="rt">18</span><span class="rw">A first look at branches</span></a>
+  <a class="rrow" href="#s19"><span class="rt">19</span><span class="rw">Practice run, unaided</span></a>
+  <a class="rrow" href="#s20"><span class="rt">20</span><span class="rw">Final checkpoint</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; command card</span></a>
+</nav>
+
+<!-- ================= 01 ================= -->
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>Git is not GitHub</h2><span class="tagline">clear this up first</span></div>
+
+  <p>These are two different things made by two different companies, and confusing them causes more beginner pain than anything else in this document. Sort it out now and a lot of later confusion simply never happens.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>Git</b><span>A <strong>program on your laptop</strong>. Written in 2005 by Linus Torvalds, the same person who wrote Linux. It records versions of a folder. It works with no internet connection, forever, and it is free.</span></div>
+    <div class="mrow"><b>GitHub</b><span>A <strong>website</strong>, owned by Microsoft, that stores copies of Git projects online so you can share them and work with other people. It's one of several — GitLab and Bitbucket do the same job.</span></div>
+  </div>
+
+  <p>An analogy that holds up: <strong>Git is like a camera. GitHub is like Instagram.</strong> The camera takes and stores the photos. The website is where you put them so other people can see. You can own a camera and never post anything. You cannot post without taking a photo first.</p>
+
+  <h3>What problem is Git solving?</h3>
+  <p>You have almost certainly done this:</p>
+  <div class="cmd"><span class="o">project_final.docx</span>
+<span class="o">project_final_v2.docx</span>
+<span class="o">project_final_FINAL.docx</span>
+<span class="o">project_final_FINAL_use_this_one.docx</span></div>
+
+  <p>That is a version control system. A bad one. It can't tell you what changed between two files. It can't combine two people's edits. It breaks completely the moment two people work at once. And after a week you genuinely cannot remember which one is real.</p>
+
+  <p>Git fixes exactly this. You keep <strong>one</strong> folder. Git remembers every saved state of it, along with a note about what changed and who changed it. You can look at any past version, compare any two, and combine work from several people without anyone overwriting anyone.</p>
+
+  <h3>Why you personally should care</h3>
+  <div class="mention">
+    <div class="mrow"><b>Every job uses it</b><span>Not most — every software job, without exception. It is assumed the way typing is assumed.</span></div>
+    <div class="mrow"><b>It's your public record</b><span>Your GitHub profile is often the first thing an interviewer opens, sometimes before your resume. A profile with real commits on real dates says more than a bullet point does.</span></div>
+    <div class="mrow"><b>It removes fear</b><span>Being able to say "I broke it, let me go back to yesterday" is what lets you experiment. People without version control code timidly, because every change is a risk.</span></div>
+    <div class="mrow"><b>It's how you submit</b><span>In this course, your assignments are graded from your repository. Git isn't a side topic here; it's the delivery mechanism.</span></div>
+  </div>
+
+  <h3>Vocabulary you'll meet shortly</h3>
+  <p>Skim these now. They'll each get a proper section — this is just so the words aren't strangers.</p>
+  <div class="mention">
+    <div class="mrow"><b>repository (repo)</b><span>A folder that Git is tracking. It has a hidden <code>.git</code> sub-folder inside it where Git keeps its records.</span></div>
+    <div class="mrow"><b>commit</b><span>One saved snapshot of the whole project, with a message describing it. Used as a noun ("look at that commit") and a verb ("commit your work").</span></div>
+    <div class="mrow"><b>clone</b><span>Download a repository from GitHub onto your laptop.</span></div>
+    <div class="mrow"><b>push</b><span>Send your commits up to GitHub.</span></div>
+    <div class="mrow"><b>pull</b><span>Bring down commits from GitHub that you don't have yet.</span></div>
+    <div class="mrow"><b>remote</b><span>The nickname for the copy living on GitHub. Almost always called <code>origin</code>.</span></div>
+    <div class="mrow"><b>branch</b><span>A separate line of work. Section 18 introduces it; the session covers it properly.</span></div>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Your laptop has no internet for a whole day. Which of these can you still do?
+      <ol type="a"><li>Make commits</li><li>Push to GitHub</li><li>Clone a new repository</li><li>All of them</li></ol>
+    </div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>(a) Make commits.</strong> Git runs entirely on your laptop, so committing works offline all day long. Pushing and cloning both have to reach GitHub's servers, so they need a connection.</p>
+      <p>This is the practical test of whether the distinction has landed. Commit whenever you like; push when you have internet.</p>
+    </div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q2</b>True or false: if GitHub shut down tomorrow, every Git repository in the world would be lost.</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>False.</strong> Every clone is a complete copy, including the entire history. If GitHub vanished, every developer with a clone would still have the full project and could push it somewhere else the same afternoon.</p>
+      <p>That's what "distributed" means in "distributed version control" — there is no single master copy that everything depends on.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete</span></label>
+</section>
+
+<!-- ================= 02 ================= -->
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>A terminal survival kit</h2><span class="tagline">skip if you're comfortable</span></div>
+
+  <p>Git is used by typing commands. If the black window with text makes you uneasy, this section fixes that. It's a small number of commands and they're all simple — the discomfort is unfamiliarity, not difficulty.</p>
+
+  <h3>Opening one</h3>
+  <div class="mention">
+    <div class="mrow"><b>Windows</b><span>Search <strong>Git Bash</strong> in the Start menu. Use this, not Command Prompt or PowerShell — Git Bash gives you the same commands Mac and Linux users have, so every instruction here works identically for you.</span></div>
+    <div class="mrow"><b>Mac</b><span>Search <strong>Terminal</strong> in Spotlight (Cmd+Space).</span></div>
+    <div class="mrow"><b>Linux</b><span>Whatever terminal your distribution gives you.</span></div>
+    <div class="mrow"><b>Inside VS Code</b><span>Press <kbd>Ctrl</kbd>+<kbd>`</kbd> (the backtick key, above Tab). This opens a terminal already sitting in your project folder, which is usually what you want.</span></div>
+  </div>
+
+  <h3>Reading the prompt</h3>
+  <div class="cmd"><span class="o">shreyas@laptop MINGW64 ~/code/git-practice (main)</span>
+<span class="p">$</span></div>
+  <p>Left to right: your username, your machine, where you currently are, and — once you're inside a Git repository — the branch you're on in brackets. The <code>$</code> is where your typing goes. In this document, <span class="p">$</span> marks the start of a command; <strong>you never type the <code>$</code> itself.</strong></p>
+
+  <h3>The six commands you actually need</h3>
+  <div class="mention">
+    <div class="mrow"><b>pwd</b><span>"Print working directory" — where am I? When something goes wrong, this is the first thing to check.</span></div>
+    <div class="mrow"><b>ls</b><span>List the files here. <code>ls -a</code> also shows hidden files, which you'll need for <code>.git</code>.</span></div>
+    <div class="mrow"><b>cd foldername</b><span>Go into a folder. <code>cd ..</code> goes up one level. <code>cd ~</code> goes to your home folder. <code>cd</code> with nothing does the same.</span></div>
+    <div class="mrow"><b>mkdir name</b><span>Make a folder. <code>mkdir -p a/b</code> makes nested folders and doesn't complain if they already exist.</span></div>
+    <div class="mrow"><b>cat file</b><span>Print a file's contents to the screen. Handy for a quick look without opening an editor.</span></div>
+    <div class="mrow"><b>clear</b><span>Wipe the screen. Nothing is deleted; it just tidies up.</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Do this now — get your bearings</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> pwd
+<span class="o">/Users/shreyas</span>          <span class="cm"># or /home/you, or /c/Users/You</span>
+
+<span class="p">$</span> ls
+<span class="o">Desktop  Documents  Downloads</span>
+
+<span class="p">$</span> mkdir -p ~/code
+<span class="p">$</span> cd ~/code
+<span class="p">$</span> pwd
+<span class="o">/Users/shreyas/code</span></div>
+
+  <p>You've just made the folder where all your course work will live, and moved into it. That's the whole skill.</p>
+
+  <h3>What <code>~</code> means</h3>
+  <p>The tilde is shorthand for your home folder — <code>/Users/yourname</code> on Mac, <code>/home/yourname</code> on Linux, <code>C:\Users\YourName</code> on Windows. So <code>~/code</code> means "the code folder inside my home folder", and it works the same on everyone's machine, which is why this document uses it.</p>
+
+  <h3>Four things that will make you much faster</h3>
+  <div class="mention">
+    <div class="mrow"><b>Tab completion</b><span>Type the first few letters of a filename and press <kbd>Tab</kbd>. The terminal finishes it. This prevents typos and is the single biggest speed-up available to you. Use it constantly.</span></div>
+    <div class="mrow"><b>Up arrow</b><span>Recalls your previous commands. Press it repeatedly to go further back. You will retype the same four Git commands hundreds of times — don't actually retype them.</span></div>
+    <div class="mrow"><b>Ctrl+C</b><span>Stops whatever is running, or clears a line you've made a mess of. Your escape key for the terminal.</span></div>
+    <div class="mrow"><b>q</b><span>Exits the scrolling view that <code>git log</code> and <code>git diff</code> open. Just the letter q. Everyone gets stuck in this exactly once.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">Avoid spaces in folder names</p><p>A folder called <code>my project</code> has to be typed as <code>cd "my project"</code> or <code>cd my\ project</code>, and it will trip you up repeatedly. Use <code>my-project</code> or <code>my_project</code>. This is a genuine convention in software, not a personal preference.</p></div>
+
+  <div class="cue"><p class="cue-k">You do not need to memorise the terminal</p><p>Six commands cover almost everything you'll do for months. Nobody is testing you on it, and looking things up is completely normal — professional developers search for shell syntax constantly.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q3</b>You're in <code>~/code/git-practice</code> and you want to get to <code>~/code</code>. What do you type?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><code>cd ..</code> — two dots means "the folder above this one".</p>
+      <p><code>cd ~/code</code> also works and is sometimes clearer, because it says exactly where you're going rather than relying on where you started.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 complete</span></label>
+</section>
+
+<!-- ================= 03 ================= -->
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>Three checks before you start</h2><span class="tagline">do not skip these</span></div>
+
+  <h3>Check 1 — is Git installed?</h3>
+  <div class="cmd"><span class="p">$</span> git --version
+<span class="o">git version 2.45.2</span>   <span class="cm"># your number will differ, that's fine</span></div>
+  <p>If it says "command not found", install it first:</p>
+  <div class="mention">
+    <div class="mrow"><b>Windows</b><span>Download Git for Windows from <a href="https://git-scm.com/download/win" target="_blank" rel="noopener">git-scm.com/download/win</a>. During install, when asked about the default editor, choose <strong>Visual Studio Code</strong> — anything else drops you into an editor you can't get out of.</span></div>
+    <div class="mrow"><b>Mac</b><span>Just type <code>git --version</code>. macOS pops up a dialog offering to install developer tools. Click Install and wait.</span></div>
+    <div class="mrow"><b>Linux</b><span><code>sudo apt install git</code> on Ubuntu/Debian, <code>sudo dnf install git</code> on Fedora. It's often already there.</span></div>
+  </div>
+
+  <h3>Check 2 — does Git know who you are?</h3>
+  <p>Every commit is signed with a name and email. If you skip this, your commits are anonymous and won't link to your GitHub account — meaning all your work is invisible on your profile.</p>
+  <div class="cmd"><span class="p">$</span> git config --global user.name "Your Full Name"
+<span class="p">$</span> git config --global user.email "the-email-on-your-github@example.com"
+
+<span class="p">$</span> git config --global user.name    <span class="cm"># read it back to check</span>
+<span class="o">Your Full Name</span></div>
+
+  <div class="cue watch"><p class="cue-k">The email must match your GitHub account exactly</p><p>Not "similar to" — the same address. If it doesn't match, GitHub cannot tell the commits are yours, and your contribution graph stays empty no matter how much you push.</p></div>
+
+  <p>Two more one-time settings that will save you real pain:</p>
+  <div class="cmd"><span class="p">$</span> git config --global init.defaultBranch main
+<span class="p">$</span> git config --global core.editor "code --wait"</div>
+  <p>The second one tells Git to use VS Code whenever it needs you to type something longer. Without it you may land in <strong>Vim</strong>, an editor that does not respond to normal keys and traps people for ten minutes. Set this now and it can't happen.</p>
+
+  <p><strong>Windows users, one more:</strong></p>
+  <div class="cmd"><span class="p">$</span> git config --global core.autocrlf true</div>
+  <p>Windows and everyone else disagree about how lines end in a text file. Without this setting, you'll eventually see Git claim that every single line of a file changed when you only touched one. This makes the problem go away. On Mac and Linux use <code>input</code> instead of <code>true</code>.</p>
+
+  <h3>Check 3 — do you have a GitHub account?</h3>
+  <p>If not, sign up at <a href="https://github.com/signup" target="_blank" rel="noopener">github.com/signup</a>. Two things matter:</p>
+  <ul>
+    <li><strong>Pick a username you'd put on a CV.</strong> Your name, or your name plus a number. Recruiters look at this. Not <code>coolcoder_007</code>.</li>
+    <li><strong>Verify your email</strong> by clicking the link they send. An unverified account cannot push code.</li>
+  </ul>
+
+  <p>Then log your laptop into GitHub. This is by far the easiest way:</p>
+  <div class="cmd"><span class="p">$</span> gh auth login</div>
+  <p>Answer the prompts: <strong>GitHub.com</strong> → <strong>HTTPS</strong> → <strong>Yes</strong> → <strong>Login with a web browser</strong>. Copy the one-time code it shows, press Enter, paste it into the browser, click Authorize. You never do this again.</p>
+  <div class="cmd"><span class="p">$</span> gh auth status
+<span class="o">✓ Logged in to github.com account your-username</span></div>
+
+  <div class="cue watch"><p class="cue-k">If <code>gh</code> isn't installed</p><p>Get the GitHub CLI from <a href="https://cli.github.com" target="_blank" rel="noopener">cli.github.com</a>. It's genuinely worth it — the alternative involves generating access tokens by hand, and it's the single most miserable part of getting started.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 complete</span></label>
+</section>
+
+<!-- ================= 04 ================= -->
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>The four places a file can live</h2><span class="tagline">the model everything hangs off</span></div>
+
+  <p>This is the most important section in the document. If you hold this picture, every command below becomes obvious. If you skip it, you'll be memorising magic spells for the next two years — which is exactly what happened to the people who find Git frightening.</p>
+
+  <p>At any moment, a file in a Git project is in one of four places. Every command you're about to learn moves it one step to the right.</p>
+
+  <figure class="board">
+    <svg viewBox="0 0 780 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: working directory, staging area, commit history, and GitHub, connected by git add, git commit and git push">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0F1A18"/></marker>
+        <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0B5D51"/></marker>
+      </defs>
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="15">
+        <rect x="8" y="46" width="150" height="72" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <text x="83" y="76" text-anchor="middle" fill="#0F1A18">WORKING</text>
+        <text x="83" y="95" text-anchor="middle" fill="#0F1A18">DIRECTORY</text>
+        <rect x="216" y="46" width="150" height="72" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+        <text x="291" y="76" text-anchor="middle" fill="#0F1A18">STAGING</text>
+        <text x="291" y="95" text-anchor="middle" fill="#0F1A18">AREA</text>
+        <rect x="424" y="46" width="150" height="72" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+        <text x="499" y="76" text-anchor="middle" fill="#0B5D51">COMMIT</text>
+        <text x="499" y="95" text-anchor="middle" fill="#0B5D51">HISTORY</text>
+        <rect x="632" y="46" width="140" height="72" fill="#101614" stroke="#101614" stroke-width="2"/>
+        <text x="702" y="86" text-anchor="middle" fill="#F5C518">GITHUB</text>
+      </g>
+      <g stroke="#0F1A18" stroke-width="2" marker-end="url(#ar)">
+        <line x1="160" y1="82" x2="208" y2="82"/><line x1="368" y1="82" x2="416" y2="82"/><line x1="576" y1="82" x2="624" y2="82"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#0B5D51" text-anchor="middle">
+        <text x="184" y="72">git add</text><text x="392" y="72">git commit</text><text x="600" y="72">git push</text>
+      </g>
+      <g font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5A6B67" text-anchor="middle">
+        <text x="83" y="140">the files you edit</text><text x="291" y="140">"include this one"</text>
+        <text x="499" y="140">a permanent snapshot</text><text x="702" y="140">on the internet</text>
+      </g>
+      <path d="M702 122 L702 162 Q702 172 692 172 L93 172 Q83 172 83 162 L83 126" fill="none" stroke="#0B5D51" stroke-width="2.5" stroke-dasharray="8 5" marker-end="url(#ar2)"/>
+      <rect x="300" y="158" width="184" height="28" fill="#FFFFFF"/>
+      <text x="392" y="177" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#0B5D51" font-weight="600">git clone / git pull</text>
+      <rect x="8" y="204" width="358" height="38" fill="none" stroke="#F5C518" stroke-width="2" stroke-dasharray="6 4"/>
+      <text x="187" y="228" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#0F1A18">git status shows you these two</text>
+      <text x="499" y="228" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#0F1A18">git log shows you this</text>
+    </svg>
+    <figcaption>Draw this on paper once. Genuinely — it takes half a minute and works far better than re-reading.</figcaption>
+  </figure>
+
+  <div class="mention">
+    <div class="mrow"><b>1. Working directory</b><span>The actual files on your laptop that you open in VS Code and edit. Git can see them but is not recording them yet.</span></div>
+    <div class="mrow"><b>2. Staging area</b><span>A holding pen. It means "these are the changes I want in my next snapshot." You put things here with <code>git add</code>. Sometimes called the "index" in documentation.</span></div>
+    <div class="mrow"><b>3. Commit history</b><span>Permanent snapshots, stored inside the hidden <code>.git</code> folder on your laptop. <code>git commit</code> takes whatever is in staging and makes one.</span></div>
+    <div class="mrow"><b>4. GitHub</b><span>A copy on the internet. <code>git push</code> sends your commits there. Until you push, your work exists on exactly one laptop.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">"Why does the staging area exist? It feels pointless."</p>
+    <p>Fair question, and here's the honest answer: it lets you change five files but save only three of them together as one meaningful snapshot. Say you fixed a bug and also renamed a variable somewhere unrelated — staging lets you commit those separately, so your history tells a clean story instead of a jumbled one.</p>
+    <p>For now, just treat <code>git add</code> as "get ready" and <code>git commit</code> as "save". The usefulness becomes obvious within a month of real work.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q4</b>You edit <code>index.html</code> and save it in VS Code. You have not run any Git commands. Where does that change live?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>The working directory only.</strong> Saving in your editor and saving in Git are completely separate actions. Git has noticed the file changed, but it has recorded nothing.</p>
+      <p>This trips up almost everyone at first: pressing Ctrl+S does not create a commit.</p>
+    </div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q5</b>You run <code>git add index.html</code> then <code>git commit -m "Fix header"</code>. Your teammate on another laptop pulls. Do they get your change?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>No.</strong> You committed, which saved it to your laptop's history. You never pushed, so GitHub doesn't have it, so there's nothing for them to pull.</p>
+      <p><strong>Commit saves locally. Push shares.</strong> Forgetting the second step is the most common reason people say their work "disappeared" — it's usually sitting safely on their laptop, uncommunicated.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 complete</span></label>
+</section>
+
+<!-- ================= 05 ================= -->
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>Make a repo and clone it</h2><span class="tagline">hands on keyboard from here</span></div>
+
+  <p>We start on GitHub and come down to the laptop, rather than the other way round. Fewer steps, and it means your work is backed up online from the very first minute.</p>
+
+  <div class="dothis">
+    <h4>Do this now — create the repository</h4>
+    <ol>
+      <li>Go to <strong><code>repo.new</code></strong> in your browser. That's the whole URL — it redirects to GitHub's new-repository page.</li>
+      <li>Repository name: <strong><code>git-practice</code></strong></li>
+      <li>Description: <em>Learning Git basics</em></li>
+      <li>Choose <strong>Public</strong></li>
+      <li><strong>Tick "Add a README file"</strong> — this matters, it gives the repo a first commit so there's something to download</li>
+      <li>Click <strong>Create repository</strong></li>
+    </ol>
+  </div>
+
+  <p>Look at what you've made. One file, <code>README.md</code>, and GitHub has already made one commit containing it. A repository with zero commits is an awkward edge case, and ticking that box avoided it entirely.</p>
+
+  <div class="dothis">
+    <h4>Do this now — clone it to your laptop</h4>
+    <p>Replace <code>YOUR-USERNAME</code> with your actual GitHub username. Type it out; don't paste the placeholder.</p>
+  </div>
+
+  <div class="cmd"><span class="p">$</span> cd ~/code
+<span class="p">$</span> git clone https://github.com/YOUR-USERNAME/git-practice.git
+
+<span class="o">Cloning into 'git-practice'...</span>
+<span class="o">remote: Enumerating objects: 3, done.</span>
+<span class="o">Receiving objects: 100% (3/3), done.</span>
+
+<span class="p">$</span> cd git-practice</div>
+
+  <p><strong>What just happened:</strong> Git downloaded the entire repository — every file plus its complete history — into a new folder called <code>git-practice</code>. It also remembered where it came from, so future pushes and pulls already know where to go.</p>
+
+  <h3>Look inside</h3>
+  <div class="cmd"><span class="p">$</span> ls
+<span class="o">README.md</span>
+
+<span class="p">$</span> ls -a
+<span class="o">.   ..   .git   README.md</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>README.md</b><span>Your one actual file. GitHub displays this as the front page of any repository.</span></div>
+    <div class="mrow"><b>.git</b><span>The hidden folder where Git keeps everything — all history, all settings. <strong>This folder is what makes the folder a repository.</strong> Delete it and you have an ordinary folder again. Never edit anything inside it by hand.</span></div>
+    <div class="mrow"><b>The leading dot</b><span>Files starting with <code>.</code> are hidden by default, which is why you needed <code>ls -a</code> rather than plain <code>ls</code>.</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Do this now — confirm the connection</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> git remote -v
+<span class="o">origin  https://github.com/YOUR-USERNAME/git-practice.git (fetch)</span>
+<span class="o">origin  https://github.com/YOUR-USERNAME/git-practice.git (push)</span></div>
+
+  <p><strong><code>origin</code></strong> is just a nickname for "the copy on GitHub". It's a convention rather than a keyword, but everyone uses it, so treat it as fixed. When you later type <code>git push</code>, that's where it goes.</p>
+
+  <div class="cue watch"><p class="cue-k">Check your own username is in that URL</p><p>If you ever clone someone else's repository by mistake, everything works fine until you try to push — then you get a permissions error, usually at the worst possible moment. <code>git remote -v</code> is the check that prevents it, and it's worth doing every time you clone.</p></div>
+
+  <div class="dothis">
+    <h4>Optional — open the folder in VS Code</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> code .</div>
+  <p>The dot means "this folder". If <code>code</code> isn't recognised, just open VS Code normally and use <strong>File → Open Folder</strong>.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q6</b>What is the difference between an ordinary folder and a Git repository?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>A hidden <code>.git</code> sub-folder.</strong> That's the entire difference. Git commands work inside a folder that has one and fail with "fatal: not a git repository" in a folder that doesn't.</p>
+      <p>If you ever see that error, the usual cause is simply standing in the wrong directory. Run <code>pwd</code> to see where you are.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 complete</span></label>
+</section>
+
+<!-- ================= 06 ================= -->
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>git status — your one diagnostic</h2><span class="tagline">run it constantly</span></div>
+
+  <p>If you learn one command properly, make it this one. It tells you where every file is, what Git is about to do, and usually what you should type next. It changes nothing, so you can run it as often as you like — there is no such thing as running it too much.</p>
+
+  <div class="cmd"><span class="p">$</span> git status
+<span class="o">On branch main</span>
+<span class="o">Your branch is up to date with 'origin/main'.</span>
+
+<span class="o">nothing to commit, working tree clean</span></div>
+
+  <p>Line by line: you're on the branch called <code>main</code>; your laptop and GitHub agree with each other; you have no unsaved changes. This is the calm state.</p>
+
+  <div class="dothis">
+    <h4>Do this now — make a mess and look at it</h4>
+    <p>Create one new file and edit the existing one.</p>
+  </div>
+
+  <div class="cmd"><span class="p">$</span> echo "My name is [your name]" &gt;&gt; README.md
+<span class="p">$</span> echo "practice notes" &gt; notes.txt
+<span class="p">$</span> git status</div>
+
+  <p>(<code>&gt;&gt;</code> adds a line to the end of a file. A single <code>&gt;</code> replaces the whole file. Worth knowing the difference before you use the wrong one.)</p>
+
+  <div class="cmd"><span class="o">On branch main</span>
+<span class="o">Changes not staged for commit:</span>
+<span class="o">  (use "git add &lt;file&gt;..." to update what will be committed)</span>
+        <span class="rr">modified:   README.md</span>
+
+<span class="o">Untracked files:</span>
+<span class="o">  (use "git add &lt;file&gt;..." to include in what will be committed)</span>
+        <span class="rr">notes.txt</span>
+
+<span class="o">no changes added to commit</span></div>
+
+  <h3>The four states, and their colours</h3>
+  <div class="mention">
+    <div class="mrow"><b>Untracked (red)</b><span>A brand-new file Git has never seen. It is being <strong>completely ignored</strong> until you <code>git add</code> it once.</span></div>
+    <div class="mrow"><b>Modified (red)</b><span>A file Git knows about, which you've changed. The change will <strong>not</strong> be in your next commit unless you add it.</span></div>
+    <div class="mrow"><b>Staged (green)</b><span>Added and ready. <strong>Will</strong> be in your next commit.</span></div>
+    <div class="mrow"><b>Clean</b><span>"nothing to commit, working tree clean" — everything is saved. Nothing to do.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">Learn this one sentence</p><p><strong>Red means it is not going in. Green means it is.</strong> That single rule explains ninety per cent of "why didn't my change get saved?" — the answer is nearly always that it was red and nobody looked.</p></div>
+
+  <h3>The other line to watch for</h3>
+  <p>After you commit but before you push, status says:</p>
+  <div class="cmd"><span class="o">Your branch is ahead of 'origin/main' by 2 commits.</span>
+<span class="o">  (use "git push" to publish your local commits)</span></div>
+  <p>"Ahead by 2" means you've saved twice on your laptop and sent neither to GitHub. Notice that Git is telling you the exact command to run. It usually is — those hints in brackets are worth reading rather than skipping past.</p>
+
+  <div class="cue"><p class="cue-k">A shorter version, once you're comfortable</p><p><code>git status -s</code> gives a compact two-column output: <code>??</code> for untracked, <code>M</code> for modified, <code>A</code> for added. Faster to scan once you know what you're looking at. Stick with the full version while you're learning — the hints are the useful part.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q7</b>You run <code>git status</code> and see <code>modified: style.css</code> in red. You then run <code>git commit -m "Update styles"</code>. What ends up in the commit?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>Nothing.</strong> Git refuses with "no changes added to commit". The file was modified but never staged, so there was nothing for the commit to capture.</p>
+      <p>You need <code>git add style.css</code> first. Red → add → green → commit.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 complete</span></label>
+</section>
+
+<!-- ================= 07 ================= -->
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>git add — the staging area</h2><span class="tagline">turning red into green</span></div>
+
+  <p><code>git add</code> takes a change from your working directory and puts it in the staging area. It saves nothing permanently — it only marks it as "include this in my next snapshot".</p>
+
+  <div class="dothis">
+    <h4>Do this now — stage one file and watch it change colour</h4>
+  </div>
+
+  <div class="cmd"><span class="p">$</span> git add README.md
+<span class="p">$</span> git status</div>
+
+  <div class="cmd"><span class="o">Changes to be committed:</span>
+        <span class="gg">modified:   README.md</span>
+
+<span class="o">Untracked files:</span>
+        <span class="rr">notes.txt</span></div>
+
+  <p>There it is. <code>README.md</code> moved into a new section and turned green. <code>notes.txt</code> is still red because you didn't add it. That's the staging area doing its job — you are choosing what goes in.</p>
+
+  <div class="dothis">
+    <h4>Do this now — stage the rest</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> git add .
+<span class="p">$</span> git status
+<span class="o">Changes to be committed:</span>
+        <span class="gg">modified:   README.md</span>
+        <span class="gg">new file:   notes.txt</span></div>
+
+  <h3>The ways to add</h3>
+  <div class="mention">
+    <div class="mrow"><b>git add filename</b><span>One specific file. Precise, and what to use when you're being careful.</span></div>
+    <div class="mrow"><b>git add .</b><span>Everything changed in the current folder and below. Convenient, and what most people use most of the time.</span></div>
+    <div class="mrow"><b>git add *.html</b><span>Everything matching a pattern — all HTML files here, in this case.</span></div>
+    <div class="mrow"><b>git add -p</b><span>Interactive. Walks you through each chunk of change and asks yes or no. Powerful; you don't need it yet, but remember it exists.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">The habit that separates careful people from careless ones</p><p><code>git add .</code> is a loaded gun. It stages <em>everything</em> — including the 2 GB video you dropped in the folder, the file of API keys you meant to delete, and half-finished work you weren't ready to save.</p><p><strong>Always run <code>git status</code> before <code>git add .</code>, and actually read the list.</strong> Two seconds of attention. It's the difference between a clean history and an embarrassing one that's now permanent and public.</p></div>
+
+  <div class="cue"><p class="cue-k">Changing your mind</p><p>Staged something by mistake? <code>git restore --staged filename</code> takes it back out. Your edits are completely untouched — it just turns the file red again. Nothing is lost.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q8</b>You run <code>git add report.txt</code>. Then, before committing, you edit <code>report.txt</code> again. You commit. Is the second edit included?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>No.</strong> This is the subtle one, and it's worth understanding properly rather than filing away.</p>
+      <p><code>git add</code> stages a <em>snapshot of the file as it was at that moment</em>, not a permanent link to the file. Your later edit exists only in the working directory. Run <code>git status</code> and you'll see <code>report.txt</code> listed <strong>twice</strong> — green under "to be committed" and red under "not staged".</p>
+      <p>The fix is simply to run <code>git add report.txt</code> again before committing.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 complete</span></label>
+</section>
+
+<!-- ================= 08 ================= -->
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>git commit — save points</h2><span class="tagline">the actual save</span></div>
+
+  <p>A commit takes everything currently staged and freezes it into a permanent snapshot, with a message explaining why.</p>
+
+  <div class="dothis">
+    <h4>Do this now — your first commit</h4>
+  </div>
+
+  <div class="cmd"><span class="p">$</span> git commit -m "Add my name to README and create notes file"
+
+<span class="o">[main 4f2a91b] Add my name to README and create notes file</span>
+<span class="o"> 2 files changed, 2 insertions(+)</span>
+<span class="o"> create mode 100644 notes.txt</span>
+
+<span class="p">$</span> git status
+<span class="o">On branch main</span>
+<span class="o">Your branch is ahead of 'origin/main' by 1 commit.</span>
+<span class="o">nothing to commit, working tree clean</span></div>
+
+  <p>Clean again — and "ahead by 1 commit", telling you the work is saved locally but not yet on GitHub.</p>
+
+  <h3>What's inside a commit</h3>
+  <div class="mention">
+    <div class="mrow"><b>A snapshot</b><span>The state of <em>every</em> tracked file at that moment, not just the ones you changed. A commit is a project version, not a file version.</span></div>
+    <div class="mrow"><b>A message</b><span>Your explanation of why the change was made.</span></div>
+    <div class="mrow"><b>Author and timestamp</b><span>Taken from the <code>user.name</code> and <code>user.email</code> you set in section 03.</span></div>
+    <div class="mrow"><b>A hash</b><span>That <code>4f2a91b</code> is a unique fingerprint, shortened from 40 characters. It's how you refer to this exact commit forever, and no two commits ever share one.</span></div>
+    <div class="mrow"><b>A parent</b><span>A link to the commit that came before it. Chain those links together and you have your project's history — that chain is, quite literally, what a Git repository is.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">A useful thing to know</p><p>Git stores full snapshots, not lists of changes. That sounds wasteful, but if a file didn't change between two commits, Git stores it once and points at it twice. So a hundred commits on a large project costs far less space than you'd expect — this is why cloning a repo with ten years of history is usually quick.</p></div>
+
+  <div class="cue watch"><p class="cue-k">Always use <code>-m</code></p><p>If you type <code>git commit</code> with no <code>-m</code>, Git opens a text editor to ask for a message. If you set <code>core.editor</code> back in section 03, that's VS Code and you're fine — type the message, save, close the tab.</p><p>If you skipped that step, it may be <strong>Vim</strong>, which does not respond to normal keys. <strong>Escape route:</strong> press <kbd>Esc</kbd>, type <code>:q!</code>, press Enter. Write that down somewhere; you'll need it eventually.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — a second commit, from memory</h4>
+    <p>Don't scroll up. Open <code>notes.txt</code> in VS Code, add a line about what you've learned so far, save it, then get it committed. If you get stuck, run <code>git status</code> and read what it tells you to do. That's the actual skill being practised here — not memorising commands, but knowing how to ask Git what to do next.</p>
+  </div>
+
+  <div class="cue"><p class="cue-k">How often should you commit?</p><p>More often than feels natural. A good commit is one complete small thing — "add the email field", "fix the broken link". Not "everything I did today".</p><p>Small commits mean that when something breaks, you can find exactly which change caused it. Big commits mean staring at 400 changed lines wondering which one did it. Nobody has ever regretted committing too often.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 complete</span></label>
+</section>
+
+<!-- ================= 09 ================= -->
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>Writing messages people respect</h2><span class="tagline">low effort, high signal</span></div>
+
+  <p>This feels cosmetic. It isn't. Commit messages are the most visible writing you do as a developer — reviewers, teammates and interviewers all read them, and a history full of "update" tells them something about you that you'd rather it didn't.</p>
+
+  <h3>The rule</h3>
+  <div class="cue"><p class="cue-k">Finish this sentence</p><p><strong>"If applied, this commit will…"</strong></p><p>So: <em>"Add email validation to the signup form"</em>. Present tense, describes the change, no full stop needed, under about 50 characters.</p></div>
+
+  <div class="mention">
+    <div class="mrow"><b>Bad</b><span><code>update</code> · <code>fix</code> · <code>asdf</code> · <code>final</code> · <code>final v2</code> · <code>changes</code> · <code>done</code> · <code>.</code></span></div>
+    <div class="mrow"><b>Good</b><span><code>Add roll number field to registration form</code></span></div>
+    <div class="mrow"><b>Good</b><span><code>Fix broken syllabus link in footer</code></span></div>
+    <div class="mrow"><b>Good</b><span><code>Remove unused CSS from header</code></span></div>
+    <div class="mrow"><b>Good</b><span><code>Rename student folder to match username</code></span></div>
+  </div>
+
+  <p>A useful test: if you looked at this list of messages in three months, could you find the one commit you're looking for without opening any of them? That's the entire purpose.</p>
+
+  <h3>Why present tense?</h3>
+  <p>It reads as an instruction the commit carries out, which is how Git's own generated messages are written ("Merge branch…", "Revert…"). Consistency with the tool is the reason; it's a convention, not a law, but it's near-universal and following it costs nothing.</p>
+
+  <div class="cue"><p class="cue-k">Fixing the last message</p><p>Typo in the message you just wrote? <code>git commit --amend -m "Better message"</code> replaces it. Only do this <strong>before you push</strong>. After pushing, leave it alone — making a new commit is normal and nobody minds.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q9</b>Which of these is the best commit message?
+      <ol type="a"><li><code>fixed stuff</code></li><li><code>Fixed the thing where the button didn't work properly when you clicked it on mobile devices sometimes</code></li><li><code>Fix submit button not responding on mobile</code></li><li><code>update index.html</code></li></ol>
+    </div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>(c).</strong> It says what changed, it's specific, it's present tense, and it fits on one line.</p>
+      <p>(a) and (d) say nothing useful — (d) is especially empty because Git already records which file changed. (b) has the right information but is far too long for a summary line; that level of detail belongs in the commit's extended description, if anywhere.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 09 complete</span></label>
+</section>
+
+<!-- ================= 10 ================= -->
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>git log and git diff</h2><span class="tagline">reading what happened</span></div>
+
+  <h3>git log — your history</h3>
+  <div class="cmd"><span class="p">$</span> git log --oneline
+<span class="o">a91c3e2 Add learning notes</span>
+<span class="o">4f2a91b Add my name to README and create notes file</span>
+<span class="o">8c1d0f4 Initial commit</span></div>
+
+  <p>Newest at the top. Three commits: GitHub made the first when you ticked "Add a README", and the other two are yours.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>git log --oneline</b><span>Compact, one line each. What you'll use nearly all of the time.</span></div>
+    <div class="mrow"><b>git log</b><span>Full detail — author, date, complete message. Press <kbd>q</kbd> to exit.</span></div>
+    <div class="mrow"><b>git log -3</b><span>Only the last three commits.</span></div>
+    <div class="mrow"><b>git log --stat</b><span>Adds which files changed and how many lines in each.</span></div>
+    <div class="mrow"><b>git log --oneline --graph</b><span>Draws the history as a diagram. Looks like a straight line now; it'll be more interesting once you use branches.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">Stuck in a screen you can't exit?</p><p>Long output opens in a pager. Press <kbd>q</kbd> to quit. Arrow keys or <kbd>Space</kbd> scroll. This catches everyone exactly once — <code>q</code> for quit.</p></div>
+
+  <h3>git diff — exactly what changed</h3>
+  <div class="dothis">
+    <h4>Do this now</h4>
+    <p>Edit <code>notes.txt</code>, add any line, save, then run:</p>
+  </div>
+
+  <div class="cmd"><span class="p">$</span> git diff
+
+<span class="o">diff --git a/notes.txt b/notes.txt</span>
+<span class="o">--- a/notes.txt</span>
+<span class="o">+++ b/notes.txt</span>
+<span class="o">@@ -1,2 +1,3 @@</span>
+<span class="o"> practice notes</span>
+<span class="o"> learned about staging</span>
+<span class="gg">+learned about diff</span></div>
+
+  <p>Lines starting with <code>+</code> (green) were added. Lines with <code>-</code> (red) were removed. Unmarked lines are context, shown so you can see where the change sits. The <code>@@ -1,2 +1,3 @@</code> line says which line numbers you're looking at — you can ignore it.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>git diff</b><span>Changes you have <strong>not</strong> staged yet.</span></div>
+    <div class="mrow"><b>git diff --staged</b><span>Changes you <strong>have</strong> staged. A good last check before committing.</span></div>
+    <div class="mrow"><b>git diff filename</b><span>Just that one file.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">Build this habit now</p><p>Run <code>git diff</code> before every <code>git add</code>. It takes seconds and it catches the debugging line you forgot to delete, the password you accidentally hardcoded, and the file you changed by mistake. Professional developers do this reflexively, and it's the cheapest quality habit you can build.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 complete</span></label>
+</section>
+
+<!-- ================= 11 ================= -->
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>git push and git pull</h2><span class="tagline">talking to GitHub</span></div>
+
+  <div class="dothis">
+    <h4>Do this now — send your work up</h4>
+  </div>
+
+  <div class="cmd"><span class="p">$</span> git push
+
+<span class="o">Enumerating objects: 8, done.</span>
+<span class="o">Writing objects: 100% (6/6), 512 bytes, done.</span>
+<span class="o">To https://github.com/YOUR-USERNAME/git-practice.git</span>
+<span class="o">   8c1d0f4..a91c3e2  main -&gt; main</span>
+
+<span class="p">$</span> git status
+<span class="o">Your branch is up to date with 'origin/main'.</span></div>
+
+  <p>Now refresh your repository page on GitHub. Your files are there, your commits are listed, your name is on them. <strong>That is the loop.</strong> Everything else in this course is a variation on it.</p>
+
+  <div class="cue"><p class="cue-k">Take a moment to look around</p><p>Click the commit count above the file list. You'll see your commits with their messages. Click one — GitHub shows you the exact diff, the same information <code>git diff</code> gave you in the terminal. This is what your TA reads when marking your work, and what an interviewer sees when they open your profile.</p></div>
+
+  <h3>git pull — the other direction</h3>
+  <p>Pull brings down commits that exist on GitHub but not on your laptop. You need it when you work on two machines, when you're on a team, or when you edit a file directly on the GitHub website.</p>
+
+  <div class="dothis">
+    <h4>Do this now — create a change on GitHub and pull it</h4>
+    <ol>
+      <li>On GitHub, open <code>README.md</code> and click the pencil icon.</li>
+      <li>Add a line. Scroll down, click <strong>Commit changes</strong>.</li>
+      <li>Back in your terminal:</li>
+    </ol>
+  </div>
+
+  <div class="cmd"><span class="p">$</span> git pull
+<span class="o">Updating a91c3e2..d3f8b02</span>
+<span class="o">Fast-forward</span>
+<span class="o"> README.md | 1 +</span>
+
+<span class="p">$</span> cat README.md    <span class="cm"># your web edit is now on your laptop</span></div>
+
+  <p>You'll see the words <strong>"Fast-forward"</strong>. That means your laptop had nothing new of its own, so Git could simply catch up. You'll meet that term properly in the session — for now, it just means the update was clean.</p>
+
+  <div class="cue watch"><p class="cue-k">The rule that avoids most pain</p><p><strong>Pull before you start working. Push when you finish.</strong></p><p>If you and GitHub both have new commits, Git has to combine them, which is where beginners get confused and frightened. Pulling first means that situation almost never arises.</p></div>
+
+  <h3>Working on two computers</h3>
+  <p>Common in a hostel — a laptop and a lab machine. The pattern is simple and worth internalising now:</p>
+  <div class="cmd"><span class="p">$</span> git pull        <span class="cm"># when you sit down</span>
+<span class="cm">... do work, commit as you go ...</span>
+<span class="p">$</span> git push        <span class="cm"># before you get up</span></div>
+  <p>Break that habit and you'll eventually have different work on two machines with no easy way to tell which is which. Keep it and Git handles the syncing invisibly.</p>
+
+  <div class="cue watch"><p class="cue-k">If push is rejected</p><p>"Updates were rejected because the remote contains work that you do not have locally" means GitHub has something you don't. Run <code>git pull</code>, then <code>git push</code>. If the pull opens a text editor asking for a merge message, press <kbd>Esc</kbd> then type <code>:wq</code> then Enter to accept the default.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q10</b>You work on your laptop all evening and make six commits. You never push. Your laptop's drive fails overnight. What have you lost?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>All six commits.</strong> Committing saves to the <code>.git</code> folder on that laptop and nowhere else. The version on GitHub is still whatever you last pushed.</p>
+      <p>This is the practical argument for pushing often — not at the end of the week, but whenever you finish something. Push is your backup.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 complete</span></label>
+</section>
+
+<!-- ================= 12 ================= -->
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>Renaming, moving and deleting</h2><span class="tagline">the bit tutorials skip</span></div>
+
+  <p>You will rename and delete files constantly, and it confuses beginners because Git needs to be told — dragging something to the Bin doesn't remove it from your repository.</p>
+
+  <h3>Deleting</h3>
+  <div class="dothis">
+    <h4>Do this now — delete a file and watch what Git says</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> echo "temporary" &gt; scratch.txt
+<span class="p">$</span> git add . && git commit -m "Add scratch file"
+
+<span class="p">$</span> rm scratch.txt          <span class="cm"># or delete it in your file manager</span>
+<span class="p">$</span> git status
+<span class="o">Changes not staged for commit:</span>
+        <span class="rr">deleted:    scratch.txt</span></div>
+
+  <p>Red again — the deletion is a change like any other, and it isn't recorded until you stage and commit it.</p>
+  <div class="cmd"><span class="p">$</span> git add .
+<span class="p">$</span> git commit -m "Remove scratch file"
+<span class="p">$</span> git push</div>
+
+  <div class="cue watch"><p class="cue-k">This is why "I deleted it but it's still on GitHub"</p><p>Deleting the file locally is only step one. Until you commit the deletion and push, GitHub still has it. There's nothing strange happening — deletion just follows the same add-commit-push loop as everything else.</p></div>
+
+  <p><code>git rm scratch.txt</code> does the delete and the staging in one step, if you prefer. Both are fine.</p>
+
+  <h3>Renaming and moving</h3>
+  <div class="cmd"><span class="p">$</span> git mv notes.txt learning-notes.txt
+<span class="p">$</span> git status
+<span class="o">Changes to be committed:</span>
+        <span class="gg">renamed:    notes.txt -&gt; learning-notes.txt</span></div>
+
+  <p>You can also just rename it in VS Code or your file manager. Git then sees a deleted file and a new one, but when you <code>git add .</code> it's usually smart enough to notice the contents are identical and report it as a rename anyway. Both routes work; <code>git mv</code> is simply more explicit.</p>
+
+  <div class="cue watch"><p class="cue-k">A trap on Windows and Mac</p><p>Those systems treat <code>Index.html</code> and <code>index.html</code> as the same file, but Git and Linux servers don't. So renaming a file to change only its capitalisation may appear to do nothing at all in Git.</p><p>If you need to, do it in two steps: <code>git mv index.html temp.html</code> then <code>git mv temp.html Index.html</code>. This matters more than it sounds — it's a classic cause of "it works on my laptop but the deployed site shows a broken image".</p></div>
+
+  <h3>Getting a deleted file back</h3>
+  <p>Deleted something by accident and haven't committed yet?</p>
+  <div class="cmd"><span class="p">$</span> git restore scratch.txt</div>
+  <p>It comes straight back, exactly as it was at the last commit. This is one of those moments where the value of committing often becomes very concrete.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 12 complete</span></label>
+</section>
+
+<!-- ================= 13 ================= -->
+<section id="s13">
+  <div class="shead"><span class="chip">13</span><h2>.gitignore</h2><span class="tagline">what not to track</span></div>
+
+  <p>Some files should never go into a repository. A <code>.gitignore</code> file lists them, and Git then pretends they don't exist — they won't show as untracked, and <code>git add .</code> will skip them.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>Dependencies</b><span><code>node_modules/</code> — tens of thousands of files that anyone can regenerate with one command. Never commit this.</span></div>
+    <div class="mrow"><b>Secrets</b><span><code>.env</code>, API keys, passwords, credentials. Committing these to a public repo is a real security incident that happens to real people every week.</span></div>
+    <div class="mrow"><b>Build output</b><span><code>dist/</code>, <code>build/</code>, <code>target/</code>, <code>*.class</code> — generated from your source, so storing it is duplication that goes stale.</span></div>
+    <div class="mrow"><b>OS and editor junk</b><span><code>.DS_Store</code> on Mac, <code>Thumbs.db</code> on Windows, <code>.vscode/</code>. Nobody else needs your editor settings.</span></div>
+    <div class="mrow"><b>Large binaries</b><span>Videos, big datasets, installers. Git stores every version forever, so a 200 MB file committed five times is a 1 GB repository nobody can clone quickly.</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Do this now — add one</h4>
+  </div>
+
+  <div class="cmd"><span class="p">$</span> touch .gitignore
+<span class="p">$</span> code .gitignore</div>
+
+  <p>Put this in it:</p>
+  <div class="cmd"><span class="cm"># dependencies</span>
+node_modules/
+
+<span class="cm"># secrets — never commit these</span>
+.env
+*.key
+
+<span class="cm"># build output</span>
+dist/
+build/
+
+<span class="cm"># OS junk</span>
+.DS_Store
+Thumbs.db</div>
+
+  <div class="mention">
+    <div class="mrow"><b>node_modules/</b><span>Trailing slash means "this folder and everything in it".</span></div>
+    <div class="mrow"><b>*.key</b><span>The asterisk matches anything, so this ignores every file ending in <code>.key</code>.</span></div>
+    <div class="mrow"><b># comment</b><span>Lines starting with <code>#</code> are notes for humans. Use them — a bare list of patterns is unreadable in six months.</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Then test that it actually works</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> echo "SECRET_KEY=hunter2" &gt; .env
+<span class="p">$</span> git status      <span class="cm"># .env does NOT appear. That's the point.</span>
+
+<span class="p">$</span> git add .gitignore
+<span class="p">$</span> git commit -m "Add gitignore"
+<span class="p">$</span> git push</div>
+
+  <p>Note that <code>.gitignore</code> itself <em>is</em> committed. It's a shared rule for the project, so everyone who clones it gets the same protection.</p>
+
+  <div class="cue watch"><p class="cue-k">The important limitation</p><p><code>.gitignore</code> only affects files Git isn't <strong>already</strong> tracking. If you commit a file first and add it to <code>.gitignore</code> afterwards, Git keeps tracking it — and worse, it stays in your history permanently, visible to anyone who looks, even if you delete it later.</p><p>So: <strong>write your <code>.gitignore</code> before your first commit.</strong> If secrets do get committed to a public repo, the only safe response is to treat them as compromised and change them.</p></div>
+
+  <div class="cue"><p class="cue-k">You don't have to write these from scratch</p><p>When creating a repository, GitHub offers a <code>.gitignore</code> template — pick Node, Java, Python, whatever fits. They're far more thorough than anything you'd write from memory. <a href="https://github.com/github/gitignore" target="_blank" rel="noopener">github.com/github/gitignore</a> has one for every language.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 13 complete</span></label>
+</section>
+
+<!-- ================= 14 ================= -->
+<section id="s14">
+  <div class="shead"><span class="chip">14</span><h2>Writing a README</h2><span class="tagline">the front page of your work</span></div>
+
+  <p>The <code>README.md</code> is what GitHub displays when anyone opens your repository. It is the first thing a TA sees when grading and the first thing a recruiter reads when they click through from your profile. An empty one makes a project look abandoned.</p>
+
+  <h3>Markdown, in about two minutes</h3>
+  <p>The <code>.md</code> means Markdown — plain text with a few symbols that turn into formatting. This is basically the whole language:</p>
+
+  <div class="cmd"><span class="o"># Big heading</span>
+<span class="o">## Smaller heading</span>
+<span class="o">### Smaller still</span>
+
+<span class="o">Normal text. **Bold text.** *Italic text.*</span>
+
+<span class="o">- A bullet point</span>
+<span class="o">- Another one</span>
+
+<span class="o">1. A numbered item</span>
+<span class="o">2. Another one</span>
+
+<span class="o">`inline code`</span>
+
+<span class="o">[Link text](https://example.com)</span></div>
+
+  <p>For a block of code, wrap it in three backticks with the language name:</p>
+  <div class="cmd"><span class="o">```html</span>
+<span class="o">&lt;h1&gt;Hello&lt;/h1&gt;</span>
+<span class="o">```</span></div>
+
+  <p>You'll use Markdown constantly — GitHub issues, pull request descriptions, documentation, and this course's submissions all use it.</p>
+
+  <div class="dothis">
+    <h4>Do this now — write a real README</h4>
+    <p>Open <code>README.md</code>, delete what's in it, and write something like this with your own details:</p>
+  </div>
+
+  <div class="cmd"><span class="o"># Git Practice</span>
+
+<span class="o">My first Git repository, created while learning the basics</span>
+<span class="o">for ESD, M.Tech CSE.</span>
+
+<span class="o">## What I learned</span>
+
+<span class="o">- The difference between Git and GitHub</span>
+<span class="o">- Staging changes with `git add` before committing</span>
+<span class="o">- Reading `git status` to work out what state things are in</span>
+<span class="o">- Pushing to GitHub so work is backed up</span>
+
+<span class="o">## Author</span>
+
+<span class="o">Your Name — [@your-username](https://github.com/your-username)</span></div>
+
+  <p>Then commit and push it, and look at the repository page. GitHub renders it properly — headings, bullets, a working link.</p>
+
+  <div class="cmd"><span class="p">$</span> git add README.md
+<span class="p">$</span> git commit -m "Write a proper README"
+<span class="p">$</span> git push</div>
+
+  <div class="cue"><p class="cue-k">What a good README answers</p><p>What is this? How do I run it? What's it built with? Who wrote it? Four questions, four short sections. That's enough for coursework and, honestly, for most professional projects too.</p></div>
+
+  <div class="cue"><p class="cue-k">Preview it while you write</p><p>In VS Code, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> with a <code>.md</code> file open to see it rendered. Much easier than pushing and refreshing to check your formatting.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 14 complete</span></label>
+</section>
+
+<!-- ================= 15 ================= -->
+<section id="s15">
+  <div class="shead"><span class="chip">15</span><h2>Undoing things without panic</h2><span class="tagline">five escape hatches</span></div>
+
+  <p>Fear of breaking things is what makes beginners commit rarely and push never. So here's the reassurance, and it's true: <strong>once you have committed, it is very hard to permanently lose work in Git.</strong> Almost everything is recoverable.</p>
+
+  <p>You don't need to memorise these. Bookmark the page and come back when you need one.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>Unstage a file</b><span><code>git restore --staged file.txt</code><br>Takes it out of staging. Your edits are completely untouched — it just turns green back to red.</span></div>
+    <div class="mrow"><b>Throw away your edits</b><span><code>git restore file.txt</code><br>Reverts the file to how it was at the last commit. <strong>This one does destroy work.</strong> Uncommitted changes cannot be recovered. Be certain.</span></div>
+    <div class="mrow"><b>Fix the last commit message</b><span><code>git commit --amend -m "Better message"</code><br>Only before you've pushed.</span></div>
+    <div class="mrow"><b>Add a forgotten file to the last commit</b><span><code>git add forgotten.txt</code> then <code>git commit --amend --no-edit</code><br>Folds it in and keeps the existing message. Again, only before pushing.</span></div>
+    <div class="mrow"><b>Undo a pushed commit</b><span><code>git revert a91c3e2</code><br>Creates a <strong>new</strong> commit that undoes that one. Safe for shared work because it adds to history rather than erasing it.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">The one rule about <code>--amend</code></p><p>It rewrites your last commit. Safe before you push, messy after. If you've already pushed, don't amend — just make a new commit that fixes the problem. That's completely normal and nobody will comment on it.</p></div>
+
+  <h3>Looking at an old version</h3>
+  <p>Want to see what a file looked like three commits ago? Get the hash from <code>git log --oneline</code>, then:</p>
+  <div class="cmd"><span class="p">$</span> git show 4f2a91b:notes.txt</div>
+  <p>That prints the old version to the screen without changing anything in your folder. This is the payoff for all the committing — every past state is still there and still reachable.</p>
+
+  <div class="cue calm"><p class="cue-k">Your real safety net</p><p>Your repository on GitHub is a complete backup. If your local folder ever gets into a state you can't untangle, you can delete the whole folder and clone it again fresh. You lose only work you hadn't pushed.</p><p>That isn't a failure — it's a legitimate move, and experienced developers do it too rather than spend an hour untangling something. Push often and the cost of doing it stays near zero.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 15 complete</span></label>
+</section>
+
+<!-- ================= 16 ================= -->
+<section id="s16">
+  <div class="shead"><span class="chip">16</span><h2>The same thing, in VS Code</h2><span class="tagline">for context, not instead</span></div>
+
+  <p>VS Code has buttons for everything you've just learned. Knowing which button is which command makes both easier to understand — and if the terminal still feels alien, this gives you a second way in.</p>
+
+  <h3>The Source Control panel</h3>
+  <p>Click the branching icon in the left sidebar, or press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd>.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>The list of files</b><span>Exactly what <code>git status</code> shows you. <strong>U</strong> means untracked, <strong>M</strong> means modified, <strong>D</strong> means deleted.</span></div>
+    <div class="mrow"><b>The + next to a file</b><span><code>git add filename</code>. The file moves to a "Staged Changes" section.</span></div>
+    <div class="mrow"><b>The + on the section header</b><span><code>git add .</code> — stages everything at once.</span></div>
+    <div class="mrow"><b>The message box + tick</b><span><code>git commit -m "your message"</code>.</span></div>
+    <div class="mrow"><b>Sync Changes</b><span><code>git pull</code> followed by <code>git push</code>, in one click.</span></div>
+    <div class="mrow"><b>Clicking a filename</b><span><code>git diff</code> for that file, shown side by side. Honestly nicer than the terminal version.</span></div>
+  </div>
+
+  <p>The colours in the file explorer follow the same rule: modified files turn yellow-ish, new files green, and a number badge shows how many files have changes.</p>
+
+  <div class="cue watch"><p class="cue-k">Learn the commands first, though</p><p>The buttons hide what's happening, which is fine once you know what's happening and a problem when you don't. Every job you take will at some point put you in a terminal on a server with no VS Code available.</p><p>Use the panel for reading diffs — it's genuinely better for that. Use the terminal for staging, committing and pushing, at least until it's automatic.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 16 complete</span></label>
+</section>
+
+<!-- ================= 17 ================= -->
+<section id="s17">
+  <div class="shead"><span class="chip">17</span><h2>When it goes wrong</h2><span class="tagline">every error you're likely to hit</span></div>
+
+  <p>Read the error message first. Git's messages are unusually good — they normally tell you exactly what to type next. These are the ones that catch people anyway.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>fatal: not a git repository</b><span>You're standing in the wrong folder. Run <code>pwd</code>, then <code>cd</code> into your project. Git commands only work inside a folder containing <code>.git</code>.</span></div>
+    <div class="mrow"><b>I'm trapped in a weird editor</b><span>You forgot <code>-m</code>. Press <kbd>Esc</kbd>, type <code>:q!</code>, Enter. Then redo the commit with <code>-m "your message"</code>. Prevent it for good: <code>git config --global core.editor "code --wait"</code></span></div>
+    <div class="mrow"><b>Password rejected on push</b><span>Your password isn't wrong — GitHub removed password-over-Git in 2021, so that method no longer exists. Run <code>gh auth login</code> once and it's solved permanently.</span></div>
+    <div class="mrow"><b>Permission denied / 403</b><span>You're pushing to a repository you don't own. Run <code>git remote -v</code> and check your own username is in the URL.</span></div>
+    <div class="mrow"><b>Updates were rejected</b><span>GitHub has commits you don't have. <code>git pull</code>, then <code>git push</code>.</span></div>
+    <div class="mrow"><b>nothing to commit</b><span>You didn't <code>git add</code>. Red means it isn't going in.</span></div>
+    <div class="mrow"><b>I committed but GitHub is empty</b><span>You didn't push. Check <code>git status</code> — if it says "ahead by N commits", that's exactly what's happening.</span></div>
+    <div class="mrow"><b>Stuck in a scrolling screen</b><span>Press <kbd>q</kbd>. That's the pager, used by <code>git log</code> and <code>git diff</code>.</span></div>
+    <div class="mrow"><b>Every line shows as changed</b><span>The Windows line-endings problem. Run <code>git config --global core.autocrlf true</code> and re-clone. See section 03.</span></div>
+    <div class="mrow"><b>Please tell me who you are</b><span>You skipped the <code>user.name</code> and <code>user.email</code> config. Section 03 has the two commands.</span></div>
+    <div class="mrow"><b>error: pathspec did not match</b><span>You typed a filename that doesn't exist — nearly always a typo. Run <code>ls</code> to see the real names, and use <kbd>Tab</kbd> completion next time.</span></div>
+  </div>
+
+  <h3>Helping yourself</h3>
+  <div class="cmd"><span class="p">$</span> git help commit        <span class="cm"># full manual, press q to exit</span>
+<span class="p">$</span> git commit -h           <span class="cm"># short summary of the options</span></div>
+  <p>And searching is completely legitimate. Paste the exact error message into a search engine — Git has been around for twenty years, and whatever you've hit, several thousand people have hit it before you and written it up.</p>
+
+  <div class="cue calm"><p class="cue-k">Asking for help is a skill, not a failure</p><p>When you're stuck, post in the class group with <strong>a screenshot of your terminal showing <code>git status</code> and the error message</strong>. That single screenshot usually makes the answer obvious in seconds.</p><p>Asking early with good information is a professional skill that people get promoted for. Silently struggling for two days is not.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 17 complete</span></label>
+</section>
+
+<!-- ================= 18 ================= -->
+<section id="s18">
+  <div class="shead"><span class="chip">18</span><h2>A first look at branches</h2><span class="tagline">so you arrive warm, not cold</span></div>
+
+  <p>This is where the session starts, so you don't need to master it. You just need the word to be familiar rather than frightening when it appears on the screen.</p>
+
+  <p>You've been on a branch this entire time. <code>git status</code> has been saying "On branch main" since section 06.</p>
+
+  <h3>What a branch is</h3>
+  <p>Most tutorials say "a parallel copy of your project". That's misleading, and it's why merging feels scary to people. Here's the accurate version:</p>
+
+  <div class="cue"><p class="cue-k">A branch is a pointer to one commit</p><p>That's it. It's a tiny file containing the ID of a commit. When you make a new commit, the pointer moves forward to it.</p><p>Because it's just a pointer, creating a branch copies nothing, takes no time, and uses no meaningful space.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — see it for yourself</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> cat .git/refs/heads/main
+<span class="o">a91c3e2f4b8d1c05e7a92f3b6d840c1e5a7b2f93</span>
+
+<span class="p">$</span> git log --oneline -1
+<span class="o">a91c3e2 Add learning notes</span></div>
+
+  <p>The same ID. The branch "main" is literally that one line of text pointing at your latest commit. No magic anywhere.</p>
+
+  <h3>Why they exist</h3>
+  <p>You want to try something risky without disturbing the working version. So you make a branch, experiment there, and if it works you combine it back in. If it doesn't, you delete the branch and nothing was harmed. On a team, everyone works on their own branch and combines at the end, so nobody overwrites anybody.</p>
+
+  <div class="dothis">
+    <h4>Optional — try one</h4>
+    <p>Entirely safe. You can undo all of it.</p>
+  </div>
+  <div class="cmd"><span class="p">$</span> git switch -c experiment      <span class="cm"># create a branch and move to it</span>
+<span class="p">$</span> echo "trying something" &gt;&gt; notes.txt
+<span class="p">$</span> git add . && git commit -m "Try an experiment"
+
+<span class="p">$</span> git switch main               <span class="cm"># go back</span>
+<span class="p">$</span> cat notes.txt                 <span class="cm"># your experiment line is GONE</span>
+
+<span class="p">$</span> git switch experiment
+<span class="p">$</span> cat notes.txt                 <span class="cm"># and it's back</span>
+
+<span class="p">$</span> git branch                    <span class="cm"># list branches, * marks where you are</span></div>
+
+  <p>Your files changed on disk when you switched. Nothing was lost — the two branches simply point at different commits, and Git makes the folder match whichever one you're on.</p>
+
+  <div class="cue"><p class="cue-k">What the session will cover</p><p>Switching and checking out · merging branches together · fast-forward vs merge commits · stashing half-finished work · rebasing · worktrees · and pull requests, which is how you'll submit every assignment this term.</p><p>None of that is needed now. Arriving knowing that a branch is a pointer puts you comfortably ahead of where most people start.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q11</b>You create a branch on a project with ten years of history and 50,000 files. Roughly how much disk space does the new branch use?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>About 41 bytes.</strong> A branch is one small file containing a commit ID. Nothing is copied.</p>
+      <p>This is why teams create and delete branches casually, dozens per week. If branches were copies that would be absurd — because they're pointers, it's free.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 18 complete</span></label>
+</section>
+
+<!-- ================= 19 ================= -->
+<section id="s19">
+  <div class="shead"><span class="chip">19</span><h2>Practice run, unaided</h2><span class="tagline">the part that makes it stick</span></div>
+
+  <p>Reading a document about Git and being able to use Git are different things. This section closes that gap. Do the whole thing <strong>without scrolling up</strong> — if you get stuck, run <code>git status</code> and read what it says before you look anything up.</p>
+
+  <div class="dothis">
+    <h4>The task</h4>
+    <ol>
+      <li>Create a new <strong>public</strong> repository on GitHub called <code>git-practice-2</code>, with a README.</li>
+      <li>Clone it into <code>~/code</code>.</li>
+      <li>Confirm the remote points at your own account.</li>
+      <li>Add a <code>.gitignore</code> containing at least <code>.env</code> and <code>node_modules/</code>. Commit it.</li>
+      <li>Create a file called <code>about.md</code> with a heading, two bullet points and a link. Commit it separately.</li>
+      <li>Rewrite the README with a proper heading and description. Commit that separately too.</li>
+      <li>Create a file called <code>delete-me.txt</code>, commit it, then delete it and commit the deletion.</li>
+      <li>Push everything.</li>
+      <li>Check on GitHub that all five commits are there with readable messages.</li>
+      <li>Edit the README on the GitHub website, then pull the change down to your laptop.</li>
+    </ol>
+  </div>
+
+  <div class="cue"><p class="cue-k">How to judge yourself</p><p>You're ready if you got through it needing <code>git status</code> but not this document. You're nearly ready if you looked up one or two commands. If you had to reread whole sections, that's fine — do it once more tomorrow rather than pushing on. Repetition is doing the work here, not comprehension.</p></div>
+
+  <div class="cue watch"><p class="cue-k">One deliberate mistake worth making</p><p>Before you finish, try committing something <em>without</em> running <code>git add</code> first, and read Git's response carefully. Then try pushing from a folder that isn't a repository. Deliberately triggering the two most common errors while you're calm means you'll recognise them instantly when they happen for real.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 19 complete</span></label>
+</section>
+
+<!-- ================= 20 ================= -->
+<section id="s20">
+  <div class="shead"><span class="chip">20</span><h2>Final checkpoint</h2><span class="tagline">answer before revealing</span></div>
+
+  <p>Fifteen questions. Answer each one in your head — or better, write it down — <em>before</em> opening the answer. Getting one wrong is information, not failure; go back to the section it came from and reread that bit.</p>
+
+  <div class="quiz"><div class="q"><b>1</b>In one sentence each: what is Git, and what is GitHub?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Git is a program on your laptop that records versions of a folder. GitHub is a website that stores copies of Git projects online so you can share them and collaborate.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>2</b>Name the four places a file can be, in order, and the command that moves it between each.</div>
+    <details><summary>Show answer</summary><div class="a"><p>Working directory →(<code>git add</code>)→ staging area →(<code>git commit</code>)→ commit history →(<code>git push</code>)→ GitHub.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>3</b>What does a red filename in <code>git status</code> mean?</div>
+    <details><summary>Show answer</summary><div class="a"><p>It's changed (or brand new) but not staged, so it will <strong>not</strong> be in your next commit. Run <code>git add</code> to turn it green.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>4</b>What's the difference between <code>git add .</code> and <code>git add filename</code>, and why should you be careful with the first?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The dot stages every change in the current folder and below; naming a file stages only that one. The dot can sweep up secrets, huge files and half-finished work — so run <code>git status</code> and read it first.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>5</b>You commit but don't push. Where does your work exist?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Only in the <code>.git</code> folder on that one laptop. GitHub has nothing. If the laptop dies, the work is gone.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>6</b>Write a good commit message for: you added a phone number field to a signup form.</div>
+    <details><summary>Show answer</summary><div class="a"><p>Something like <code>Add phone number field to signup form</code>. Present tense, specific, completes "if applied, this commit will…", under about 50 characters.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>7</b>What does <code>origin</code> refer to?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The default nickname for the remote copy of your repository — in practice, the GitHub URL you cloned from. A convention rather than a keyword, but effectively universal.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>8</b>Name three kinds of file that belong in <code>.gitignore</code>, and say why for one of them.</div>
+    <details><summary>Show answer</summary><div class="a"><p>Dependencies (<code>node_modules/</code>) — regenerable, tens of thousands of files. Secrets (<code>.env</code>) — committing them to a public repo is a security incident. Build output (<code>dist/</code>) — generated from source, so it's duplication. Large binaries and OS junk also count.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>9</b>You add a file to <code>.gitignore</code> but it was already committed last week. Is it now ignored?</div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>No.</strong> <code>.gitignore</code> only affects files Git isn't already tracking. It also stays in your history permanently. This is why the <code>.gitignore</code> should come before the first commit — and why a leaked secret must be changed, not just deleted.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>10</b>You delete a file in your file manager. Is it gone from the repository?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Not yet. <code>git status</code> shows it in red as <code>deleted:</code>. You still have to <code>git add</code>, commit and push for the deletion to be recorded. Deletion follows the same loop as every other change.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>11</b>You're trapped in a strange editor after running <code>git commit</code>. What do you press?</div>
+    <details><summary>Show answer</summary><div class="a"><p><kbd>Esc</kbd>, then <code>:q!</code>, then Enter. Then redo the commit with <code>-m "your message"</code>.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>12</b>Your push is rejected saying the remote has work you don't have. What do you do?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>git pull</code> to bring their commits down, then <code>git push</code>. Better still, build the habit of pulling before you start work.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>13</b>What is a branch, mechanically?</div>
+    <details><summary>Show answer</summary><div class="a"><p>A pointer to a single commit — a small file holding a commit ID. Not a copy of the project. Committing moves the pointer forward.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>14</b>You staged a file by mistake. How do you unstage it without losing your edits?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>git restore --staged filename</code>. It turns green back to red; your edits are untouched. Note that <code>git restore filename</code> — without <code>--staged</code> — is the dangerous one that throws the edits away.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>15</b>Write out the four commands of the everyday loop, in order.</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>git status</code> → <code>git add .</code> → <code>git commit -m "message"</code> → <code>git push</code></p><p>With <code>git status</code> again between each step while you're still learning. If you can type this without thinking, you're ready for the session.</p></div></details></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 20 complete</span></label>
+</section>
+
+<!-- ================= GLOSSARY ================= -->
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+
+  <div class="gloss">
+    <div class="grow"><b>branch</b><span>A pointer to a commit; a separate line of work. Default is <code>main</code>.</span></div>
+    <div class="grow"><b>clone</b><span>Download a full copy of a repository, including all history.</span></div>
+    <div class="grow"><b>commit</b><span>A saved snapshot of the whole project, with a message and an author.</span></div>
+    <div class="grow"><b>diff</b><span>The set of differences between two versions. Additions in green, removals in red.</span></div>
+    <div class="grow"><b>fast-forward</b><span>When Git can update by simply moving a pointer forward, with nothing to combine.</span></div>
+    <div class="grow"><b>fork</b><span>Your own copy of someone else's repository on GitHub. Covered in the session.</span></div>
+    <div class="grow"><b>hash / SHA</b><span>The unique fingerprint of a commit, like <code>a91c3e2</code>. Shortened from 40 characters.</span></div>
+    <div class="grow"><b>HEAD</b><span>Git's name for "where you are right now" — normally the tip of your current branch.</span></div>
+    <div class="grow"><b>main</b><span>The conventional name for the primary branch. Older projects call it <code>master</code>.</span></div>
+    <div class="grow"><b>merge</b><span>Combining the work of two branches. Covered in the session.</span></div>
+    <div class="grow"><b>origin</b><span>The default nickname for the remote you cloned from.</span></div>
+    <div class="grow"><b>pull</b><span>Fetch commits from the remote and apply them to your local copy.</span></div>
+    <div class="grow"><b>pull request (PR)</b><span>A request to have your changes merged into someone else's repository. How you'll submit assignments.</span></div>
+    <div class="grow"><b>push</b><span>Send your local commits to the remote.</span></div>
+    <div class="grow"><b>remote</b><span>A copy of the repository somewhere else, usually on GitHub.</span></div>
+    <div class="grow"><b>repository</b><span>A folder Git is tracking — one containing a <code>.git</code> sub-folder.</span></div>
+    <div class="grow"><b>staging area</b><span>The holding pen for changes you intend to include in your next commit. Also called the index.</span></div>
+    <div class="grow"><b>tracked / untracked</b><span>Tracked means Git knows about the file. Untracked means it has never been added.</span></div>
+    <div class="grow"><b>working directory</b><span>The actual files on your disk that you edit.</span></div>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Glossary read</span></label>
+</section>
+
+<div class="finish">
+  <h2>Submit this to finish</h2>
+  <p>Two things in the class group. It's how we know you're ready, and it's the only thing you need to hand in.</p>
+  <div class="cmd"><span class="p">$</span> git log --oneline</div>
+  <ol>
+    <li><strong>A screenshot of that output</strong>, showing at least three commits with real messages.</li>
+    <li><strong>The link to your <code>git-practice</code> repository</strong> on GitHub.</li>
+  </ol>
+  <p style="margin-top:16px">Then you're done. You can clone, stage, commit, push, pull, rename, delete, ignore files, undo mistakes, read history, write a README, and you know what a branch actually is. That is a real, employable skill and you now have it.</p>
+  <p><strong>The session starts where this document ends.</strong> Branches, merging, stashing, rebasing, worktrees and pull requests all assume exactly what you've just learned and nothing more.</p>
+
+  <h2 style="margin-top:30px;font-size:20px">The everyday loop</h2>
+  <div class="cmd"><span class="p">$</span> git status                    <span class="cm"># where is everything?</span>
+<span class="p">$</span> git add .                      <span class="cm"># stage changes</span>
+<span class="p">$</span> git commit -m "message"        <span class="cm"># save a snapshot</span>
+<span class="p">$</span> git push                       <span class="cm"># send to GitHub</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Everything else, on one card</h2>
+  <div class="cmd"><span class="p">$</span> git clone &lt;url&gt;                <span class="cm"># download a repo</span>
+<span class="p">$</span> git pull                       <span class="cm"># get changes from GitHub</span>
+<span class="p">$</span> git log --oneline              <span class="cm"># see history</span>
+<span class="p">$</span> git diff                       <span class="cm"># what changed, unstaged</span>
+<span class="p">$</span> git diff --staged              <span class="cm"># what changed, staged</span>
+<span class="p">$</span> git remote -v                  <span class="cm"># where does this push to?</span>
+<span class="p">$</span> git mv old new                 <span class="cm"># rename a tracked file</span>
+<span class="p">$</span> git rm file                    <span class="cm"># delete and stage it</span>
+<span class="p">$</span> git restore --staged file      <span class="cm"># unstage (edits kept)</span>
+<span class="p">$</span> git restore file               <span class="cm"># discard edits (destructive)</span>
+<span class="p">$</span> git commit --amend -m "..."    <span class="cm"># fix last message, pre-push</span>
+<span class="p">$</span> git revert &lt;hash&gt;              <span class="cm"># undo a pushed commit safely</span>
+<span class="p">$</span> git show &lt;hash&gt;:file           <span class="cm"># view an old version</span>
+<span class="p">$</span> git branch                     <span class="cm"># list branches</span>
+<span class="p">$</span> git switch -c name             <span class="cm"># create and switch to a branch</span>
+<span class="p">$</span> git help &lt;command&gt;             <span class="cm"># the manual</span></div>
+</div>
+
+<footer>M.Tech CSE · ESD · Git prerequisites<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+
+</div>
+
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ----
+     Fragment hrefs get resolved against the host page URL in some
+     embedded/iframed contexts, which breaks them. Scrolling manually
+     works the same whether this file is opened locally, served from
+     a static host, or previewed inside another page. */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=['Work through it at whatever pace suits you.',
+             'Good start — section 04 is the one that matters most.',
+             'Past halfway. The hard conceptual part is behind you.',
+             'Nearly there. The practice run is where it sticks.',
+             'Done. Post your git log screenshot in the group.'];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    msg.textContent=n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))];
+  }
+  checks.forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^\$\s?/,'').trim()}).filter(Boolean).join('\n');
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>
