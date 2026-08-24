@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSS &amp; layout — box model, Flexbox, Grid, responsive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+.cue.work{border-left-color:var(--ink);background:var(--surface)}
+.cue.work .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.tg{color:var(--term-green)}
+.at{color:var(--signal)}
+.st{color:#B7C4C0}
+.tx{color:#FFFFFF}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 186px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 168px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> CSS &amp; layout</p>
+  <h1>CSS: the box<br>model, <em>Flexbox</em><br>&amp; Grid</h1>
+  <p class="lede">CSS has a reputation for being fiddly and unpredictable. It isn't — it's a small set of rules applied consistently, and almost all the frustration comes from not knowing three of them: how a box is measured, how the cascade decides who wins, and which layout tool fits which problem. This document is those three things, then Flexbox and Grid properly, then making it work on a phone.</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">0</span> sections</div>
+      <div class="tracker-msg" id="msg">Work through it at whatever pace suits you.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p>This assumes you can write HTML and know what the DOM is — CSS selects nodes out of that tree, so if the tree is still fuzzy, go and fix that first.</p>
+  <p><strong>CSS is the subject people fake for longest.</strong> It's easy to nudge values until something looks right, ship it, and never find out why it worked. That approach collapses the first time a layout breaks on a screen size you didn't test. The sections on the box model (04–05) and the cascade (03) are the ones that stop that happening.</p>
+  <p><strong>There is no time limit and nothing to submit.</strong> Keep a browser open with DevTools next to you the whole way through — CSS is the one topic where reading without looking is close to useless.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — sections build on each other, so go in order the first time</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">What CSS is and how it attaches</span></a>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">Selectors — querying the tree</span></a>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">The cascade, specificity, inheritance</span></a>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">The box model</span></a>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">Margin collapse</span></a>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">Display and normal flow</span></a>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">Units — px, rem, em, %, vw</span></a>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">Colour and custom properties</span></a>
+  <a class="rrow" href="#s9"><span class="rt">09</span><span class="rw">Flexbox — the two axes</span></a>
+  <a class="rrow" href="#s10"><span class="rt">10</span><span class="rw">Flexbox — alignment</span></a>
+  <a class="rrow" href="#s11"><span class="rt">11</span><span class="rw">Flexbox — grow, shrink, basis</span></a>
+  <a class="rrow" href="#s12"><span class="rt">12</span><span class="rw">Grid — the anatomy</span></a>
+  <a class="rrow" href="#s13"><span class="rt">13</span><span class="rw">Grid — placing items</span></a>
+  <a class="rrow" href="#s14"><span class="rt">14</span><span class="rw">Grid — the responsive one-liner</span></a>
+  <a class="rrow" href="#s15"><span class="rt">15</span><span class="rw">Flexbox or Grid?</span></a>
+  <a class="rrow" href="#s16"><span class="rt">16</span><span class="rw">Position and z-index</span></a>
+  <a class="rrow" href="#s17"><span class="rt">17</span><span class="rw">Responsive design, mobile first</span></a>
+  <a class="rrow" href="#s18"><span class="rt">18</span><span class="rw">Responsive without media queries</span></a>
+  <a class="rrow" href="#s19"><span class="rt">19</span><span class="rw">Debugging CSS in DevTools</span></a>
+  <a class="rrow" href="#s20"><span class="rt">20</span><span class="rw">When it goes wrong</span></a>
+  <a class="rrow" href="#s21"><span class="rt">21</span><span class="rw">Practice run, unaided</span></a>
+  <a class="rrow" href="#s22"><span class="rt">22</span><span class="rw">Final checkpoint</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; reference card</span></a>
+</nav>
+
+<!-- ================= 01 ================= -->
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>What CSS is and how it attaches</h2><span class="tagline">start here</span></div>
+
+  <p><strong>C</strong>ascading <strong>S</strong>tyle <strong>S</strong>heets. A list of rules saying "elements matching this pattern should look like this". Each rule has two halves:</p>
+
+  <div class="cmd"><span class="tg">h1</span> {                    <span class="cm">/* selector — which elements */</span>
+  <span class="at">color</span>: <span class="st">#0B5D51</span>;       <span class="cm">/* declaration: property + value */</span>
+  <span class="at">font-size</span>: <span class="st">2rem</span>;
+}                       <span class="cm">/* the { } part is the declaration block */</span></div>
+
+  <h3>Three ways to attach it, one of which you should use</h3>
+  <div class="mention">
+    <div class="mrow"><b>External file</b><span>A separate <code>.css</code> file linked from the head. <strong>Use this.</strong> One file styles every page, the browser caches it, and your HTML stays readable.</span></div>
+    <div class="mrow"><b>&lt;style&gt; in the head</b><span>Rules written inside the HTML file. Fine for a single-page demo or an email template. Doesn't scale.</span></div>
+    <div class="mrow"><b>style="" attribute</b><span>Inline, on one element. Hard to override, impossible to reuse, and it beats almost everything in the cascade. Avoid except when JavaScript is setting a value at runtime.</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Do this now — set up a playground</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> mkdir -p ~/code/css-practice && cd ~/code/css-practice
+<span class="p">$</span> code .</div>
+
+  <p>Create <code>index.html</code>:</p>
+  <div class="cmd"><span class="tg">&lt;!DOCTYPE html&gt;</span>
+<span class="tg">&lt;html</span> <span class="at">lang</span>=<span class="st">"en"</span><span class="tg">&gt;</span>
+<span class="tg">&lt;head&gt;</span>
+  <span class="tg">&lt;meta</span> <span class="at">charset</span>=<span class="st">"UTF-8"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;meta</span> <span class="at">name</span>=<span class="st">"viewport"</span> <span class="at">content</span>=<span class="st">"width=device-width, initial-scale=1.0"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;title&gt;</span><span class="tx">CSS practice</span><span class="tg">&lt;/title&gt;</span>
+  <span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="st">"stylesheet"</span> <span class="at">href</span>=<span class="st">"style.css"</span><span class="tg">&gt;</span>
+<span class="tg">&lt;/head&gt;</span>
+<span class="tg">&lt;body&gt;</span>
+  <span class="tg">&lt;h1&gt;</span><span class="tx">CSS practice</span><span class="tg">&lt;/h1&gt;</span>
+  <span class="tg">&lt;p</span> <span class="at">class</span>=<span class="st">"lead"</span><span class="tg">&gt;</span><span class="tx">A paragraph to style.</span><span class="tg">&lt;/p&gt;</span>
+  <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"box"</span><span class="tg">&gt;</span><span class="tx">Box</span><span class="tg">&lt;/div&gt;</span>
+<span class="tg">&lt;/body&gt;</span>
+<span class="tg">&lt;/html&gt;</span></div>
+
+  <p>And <code>style.css</code> next to it:</p>
+  <div class="cmd"><span class="tg">body</span> {
+  <span class="at">font-family</span>: <span class="st">system-ui, sans-serif</span>;
+  <span class="at">margin</span>: <span class="st">2rem</span>;
+}
+
+<span class="tg">.box</span> {
+  <span class="at">background</span>: <span class="st">#E4EEEB</span>;
+  <span class="at">padding</span>: <span class="st">1rem</span>;
+}</div>
+
+  <p>Open it with Live Server. Everything from here assumes these two files are in front of you.</p>
+
+  <div class="cue watch"><p class="cue-k">The meta viewport line is not optional</p><p>Without <code>&lt;meta name="viewport"&gt;</code>, a phone pretends to be a 980px-wide desktop and renders your page zoomed out and unreadable. Every media query you write will be ignored.</p><p>It is the single most common reason a "responsive" site isn't. It's in the snippet above — leave it there.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete</span></label>
+</section>
+
+<!-- ================= 02 ================= -->
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>Selectors — querying the tree</h2><span class="tagline">CSS is a tree query language</span></div>
+
+  <p>A selector is a pattern matched against the DOM. That's worth holding onto — CSS isn't styling <em>text</em>, it's selecting <em>nodes</em>, and everything about how selectors combine follows from the tree.</p>
+
+  <h3>The basics</h3>
+  <div class="mention">
+    <div class="mrow"><b>p</b><span>Every <code>&lt;p&gt;</code> element. Called a type selector.</span></div>
+    <div class="mrow"><b>.lead</b><span>Every element with <code>class="lead"</code>. Your everyday tool.</span></div>
+    <div class="mrow"><b>#intro</b><span>The element with <code>id="intro"</code>. Works, but see the specificity warning in section 03.</span></div>
+    <div class="mrow"><b>*</b><span>Everything. Mostly used in resets.</span></div>
+    <div class="mrow"><b>[type="email"]</b><span>Attribute selector. Very useful for forms: <code>input[required]</code>, <code>a[href^="https"]</code>.</span></div>
+  </div>
+
+  <h3>Combining them — this is where the tree matters</h3>
+  <div class="cmd"><span class="tg">nav a</span>        { }   <span class="cm">/* any a that is a DESCENDANT of a nav, any depth */</span>
+<span class="tg">nav &gt; a</span>      { }   <span class="cm">/* only a DIRECT CHILD of a nav */</span>
+<span class="tg">h2 + p</span>       { }   <span class="cm">/* a p immediately AFTER an h2, same parent */</span>
+<span class="tg">h2 ~ p</span>       { }   <span class="cm">/* every p after an h2, same parent */</span>
+<span class="tg">a.button</span>     { }   <span class="cm">/* an a that ALSO has class button — no space! */</span>
+<span class="tg">.card, .panel</span>{ }   <span class="cm">/* either one — a comma means OR */</span></div>
+
+  <div class="cue watch"><p class="cue-k">The space is a real operator</p><p><code>a.button</code> and <code>a .button</code> mean completely different things. The first is "an anchor with class button". The second is "anything with class button, inside an anchor".</p><p>One accidental space is a genuinely common bug and it produces no error — the rule just silently matches nothing.</p></div>
+
+  <h3>Pseudo-classes — state, not structure</h3>
+  <div class="mention">
+    <div class="mrow"><b>:hover</b><span>Mouse is over it. Remember it doesn't exist on touch devices.</span></div>
+    <div class="mrow"><b>:focus</b><span>Keyboard or click focus. <strong>Never remove focus styles</strong> without replacing them — keyboard users navigate by them.</span></div>
+    <div class="mrow"><b>:focus-visible</b><span>Focus, but only when the browser thinks a focus ring should show — keyboard yes, mouse click no. Use this instead of <code>:focus</code> for outlines.</span></div>
+    <div class="mrow"><b>:first-child / :last-child</b><span>Position among siblings.</span></div>
+    <div class="mrow"><b>:nth-child(2n)</b><span>Every second one. <code>odd</code> and <code>even</code> also work.</span></div>
+    <div class="mrow"><b>:not(.active)</b><span>Everything except. Takes a selector.</span></div>
+    <div class="mrow"><b>:disabled / :checked / :invalid</b><span>Form states, straight from the DOM. Style a checked checkbox's label with no JavaScript at all.</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Do this now — style form state with zero JavaScript</h4>
+    <p>Add an input to your HTML and this to your CSS. Type something invalid and watch it react as you type.</p>
+  </div>
+  <div class="cmd"><span class="tg">input:invalid</span>  { <span class="at">border-color</span>: <span class="st">#E06C4F</span>; }
+<span class="tg">input:focus-visible</span> { <span class="at">outline</span>: <span class="st">3px solid #F5C518</span>; }</div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>What's the difference between <code>.card p</code> and <code>.card &gt; p</code>?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><code>.card p</code> matches any paragraph <em>anywhere</em> inside a card, however deeply nested. <code>.card &gt; p</code> matches only paragraphs that are <em>direct children</em> of the card.</p>
+      <p>If a card contains <code>&lt;div&gt;&lt;p&gt;…&lt;/p&gt;&lt;/div&gt;</code>, the first selector matches that paragraph and the second doesn't.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 complete</span></label>
+</section>
+
+<!-- ================= 03 ================= -->
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>The cascade, specificity, inheritance</h2><span class="tagline">why my rule isn't applying</span></div>
+
+  <p>Two rules target the same element and say different things. Which wins? This is the question behind most CSS frustration, and the answer is a fixed procedure — not a mystery.</p>
+
+  <div class="cue"><p class="cue-k">The order the browser decides in</p>
+    <p><strong>1. Importance</strong> — <code>!important</code> beats normal. Rare and best avoided.</p>
+    <p><strong>2. Specificity</strong> — a more specific selector beats a less specific one.</p>
+    <p><strong>3. Source order</strong> — if specificity ties, the one written <em>later</em> wins.</p>
+  </div>
+
+  <h3>Specificity, counted properly</h3>
+  <p>Count three numbers for each selector — <strong>ids, classes, elements</strong> — and compare left to right.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>p</b><span><code>0-0-1</code> — one element</span></div>
+    <div class="mrow"><b>.lead</b><span><code>0-1-0</code> — one class. Beats <em>any</em> number of elements.</span></div>
+    <div class="mrow"><b>p.lead</b><span><code>0-1-1</code></span></div>
+    <div class="mrow"><b>nav ul li a</b><span><code>0-0-4</code> — still loses to a single class</span></div>
+    <div class="mrow"><b>#intro</b><span><code>1-0-0</code> — beats any number of classes</span></div>
+    <div class="mrow"><b>style="" attribute</b><span>Beats all selectors. Only <code>!important</code> overrides it.</span></div>
+  </div>
+
+  <p>The comparison is <strong>not</strong> a sum. <code>0-1-0</code> beats <code>0-0-9</code>, because the class column is compared first and eleven elements still lose to one class.</p>
+
+  <div class="cue watch"><p class="cue-k">Why you should mostly stick to classes</p><p>If everything is a single class, everything is <code>0-1-0</code> and the winner is simply whichever came last — which is easy to reason about and easy to override.</p><p>Mix in ids and long descendant chains and you get a specificity war: the only way to beat <code>#sidebar ul li a</code> is something even more specific, and soon somebody reaches for <code>!important</code> and the file becomes unmaintainable. This is not a hypothetical; it's how most legacy stylesheets got that way.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — see it happen</h4>
+    <p>Put both of these in your CSS, in this order, and give a paragraph <code>class="lead"</code> and <code>id="intro"</code>.</p>
+  </div>
+  <div class="cmd"><span class="tg">#intro</span>  { <span class="at">color</span>: <span class="st">red</span>; }     <span class="cm">/* 1-0-0 */</span>
+<span class="tg">.lead</span>   { <span class="at">color</span>: <span class="st">blue</span>; }    <span class="cm">/* 0-1-0 — written later, still loses */</span></div>
+  <p>It's red. Now open DevTools, find the element, and look at the Styles pane: the blue rule is there with a <strong>line through it</strong>. That strikethrough is the browser telling you exactly which rule lost, and it's the fastest debugging tool in CSS.</p>
+
+  <h3>Inheritance</h3>
+  <p>Some properties pass down the tree to descendants automatically. Most don't.</p>
+  <div class="mention">
+    <div class="mrow"><b>Inherited</b><span>Text-related things: <code>color</code>, <code>font-family</code>, <code>font-size</code>, <code>line-height</code>, <code>text-align</code>, <code>visibility</code>.</span></div>
+    <div class="mrow"><b>Not inherited</b><span>Box-related things: <code>margin</code>, <code>padding</code>, <code>border</code>, <code>width</code>, <code>background</code>, <code>display</code>.</span></div>
+  </div>
+  <p>Which is why setting <code>font-family</code> on <code>body</code> styles the whole page, but setting <code>padding</code> on <code>body</code> does not pad every element. The rule of thumb: if inheriting would obviously be useful, it probably inherits.</p>
+
+  <div class="cue"><p class="cue-k">Two modern helpers worth knowing</p><p><code>:where(.card)</code> matches like <code>.card</code> but contributes <strong>zero specificity</strong>. Useful for defaults that should be trivially overridable.</p><p><code>:is(h1, h2, h3)</code> is shorthand for a list, taking the specificity of its most specific argument. Saves a lot of repetition.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q2</b>You write <code>.button { background: blue }</code> but the button stays grey. Give the three things to check, in order.</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>1.</strong> Does the selector match at all? Check for a typo, a missing class on the element, or the space bug from section 02. DevTools will show the rule if it matched.</p>
+      <p><strong>2.</strong> Is a more specific rule winning? Look for the strikethrough in the Styles pane.</p>
+      <p><strong>3.</strong> Is an equally specific rule later in the file overriding it?</p>
+      <p>Almost every "CSS is broken" moment is one of these three, and DevTools answers all of them in about five seconds.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 complete</span></label>
+</section>
+
+<!-- ================= 04 ================= -->
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>The box model</h2><span class="tagline">the most important section</span></div>
+
+  <p>Every element the browser draws is a rectangle. That rectangle has four nested layers, and knowing them is the difference between placing things deliberately and nudging numbers until it looks right.</p>
+
+  <figure class="board">
+    <svg viewBox="0 0 780 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The box model: content at the centre, surrounded by padding, then border, then margin.">
+      <rect x="90" y="26" width="500" height="266" fill="#F7E9B8" stroke="#8A6D08" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <text x="102" y="46" font-family="IBM Plex Mono, monospace" font-size="12" fill="#8A6D08" font-weight="600">margin</text>
+
+      <rect x="150" y="70" width="380" height="178" fill="#0F1A18"/>
+      <text x="162" y="90" font-family="IBM Plex Mono, monospace" font-size="12" fill="#F5C518" font-weight="600">border</text>
+
+      <rect x="172" y="98" width="336" height="122" fill="#CDE3DC"/>
+      <text x="184" y="118" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0B5D51" font-weight="600">padding</text>
+
+      <rect x="212" y="130" width="256" height="58" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="340" y="164" text-anchor="middle" font-family="IBM Plex Sans Condensed, sans-serif" font-size="16" font-weight="700" fill="#0F1A18">CONTENT</text>
+
+      <g font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="#2B3936">
+        <text x="612" y="140">Your text or image.</text>
+        <text x="612" y="162">Padding is inside the</text>
+        <text x="612" y="180">border and takes the</text>
+        <text x="612" y="198">background colour.</text>
+        <text x="612" y="226">Margin is outside the</text>
+        <text x="612" y="244">border and is always</text>
+        <text x="612" y="262">transparent.</text>
+      </g>
+
+      <g stroke="#5A6B67" stroke-width="1.5">
+        <line x1="212" y1="308" x2="468" y2="308"/>
+        <line x1="212" y1="303" x2="212" y2="313"/><line x1="468" y1="303" x2="468" y2="313"/>
+        <line x1="150" y1="326" x2="530" y2="326"/>
+        <line x1="150" y1="321" x2="150" y2="331"/><line x1="530" y1="321" x2="530" y2="331"/>
+      </g>
+      <text x="340" y="303" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#5A6B67">content-box width</text>
+      <text x="340" y="339" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#0B5D51" font-weight="600">border-box width — what you actually want</text>
+    </svg>
+    <figcaption>Four layers. The two measurements at the bottom are the whole reason <code>box-sizing</code> exists.</figcaption>
+  </figure>
+
+  <div class="mention">
+    <div class="mrow"><b>content</b><span>The text or image itself.</span></div>
+    <div class="mrow"><b>padding</b><span>Space <em>inside</em> the border. Takes the element's background colour. Use it to stop text touching the edge.</span></div>
+    <div class="mrow"><b>border</b><span>A line around the padding. Has a width, style and colour.</span></div>
+    <div class="mrow"><b>margin</b><span>Space <em>outside</em> the border. Always transparent. Use it to push other elements away.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">Padding or margin?</p><p><strong>Padding</strong> when the space should be part of the element — inside its background, inside its clickable area. <strong>Margin</strong> when the space is between this element and something else.</p><p>A button's inner breathing room is padding. The gap to the next button is margin — or better, <code>gap</code> on the parent, once you reach section 09.</p></div>
+
+  <h3>The default that surprises everyone</h3>
+  <div class="cmd"><span class="tg">.box</span> {
+  <span class="at">width</span>: <span class="st">200px</span>;
+  <span class="at">padding</span>: <span class="st">20px</span>;
+  <span class="at">border</span>: <span class="st">5px solid black</span>;
+}</div>
+
+  <p>How wide is that box on screen? Not 200px. By default <code>width</code> sets the <strong>content</strong> width, and padding and border are added on top:</p>
+
+  <div class="cmd"><span class="o">200  content</span>
+<span class="o">+ 40  padding  (20 left + 20 right)</span>
+<span class="o">+ 10  border   (5 left + 5 right)</span>
+<span class="o">─────</span>
+<span class="o">250px on screen</span></div>
+
+  <p>This is <code>box-sizing: content-box</code>, the default, and it is a design decision from 1996 that almost nobody wants. Set a 25% width on four boxes, add any padding, and your row overflows.</p>
+
+  <h3>The fix, which every project uses</h3>
+  <div class="cmd"><span class="cm">/* put this at the top of every stylesheet you write */</span>
+<span class="tg">*, *::before, *::after</span> {
+  <span class="at">box-sizing</span>: <span class="st">border-box</span>;
+}</div>
+
+  <p>Now <code>width: 200px</code> means <strong>200px on screen, total</strong>, with padding and border eating into it rather than adding to it. Every CSS framework in existence does this. Do it in your first three lines and never think about it again.</p>
+
+  <div class="dothis">
+    <h4>Do this now — see both, side by side</h4>
+    <p>Add two boxes with the same width and padding, one of each sizing mode, then measure them in DevTools.</p>
+  </div>
+  <div class="cmd"><span class="tg">.a</span>, <span class="tg">.b</span> { <span class="at">width</span>: <span class="st">200px</span>; <span class="at">padding</span>: <span class="st">20px</span>; <span class="at">border</span>: <span class="st">5px solid</span>; <span class="at">margin-bottom</span>: <span class="st">1rem</span>; }
+<span class="tg">.a</span> { <span class="at">box-sizing</span>: <span class="st">content-box</span>; }   <span class="cm">/* 250px wide */</span>
+<span class="tg">.b</span> { <span class="at">box-sizing</span>: <span class="st">border-box</span>; }    <span class="cm">/* 200px wide  */</span></div>
+
+  <h3>Shorthand, and the order</h3>
+  <div class="cmd"><span class="at">padding</span>: <span class="st">10px</span>;                  <span class="cm">/* all four sides */</span>
+<span class="at">padding</span>: <span class="st">10px 20px</span>;             <span class="cm">/* vertical | horizontal */</span>
+<span class="at">padding</span>: <span class="st">10px 20px 30px</span>;        <span class="cm">/* top | horizontal | bottom */</span>
+<span class="at">padding</span>: <span class="st">10px 20px 30px 40px</span>;   <span class="cm">/* top right bottom left — clockwise */</span></div>
+  <p>Four values run clockwise from the top. The mnemonic everyone uses is <strong>TRouBLe</strong> — Top, Right, Bottom, Left. <code>margin</code> and <code>border-width</code> follow the same pattern.</p>
+
+  <div class="cue"><p class="cue-k">One shorthand worth memorising</p><p><code>margin: 0 auto;</code> — zero top and bottom, automatic left and right. <code>auto</code> splits the leftover horizontal space equally, which centres a block element that has a width. It's the oldest centring trick in CSS and still the right answer for a page container.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q3</b>Four cards, each <code>width: 25%</code> with <code>padding: 1rem</code>, in a row. They overflow. Why, and what's the one-line fix?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p>With <code>content-box</code>, each card is 25% <em>plus</em> 2rem of padding. Four of them come to 100% plus 8rem, which doesn't fit.</p>
+      <p>Fix: <code>*, *::before, *::after { box-sizing: border-box; }</code>. Now 25% includes the padding and they fit exactly.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 complete</span></label>
+</section>
+
+<!-- ================= 05 ================= -->
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>Margin collapse</h2><span class="tagline">the genuinely weird one</span></div>
+
+  <p>This one behaves in a way that looks like a bug, isn't, and wastes an afternoon of everyone's life exactly once.</p>
+
+  <div class="cue"><p class="cue-k">The rule</p><p><strong>Adjacent vertical margins collapse into one — the larger of the two.</strong> Not added together.</p></div>
+
+  <div class="cmd"><span class="tg">.top</span>    { <span class="at">margin-bottom</span>: <span class="st">30px</span>; }
+<span class="tg">.bottom</span> { <span class="at">margin-top</span>: <span class="st">20px</span>; }
+
+<span class="cm">/* the gap between them is 30px, not 50px */</span></div>
+
+  <p>Three things to know about it:</p>
+  <div class="mention">
+    <div class="mrow"><b>Vertical only</b><span>Horizontal margins never collapse. Two elements side by side with 20px each really are 40px apart.</span></div>
+    <div class="mrow"><b>Parent and first child collapse too</b><span>A parent with no padding or border, whose first child has <code>margin-top: 40px</code>, gets pushed down by 40px itself — the margin "escapes" the parent. This is the one that looks broken.</span></div>
+    <div class="mrow"><b>It doesn't happen in flex or grid</b><span>Margins on flex items and grid items never collapse. Which is one more reason modern layouts feel more predictable.</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Do this now — reproduce the escaping margin</h4>
+  </div>
+  <div class="cmd"><span class="tg">.parent</span> { <span class="at">background</span>: <span class="st">#E4EEEB</span>; }
+<span class="tg">.parent h2</span> { <span class="at">margin-top</span>: <span class="st">40px</span>; }
+
+<span class="cm">/* The gap appears ABOVE the parent's background, not inside it.
+   Now add ONE of these to .parent and watch it move inside: */</span>
+<span class="cm">/*   padding-top: 1px;  |  border-top: 1px solid;  |  display: flow-root;  */</span></div>
+
+  <p><code>display: flow-root</code> is the clean modern fix — it creates a new block formatting context, which stops margins escaping, without adding a stray pixel of padding.</p>
+
+  <div class="cue work"><p class="cue-k">How professionals sidestep the whole topic</p>
+    <p><strong>Set margins in one direction only.</strong> Pick <code>margin-bottom</code> for everything (or <code>margin-top</code>, but pick one) and stick to it. If nothing ever has both, adjacent margins can't fight.</p>
+    <p><strong>Or use <code>gap</code>.</strong> On a flex or grid container, <code>gap</code> spaces children with no margins at all — no collapse, no direction to remember, no last-child exception. This is why modern layouts barely use margins between siblings.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q4</b><code>.a</code> has <code>margin-bottom: 20px</code>. <code>.b</code>, directly after it, has <code>margin-top: 20px</code>. How big is the gap?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>20px.</strong> They collapse into one margin the size of the larger, and both are 20.</p>
+      <p>People expect 40 and then start adding compensating negative margins, which is how a stylesheet begins its decline. Use <code>gap</code> instead.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 complete</span></label>
+</section>
+
+<!-- ================= 06 ================= -->
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>Display and normal flow</h2><span class="tagline">why things sit where they do</span></div>
+
+  <p>Before any layout tool, the browser has a default way of arranging things called <strong>normal flow</strong>: block elements stack downwards, inline elements sit along a line and wrap. Everything else in this document is a deviation from that.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>display: block</b><span>Starts on a new line, takes the full width available. <code>div</code>, <code>p</code>, <code>h1</code>, <code>section</code>. Width and height apply.</span></div>
+    <div class="mrow"><b>display: inline</b><span>Sits within a line of text, only as wide as its content. <code>span</code>, <code>a</code>, <code>strong</code>. <strong>Width, height and vertical margins are ignored.</strong></span></div>
+    <div class="mrow"><b>display: inline-block</b><span>Flows inline but accepts width, height and all margins. The old way of putting boxes in a row.</span></div>
+    <div class="mrow"><b>display: none</b><span>Removed from the page entirely — takes no space, invisible to screen readers.</span></div>
+    <div class="mrow"><b>display: flex</b><span>The element becomes a flex container and its <em>children</em> become flex items. Section 09.</span></div>
+    <div class="mrow"><b>display: grid</b><span>Same idea, two-dimensional. Section 12.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">Setting height on an inline element does nothing</p><p>Try <code>a { height: 60px }</code> and nothing happens. Inline elements are sized by their content and the line box they sit in.</p><p>The fix is <code>display: inline-block</code>, or — much more often these days — make the parent a flex container, which turns every child into a flex item that accepts sizing.</p></div>
+
+  <div class="cue"><p class="cue-k">display: none vs visibility: hidden vs opacity: 0</p><p><strong>none</strong> — gone, no space reserved, not read by screen readers. <strong>visibility: hidden</strong> — invisible but still occupies its space. <strong>opacity: 0</strong> — invisible, occupies space, and is <em>still clickable</em>, which produces genuinely baffling bugs.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — prove it to yourself</h4>
+  </div>
+  <div class="cmd"><span class="tg">span.tag</span> { <span class="at">background</span>: <span class="st">#F5C518</span>; <span class="at">height</span>: <span class="st">60px</span>; <span class="at">margin</span>: <span class="st">20px</span>; }
+<span class="cm">/* height ignored, vertical margin ignored, horizontal margin applied */</span>
+
+<span class="tg">span.tag</span> { <span class="at">display</span>: <span class="st">inline-block</span>; }
+<span class="cm">/* now all of it works */</span></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 complete</span></label>
+</section>
+
+<!-- ================= 07 ================= -->
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>Units</h2><span class="tagline">pick the right one and layouts stop fighting you</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>px</b><span>An absolute pixel. Predictable. Right for borders and the occasional fixed detail. Wrong for text, because it ignores a user's browser font-size setting.</span></div>
+    <div class="mrow"><b>rem</b><span>Relative to the <strong>root</strong> font size — 16px by default. <code>1.5rem</code> = 24px. <strong>Your default for font sizes, padding, margins and gaps.</strong> Scales with user preference, and never compounds.</span></div>
+    <div class="mrow"><b>em</b><span>Relative to <em>this element's own</em> font size. Useful for spacing that should scale with the text it sits next to — but it compounds through nesting, which catches people out.</span></div>
+    <div class="mrow"><b>%</b><span>Relative to the parent — but to <em>which</em> dimension depends on the property. <code>width: 50%</code> is half the parent's width; <code>padding-top: 50%</code> is also based on the parent's <em>width</em>, not height.</span></div>
+    <div class="mrow"><b>vw / vh</b><span>1% of viewport width / height. <code>100vh</code> is exactly one screen tall.</span></div>
+    <div class="mrow"><b>dvh</b><span>Dynamic viewport height — accounts for mobile browser chrome appearing and disappearing. Use instead of <code>vh</code> for full-screen sections.</span></div>
+    <div class="mrow"><b>ch</b><span>The width of the "0" character. <code>max-width: 65ch</code> is the classic readable line length.</span></div>
+    <div class="mrow"><b>fr</b><span>A fraction of leftover space. Grid only. Section 12.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">The em compounding trap</p></div>
+  <div class="cmd"><span class="tg">.parent</span> { <span class="at">font-size</span>: <span class="st">1.2em</span>; }
+<span class="tg">.child</span>  { <span class="at">font-size</span>: <span class="st">1.2em</span>; }   <span class="cm">/* 1.44em of the grandparent */</span>
+<span class="tg">.grandchild</span> { <span class="at">font-size</span>: <span class="st">1.2em</span>; } <span class="cm">/* 1.728em — and growing */</span></div>
+  <p>Nest three lists with <code>em</code> font sizes and the innermost text is enormous. <code>rem</code> always refers to the root, so it never compounds. Default to <code>rem</code>.</p>
+
+  <div class="cue watch"><p class="cue-k">100vh is wrong on mobile</p><p>Mobile browsers hide and show the address bar as you scroll, so <code>100vh</code> is taller than the visible area and your "full screen" hero gets cut off. Use <code>100dvh</code>, or <code>min-height: 100svh</code> if you want the smallest safe height.</p></div>
+
+  <div class="cue"><p class="cue-k">A sane default set</p><p>Text and spacing in <code>rem</code>. Borders in <code>px</code>. Layout widths in <code>%</code>, <code>fr</code> or <code>minmax()</code>. Reading widths in <code>ch</code>. Full-height sections in <code>dvh</code>. That covers essentially everything you'll build.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 complete</span></label>
+</section>
+
+<!-- ================= 08 ================= -->
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>Colour and custom properties</h2><span class="tagline">stop repeating yourself</span></div>
+
+  <div class="cmd"><span class="at">color</span>: <span class="st">#0B5D51</span>;                  <span class="cm">/* hex */</span>
+<span class="at">color</span>: <span class="st">rgb(11 93 81)</span>;            <span class="cm">/* modern space-separated syntax */</span>
+<span class="at">color</span>: <span class="st">rgb(11 93 81 / 50%)</span>;      <span class="cm">/* with alpha */</span>
+<span class="at">color</span>: <span class="st">hsl(172 79% 20%)</span>;         <span class="cm">/* hue saturation lightness */</span></div>
+
+  <p><code>hsl</code> is worth knowing because it's the only one you can reason about by hand: keep the hue, drop the lightness, and you have a darker shade of the same colour. Producing a palette in hex means guessing.</p>
+
+  <h3>Custom properties — real variables, in the browser</h3>
+  <div class="cmd"><span class="tg">:root</span> {
+  <span class="at">--brand</span>: <span class="st">#0B5D51</span>;
+  <span class="at">--paper</span>: <span class="st">#DDE3E0</span>;
+  <span class="at">--space</span>: <span class="st">1rem</span>;
+  <span class="at">--radius</span>: <span class="st">4px</span>;
+}
+
+<span class="tg">.button</span> {
+  <span class="at">background</span>: <span class="st">var(--brand)</span>;
+  <span class="at">padding</span>: <span class="st">var(--space) calc(var(--space) * 2)</span>;
+  <span class="at">border-radius</span>: <span class="st">var(--radius)</span>;
+}</div>
+
+  <div class="mention">
+    <div class="mrow"><b>Two dashes to define</b><span><code>--name: value</code>. <code>:root</code> is the <code>&lt;html&gt;</code> element, so anything defined there is available everywhere.</span></div>
+    <div class="mrow"><b>var() to use</b><span><code>var(--name)</code>, with an optional fallback: <code>var(--name, #ccc)</code>.</span></div>
+    <div class="mrow"><b>They inherit</b><span>Redefine one inside a component and everything beneath uses the new value. This is what makes theming trivial.</span></div>
+    <div class="mrow"><b>They're live</b><span>Unlike Sass variables, these exist at runtime. JavaScript can change one and every rule using it updates instantly.</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Do this now — build a dark mode in six lines</h4>
+  </div>
+  <div class="cmd"><span class="tg">:root</span> { <span class="at">--bg</span>: <span class="st">white</span>; <span class="at">--fg</span>: <span class="st">#111</span>; }
+
+<span class="tg">@media (prefers-color-scheme: dark)</span> {
+  <span class="tg">:root</span> { <span class="at">--bg</span>: <span class="st">#111</span>; <span class="at">--fg</span>: <span class="st">#eee</span>; }
+}
+
+<span class="tg">body</span> { <span class="at">background</span>: <span class="st">var(--bg)</span>; <span class="at">color</span>: <span class="st">var(--fg)</span>; }</div>
+
+  <p>Change your operating system to dark mode and the page follows. Two colour definitions, no JavaScript, no class toggling.</p>
+
+  <div class="cue"><p class="cue-k">Name them by role, not appearance</p><p><code>--brand</code> and <code>--danger</code>, not <code>--green</code> and <code>--red</code>. When the design changes and your green becomes blue, a variable called <code>--green</code> holding blue is worse than no variable at all.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 complete</span></label>
+</section>
+
+<!-- ================= 09 ================= -->
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>Flexbox — the two axes</h2><span class="tagline">one dimension, done properly</span></div>
+
+  <p>Flexbox arranges items along <strong>one line</strong> — a row or a column — and distributes space between them. If your problem is "put these things in a row and space them out", this is the tool.</p>
+
+  <div class="cmd"><span class="tg">.container</span> {
+  <span class="at">display</span>: <span class="st">flex</span>;
+}</div>
+
+  <p>That single line does a lot: every direct child becomes a <strong>flex item</strong>, they line up horizontally, they no longer collapse margins, and they shrink to fit rather than overflowing.</p>
+
+  <div class="cue"><p class="cue-k">Everything depends on the axes</p><p>The <strong>main axis</strong> runs in the direction of <code>flex-direction</code>. The <strong>cross axis</strong> is perpendicular to it. <code>justify-*</code> works along the main axis; <code>align-*</code> works along the cross axis.</p><p>Get that pair straight and Flexbox stops being trial and error.</p></div>
+
+  <figure class="board">
+    <svg viewBox="0 0 780 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="With flex-direction row the main axis is horizontal and the cross axis vertical; with column the two swap.">
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="16">flex-direction: row  (the default)</text>
+      </g>
+      <rect x="0" y="30" width="380" height="120" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+      <rect x="20" y="56" width="70" height="68" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      <rect x="106" y="56" width="70" height="68" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      <rect x="192" y="56" width="70" height="68" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      <g font-family="IBM Plex Mono, monospace" font-size="12" fill="#0B5D51" text-anchor="middle">
+        <text x="55" y="95">1</text><text x="141" y="95">2</text><text x="227" y="95">3</text>
+      </g>
+      <defs>
+        <marker id="mA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#F5C518"/></marker>
+        <marker id="mB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0B5D51"/></marker>
+      </defs>
+      <line x1="20" y1="170" x2="350" y2="170" stroke="#F5C518" stroke-width="3" marker-end="url(#mA)"/>
+      <text x="185" y="190" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#8A6D08" font-weight="600">main axis → justify-content</text>
+      <line x1="356" y1="40" x2="356" y2="140" stroke="#0B5D51" stroke-width="3" marker-end="url(#mB)"/>
+      <text x="368" y="94" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0B5D51" font-weight="600">cross axis</text>
+      <text x="368" y="112" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0B5D51" font-weight="600">align-items</text>
+
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">
+        <text x="0" y="234">flex-direction: column  —  the axes swap over</text>
+      </g>
+      <rect x="0" y="248" width="200" height="86" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+      <rect x="20" y="258" width="120" height="20" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      <rect x="20" y="282" width="120" height="20" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      <rect x="20" y="306" width="120" height="20" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      <line x1="160" y1="256" x2="160" y2="328" stroke="#F5C518" stroke-width="3" marker-end="url(#mA)"/>
+      <line x1="20" y1="242" x2="140" y2="242" stroke="#0B5D51" stroke-width="3" marker-end="url(#mB)"/>
+      <text x="216" y="276" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#0F1A18">Now <tspan font-family="IBM Plex Mono, monospace" font-size="12" fill="#8A6D08" font-weight="600">justify-content</tspan> moves things vertically</text>
+      <text x="216" y="298" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#0F1A18">and <tspan font-family="IBM Plex Mono, monospace" font-size="12" fill="#0B5D51" font-weight="600">align-items</tspan> moves them horizontally.</text>
+      <text x="216" y="322" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#5A6B67">The property names never change — the axes do.</text>
+    </svg>
+    <figcaption>This is the whole mental model. Nearly every Flexbox mistake is applying the right property to the wrong axis.</figcaption>
+  </figure>
+
+  <div class="mention">
+    <div class="mrow"><b>flex-direction</b><span><code>row</code> (default), <code>column</code>, <code>row-reverse</code>, <code>column-reverse</code>.</span></div>
+    <div class="mrow"><b>flex-wrap</b><span><code>nowrap</code> (default — items shrink rather than wrap) or <code>wrap</code> (they move to a new line).</span></div>
+    <div class="mrow"><b>gap</b><span>Space between items. Replaces margins entirely, with no last-child exception to work around. Use it.</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Do this now — a navigation bar in five lines</h4>
+  </div>
+  <div class="cmd"><span class="tg">nav</span> {
+  <span class="at">display</span>: <span class="st">flex</span>;
+  <span class="at">gap</span>: <span class="st">1.5rem</span>;
+  <span class="at">align-items</span>: <span class="st">center</span>;
+  <span class="at">justify-content</span>: <span class="st">space-between</span>;
+}</div>
+  <p>Logo on the left, links on the right, everything vertically centred, evenly spaced. That layout used to take floats, clearfixes and a bad afternoon.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 09 complete</span></label>
+</section>
+
+<!-- ================= 10 ================= -->
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>Flexbox — alignment</h2><span class="tagline">the properties you'll use daily</span></div>
+
+  <h3>Along the main axis — justify-content</h3>
+  <div class="mention">
+    <div class="mrow"><b>flex-start</b><span>Bunched at the start. The default.</span></div>
+    <div class="mrow"><b>center</b><span>Bunched in the middle.</span></div>
+    <div class="mrow"><b>flex-end</b><span>Bunched at the end.</span></div>
+    <div class="mrow"><b>space-between</b><span>First at the start, last at the end, equal gaps between. The nav bar classic.</span></div>
+    <div class="mrow"><b>space-around</b><span>Equal space around each item, so edge gaps are half the size of inner ones.</span></div>
+    <div class="mrow"><b>space-evenly</b><span>Every gap identical, including the edges. Usually what people mean when they reach for <code>space-around</code>.</span></div>
+  </div>
+
+  <h3>Across the cross axis — align-items</h3>
+  <div class="mention">
+    <div class="mrow"><b>stretch</b><span>Items fill the container's height. <strong>The default</strong> — this is why flex children often look taller than expected.</span></div>
+    <div class="mrow"><b>center</b><span>Vertically centred in a row. This is the one you'll use most.</span></div>
+    <div class="mrow"><b>flex-start / flex-end</b><span>Top or bottom of the container.</span></div>
+    <div class="mrow"><b>baseline</b><span>Text baselines line up, even when font sizes differ. Underrated for labels next to inputs.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">Perfect centring, finally</p></div>
+  <div class="cmd"><span class="tg">.centre</span> {
+  <span class="at">display</span>: <span class="st">flex</span>;
+  <span class="at">justify-content</span>: <span class="st">center</span>;   <span class="cm">/* horizontal, in a row */</span>
+  <span class="at">align-items</span>: <span class="st">center</span>;       <span class="cm">/* vertical, in a row */</span>
+  <span class="at">min-height</span>: <span class="st">100dvh</span>;
+}
+
+<span class="cm">/* or the shorthand for both */</span>
+<span class="tg">.centre</span> { <span class="at">display</span>: <span class="st">flex</span>; <span class="at">place-items</span>: <span class="st">center</span>; }</div>
+  <p>Vertical centring was genuinely hard for about fifteen years and generated an entire genre of blog post. It is now two lines.</p>
+
+  <h3>Overriding one item — align-self</h3>
+  <div class="cmd"><span class="tg">.item-3</span> { <span class="at">align-self</span>: <span class="st">flex-end</span>; }   <span class="cm">/* just this one drops to the bottom */</span></div>
+
+  <div class="cue"><p class="cue-k">The auto-margin trick</p><p>On a flex item, <code>margin-left: auto</code> absorbs all remaining space and pushes that item — and everything after it — to the far end.</p><p>Perfect for "logo, some links, then a login button pinned right" without splitting the markup into wrapper divs.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q5</b>You set <code>flex-direction: column</code> and now <code>align-items: center</code> centres things horizontally instead of vertically. Is this a bug?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p><strong>No — it's the definition working correctly.</strong> <code>align-items</code> always works on the cross axis. In a column, the main axis is vertical, so the cross axis is horizontal.</p>
+      <p>To centre vertically in a column you want <code>justify-content: center</code>. Nothing about the properties changed; the axes rotated.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 complete</span></label>
+</section>
+
+<!-- ================= 11 ================= -->
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>Flexbox — grow, shrink, basis</h2><span class="tagline">how space gets divided</span></div>
+
+  <p>Those three properties on the <em>items</em> control how leftover space is shared out, and they're bundled into one shorthand.</p>
+
+  <div class="cmd"><span class="at">flex</span>: <span class="st">&lt;grow&gt; &lt;shrink&gt; &lt;basis&gt;</span>;
+
+<span class="at">flex</span>: <span class="st">0 1 auto</span>;    <span class="cm">/* the default: don't grow, do shrink, size by content */</span>
+<span class="at">flex</span>: <span class="st">1</span>;          <span class="cm">/* shorthand for 1 1 0% — grow to fill, ignore content width */</span>
+<span class="at">flex</span>: <span class="st">1 1 200px</span>;   <span class="cm">/* start at 200px, then grow and shrink from there */</span>
+<span class="at">flex</span>: <span class="st">0 0 200px</span>;   <span class="cm">/* exactly 200px, never flexes. A fixed sidebar. */</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>flex-grow</b><span>How much of the <em>leftover</em> space this item takes, relative to its siblings. <code>0</code> means none.</span></div>
+    <div class="mrow"><b>flex-shrink</b><span>How much it gives up when there isn't enough room. <code>1</code> by default, <code>0</code> to forbid shrinking.</span></div>
+    <div class="mrow"><b>flex-basis</b><span>The starting size before growing or shrinking. <code>auto</code> means "use the content or the width property".</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Do this now — the classic app layout</h4>
+  </div>
+  <div class="cmd"><span class="tg">.layout</span>  { <span class="at">display</span>: <span class="st">flex</span>; <span class="at">gap</span>: <span class="st">1rem</span>; }
+<span class="tg">.sidebar</span> { <span class="at">flex</span>: <span class="st">0 0 240px</span>; }   <span class="cm">/* fixed, never moves */</span>
+<span class="tg">.main</span>    { <span class="at">flex</span>: <span class="st">1</span>; }           <span class="cm">/* takes everything else */</span></div>
+  <p>Drag the browser window narrower. The sidebar stays exactly 240px, the main area absorbs every pixel of change. Two declarations.</p>
+
+  <div class="cue"><p class="cue-k">Ratios, not percentages</p><p>Three items with <code>flex: 1</code>, <code>flex: 2</code>, <code>flex: 1</code> divide the free space in a 1:2:1 ratio. It's proportional, so you never have to make the numbers add up to anything.</p></div>
+
+  <div class="cue watch"><p class="cue-k">The min-width bug that catches everyone</p>
+    <p>A flex item won't shrink below its content's minimum size — because <code>min-width</code> defaults to <code>auto</code> for flex items, not <code>0</code>. So one long unbroken string, a wide table, or a <code>&lt;pre&gt;</code> block will blow your layout out past the viewport and give you a horizontal scrollbar.</p>
+    <p>The fix, which looks like magic until you know why:</p>
+  </div>
+  <div class="cmd"><span class="tg">.flex-item</span> {
+  <span class="at">min-width</span>: <span class="st">0</span>;        <span class="cm">/* now it may shrink below its content */</span>
+  <span class="at">overflow</span>: <span class="st">hidden</span>;   <span class="cm">/* or overflow-wrap: break-word for text */</span>
+}</div>
+  <p>In a column, the same problem appears as <code>min-height: auto</code>. If a flex layout is mysteriously overflowing, this is the first thing to try.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 complete</span></label>
+</section>
+
+<!-- ================= 12 ================= -->
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>Grid — the anatomy</h2><span class="tagline">two dimensions at once</span></div>
+
+  <p>Flexbox handles one line. Grid handles rows <strong>and</strong> columns simultaneously, so items line up in both directions — which Flexbox genuinely cannot do once things wrap.</p>
+
+  <div class="cmd"><span class="tg">.grid</span> {
+  <span class="at">display</span>: <span class="st">grid</span>;
+  <span class="at">grid-template-columns</span>: <span class="st">200px 1fr 1fr</span>;
+  <span class="at">grid-template-rows</span>: <span class="st">auto 1fr</span>;
+  <span class="at">gap</span>: <span class="st">1rem</span>;
+}</div>
+
+  <figure class="board">
+    <svg viewBox="0 0 780 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Grid anatomy: numbered column and row lines, tracks between them, cells, a gap, and an area spanning two cells.">
+      <g font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#8A6D08" font-weight="600" text-anchor="middle">
+        <text x="60" y="34">1</text><text x="250" y="34">2</text><text x="420" y="34">3</text><text x="590" y="34">4</text>
+      </g>
+      <g stroke="#F5C518" stroke-width="2" stroke-dasharray="6 4">
+        <line x1="60" y1="42" x2="60" y2="280"/><line x1="250" y1="42" x2="250" y2="280"/>
+        <line x1="420" y1="42" x2="420" y2="280"/><line x1="590" y1="42" x2="590" y2="280"/>
+        <line x1="46" y1="56" x2="604" y2="56"/><line x1="46" y1="160" x2="604" y2="160"/><line x1="46" y1="264" x2="604" y2="264"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#8A6D08" font-weight="600" text-anchor="end">
+        <text x="40" y="60">1</text><text x="40" y="164">2</text><text x="40" y="268">3</text>
+      </g>
+
+      <rect x="70" y="66" width="170" height="84" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      <text x="155" y="113" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0B5D51">cell</text>
+
+      <rect x="260" y="66" width="320" height="84" fill="#101614"/>
+      <text x="420" y="106" text-anchor="middle" font-family="IBM Plex Sans Condensed, sans-serif" font-size="14" font-weight="700" fill="#F5C518">AREA — spans 2 columns</text>
+      <text x="420" y="126" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#B7C4C0">grid-column: 2 / 4</text>
+
+      <rect x="70" y="170" width="170" height="84" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      <rect x="260" y="170" width="150" height="84" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      <rect x="430" y="170" width="150" height="84" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+
+      <line x1="240" y1="212" x2="260" y2="212" stroke="#E06C4F" stroke-width="3"/>
+      <text x="250" y="300" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#E06C4F" font-weight="600">gap</text>
+      <line x1="250" y1="288" x2="250" y2="220" stroke="#E06C4F" stroke-width="1.5" stroke-dasharray="3 3"/>
+
+      <g font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="#2B3936">
+        <text x="620" y="76">Lines are numbered</text>
+        <text x="620" y="94">from 1, and they're</text>
+        <text x="620" y="112">what you place items</text>
+        <text x="620" y="130">between.</text>
+        <text x="620" y="170">A track is the space</text>
+        <text x="620" y="188">between two lines —</text>
+        <text x="620" y="206">a column or a row.</text>
+        <text x="620" y="246">An area is any</text>
+        <text x="620" y="264">rectangle of cells.</text>
+      </g>
+    </svg>
+    <figcaption>You place items between numbered <em>lines</em>, not into cells. Four lines make three columns — this off-by-one catches everyone once.</figcaption>
+  </figure>
+
+  <div class="mention">
+    <div class="mrow"><b>Track</b><span>One column or one row.</span></div>
+    <div class="mrow"><b>Line</b><span>The dividing line between tracks, numbered from 1. <strong>N tracks means N+1 lines.</strong></span></div>
+    <div class="mrow"><b>Cell</b><span>One column crossed with one row.</span></div>
+    <div class="mrow"><b>Area</b><span>Any rectangle of cells, which one item can occupy.</span></div>
+    <div class="mrow"><b>Gap</b><span>Space between tracks. Not a track itself, and not affected by margins.</span></div>
+  </div>
+
+  <h3>Defining tracks</h3>
+  <div class="cmd"><span class="at">grid-template-columns</span>: <span class="st">200px 200px 200px</span>;    <span class="cm">/* three fixed */</span>
+<span class="at">grid-template-columns</span>: <span class="st">repeat(3, 200px)</span>;      <span class="cm">/* same, less typing */</span>
+<span class="at">grid-template-columns</span>: <span class="st">1fr 1fr 1fr</span>;           <span class="cm">/* three equal, fluid */</span>
+<span class="at">grid-template-columns</span>: <span class="st">250px 1fr</span>;             <span class="cm">/* sidebar + rest */</span>
+<span class="at">grid-template-columns</span>: <span class="st">1fr 2fr</span>;               <span class="cm">/* one third, two thirds */</span>
+<span class="at">grid-template-columns</span>: <span class="st">minmax(200px, 1fr) 3fr</span>; <span class="cm">/* never below 200px */</span></div>
+
+  <div class="cue"><p class="cue-k">fr is the unit that makes Grid pleasant</p><p><code>1fr</code> means "one share of the space left after fixed sizes and gaps are subtracted". Unlike percentages, it accounts for the gaps automatically — so <code>repeat(3, 1fr)</code> with a <code>2rem</code> gap just works, where <code>33.33%</code> three times overflows.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 12 complete</span></label>
+</section>
+
+<!-- ================= 13 ================= -->
+<section id="s13">
+  <div class="shead"><span class="chip">13</span><h2>Grid — placing items</h2><span class="tagline">by line, or by name</span></div>
+
+  <p>By default items fill cells in order. To place one deliberately, name the lines it should sit between.</p>
+
+  <div class="cmd"><span class="tg">.hero</span> {
+  <span class="at">grid-column</span>: <span class="st">1 / 3</span>;    <span class="cm">/* from line 1 to line 3 — spans 2 columns */</span>
+  <span class="at">grid-row</span>: <span class="st">1 / 2</span>;
+}
+
+<span class="tg">.wide</span>  { <span class="at">grid-column</span>: <span class="st">span 2</span>; }    <span class="cm">/* 2 columns from wherever it lands */</span>
+<span class="tg">.full</span>  { <span class="at">grid-column</span>: <span class="st">1 / -1</span>; }    <span class="cm">/* -1 is the last line: full width */</span></div>
+
+  <p><code>1 / -1</code> is worth memorising — it means "edge to edge" regardless of how many columns there are, so it keeps working when the layout changes.</p>
+
+  <h3>Named areas — the readable way</h3>
+  <p>For page-level layout this is hard to beat, because the CSS looks like the thing it produces.</p>
+
+  <div class="cmd"><span class="tg">.page</span> {
+  <span class="at">display</span>: <span class="st">grid</span>;
+  <span class="at">grid-template-columns</span>: <span class="st">240px 1fr</span>;
+  <span class="at">grid-template-rows</span>: <span class="st">auto 1fr auto</span>;
+  <span class="at">min-height</span>: <span class="st">100dvh</span>;
+  <span class="at">grid-template-areas</span>:
+    <span class="st">"header  header"</span>
+    <span class="st">"sidebar main"</span>
+    <span class="st">"footer  footer"</span>;
+}
+
+<span class="tg">header</span>  { <span class="at">grid-area</span>: <span class="st">header</span>; }
+<span class="tg">.sidebar</span> { <span class="at">grid-area</span>: <span class="st">sidebar</span>; }
+<span class="tg">main</span>    { <span class="at">grid-area</span>: <span class="st">main</span>; }
+<span class="tg">footer</span>  { <span class="at">grid-area</span>: <span class="st">footer</span>; }</div>
+
+  <div class="dothis">
+    <h4>Do this now — build it, then rearrange it</h4>
+    <p>Get the layout above working. Then swap the sidebar to the right by changing <strong>only</strong> the areas block:</p>
+  </div>
+  <div class="cmd"><span class="at">grid-template-columns</span>: <span class="st">1fr 240px</span>;
+<span class="at">grid-template-areas</span>:
+  <span class="st">"header header"</span>
+  <span class="st">"main   sidebar"</span>
+  <span class="st">"footer footer"</span>;</div>
+  <p>The HTML never changed. The sidebar is still before <code>main</code> in the source — which matters, because screen readers and keyboard tabbing follow the DOM order, not the visual one.</p>
+
+  <div class="cue watch"><p class="cue-k">Don't let visual order drift from DOM order</p><p>Grid lets you place anything anywhere, and <code>order</code> in Flexbox does the same. Both are easy to abuse. If a keyboard user tabs through your form and the focus jumps from the top of the page to the bottom and back, you've created that with CSS.</p><p>Reorder the HTML when the order genuinely changes. Use CSS placement for layout, not for sequence.</p></div>
+
+  <h3>Implicit tracks</h3>
+  <p>Put in more items than your template defines and Grid creates extra rows automatically. Size them with:</p>
+  <div class="cmd"><span class="at">grid-auto-rows</span>: <span class="st">minmax(120px, auto)</span>;   <span class="cm">/* at least 120px, taller if needed */</span>
+<span class="at">grid-auto-flow</span>: <span class="st">dense</span>;                 <span class="cm">/* backfill gaps left by spanning items */</span></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q6</b>Your grid has 4 columns. What does <code>grid-column: 2 / 4</code> span, and how many lines are there in total?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <p>It spans <strong>two columns</strong> — the 2nd and 3rd — because it runs from line 2 to line 4, and the item occupies the tracks <em>between</em> those lines.</p>
+      <p>Four columns have <strong>five</strong> lines. This off-by-one is the single most common Grid confusion: you're placing between lines, not into columns.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 13 complete</span></label>
+</section>
+
+<!-- ================= 14 ================= -->
+<section id="s14">
+  <div class="shead"><span class="chip">14</span><h2>Grid — the responsive one-liner</h2><span class="tagline">worth the price of admission</span></div>
+
+  <p>This single declaration produces a card layout that reflows from four columns to one, with no media queries at all.</p>
+
+  <div class="cmd"><span class="tg">.cards</span> {
+  <span class="at">display</span>: <span class="st">grid</span>;
+  <span class="at">grid-template-columns</span>: <span class="st">repeat(auto-fit, minmax(250px, 1fr))</span>;
+  <span class="at">gap</span>: <span class="st">1.5rem</span>;
+}</div>
+
+  <div class="cue"><p class="cue-k">Read it inside out</p>
+    <p><strong><code>minmax(250px, 1fr)</code></strong> — each column is at least 250px, and shares leftover space equally beyond that.</p>
+    <p><strong><code>auto-fit</code></strong> — fit as many such columns as will go, then stretch them to fill the row.</p>
+    <p><strong><code>repeat(…)</code></strong> — apply that as many times as it fits.</p>
+    <p>So: as many 250px-minimum columns as the screen allows. Four on a laptop, two on a tablet, one on a phone. <strong>The layout responds to the container, not to a device you guessed about.</strong></p>
+  </div>
+
+  <div class="dothis">
+    <h4>Do this now — build it and drag the window</h4>
+    <p>Add six cards to your HTML and apply the rule above. Then drag the browser edge slowly from wide to narrow and watch the column count drop. No breakpoints were written.</p>
+  </div>
+
+  <h3>auto-fit vs auto-fill</h3>
+  <div class="mention">
+    <div class="mrow"><b>auto-fit</b><span>Collapses empty tracks, so the items you have stretch to fill the row. Usually what you want.</span></div>
+    <div class="mrow"><b>auto-fill</b><span>Keeps empty tracks in place, so three cards in a five-column-wide container stay card-sized with a gap on the right. Right when you want a consistent grid regardless of item count.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">The one flaw</p><p>If the container is narrower than your minimum — a 250px minimum inside a 200px phone viewport — the track overflows. Guard it with <code>min()</code>:</p></div>
+  <div class="cmd"><span class="at">grid-template-columns</span>: <span class="st">repeat(auto-fit, minmax(min(250px, 100%), 1fr))</span>;</div>
+  <p>Now the minimum is 250px <em>or</em> the full container width, whichever is smaller. Nothing can overflow.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 14 complete</span></label>
+</section>
+
+<!-- ================= 15 ================= -->
+<section id="s15">
+  <div class="shead"><span class="chip">15</span><h2>Flexbox or Grid?</h2><span class="tagline">a decision, not a rivalry</span></div>
+
+  <p>They aren't competitors and you'll use both on the same page — usually Grid for the page skeleton and Flexbox inside the pieces.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>Flexbox — one dimension</b><span>A row or a column. The layout follows the <em>content</em>: items size themselves and space gets distributed around them.</span></div>
+    <div class="mrow"><b>Grid — two dimensions</b><span>Rows and columns together. You define the <em>structure</em> first and content goes into it.</span></div>
+  </div>
+
+  <div class="cue work"><p class="cue-k">The question that decides it</p><p><strong>"Do I care about alignment in both directions at once?"</strong></p><p>Yes → Grid. No → Flexbox.</p><p>A nav bar is one row: Flexbox. A photo gallery where every item lines up in both axes: Grid. A card's internal stack of title, text and button: Flexbox. The page skeleton of header, sidebar, main, footer: Grid.</p></div>
+
+  <div class="cmd"><span class="cm">/* Grid for the page */</span>
+<span class="tg">.page</span> { <span class="at">display</span>: <span class="st">grid</span>; <span class="at">grid-template-columns</span>: <span class="st">240px 1fr</span>; }
+
+<span class="cm">/* Grid for the card collection */</span>
+<span class="tg">.cards</span> { <span class="at">display</span>: <span class="st">grid</span>; <span class="at">grid-template-columns</span>: <span class="st">repeat(auto-fit, minmax(250px, 1fr))</span>; <span class="at">gap</span>: <span class="st">1rem</span>; }
+
+<span class="cm">/* Flexbox INSIDE each card, to push the button to the bottom */</span>
+<span class="tg">.card</span> { <span class="at">display</span>: <span class="st">flex</span>; <span class="at">flex-direction</span>: <span class="st">column</span>; <span class="at">gap</span>: <span class="st">.5rem</span>; }
+<span class="tg">.card .btn</span> { <span class="at">margin-top</span>: <span class="st">auto</span>; }   <span class="cm">/* buttons align even with uneven text */</span></div>
+
+  <p>That last line is a small piece of craft worth stealing: <code>margin-top: auto</code> on the final flex item in a column pushes it to the bottom, so a row of cards with different amounts of text still has its buttons in a straight line.</p>
+
+  <div class="cue"><p class="cue-k">A note on floats</p><p>If you find a tutorial using <code>float</code> for layout, it's from before 2017. Floats were designed to wrap text around an image, which is still their only good use. Anything about clearfixes is a workaround for a problem you no longer have.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 15 complete</span></label>
+</section>
+
+<!-- ================= 16 ================= -->
+<section id="s16">
+  <div class="shead"><span class="chip">16</span><h2>Position and z-index</h2><span class="tagline">taking things out of flow</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>static</b><span>The default. Sits in normal flow. <code>top</code>/<code>left</code> do nothing.</span></div>
+    <div class="mrow"><b>relative</b><span>Still occupies its normal space, but can be nudged with offsets. Crucially, it becomes a <strong>positioning context</strong> for absolute children.</span></div>
+    <div class="mrow"><b>absolute</b><span><strong>Removed from flow</strong> — other elements act as if it isn't there. Positioned against the nearest ancestor that isn't <code>static</code>.</span></div>
+    <div class="mrow"><b>fixed</b><span>Removed from flow and positioned against the viewport. Stays put when you scroll.</span></div>
+    <div class="mrow"><b>sticky</b><span>Normal until it hits a scroll threshold, then behaves like fixed within its parent. Table headers, section titles.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">The relative/absolute pairing</p><p>Almost every use of <code>absolute</code> comes with <code>relative</code> on its parent. Forget the parent and your badge positions itself against the whole page instead of the card it belongs to.</p></div>
+
+  <div class="cmd"><span class="tg">.card</span>  { <span class="at">position</span>: <span class="st">relative</span>; }
+<span class="tg">.badge</span> { <span class="at">position</span>: <span class="st">absolute</span>; <span class="at">top</span>: <span class="st">.5rem</span>; <span class="at">right</span>: <span class="st">.5rem</span>; }</div>
+
+  <h3>Sticky, and why it silently fails</h3>
+  <div class="cmd"><span class="tg">.toolbar</span> {
+  <span class="at">position</span>: <span class="st">sticky</span>;
+  <span class="at">top</span>: <span class="st">0</span>;        <span class="cm">/* REQUIRED — without a threshold it does nothing */</span>
+}</div>
+
+  <div class="cue watch"><p class="cue-k">Three reasons sticky doesn't work</p>
+    <p><strong>1.</strong> No <code>top</code> (or <code>bottom</code>/<code>left</code>/<code>right</code>) value. There's no threshold to stick at, so it never activates. This is most cases.</p>
+    <p><strong>2.</strong> An ancestor has <code>overflow: hidden</code>, <code>auto</code> or <code>scroll</code>. Sticky is scoped to the nearest scrolling ancestor, and a stray <code>overflow-x: hidden</code> on a wrapper kills it silently.</p>
+    <p><strong>3.</strong> The parent isn't tall enough. Sticky can only travel within its own parent, so a sticky element in a short container appears not to move.</p>
+  </div>
+
+  <h3>z-index and stacking contexts</h3>
+  <p><code>z-index</code> controls what sits in front. Two rules explain almost all of the confusion:</p>
+  <div class="mention">
+    <div class="mrow"><b>It only works on positioned elements</b><span>Anything except <code>position: static</code>. Also works on flex and grid items, which is a modern exception worth knowing.</span></div>
+    <div class="mrow"><b>Stacking contexts nest</b><span>An element with a <code>z-index</code> creates a context for its children. A child with <code>z-index: 9999</code> inside a parent with <code>z-index: 1</code> can never appear above a sibling of the parent with <code>z-index: 2</code>. It's trapped.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">Which is why z-index: 9999 doesn't fix it</p><p>If a modal is stuck behind something, escalating the number won't help — the element is inside a stacking context that is itself behind. Move the element up the DOM (or use the <code>&lt;dialog&gt;</code> element, which handles this properly).</p><p>Also note: <code>transform</code>, <code>opacity</code> below 1, <code>filter</code> and <code>will-change</code> all create stacking contexts too, which is why adding a fade animation can mysteriously break layering.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 16 complete</span></label>
+</section>
+
+<!-- ================= 17 ================= -->
+<section id="s17">
+  <div class="shead"><span class="chip">17</span><h2>Responsive design, mobile first</h2><span class="tagline">one page, every screen</span></div>
+
+  <p>Responsive means one set of HTML and CSS that works from a 360px phone to a 27-inch monitor. The tool is the media query, but the more important part is the approach.</p>
+
+  <div class="cmd"><span class="cm">/* base styles — written for the SMALL screen, no query needed */</span>
+<span class="tg">.cards</span> { <span class="at">display</span>: <span class="st">grid</span>; <span class="at">gap</span>: <span class="st">1rem</span>; }
+
+<span class="cm">/* then ADD complexity as the screen gets bigger */</span>
+<span class="tg">@media (min-width: 40rem)</span> {
+  <span class="tg">.cards</span> { <span class="at">grid-template-columns</span>: <span class="st">1fr 1fr</span>; }
+}
+
+<span class="tg">@media (min-width: 64rem)</span> {
+  <span class="tg">.cards</span> { <span class="at">grid-template-columns</span>: <span class="st">repeat(4, 1fr)</span>; }
+}</div>
+
+  <div class="cue"><p class="cue-k">Why mobile first, and not the other way round</p>
+    <p>A phone layout is a single column — which is what HTML does by default. So your base styles are almost nothing, and each breakpoint <em>adds</em>.</p>
+    <p>Desktop-first means writing a complex layout and then unpicking it at every breakpoint, which means more code and more overrides fighting each other. It also means the phone — usually the majority of your traffic — downloads and parses all the desktop CSS before overriding it.</p>
+  </div>
+
+  <h3>Choosing breakpoints</h3>
+  <div class="cue watch"><p class="cue-k">Don't target devices</p><p>There is no useful list of device widths — there are hundreds of screen sizes and they change every year. Chasing "iPhone width" is a losing game.</p><p><strong>Widen your browser slowly and add a breakpoint wherever the layout starts to look bad.</strong> Let the content decide. Most sites need two or three, not eight.</p></div>
+
+  <div class="mention">
+    <div class="mrow"><b>min-width</b><span>"From this width upwards." The mobile-first direction. Use this by default.</span></div>
+    <div class="mrow"><b>max-width</b><span>"Up to this width." Occasionally useful, but mixing both directions in one stylesheet gets confusing fast.</span></div>
+    <div class="mrow"><b>Use rem, not px</b><span><code>min-width: 40rem</code> respects a user who has increased their default font size. <code>640px</code> doesn't.</span></div>
+    <div class="mrow"><b>prefers-reduced-motion</b><span>Not a size query, but essential: wrap your animations so people who get motion sickness can turn them off.</span></div>
+  </div>
+
+  <h3>The other things responsive needs</h3>
+  <div class="cmd"><span class="cm">/* images must never exceed their container */</span>
+<span class="tg">img, video</span> { <span class="at">max-width</span>: <span class="st">100%</span>; <span class="at">height</span>: <span class="st">auto</span>; }
+
+<span class="cm">/* touch targets need to be finger-sized */</span>
+<span class="tg">button, a.btn</span> { <span class="at">min-height</span>: <span class="st">44px</span>; }
+
+<span class="cm">/* long words and URLs shouldn't blow out the layout */</span>
+<span class="tg">body</span> { <span class="at">overflow-wrap</span>: <span class="st">break-word</span>; }</div>
+
+  <div class="dothis">
+    <h4>Do this now — test it honestly</h4>
+    <ol>
+      <li>DevTools → the device toolbar icon (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>).</li>
+      <li>Set the width to <strong>360px</strong> — a realistic small phone, narrower than the presets people usually test.</li>
+      <li>Scroll the whole page. <strong>Any horizontal scrollbar is a bug.</strong> Find what's overflowing.</li>
+      <li>Now go the other way: 1600px. Does your text stretch into unreadable 200-character lines? Add <code>max-width: 65ch</code> to your prose container.</li>
+    </ol>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 17 complete</span></label>
+</section>
+
+<!-- ================= 18 ================= -->
+<section id="s18">
+  <div class="shead"><span class="chip">18</span><h2>Responsive without media queries</h2><span class="tagline">the modern way</span></div>
+
+  <p>Media queries respond to the <em>viewport</em>. But a card doesn't care how wide the window is — it cares how wide <em>it</em> is. Modern CSS lets you write layouts that adapt intrinsically, and it's usually less code.</p>
+
+  <h3>clamp() — fluid values with limits</h3>
+  <div class="cmd"><span class="at">font-size</span>: <span class="st">clamp(1.5rem, 4vw, 3rem)</span>;
+<span class="cm">/*          minimum | preferred | maximum */</span></div>
+  <p>Scales smoothly with the viewport, never smaller than 1.5rem, never larger than 3rem. That replaces three media queries with one line, and there's no sudden jump at a breakpoint.</p>
+
+  <div class="cmd"><span class="cm">/* fluid page gutters */</span>
+<span class="at">padding-inline</span>: <span class="st">clamp(1rem, 5vw, 4rem)</span>;
+
+<span class="cm">/* a container that's fluid but capped */</span>
+<span class="at">width</span>: <span class="st">min(100% - 2rem, 65rem)</span>;
+<span class="at">margin-inline</span>: <span class="st">auto</span>;</div>
+
+  <p>That second one is a complete page container: full width minus gutters on a phone, capped at 65rem on a monitor, centred throughout. No breakpoints.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>min(a, b)</b><span>Whichever is smaller. Good for "this size, but never wider than the screen".</span></div>
+    <div class="mrow"><b>max(a, b)</b><span>Whichever is larger. Good for enforcing a floor.</span></div>
+    <div class="mrow"><b>clamp(lo, val, hi)</b><span>Both at once. The one you'll use most.</span></div>
+  </div>
+
+  <h3>Container queries — asking about the parent</h3>
+  <p>The genuinely new idea: a component can respond to the space <em>it</em> has, so the same card works in a wide main area and a narrow sidebar without knowing which it's in.</p>
+
+  <div class="cmd"><span class="tg">.card-wrapper</span> {
+  <span class="at">container-type</span>: <span class="st">inline-size</span>;
+}
+
+<span class="tg">@container (min-width: 400px)</span> {
+  <span class="tg">.card</span> { <span class="at">display</span>: <span class="st">grid</span>; <span class="at">grid-template-columns</span>: <span class="st">120px 1fr</span>; }
+}</div>
+
+  <p>This is what component-based design always wanted. It's supported across all current browsers; check <a href="https://caniuse.com" target="_blank" rel="noopener">caniuse.com</a> if you need to support older ones.</p>
+
+  <div class="cue work"><p class="cue-k">The order to reach for things</p>
+    <p><strong>1.</strong> Can normal flow do it? A single column of block elements is already responsive.</p>
+    <p><strong>2.</strong> Can <code>flex-wrap</code>, <code>auto-fit</code> or <code>clamp()</code> do it? Usually yes, and with no breakpoints.</p>
+    <p><strong>3.</strong> Does the <em>component</em> need to change shape? Container query.</p>
+    <p><strong>4.</strong> Does the <em>page structure</em> need to change? Now use a media query.</p>
+    <p>Media queries are still correct for big structural shifts — sidebar becomes a drawer, three columns become one. They just shouldn't be the first tool you reach for any more.</p>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 18 complete</span></label>
+</section>
+
+<!-- ================= 19 ================= -->
+<section id="s19">
+  <div class="shead"><span class="chip">19</span><h2>Debugging CSS in DevTools</h2><span class="tagline">stop guessing</span></div>
+
+  <p>CSS produces no error messages. A misspelled property is simply ignored. So the browser's inspector isn't a nice extra — it's the only feedback you get.</p>
+
+  <div class="dothis">
+    <h4>Do this now — six things, in order</h4>
+  </div>
+
+  <div class="mention">
+    <div class="mrow"><b>1. The Styles pane</b><span>Right-click → Inspect. Every rule matching this element, most specific at the top, with the file and line number. <strong>Anything with a line through it lost the cascade.</strong></span></div>
+    <div class="mrow"><b>2. Edit values live</b><span>Click any value and type. Use arrow keys to nudge numbers — hold <kbd>Shift</kbd> for tens. Far faster than save-and-reload for finding the right spacing.</span></div>
+    <div class="mrow"><b>3. The Computed tab</b><span>The final value of every property after everything resolved. When you can't work out where a value came from, expand it here — it shows the winning rule.</span></div>
+    <div class="mrow"><b>4. The box model diagram</b><span>At the bottom of Styles, or in Computed. Hover each layer to highlight it on the page. The fastest way to answer "is that gap padding or margin?"</span></div>
+    <div class="mrow"><b>5. Flex and grid badges</b><span>Elements with <code>display: flex</code> or <code>grid</code> get a little badge in the Elements panel. Click it to overlay the tracks, line numbers and gaps directly on the page. This makes Grid debugging almost trivial.</span></div>
+    <div class="mrow"><b>6. Toggle states</b><span>The <code>:hov</code> button lets you force <code>:hover</code>, <code>:focus</code>, <code>:active</code> so you can style them without contorting yourself over the mouse.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">The outline trick for "what is that thing?"</p></div>
+  <div class="cmd"><span class="tg">* </span>{ <span class="at">outline</span>: <span class="st">1px solid red</span>; }</div>
+  <p>Every box on the page becomes visible. Use <code>outline</code> rather than <code>border</code> — outlines draw outside the box and take no space, so they don't change the layout while you're inspecting it.</p>
+
+  <div class="cue watch"><p class="cue-k">Finding what causes horizontal scroll</p><p>A stray horizontal scrollbar on mobile is the classic hard-to-find bug. Paste this in the Console and it will list every element wider than the viewport:</p></div>
+  <div class="cmd"><span class="p">&gt;</span> document.querySelectorAll('*').forEach(el =&gt; {
+    if (el.scrollWidth &gt; document.documentElement.clientWidth) console.log(el);
+  })</div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 19 complete</span></label>
+</section>
+
+<!-- ================= 20 ================= -->
+<section id="s20">
+  <div class="shead"><span class="chip">20</span><h2>When it goes wrong</h2><span class="tagline">the usual suspects</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>My rule isn't applying</b><span>Three checks in order: does the selector match, is something more specific winning, is something later overriding? DevTools answers all three. See section 03.</span></div>
+    <div class="mrow"><b>My boxes overflow the row</b><span><code>box-sizing: border-box</code> missing. Section 04.</span></div>
+    <div class="mrow"><b>The gap is smaller than I set</b><span>Margin collapse. Use <code>gap</code> instead. Section 05.</span></div>
+    <div class="mrow"><b>height does nothing</b><span>The element is <code>display: inline</code>. Section 06.</span></div>
+    <div class="mrow"><b>A flex item won't shrink</b><span><code>min-width: auto</code> is the default on flex items. Set <code>min-width: 0</code>. Section 11.</span></div>
+    <div class="mrow"><b>My grid span is off by one</b><span>You're placing between <em>lines</em>, and N columns have N+1 lines. Section 13.</span></div>
+    <div class="mrow"><b>position: sticky does nothing</b><span>Missing <code>top</code>, or an ancestor has <code>overflow</code> set. Section 16.</span></div>
+    <div class="mrow"><b>z-index: 9999 isn't working</b><span>You're trapped inside a stacking context. Section 16.</span></div>
+    <div class="mrow"><b>Media queries are ignored on mobile</b><span>Missing <code>&lt;meta name="viewport"&gt;</code>. Section 01.</span></div>
+    <div class="mrow"><b>Horizontal scrollbar on mobile</b><span>Something is wider than the screen — an image with no <code>max-width</code>, a fixed-width element, a long unbroken string, or negative margins. Use the Console snippet in section 19.</span></div>
+    <div class="mrow"><b>100vh is too tall on a phone</b><span>Mobile browser chrome. Use <code>100dvh</code>. Section 07.</span></div>
+    <div class="mrow"><b>A whole block of rules stopped working</b><span>A missing semicolon or closing brace earlier in the file. The parser skips ahead to what it thinks is the next rule and swallows several. Check the line just above where things break.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">Two general techniques</p>
+    <p><strong>Comment out half.</strong> Same bisection method as debugging anything else. Comment out half your stylesheet; if the problem persists it's in the other half. Five rounds narrows 500 lines to fifteen.</p>
+    <p><strong>Validate it.</strong> <a href="https://jigsaw.w3.org/css-validator/" target="_blank" rel="noopener">jigsaw.w3.org/css-validator</a> catches typos and syntax errors that the browser silently ignores.</p>
+  </div>
+
+  <div class="cue calm"><p class="cue-k">Asking for help is a skill, not a failure</p><p>When you're properly stuck, ask someone — and have a screenshot of both <strong>the Styles pane</strong> and <strong>what you expected</strong> ready when you do. For CSS specifically, a link to a minimal reproduction on CodePen gets you an answer far faster than a description.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 20 complete</span></label>
+</section>
+
+<!-- ================= 21 ================= -->
+<section id="s21">
+  <div class="shead"><span class="chip">21</span><h2>Practice run, unaided</h2><span class="tagline">the part that makes it stick</span></div>
+
+  <p>Build this <strong>without scrolling up</strong>. When you're stuck, open DevTools and look at what the browser actually did before you look anything up.</p>
+
+  <div class="dothis">
+    <h4>The task — a course dashboard page</h4>
+    <ol>
+      <li>Start a fresh <code>index.html</code> and <code>style.css</code>. First three lines of CSS: the <code>border-box</code> reset.</li>
+      <li>Define at least four custom properties on <code>:root</code> — two colours, a spacing unit, a border radius — and use them throughout. No raw hex values below <code>:root</code>.</li>
+      <li><strong>Page skeleton with Grid:</strong> header across the top, a 240px sidebar, main content, footer across the bottom. Use <code>grid-template-areas</code>. Full viewport height with the footer at the bottom even when content is short.</li>
+      <li><strong>Header with Flexbox:</strong> a title on the left, three nav links on the right, vertically centred, using <code>gap</code> and no margins.</li>
+      <li><strong>Card grid in main:</strong> six cards using <code>repeat(auto-fit, minmax(250px, 1fr))</code>. No media query for this.</li>
+      <li><strong>Each card with Flexbox:</strong> a column containing a title, a variable amount of text, and a button. Every button must line up along the bottom regardless of text length.</li>
+      <li>Give one card a "New" badge in its top-right corner using <code>relative</code> and <code>absolute</code>.</li>
+      <li>Make the header <code>sticky</code> at the top on scroll.</li>
+      <li>Fluid heading size with <code>clamp()</code>. Prose capped at <code>65ch</code>.</li>
+      <li><strong>One media query only:</strong> below 48rem, the sidebar moves above main and the layout becomes a single column.</li>
+    </ol>
+  </div>
+
+  <div class="dothis">
+    <h4>Then verify it — this half matters as much</h4>
+    <ol>
+      <li>360px wide in the device toolbar. <strong>Zero horizontal scroll.</strong></li>
+      <li>1600px wide. No line of text longer than about 65 characters.</li>
+      <li>Every width in between, dragged slowly. Nothing overlaps, nothing jumps awkwardly.</li>
+      <li>Turn on the grid overlay badge and check your tracks are what you think they are.</li>
+      <li>Tab through the page. Focus order sensible, focus rings visible.</li>
+      <li>Switch your OS to dark mode. If you did section 08, it should follow.</li>
+      <li>Search your stylesheet for <code>!important</code>. There should be none.</li>
+    </ol>
+  </div>
+
+  <div class="cue"><p class="cue-k">How to judge yourself</p><p>You're ready if you built it needing DevTools but not this document. Nearly ready if you looked up two or three property names — nobody memorises every <code>justify-content</code> value.</p><p>The real test isn't the properties. It's whether, when something looked wrong, you <em>knew where to look</em> instead of changing numbers until it moved.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 21 complete</span></label>
+</section>
+
+<!-- ================= 22 ================= -->
+<section id="s22">
+  <div class="shead"><span class="chip">22</span><h2>Final checkpoint</h2><span class="tagline">answer before revealing</span></div>
+
+  <p>Fifteen questions. Answer each in your head — or better, write it down — <em>before</em> opening the answer. Getting one wrong is information, not failure; go back to the section it came from.</p>
+
+  <div class="quiz"><div class="q"><b>1</b>Name the four layers of the box model, from the inside out.</div>
+    <details><summary>Show answer</summary><div class="a"><p>Content, padding, border, margin. Padding is inside the border and takes the background; margin is outside and is always transparent.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>2</b><code>width: 200px; padding: 20px; border: 5px</code>. How wide on screen, and how do you make it 200?</div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>250px</strong> by default (<code>content-box</code>). Set <code>box-sizing: border-box</code> — universally as <code>*, *::before, *::after { box-sizing: border-box }</code> — and it becomes exactly 200px.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>3</b>Two stacked elements, 30px bottom margin and 20px top margin. What's the gap?</div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>30px.</strong> Adjacent vertical margins collapse to the larger of the two. Avoid the whole topic by using <code>gap</code> on a flex or grid parent, where margins never collapse.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>4</b>Put these in specificity order: <code>#nav a</code>, <code>.nav .link</code>, <code>nav ul li a</code>.</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>#nav a</code> is 1-0-1, <code>.nav .link</code> is 0-2-0, <code>nav ul li a</code> is 0-0-4. So: <strong>#nav a &gt; .nav .link &gt; nav ul li a</strong>.</p><p>Columns are compared left to right, not summed — one id beats any number of classes, and one class beats any number of elements.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>5</b>Which of these inherit: <code>color</code>, <code>padding</code>, <code>font-family</code>, <code>border</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>color</code> and <code>font-family</code> inherit. <code>padding</code> and <code>border</code> don't.</p><p>Rule of thumb: text-related properties inherit, box-related ones don't.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>6</b>Why prefer <code>rem</code> over <code>em</code> for font sizes?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>em</code> is relative to the element's own font size, so it compounds through nesting — three nested 1.2em elements give 1.728×. <code>rem</code> always refers to the root, so it never compounds.</p><p>Both beat <code>px</code> for text, because both respect a user's browser font-size setting.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>7</b>In <code>flex-direction: column</code>, which property centres items vertically?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>justify-content: center</code> — because in a column the main axis is vertical, and <code>justify-*</code> always works on the main axis.</p><p><code>align-items</code> would centre them horizontally there.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>8</b>What does <code>flex: 1</code> expand to, and what does each part mean?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>flex: 1 1 0%</code> — grow 1 (take a share of free space), shrink 1 (give up space when cramped), basis 0% (ignore content width when dividing).</p><p>Which is why several <code>flex: 1</code> items end up equal width regardless of their content.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>9</b>A flex item containing a long URL is forcing a horizontal scrollbar. Fix?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>min-width: 0</code> on the flex item. Flex items default to <code>min-width: auto</code>, meaning they refuse to shrink below their content's intrinsic size.</p><p>Add <code>overflow-wrap: break-word</code> so the URL wraps rather than being clipped.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>10</b>A grid has 3 columns. How many lines, and what does <code>grid-column: 1 / -1</code> do?</div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>Four lines.</strong> N columns means N+1 lines.</p><p><code>1 / -1</code> spans from the first line to the last — full width — and keeps working if the column count changes.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>11</b>Explain <code>repeat(auto-fit, minmax(250px, 1fr))</code>.</div>
+    <details><summary>Show answer</summary><div class="a"><p>Fit as many columns as possible, each at least 250px wide, sharing any leftover space equally. Empty tracks collapse so the real items stretch to fill the row.</p><p>Result: a responsive card grid that reflows at any width, with no media queries.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>12</b>Flexbox or Grid — what's the deciding question?</div>
+    <details><summary>Show answer</summary><div class="a"><p>"Do I need alignment in two dimensions at once?" Yes → Grid. No → Flexbox.</p><p>Flexbox is content-out (one row or column, items size themselves); Grid is layout-in (you define the structure first). Most real pages use Grid for the skeleton and Flexbox inside the parts.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>13</b>Give three reasons <code>position: sticky</code> silently does nothing.</div>
+    <details><summary>Show answer</summary><div class="a"><p>No <code>top</code>/<code>bottom</code> threshold set; an ancestor has <code>overflow</code> hidden/auto/scroll; or the parent isn't tall enough for the element to travel within.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>14</b>Why is mobile-first the right default?</div>
+    <details><summary>Show answer</summary><div class="a"><p>A single-column phone layout is close to what HTML does anyway, so the base styles are minimal and each <code>min-width</code> query <em>adds</em> complexity. Desktop-first means writing everything then unpicking it, which produces more code and override wars — and makes phones parse desktop CSS they'll never use.</p></div></details></div>
+
+  <div class="quiz"><div class="q"><b>15</b>Your media queries have no effect on a real phone. What's the first thing to check?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</code> in the head. Without it a phone reports itself as roughly 980px wide, so no small-screen query ever matches.</p></div></details></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 22 complete</span></label>
+</section>
+
+<!-- ================= GLOSSARY ================= -->
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+
+  <div class="gloss">
+    <div class="grow"><b>block formatting context</b><span>An isolated layout region. Created by <code>display: flow-root</code>, flex, grid and others. Stops margins escaping.</span></div>
+    <div class="grow"><b>border-box</b><span>Sizing mode where <code>width</code> includes padding and border. What you want, always.</span></div>
+    <div class="grow"><b>breakpoint</b><span>A width at which a media query changes the layout. Chosen by content, not by device.</span></div>
+    <div class="grow"><b>cascade</b><span>The procedure that decides which rule wins: importance, then specificity, then source order.</span></div>
+    <div class="grow"><b>clamp()</b><span><code>clamp(min, preferred, max)</code> — a fluid value with hard limits.</span></div>
+    <div class="grow"><b>container query</b><span>A query on a parent element's size rather than the viewport's.</span></div>
+    <div class="grow"><b>cross axis</b><span>The axis perpendicular to <code>flex-direction</code>. Controlled by <code>align-*</code>.</span></div>
+    <div class="grow"><b>custom property</b><span><code>--name: value</code>, read with <code>var()</code>. A real runtime variable that inherits.</span></div>
+    <div class="grow"><b>declaration</b><span>One <code>property: value</code> pair.</span></div>
+    <div class="grow"><b>flex item</b><span>A direct child of a <code>display: flex</code> element.</span></div>
+    <div class="grow"><b>fr</b><span>A fraction of leftover grid space, calculated after gaps and fixed tracks.</span></div>
+    <div class="grow"><b>gap</b><span>Space between flex or grid children. Replaces sibling margins.</span></div>
+    <div class="grow"><b>inheritance</b><span>Text properties passing down the tree automatically; box properties not.</span></div>
+    <div class="grow"><b>main axis</b><span>The direction of <code>flex-direction</code>. Controlled by <code>justify-content</code>.</span></div>
+    <div class="grow"><b>margin collapse</b><span>Adjacent vertical margins merging into the larger of the two.</span></div>
+    <div class="grow"><b>media query</b><span><code>@media (min-width: …)</code> — rules that apply only at certain viewport conditions.</span></div>
+    <div class="grow"><b>minmax()</b><span>A grid track that is at least one size and at most another.</span></div>
+    <div class="grow"><b>normal flow</b><span>The default arrangement: blocks stack down, inlines run along a line.</span></div>
+    <div class="grow"><b>rem</b><span>Relative to the root font size. Your default unit.</span></div>
+    <div class="grow"><b>specificity</b><span>The ids-classes-elements score deciding which selector wins.</span></div>
+    <div class="grow"><b>stacking context</b><span>A layering scope. Children can't escape their parent's position in the stack.</span></div>
+    <div class="grow"><b>track</b><span>One grid column or row. Lines are the dividers between tracks.</span></div>
+    <div class="grow"><b>viewport</b><span>The visible area of the browser window.</span></div>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Glossary read</span></label>
+</section>
+
+<div class="finish">
+  <h2>How to know you're ready</h2>
+  <p><strong>There is nothing to submit.</strong> No form, no upload, nothing to send anywhere. This is for your own benefit, and the only person who needs to be satisfied by it is you.</p>
+  <p>You're there if you can do all of these <em>without looking anything up</em>:</p>
+  <ol>
+    <li>Name the four layers of the box model and explain what <code>box-sizing: border-box</code> changes.</li>
+    <li>Work out which of two competing rules wins, and prove it in DevTools.</li>
+    <li>Say which properties inherit and which don't, and why that split makes sense.</li>
+    <li>Build a nav bar and a centred layout with Flexbox, without guessing at the axes.</li>
+    <li>Explain what <code>flex: 1</code> expands to.</li>
+    <li>Build a responsive card grid with <code>repeat(auto-fit, minmax(…))</code> and explain it line by line.</li>
+    <li>Choose between Flexbox and Grid and say why in one sentence.</li>
+    <li>Write a mobile-first media query, and know when you don't need one at all.</li>
+  </ol>
+  <p>If any of those feels shaky, go back to the section it came from and build the example again. Nobody is checking, so there's no reason to pretend otherwise to yourself.</p>
+
+  <h2 style="margin-top:30px;font-size:20px">The four lines every stylesheet starts with</h2>
+  <div class="cmd"><span class="tg">*, *::before, *::after</span> { <span class="at">box-sizing</span>: <span class="st">border-box</span>; }
+<span class="tg">body</span> { <span class="at">margin</span>: <span class="st">0</span>; <span class="at">font-family</span>: <span class="st">system-ui, sans-serif</span>; <span class="at">line-height</span>: <span class="st">1.6</span>; }
+<span class="tg">img, video</span> { <span class="at">max-width</span>: <span class="st">100%</span>; <span class="at">height</span>: <span class="st">auto</span>; }
+<span class="tg">h1, h2, h3, p</span> { <span class="at">margin-block</span>: <span class="st">0 1rem</span>; }   <span class="cm">/* one direction only */</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Flexbox card</h2>
+  <div class="cmd"><span class="cm">/* on the container */</span>
+<span class="at">display</span>: <span class="st">flex</span>;
+<span class="at">flex-direction</span>: <span class="st">row | column</span>;
+<span class="at">flex-wrap</span>: <span class="st">wrap</span>;
+<span class="at">gap</span>: <span class="st">1rem</span>;
+<span class="at">justify-content</span>: <span class="st">flex-start | center | space-between | space-evenly</span>;  <span class="cm">/* main */</span>
+<span class="at">align-items</span>: <span class="st">stretch | center | flex-start | baseline</span>;              <span class="cm">/* cross */</span>
+
+<span class="cm">/* on the items */</span>
+<span class="at">flex</span>: <span class="st">1</span>;              <span class="cm">/* = 1 1 0%  — equal, fluid */</span>
+<span class="at">flex</span>: <span class="st">0 0 240px</span>;       <span class="cm">/* fixed, never flexes */</span>
+<span class="at">align-self</span>: <span class="st">center</span>;   <span class="cm">/* override just this one */</span>
+<span class="at">margin-top</span>: <span class="st">auto</span>;     <span class="cm">/* push to the end of a column */</span>
+<span class="at">min-width</span>: <span class="st">0</span>;         <span class="cm">/* allow shrinking past content */</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Grid card</h2>
+  <div class="cmd"><span class="cm">/* on the container */</span>
+<span class="at">display</span>: <span class="st">grid</span>;
+<span class="at">grid-template-columns</span>: <span class="st">240px 1fr</span>;
+<span class="at">grid-template-columns</span>: <span class="st">repeat(auto-fit, minmax(250px, 1fr))</span>;  <span class="cm">/* responsive */</span>
+<span class="at">grid-template-areas</span>: <span class="st">"header header" "side main"</span>;
+<span class="at">grid-auto-rows</span>: <span class="st">minmax(120px, auto)</span>;
+<span class="at">gap</span>: <span class="st">1rem</span>;
+<span class="at">place-items</span>: <span class="st">center</span>;
+
+<span class="cm">/* on the items */</span>
+<span class="at">grid-column</span>: <span class="st">1 / 3</span>;      <span class="cm">/* between lines 1 and 3 */</span>
+<span class="at">grid-column</span>: <span class="st">span 2</span>;     <span class="cm">/* two tracks from wherever it lands */</span>
+<span class="at">grid-column</span>: <span class="st">1 / -1</span>;     <span class="cm">/* full width, any column count */</span>
+<span class="at">grid-area</span>: <span class="st">main</span>;         <span class="cm">/* into a named area */</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Responsive card</h2>
+  <div class="cmd"><span class="at">font-size</span>: <span class="st">clamp(1.5rem, 4vw, 3rem)</span>;
+<span class="at">width</span>: <span class="st">min(100% - 2rem, 65rem)</span>;  <span class="at">margin-inline</span>: <span class="st">auto</span>;
+<span class="at">padding-inline</span>: <span class="st">clamp(1rem, 5vw, 4rem)</span>;
+<span class="at">max-width</span>: <span class="st">65ch</span>;                  <span class="cm">/* readable line length */</span>
+<span class="at">min-height</span>: <span class="st">100dvh</span>;                <span class="cm">/* not 100vh */</span>
+
+<span class="tg">@media (min-width: 48rem)</span> { <span class="cm">/* mobile first: add, don't remove */</span> }
+<span class="tg">@container (min-width: 400px)</span> { <span class="cm">/* needs container-type on the parent */</span> }
+<span class="tg">@media (prefers-reduced-motion: reduce)</span> { <span class="cm">/* turn animations off */</span> }</div>
+</div>
+
+<footer>M.Tech CSE · ESD · CSS &amp; layout<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+
+</div>
+
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ----
+     Fragment hrefs get resolved against the host page URL in some
+     embedded/iframed contexts, which breaks them. Scrolling manually
+     works the same whether this file is opened locally, served from
+     a static host, or previewed inside another page. */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=['Work through it at whatever pace suits you.',
+             'Good start — the box model and the cascade carry everything else.',
+             'Past halfway. Flexbox and Grid are the fun part.',
+             'Nearly there. The practice run is where it sticks.',
+             "All done — nothing to hand in. You're ready."];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    msg.textContent=n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))];
+  }
+  checks.forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^[$>]\s?/,'').trimEnd()}).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>
