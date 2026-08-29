@@ -265,7 +265,7 @@ footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.
   <p>If you've read the first two chapters, skim this. If not, it's enough to continue with.</p>
 
   <h3>Bindings</h3>
-  <div class="cmd"><span class="tg">const</span> name = <span class="st">"Shreyas"</span>;   <span class="cm">// cannot be reassigned. Your default.</span>
+  <div class="cmd"><span class="tg">const</span> name = <span class="st">"Utkarsh"</span>;   <span class="cm">// cannot be reassigned. Your default.</span>
 <span class="tg">let</span> count = <span class="st">0</span>;            <span class="cm">// can be reassigned. Use when it genuinely changes.</span>
 <span class="tg">var</span> old = <span class="st">"avoid"</span>;        <span class="cm">// legacy. See section 04.</span></div>
 
@@ -349,8 +349,8 @@ x =&gt; x * x             <span class="cm">// one parameter: brackets optional</
   <span class="tg">return</span> <span class="st">`${greeting}, ${name}!`</span>;             <span class="cm">// template literal</span>
 }
 
-<span class="at">greet</span>(<span class="st">"Shreyas"</span>);              <span class="o">// "Hello, Shreyas!"</span>
-<span class="at">greet</span>(<span class="st">"Shreyas"</span>, <span class="st">"Namaskar"</span>);   <span class="o">// "Namaskar, Shreyas!"</span>
+<span class="at">greet</span>(<span class="st">"Utkarsh"</span>);              <span class="o">// "Hello, Utkarsh!"</span>
+<span class="at">greet</span>(<span class="st">"Utkarsh"</span>, <span class="st">"Namaskar"</span>);   <span class="o">// "Namaskar, Utkarsh!"</span>
 
 <span class="tg">function</span> <span class="at">sum</span>(...numbers) {         <span class="cm">// rest: collect the lot into an array</span>
   <span class="tg">return</span> numbers.<span class="at">reduce</span>((a, b) =&gt; a + b, <span class="st">0</span>);
@@ -637,7 +637,7 @@ courses[<span class="st">10</span>];             <span class="o">// undefined �
   <div class="shead"><span class="chip">08</span><h2>Objects</h2><span class="tagline">named properties</span></div>
 
   <div class="cmd"><span class="tg">const</span> student = {
-  name: <span class="st">"Shreyas"</span>,
+  name: <span class="st">"Utkarsh"</span>,
   roll: <span class="st">"CS2024"</span>,
   courses: [<span class="st">"ADB"</span>, <span class="st">"ESD"</span>],
   address: { city: <span class="st">"Pune"</span>, pin: <span class="st">411001</span> },
@@ -645,8 +645,8 @@ courses[<span class="st">10</span>];             <span class="o">// undefined �
 };</div>
 
   <h3>Reading and writing</h3>
-  <div class="cmd">student.name;                <span class="o">// "Shreyas"     — dot notation</span>
-student[<span class="st">"name"</span>];             <span class="o">// "Shreyas"     — bracket notation</span>
+  <div class="cmd">student.name;                <span class="o">// "Utkarsh"     — dot notation</span>
+student[<span class="st">"name"</span>];             <span class="o">// "Utkarsh"     — bracket notation</span>
 
 <span class="tg">const</span> key = <span class="st">"roll"</span>;
 student[key];                <span class="o">// "CS2024"      — brackets take an expression</span>
@@ -659,7 +659,7 @@ student.email = <span class="st">"x@y.com"</span>;  <span class="cm">// add</spa
   <div class="cue"><p class="cue-k">When to use brackets</p><p>Use dots when you know the property name as you write the code. Use brackets when the name is in a variable, comes from user input, or isn't a valid identifier (<code>obj["first name"]</code>).</p><p>That's the entire rule, and "why doesn't <code>obj.key</code> work?" is one of the most common beginner questions.</p></div>
 
   <h3>Useful shorthands</h3>
-  <div class="cmd"><span class="tg">const</span> name = <span class="st">"Shreyas"</span>, roll = <span class="st">"CS2024"</span>;
+  <div class="cmd"><span class="tg">const</span> name = <span class="st">"Utkarsh"</span>, roll = <span class="st">"CS2024"</span>;
 <span class="tg">const</span> student = { name, roll };        <span class="cm">// same as { name: name, roll: roll }</span>
 
 <span class="tg">const</span> field = <span class="st">"score"</span>;
@@ -667,8 +667,8 @@ student.email = <span class="st">"x@y.com"</span>;  <span class="cm">// add</spa
 
   <h3>Iterating an object</h3>
   <div class="cmd"><span class="tg">Object</span>.<span class="at">keys</span>(student);     <span class="o">// ["name", "roll", "courses", …]</span>
-<span class="tg">Object</span>.<span class="at">values</span>(student);   <span class="o">// ["Shreyas", "CS2024", …]</span>
-<span class="tg">Object</span>.<span class="at">entries</span>(student);  <span class="o">// [["name","Shreyas"], ["roll","CS2024"], …]</span>
+<span class="tg">Object</span>.<span class="at">values</span>(student);   <span class="o">// ["Utkarsh", "CS2024", …]</span>
+<span class="tg">Object</span>.<span class="at">entries</span>(student);  <span class="o">// [["name","Utkarsh"], ["roll","CS2024"], …]</span>
 
 <span class="tg">for</span> (<span class="tg">const</span> [key, value] <span class="tg">of</span> <span class="tg">Object</span>.<span class="at">entries</span>(student)) {
   <span class="tg">console</span>.<span class="at">log</span>(key, <span class="st">"→"</span>, value);
@@ -1063,13 +1063,13 @@ students.<span class="at">filter</span>(<span class="tg">Boolean</span>);       
   <div class="cue"><p class="cue-k">The rule that explains everything</p><p><strong><code>this</code> is determined by how a function is <em>called</em>, not where it was written.</strong></p><p>Every confusing <code>this</code> bug comes from expecting the opposite.</p></div>
 
   <div class="cmd"><span class="tg">const</span> student = {
-  name: <span class="st">"Shreyas"</span>,
+  name: <span class="st">"Utkarsh"</span>,
   <span class="at">greet</span>() {
     <span class="tg">return</span> <span class="st">`Hi, ${<span class="tg">this</span>.name}`</span>;
   }
 };
 
-student.<span class="at">greet</span>();          <span class="o">// "Hi, Shreyas"  — called ON student</span>
+student.<span class="at">greet</span>();          <span class="o">// "Hi, Utkarsh"  — called ON student</span>
 
 <span class="tg">const</span> fn = student.greet;  <span class="cm">// pull the function out…</span>
 <span class="at">fn</span>();                     <span class="o">// "Hi, undefined" — no object, no `this`</span></div>
@@ -1201,8 +1201,8 @@ loose.<span class="at">call</span>(obj);             <span class="o">// "object"
   <div class="cmd"><span class="tg">const</span> proto = { <span class="at">greet</span>() { <span class="tg">return</span> <span class="st">`Hi, ${<span class="tg">this</span>.name}`</span>; } };
 
 <span class="tg">const</span> a = <span class="tg">Object</span>.<span class="at">create</span>(proto);
-a.name = <span class="st">"Shreyas"</span>;
-a.<span class="at">greet</span>();                  <span class="o">// "Hi, Shreyas"  — greet lives on proto</span>
+a.name = <span class="st">"Utkarsh"</span>;
+a.<span class="at">greet</span>();                  <span class="o">// "Hi, Utkarsh"  — greet lives on proto</span>
 
 <span class="tg">const</span> bare = <span class="tg">Object</span>.<span class="at">create</span>(<span class="tg">null</span>);   <span class="cm">// no prototype at all — a clean dictionary</span></div>
 
@@ -1239,9 +1239,9 @@ a.<span class="at">greet</span>();                  <span class="o">// "Hi, Shre
   }
 }
 
-<span class="tg">const</span> s = <span class="tg">new</span> <span class="at">Student</span>(<span class="st">"Shreyas"</span>, <span class="st">"CS2024"</span>);
-s.<span class="at">greet</span>();        <span class="o">// "Hi, Shreyas"</span>
-s.label;          <span class="o">// "Shreyas (CS2024)"  — no brackets, it's a getter</span>
+<span class="tg">const</span> s = <span class="tg">new</span> <span class="at">Student</span>(<span class="st">"Utkarsh"</span>, <span class="st">"CS2024"</span>);
+s.<span class="at">greet</span>();        <span class="o">// "Hi, Utkarsh"</span>
+s.label;          <span class="o">// "Utkarsh (CS2024)"  — no brackets, it's a getter</span>
 <span class="at">Student</span>.count;   <span class="o">// 1</span></div>
 
   <h3>What <code>new</code> actually does</h3>
@@ -1625,7 +1625,7 @@ a?.b?.c          <span class="cm">// optional chaining</span>
 x ?? <span class="st">"default"</span>    <span class="cm">// null/undefined only — NOT falsy</span></div>
 </div>
 
-<footer>M.Tech CSE · ESD · JavaScript<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+<footer>M.Tech CSE · ESD · JavaScript<br><span class="mk">Made with <span class="hz">&#10084;</span> by Utkarsh</span></footer>
 
 </div>
 
