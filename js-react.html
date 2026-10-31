@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JavaScript for React — JS Lab 1</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#101614">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Condensed:wght@600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+.cue.work{border-left-color:var(--ink);background:var(--surface)}
+.cue.work .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.tg{color:var(--term-green)}
+.at{color:var(--signal)}
+.st{color:#B7C4C0}
+.tx{color:#FFFFFF}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 182px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+.quiz .a .cmd{margin-top:4px}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 168px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+/* ---- additions for the lab docs ---- */
+.cue.react{border-left-color:var(--term-green);background:var(--dark);color:#DDE3E0}
+.cue.react .cue-k{color:var(--term-green)}
+.cue.react code{background:#22302D;color:var(--term-green)}
+.cue.react strong{color:#FFF}
+.refs{font-family:var(--mono);font-size:12px;color:var(--muted);margin:-6px 0 16px;max-width:70ch}
+.refs a{color:var(--teal);font-weight:600}
+.part{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper);background:var(--ink);display:inline-block;padding:5px 10px;margin:64px 0 -28px}
+.toc .rpart{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);padding:10px 16px 6px;border-bottom:1px solid var(--line);background:var(--teal-soft);font-weight:600}
+table.grid{border-collapse:collapse;width:100%;max-width:70ch;background:var(--surface);border:1px solid var(--ink);margin:0 0 16px;font-size:14.5px}
+table.grid th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;text-align:left;color:var(--muted);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--ink)}
+table.grid td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.grid tr:last-child td{border-bottom:0}
+table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--teal);font-weight:600;white-space:nowrap}
+
+/* ---- core / stretch ---- */
+.lvl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:3px 7px;align-self:center;white-space:nowrap}
+.lvl.core{background:var(--ink);color:var(--signal)}
+.lvl.stretch-box{border:1px dashed var(--teal);color:var(--teal)}
+.lvl.ref{border:1px solid var(--muted);color:var(--muted)}
+.rrow .rl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:600;flex:0 0 auto;border:1px dashed var(--teal);padding:1px 6px;align-self:center}
+.rrow .rl.ref{color:var(--muted);border:1px solid var(--muted)}
+.rrow.is-extra .rw{color:var(--muted)}
+.stretch-box{border:1px dashed var(--teal);background:rgba(255,255,255,.55);padding:14px 16px 4px;margin:8px 0 18px}
+.stretch-box::before{content:"Stretch — optional. Do it if you can, and ask about it any time.";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600;margin-bottom:10px}
+.stretch-box h3:first-of-type{margin-top:0}
+.legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 0;font-size:14px;color:#2B3936}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+  table.grid td:first-child{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> JS Lab 1 · Tue Nov 3 · No AI</p>
+  <h1>JavaScript<br>for <em>React</em></h1>
+  <p class="lede">React is named after one idea: <strong>reactivity</strong> — you change the data, and the screen <em>reacts</em> by updating itself. Under the name it is ordinary JavaScript: functions handed around as values, closures that remember things, data that is never changed in place. This lab builds that JavaScript from the bottom up, on one small course-catalogue app, and then you build reactivity yourself — a working <code>useState</code> — so that React reads like code you already know.</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">16</span> core</div>
+      <div class="tracker-msg" id="msg">Core first, in order — every section builds on the last.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill" style="width: 0%;"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p><strong>This is a pre-lab.</strong> You work through it at home, at your own pace, before Tuesday. The 90 minutes in the lab are for your doubts and for one harder topic that only makes sense once you've done this. If you arrive without it, the lab won't make sense.</p>
+  <p><strong>The thread through all of it is reactivity.</strong> Sections 03–14 are the JavaScript it needs. Section 13 shows what a page is like without it, and section 15 is where you build it. Keep asking, at every section: <em>how would this help the screen update itself?</em></p>
+  <p><strong>It builds on two documents you already have:</strong> <a href="js-funda.html">05 · Functions, arrays &amp; objects</a> and <a href="advanced-javascript.html">06 · Advanced JavaScript</a>. This lab doesn't repeat them. Each section starts with a short refresher and a link to the full version. If a refresher feels unfamiliar, open the link before going on.</p>
+  <p><strong>Core and stretch.</strong> Every section and some parts within sections are marked: <span class="lvl core">Core</span> is mandatory — it's what we go through together in the lab, and what <code>npm test</code> checks. <span class="lvl stretch">Stretch</span> is extra: worth doing, checked by <code>npm run test:stretch</code>, and you can ask about it any time. Plan for <strong>about four hours of core</strong>, split across two sittings if you like; stretch adds two to three more.</p>
+  <p><strong>No AI for this lab.</strong> Not for the exercises, not for explanations. The tests tell you when you're right; your own confusion tells you where to look. Keep a terminal and a browser console open the whole time and run every snippet.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — simple to complex, then React. Do every core section, in order; stretch is extra</div>
+  <div class="rpart">Part 1 · Getting set up</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">How this lab works</span></a>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">Where we're going — one React component</span></a>
+  <div class="rpart">Part 2 · Values and functions</div>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">Values, truthiness and expressions</span></a>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">Functions are values</span></a>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">Callbacks and higher-order functions</span></a>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">Scope and closures</span></a>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">this — and why React stopped needing it</span></a>
+  <div class="rpart">Part 3 · Data for the screen</div>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">Destructuring, spread, rest and computed keys</span></a>
+  <a class="rrow is-extra" href="#s9"><span class="rt">09</span><span class="rw">References, equality and copies</span><span class="rl">stretch</span></a>
+  <a class="rrow" href="#s10"><span class="rt">10</span><span class="rw">Immutable updates</span></a>
+  <a class="rrow" href="#s11"><span class="rt">11</span><span class="rw">The array toolkit for UIs</span></a>
+  <div class="rpart">Part 4 · The browser</div>
+  <a class="rrow" href="#s12"><span class="rt">12</span><span class="rw">Selecting and creating elements</span></a>
+  <a class="rrow" href="#s13"><span class="rt">13</span><span class="rw">Events, bubbling and forms</span></a>
+  <a class="rrow is-extra" href="#s14"><span class="rt">14</span><span class="rw">Modules</span><span class="rl">stretch</span></a>
+  <div class="rpart">Part 5 · Towards React</div>
+  <a class="rrow" href="#s15"><span class="rt">15</span><span class="rw">Reactivity — build your own useState</span></a>
+  <a class="rrow" href="#s16"><span class="rt">16</span><span class="rw">Reading React with what you now know</span></a>
+  <a class="rrow" href="#s17"><span class="rt">17</span><span class="rw">In the lab on Tuesday</span></a>
+  <a class="rrow is-extra" href="#s18"><span class="rt">18</span><span class="rw">When it goes wrong</span><span class="rl ref">reference</span></a>
+  <a class="rrow is-extra" href="#s19"><span class="rt">19</span><span class="rw">Practice run, unaided</span><span class="rl">stretch</span></a>
+  <a class="rrow" href="#s20"><span class="rt">20</span><span class="rw">Checkpoint</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; reference cards</span></a>
+</nav>
+
+<div class="part">Part 1 · Getting set up</div>
+
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>How this lab works</h2><span class="lvl core">Core</span><span class="tagline">setup, tests, and the rules</span></div>
+
+  <p>Everything in this lab happens in one small project: a <strong>course catalogue</strong>. Twenty courses in a plain array, a planner that holds the ids of courses a student wants, and a form for adding a new course. There is no server and no database. Every exercise is a function you write in a file, checked by tests you run with one command.</p>
+
+  <h3>What you need</h3>
+  <div class="mention">
+    <div class="mrow"><b>Node.js 20 or newer</b><span>Runs JavaScript outside the browser, and runs the tests. Get the LTS installer from <a href="https://nodejs.org" target="_blank" rel="noopener">nodejs.org</a>.</span></div>
+    <div class="mrow"><b>VS Code</b><span>As a plain editor. No extensions needed.</span></div>
+    <div class="mrow"><b>A browser</b><span>Any modern one, with DevTools (<kbd>F12</kbd> or <kbd>Cmd</kbd>+<kbd>Opt</kbd>+<kbd>I</kbd>).</span></div>
+  </div>
+
+  <h3>Getting the starter</h3>
+  <p>Every lab's starter code lives in one GitHub repository, <a href="https://github.com/shreyasg-git/esd-labs" target="_blank" rel="noopener"><code>esd-labs</code></a>, with one folder per lab. You clone it <strong>once</strong>. Before each later lab you <code>git pull</code>, and that lab's folder appears next to the ones you already have — your work in the older folders isn't touched.</p>
+  <div class="dothis">
+    <h4>Do this now — clone it and run the tests</h4>
+    <ol>
+      <li>In a terminal, in the folder where you keep your course work, run the commands below.</li>
+      <li>Open the <strong><code>js-lab1</code> folder</strong> in VS Code (<em>File → Open Folder…</em>) and open its terminal (<kbd>Ctrl</kbd>+<kbd>`</kbd>).</li>
+    </ol>
+  </div>
+  <div class="cmd"><span class="p">$</span> git clone https://github.com/shreyasg-git/esd-labs.git
+<span class="p">$</span> cd esd-labs/js-lab1
+<span class="p">$</span> node -v
+<span class="o">v22.11.0</span>
+<span class="p">$</span> npm test
+<span class="cm"># tests 63</span>
+<span class="cm"># pass 1</span>
+<span class="cm"># fail 62</span></div>
+  <p>Almost everything fails, and that's correct: every function starts as <code>throw new Error("TODO")</code>. Your job is to turn the 62 into 0. (The stretch tests are separate: <code>npm run test:stretch</code>.) There is nothing to <code>npm install</code> — the tests use the runner built into Node.</p>
+
+  <div class="cue"><p class="cue-k">Keeping your work, and getting the next lab</p><p>Commit your work as you go (<code>git add -A</code>, <code>git commit -m "…"</code>) — <a href="git-basics.html">01 · Git, from absolute zero</a> covers it. Before each lab, run <code>git pull</code> in the <code>esd-labs</code> folder. New labs only <strong>add</strong> folders, so a pull never fights with your work. Each folder stands alone, with its own <code>npm test</code>: a half-finished lab can never break the next one. No git yet? Use <em>Code → Download ZIP</em> on the GitHub page — but you'll have to download again for each lab.</p></div>
+
+  <div class="cue watch"><p class="cue-k">On Windows, if npm says "running scripts is disabled"</p><p>That's PowerShell's execution policy, not your code. Either switch the VS Code terminal to <strong>Command Prompt</strong> (the <kbd>+</kbd> dropdown in the terminal panel), or run <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> once in PowerShell and reopen the terminal.</p></div>
+
+  <h3>The folder</h3>
+  <div class="mention">
+    <div class="mrow"><b>data/courses.js</b><span>The 20 courses. Read it once now so the field names are familiar.</span></div>
+    <div class="mrow"><b>src/s03-…js → s15-…js</b><span>One file per section. The section number in the file name matches this doc.</span></div>
+    <div class="mrow"><b>test/</b><span>The tests. Read them — they're the exact specification. Don't edit them.</span></div>
+    <div class="mrow"><b>predict/</b><span>Predict-then-run sheets. Write what you expect, then run, then explain the difference.</span></div>
+    <div class="mrow"><b>web/</b><span>The browser exercises: the form (sections 12–13) and the counter (section 15).</span></div>
+    <div class="mrow"><b>inlab/</b><span>For Tuesday. Leave it alone until then.</span></div>
+    <div class="mrow"><b>tools/</b><span><code>npm run repl</code> (a console with everything loaded) and <code>npm run web</code> (serves the browser exercise).</span></div>
+  </div>
+
+  <h3>Running one section's tests</h3>
+  <div class="cmd"><span class="p">$</span> node --test test/s03.test.js
+<span class="cm"># runs only section 03's tests</span>
+<span class="p">$</span> npm test
+<span class="cm"># runs every core test</span>
+<span class="p">$</span> npm run test:stretch
+<span class="cm"># runs the stretch tests</span></div>
+
+  <h3>Trying the snippets in this doc</h3>
+  <p>Many code blocks below use <code>courses</code>, or functions you're about to write. To run them, start a console with everything already loaded:</p>
+  <div class="cmd"><span class="p">$</span> npm run repl
+<span class="o">lab1&gt; courses[3].title</span>
+<span class="o">'Enterprise Software Development'</span>
+<span class="o">lab1&gt; .exit</span></div>
+  <p>It loads the course data and every function in <code>src/</code>. A function you haven't written yet will throw <code>Error: TODO</code> — that's expected. Restart the console after you edit a file, so it picks up the change. Snippets that don't use the data (like section 03's) work in the browser console too.</p>
+
+  <h3>Why the tests "freeze" their data</h3>
+  <p>Every test hands your function <strong>frozen</strong> data: objects and arrays that cannot be changed. If your function tries to change its input — <code>push</code> onto an array it was given, assign to a field of an object it was given — JavaScript throws immediately, and the test fails with something like:</p>
+  <div class="cmd"><span class="o">TypeError: Cannot add property 2, object is not extensible</span>
+<span class="o">TypeError: Cannot assign to read only property 'seatsLeft' of object</span></div>
+  <p>That's deliberate. Changing data in place is the single most common React bug, and in React it doesn't throw — the screen just quietly fails to update. Here, you find out at once. Section 10 explains why this matters so much.</p>
+
+  <h3>Getting it checked</h3>
+  <p>Before Tuesday, fill in the <a href="#s20">checkpoint</a> (section 20): your <code>npm test</code> summary, and one line on where you got stuck. The TAs read every "where I got stuck" line the morning of the lab and start the session with the most common ones.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — npm test runs</span></label>
+</section>
+
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>Where we're going</h2><span class="lvl core">Core</span><span class="tagline">one React component, read later</span></div>
+
+  <p>Here is a complete React component: a page that lists courses and lets a student add them to a planner. <strong>Don't try to understand it yet.</strong> Just notice that, apart from the HTML-looking parts, it is entirely JavaScript.</p>
+
+  <div class="cmd"><span class="tg">import</span> { useState } <span class="tg">from</span> <span class="st">"react"</span>;
+<span class="tg">import</span> CourseCard <span class="tg">from</span> <span class="st">"./CourseCard.js"</span>;
+
+<span class="tg">export</span> <span class="tg">default</span> <span class="tg">function</span> <span class="at">CoursePage</span>({ courses }) {
+  <span class="tg">const</span> [planner, setPlanner] = <span class="at">useState</span>([]);
+
+  <span class="tg">const</span> credits = planner
+    .<span class="at">map</span>((id) =&gt; courses.<span class="at">find</span>((c) =&gt; c.id === id))
+    .<span class="at">reduce</span>((sum, c) =&gt; sum + c.credits, <span class="st">0</span>);
+
+  <span class="tg">return</span> (
+    &lt;main&gt;
+      &lt;h1&gt;Courses {planner.length &gt; <span class="st">0</span> &amp;&amp; &lt;span&gt;{planner.length} planned&lt;/span&gt;}&lt;/h1&gt;
+      {courses.<span class="at">map</span>((course) =&gt; (
+        &lt;CourseCard
+          key={course.id}
+          course={course}
+          onAdd={() =&gt; <span class="at">setPlanner</span>((prev) =&gt; [...prev, course.id])}
+        /&gt;
+      ))}
+      &lt;p&gt;{credits} credits planned&lt;/p&gt;
+    &lt;/main&gt;
+  );
+}</div>
+
+  <p>Every idea in that component is one of the sections ahead:</p>
+  <div class="mention">
+    <div class="mrow"><b>import … export default</b><span>Modules — section 14.</span></div>
+    <div class="mrow"><b>function CoursePage({ courses })</b><span>A component is a function; <code>{ courses }</code> is destructuring — sections 04 and 08.</span></div>
+    <div class="mrow"><b>const [planner, setPlanner]</b><span>Array destructuring of a pair, one of which is a function — sections 04, 06, 08.</span></div>
+    <div class="mrow"><b>.map … .find … .reduce</b><span>The array toolkit — section 11.</span></div>
+    <div class="mrow"><b>planner.length &gt; 0 &amp;&amp; …</b><span>Expressions and short-circuiting — section 03.</span></div>
+    <div class="mrow"><b>onAdd={() =&gt; …}</b><span>Passing a function, not calling it — sections 04 and 05.</span></div>
+    <div class="mrow"><b>setPlanner((prev) =&gt; …)</b><span>Handing over a function to be called later — section 05.</span></div>
+    <div class="mrow"><b>[...prev, course.id]</b><span>An immutable update — sections 09 and 10.</span></div>
+    <div class="mrow"><b>no this anywhere</b><span>Why modern React doesn't need it — section 07.</span></div>
+  </div>
+  <p>And all of it serves one goal. Nowhere in that component is there a line that changes the page. It says what the page should look like for the current <code>planner</code>, calls <code>setPlanner</code> when something happens, and the page <strong>reacts</strong> by itself. That's <strong>reactivity</strong>, the idea React is named for — and in section 15 you build it from scratch.</p>
+  <p>In section 16 we come back to this exact component and read every line. By then it will be boring, which is the goal.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 complete</span></label>
+</section>
+
+<div class="part">Part 2 · Values and functions</div>
+
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>Values, truthiness and expressions</h2><span class="lvl core">Core</span><span class="tagline">the smallest pieces</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>JavaScript has eight types: <code>number</code>, <code>string</code>, <code>boolean</code>, <code>null</code>, <code>undefined</code>, <code>bigint</code>, <code>symbol</code> and <code>object</code> (arrays and functions are objects). Exactly eight values are <strong>falsy</strong> — <code>false 0 -0 0n "" null undefined NaN</code> — and everything else is truthy. Always compare with <code>===</code>.</p></div>
+  <p class="refs">Full version → <a href="js-funda.html#s2">05 · §02 The fast recap — values &amp; flow</a></p>
+
+  <h3>Expressions and statements</h3>
+  <p>An <strong>expression</strong> is any piece of code that produces a value: <code>3 + 4</code>, <code>course.title</code>, <code>courses.length &gt; 0</code>, <code>seatLabel(course)</code>. A <strong>statement</strong> does something but has no value: <code>if (…) { … }</code>, <code>for (…) { … }</code>, <code>const x = …;</code>.</p>
+  <p>The difference matters wherever JavaScript expects a value. Inside <code>${ }</code> in a template literal, as an argument to a function, on the right of <code>=</code> — only an expression fits there. You can't put an <code>if</code> inside <code>${ }</code>. So JavaScript gives you expression-shaped versions of choice:</p>
+
+  <div class="cmd"><span class="tg">const</span> seats = <span class="st">0</span>;
+
+<span class="cm">// statement — does something, has no value</span>
+<span class="tg">if</span> (seats === <span class="st">0</span>) { <span class="tg">console</span>.<span class="at">log</span>(<span class="st">"Full"</span>); }
+
+<span class="cm">// expression — the same choice, as a value you can use anywhere</span>
+<span class="tg">const</span> label = seats === <span class="st">0</span> ? <span class="st">"Full"</span> : <span class="st">`${seats} left`</span>;
+<span class="tg">console</span>.<span class="at">log</span>(<span class="st">`Status: ${seats === 0 ? "Full" : "Open"}`</span>);  <span class="o">// Status: Full</span></div>
+
+  <h3>&amp;&amp;, || and ?? return one of their operands</h3>
+  <p>This surprises almost everyone. <code>&amp;&amp;</code> and <code>||</code> don't return <code>true</code> or <code>false</code> — they return <strong>one of the two values you gave them</strong>.</p>
+  <div class="mention">
+    <div class="mrow"><b>a &amp;&amp; b</b><span>If <code>a</code> is falsy, returns <code>a</code>. Otherwise returns <code>b</code>.</span></div>
+    <div class="mrow"><b>a || b</b><span>If <code>a</code> is truthy, returns <code>a</code>. Otherwise returns <code>b</code>.</span></div>
+    <div class="mrow"><b>a ?? b</b><span>If <code>a</code> is <code>null</code> or <code>undefined</code>, returns <code>b</code>. Otherwise returns <code>a</code> — even if <code>a</code> is <code>0</code> or <code>""</code>.</span></div>
+  </div>
+  <div class="dothis"><h4>Do this now — in the browser console</h4><p>Predict each line, then type it.</p></div>
+  <div class="cmd"><span class="st">"Asha"</span> &amp;&amp; <span class="st">"logged in"</span>     <span class="o">// "logged in"</span>
+<span class="st">0</span> &amp;&amp; <span class="st">"3 in planner"</span>       <span class="o">// 0          ← not false: the 0 itself</span>
+<span class="st">""</span> || <span class="st">"No description"</span>    <span class="o">// "No description"</span>
+<span class="st">""</span> ?? <span class="st">"No description"</span>    <span class="o">// ""         ← "" is a real value to ??</span>
+<span class="tg">null</span> ?? <span class="st">"No description"</span>  <span class="o">// "No description"</span>
+<span class="st">0</span> ?? <span class="st">24</span>                   <span class="o">// 0</span></div>
+
+  <div class="cue watch"><p class="cue-k">The trap you will hit in React</p><p>A badge that should only show when the planner has something in it: <code>count &amp;&amp; `${count} in planner`</code>. When <code>count</code> is 3, you get the text. When it is 0, you don't get "nothing" — you get <strong>0</strong>, and React prints a stray <strong>0</strong> on the page. Make the left side a real boolean: <code>count &gt; 0 &amp;&amp; …</code>, or use a ternary.</p></div>
+
+  <h3>Optional chaining</h3>
+  <p><code>course?.title</code> reads <code>title</code> if <code>course</code> exists, and gives <code>undefined</code> instead of crashing if it is <code>null</code> or <code>undefined</code>. You'll need it whenever data might not have arrived yet — and in React, on the first render, it usually hasn't.</p>
+  <div class="cmd"><span class="tg">const</span> found = courses.<span class="at">find</span>((c) =&gt; c.code === <span class="st">"XX999"</span>);   <span class="cm">// undefined</span>
+found.title      <span class="cm">// TypeError: Cannot read properties of undefined (reading 'title')</span>
+found?.title     <span class="o">// undefined — no crash</span>
+found?.title ?? <span class="st">"No such course"</span>   <span class="o">// "No such course"</span></div>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>The curly braces in JSX — <code>&lt;h1&gt;{…}&lt;/h1&gt;</code> — accept <strong>exactly one expression</strong>. That one rule is why React code never has an <code>if</code> inside the markup, and instead uses <code>? :</code> for either/or, <code>&amp;&amp;</code> for "only if", and <code>.map()</code> for lists. You're learning the only three tools there are.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — src/s03-expressions.js</h4>
+    <ul>
+      <li><code>seatLabel(course)</code> → <code>"Full"</code>, <code>"1 seat left"</code> or <code>"12 seats left"</code>. One <code>return</code>, using ternaries and a template literal.</li>
+      <li><code>descriptionOrDefault(course)</code> → the description, or <code>"No description yet."</code> only when it is <code>null</code>/<code>undefined</code>. Course 13's description is <code>""</code> and must stay <code>""</code>.</li>
+      <li><code>plannerBadge(count)</code> → <code>"3 in planner"</code>, or <code>null</code> for 0. Try the naive <code>count &amp;&amp; …</code> first and read the failure.</li>
+    </ul>
+  </div>
+  <div class="cmd"><span class="p">$</span> node --test test/s03.test.js</div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>What does <code>courses.length &amp;&amp; "We have courses"</code> evaluate to when <code>courses</code> is empty?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>0</code>. The left side is <code>0</code>, which is falsy, so <code>&amp;&amp;</code> returns it unchanged. In JSX that would print a <strong>0</strong> on screen. Write <code>courses.length &gt; 0 &amp;&amp; …</code>.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Which of these can go inside <code>${ }</code>?
+      <ol><li><code>credits &gt; 20 ? "heavy" : "ok"</code></li><li><code>if (credits &gt; 20) "heavy"</code></li><li><code>plannerBadge(3)</code></li></ol></div>
+    <details><summary>Show answer</summary><div class="a"><p>1 and 3. Both are expressions — they produce a value. 2 is a statement and is a syntax error there.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 complete — s03 tests pass</span></label>
+</section>
+
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>Functions are values</h2><span class="lvl core">Core</span><span class="tagline">the idea React is built on</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>Three ways to write a function: a <strong>declaration</strong> <code>function add(a, b) { return a + b; }</code>, an <strong>expression</strong> <code>const add = function (a, b) { … }</code>, and an <strong>arrow</strong> <code>const add = (a, b) =&gt; a + b</code>. Parameters can have defaults: <code>(credits = 3) =&gt; …</code>.</p></div>
+  <p class="refs">Full version → <a href="js-funda.html#s3">05 · §03 Functions — three ways</a> · <a href="advanced-javascript.html#s1">06 · §01 Functions are values</a></p>
+
+  <h3>A function is just another value</h3>
+  <p>In JavaScript, a function is a value in exactly the way <code>42</code> and <code>"CS101"</code> are values. Anything you can do with a number, you can do with a function: store it in a variable, put it in an array or an object, pass it to another function, return it from a function.</p>
+  <div class="cmd"><span class="tg">const</span> shout = (text) =&gt; text.<span class="at">toUpperCase</span>();
+<span class="tg">typeof</span> shout                       <span class="o">// "function"</span>
+
+<span class="tg">const</span> alsoShout = shout;           <span class="cm">// store it in another variable</span>
+<span class="at">alsoShout</span>(<span class="st">"full"</span>)                  <span class="o">// "FULL"</span>
+
+<span class="tg">const</span> formatters = {               <span class="cm">// put functions in an object</span>
+  short: (c) =&gt; c.code,
+  long: (c) =&gt; <span class="st">`${c.code} · ${c.title}`</span>,
+};
+formatters.<span class="at">long</span>(courses[<span class="st">0</span>])        <span class="o">// "CS101 · Programming Fundamentals"</span>
+
+[shout, (t) =&gt; t + <span class="st">"!"</span>].<span class="at">map</span>((f) =&gt; <span class="at">f</span>(<span class="st">"hi"</span>))   <span class="o">// ["HI", "hi!"]</span></div>
+
+  <h3>The name is the function; the parentheses run it</h3>
+  <p>This distinction is the whole section. <code>seatLabel</code> <em>is</em> the function. <code>seatLabel(course)</code> <em>runs</em> it, and is whatever it returned.</p>
+  <div class="cmd">seatLabel              <span class="o">// [Function: seatLabel]   — the function itself</span>
+<span class="at">seatLabel</span>(courses[<span class="st">1</span>])  <span class="o">// "Full"                  — the result of running it</span></div>
+
+  <div class="cue watch"><p class="cue-k">Pass it, don't call it</p><p><code>button.addEventListener("click", save())</code> looks right and is wrong. The parentheses run <code>save</code> <strong>immediately</strong>, while the page loads, and hand <code>addEventListener</code> whatever <code>save</code> returned — usually <code>undefined</code>. The click then does nothing. Pass the function itself: <code>addEventListener("click", save)</code>. If it needs an argument, wrap it in a new function that will call it later: <code>addEventListener("click", () =&gt; save(course.id))</code>.</p></div>
+
+  <h3>The three arrow-function return rules</h3>
+  <p>Most "my map returns undefined" bugs are one of these.</p>
+  <div class="cmd"><span class="cm">// 1. No braces → the expression is returned automatically</span>
+<span class="tg">const</span> credits = courses.<span class="at">map</span>((c) =&gt; c.credits);          <span class="o">// [4, 4, 4, …]</span>
+
+<span class="cm">// 2. Braces → it's a block; nothing is returned unless you say return</span>
+<span class="tg">const</span> broken = courses.<span class="at">map</span>((c) =&gt; { c.credits });       <span class="o">// [undefined, undefined, …]</span>
+<span class="tg">const</span> fixed  = courses.<span class="at">map</span>((c) =&gt; { <span class="tg">return</span> c.credits; });
+
+<span class="cm">// 3. Returning an object literal → wrap it in parentheses,</span>
+<span class="cm">//    or the braces are read as a block</span>
+<span class="tg">const</span> wrong = courses.<span class="at">map</span>((c) =&gt; { code: c.code });     <span class="o">// [undefined, …]</span>
+<span class="tg">const</span> right = courses.<span class="at">map</span>((c) =&gt; ({ code: c.code }));   <span class="o">// [{ code: "CS101" }, …]</span></div>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>A React <strong>component is a function</strong> that returns what to show. Event handlers are functions you <strong>pass</strong>: <code>&lt;button onClick={handleAdd}&gt;</code>. Writing <code>onClick={handleAdd()}</code> calls it during every render — and if <code>handleAdd</code> changes state, React re-renders, which calls it again, forever. React stops it with the error <em>"Too many re-renders"</em>. Now you know what it means.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — src/s04-functions.js</h4>
+    <ul>
+      <li><code>toCardView(course)</code> → <code>{ id, heading, meta, isFull }</code>. Write it as an arrow function with an implicit object return (rule 3). The test shows the exact strings.</li>
+      <li><code>buildButtons(courses, onAdd)</code> is already written — and broken. Run the tests and read the message: <em>"onAdd was called while building"</em>. Fix the one line.</li>
+    </ul>
+  </div>
+  <div class="cmd"><span class="p">$</span> node --test test/s04.test.js</div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>What is <code>[1, 2, 3].map((n) =&gt; { n * 2 })</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>[undefined, undefined, undefined]</code>. The braces make a block body, and the block has no <code>return</code>. Either drop the braces or add <code>return</code>.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>What happens with <code>setTimeout(console.log("done"), 2000)</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>"done" prints <strong>immediately</strong>. <code>console.log("done")</code> runs first, returns <code>undefined</code>, and <code>setTimeout</code> receives <code>undefined</code> — so after 2 seconds, nothing happens. The fix: <code>setTimeout(() =&gt; console.log("done"), 2000)</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 complete — s04 tests pass</span></label>
+</section>
+
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>Callbacks and higher-order functions</h2><span class="lvl core">Core</span><span class="tagline">"don't call us, we'll call you"</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>A <strong>higher-order function</strong> takes a function as an argument, returns a function, or both. <code>setTimeout</code>, <code>addEventListener</code> and every array method you know (<code>map</code>, <code>filter</code>, <code>reduce</code>) are higher-order. The function you pass in is a <strong>callback</strong>.</p></div>
+  <p class="refs">Full version → <a href="advanced-javascript.html#s2">06 · §02–05 Higher-order functions</a> · <a href="js-funda.html#s12">05 · §12 Higher-order functions</a></p>
+
+  <h3>The receiver decides when to call it</h3>
+  <p>When you pass a callback, you hand over control. <strong>You</strong> don't call it — the function you gave it to calls it, when it decides, with the arguments it chooses. <code>setTimeout</code> calls yours after a delay. <code>addEventListener</code> calls yours on each click, with an event object. <code>map</code> calls yours once per item, with that item.</p>
+  <p>Writing one yourself makes this concrete. Here's a function that counts how many items pass a test — the test is a callback:</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">countWhere</span>(list, predicate) {
+  <span class="tg">let</span> count = <span class="st">0</span>;
+  <span class="tg">for</span> (<span class="tg">const</span> item <span class="tg">of</span> list) {
+    <span class="tg">if</span> (<span class="at">predicate</span>(item)) count += <span class="st">1</span>;   <span class="cm">// WE call the callback, once per item</span>
+  }
+  <span class="tg">return</span> count;
+}
+
+<span class="at">countWhere</span>(courses, (c) =&gt; c.seatsLeft === <span class="st">0</span>)   <span class="o">// 5</span>
+<span class="at">countWhere</span>(courses, (c) =&gt; c.credits === <span class="st">2</span>)     <span class="o">// 3</span></div>
+  <p><code>countWhere</code> knows how to count. It has no idea what you're counting — the callback supplies that. One general function, any number of questions.</p>
+
+  <h3>Functions that make functions</h3>
+  <p><code>sort</code> takes a <strong>comparator</strong>: a function of two items that returns a negative number if <code>a</code> comes first, positive if <code>b</code> does, and <code>0</code> if they're equal. Writing a comparator per field gets repetitive, so write a function that <em>builds</em> one:</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">byField</span>(field) {
+  <span class="tg">return</span> (a, b) =&gt; (a[field] &lt; b[field] ? -<span class="st">1</span> : a[field] &gt; b[field] ? <span class="st">1</span> : <span class="st">0</span>);
+}
+
+<span class="tg">const</span> bySeats = <span class="at">byField</span>(<span class="st">"seatsLeft"</span>);   <span class="cm">// a function, made to order</span>
+[...courses].<span class="at">sort</span>(bySeats)[<span class="st">0</span>].code      <span class="o">// "CS201"  (a full course)</span>
+[...courses].<span class="at">sort</span>(<span class="at">byField</span>(<span class="st">"title"</span>))[<span class="st">0</span>].title   <span class="o">// "Data Structures"</span></div>
+  <div class="cue watch"><p class="cue-k">Why [...courses] and not courses</p><p><code>sort</code> changes the array you call it on. The <code>[...courses]</code> makes a copy first so the original keeps its order. Section 09 explains why this matters; for now, always sort a copy.</p></div>
+
+  <h3>Handing over a function to compute later</h3>
+  <p>Here is the idea from this section you'll use most in React. Imagine a setter that accepts <em>either</em> a new value <em>or</em> a function that works the new value out from the current one:</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">applyUpdate</span>(current, update) {
+  <span class="tg">return</span> <span class="tg">typeof</span> update === <span class="st">"function"</span> ? <span class="at">update</span>(current) : update;
+}
+
+<span class="at">applyUpdate</span>(<span class="st">3</span>, <span class="st">5</span>)             <span class="o">// 5   — a value: just use it</span>
+<span class="at">applyUpdate</span>(<span class="st">3</span>, (n) =&gt; n + <span class="st">1</span>)  <span class="o">// 4   — a function: call it with the current value</span></div>
+  <p>Now apply three updates in a row, each to the result of the one before. Compare these two:</p>
+  <div class="cmd"><span class="tg">const</span> count = <span class="st">0</span>;
+
+<span class="at">applyAll</span>(count, [count + <span class="st">1</span>, count + <span class="st">1</span>, count + <span class="st">1</span>]);
+<span class="o">// 1   — count + 1 was worked out NOW, three times, from the same 0</span>
+
+<span class="at">applyAll</span>(count, [(n) =&gt; n + <span class="st">1</span>, (n) =&gt; n + <span class="st">1</span>, (n) =&gt; n + <span class="st">1</span>]);
+<span class="o">// 3   — each function runs LATER, on the latest value</span></div>
+  <p>A value is computed the moment you write it. A function is a recipe, run later, with whatever is current then. That is the entire difference.</p>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p><code>setCount(count + 1)</code> called three times in one click adds <strong>1</strong>. <code>setCount((c) =&gt; c + 1)</code> three times adds <strong>3</strong>. Your <code>applyAll</code> is a simplified version of exactly how React processes a queue of updates. And when a child component needs to tell its parent something, the parent passes a callback down — <code>onAdd</code> — and the child calls it. Events flow up through callbacks.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — src/s05-higher-order.js</h4>
+    <ul>
+      <li><code>countWhere(list, predicate)</code> — write the loop yourself (no <code>filter</code>).</li>
+      <li><code>byField(field)</code> — returns a comparator. Works for strings and numbers.</li>
+      <li><code>applyUpdate(current, update)</code> and <code>applyAll(start, updates)</code> — <code>applyAll</code> is one <code>reduce</code> that calls <code>applyUpdate</code>.</li>
+    </ul>
+  </div>
+  <div class="cmd"><span class="p">$</span> node --test test/s05.test.js</div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Why is <code>[10, 9, 1].sort()</code> equal to <code>[1, 10, 9]</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>With no comparator, <code>sort</code> converts every item to a <strong>string</strong> and compares those: <code>"1" &lt; "10" &lt; "9"</code>. For numbers, always pass one: <code>.sort((a, b) =&gt; a - b)</code>.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>In <code>countWhere(courses, (c) =&gt; c.credits === 2)</code>, who calls the arrow function, and how many times?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>countWhere</code> calls it, once per course — 20 times. You only wrote it and handed it over.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 complete — s05 tests pass</span></label>
+</section>
+
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>Scope and closures</h2><span class="lvl core">Core</span><span class="tagline">the engine under every hook</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>Scope looks <strong>outward</strong>: code inside a function can see the variables of every function around it, never the other way. A <strong>closure</strong> is a function together with the variables it could see where it was created — and it keeps them alive after the outer function has finished.</p></div>
+  <p class="refs">Full version → <a href="js-funda.html#s4">05 · §04 Scope</a> · <a href="js-funda.html#s5">05 · §05 Closures</a> · <a href="advanced-javascript.html#s6">06 · §06–10 Closures, step by step</a></p>
+
+  <div class="cmd"><span class="tg">function</span> <span class="at">makeCounter</span>() {
+  <span class="tg">let</span> n = <span class="st">0</span>;              <span class="cm">// lives in this call's scope</span>
+  <span class="tg">return</span> () =&gt; ++n;       <span class="cm">// the returned function still refers to it</span>
+}
+<span class="tg">const</span> a = <span class="at">makeCounter</span>();
+<span class="at">a</span>(); <span class="at">a</span>();
+<span class="at">a</span>()   <span class="o">// 3   — makeCounter finished long ago, but n survived</span></div>
+
+  <h3>Function factories</h3>
+  <p>A function that builds and returns another function, with some settings baked in. Each call makes a <strong>new</strong> function with its <strong>own</strong> variables:</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">createIdGenerator</span>(prefix) {
+  <span class="tg">let</span> n = <span class="st">0</span>;
+  <span class="tg">return</span> () =&gt; <span class="st">`${prefix}-${++n}`</span>;
+}
+<span class="tg">const</span> nextOrder = <span class="at">createIdGenerator</span>(<span class="st">"ORD"</span>);
+<span class="tg">const</span> nextTicket = <span class="at">createIdGenerator</span>(<span class="st">"TKT"</span>);
+<span class="at">nextOrder</span>();  <span class="at">nextOrder</span>();
+<span class="at">nextOrder</span>()    <span class="o">// "ORD-3"</span>
+<span class="at">nextTicket</span>()   <span class="o">// "TKT-1"   — its own n, untouched by the other</span></div>
+
+  <h3>A closure sees the variable, not a copy</h3>
+  <p>A closure doesn't take a snapshot of a value. It keeps a link to the <strong>variable</strong>. If the variable changes, the closure sees the change:</p>
+  <div class="cmd"><span class="tg">let</span> total = <span class="st">0</span>;
+<span class="tg">const</span> report = () =&gt; <span class="tg">console</span>.<span class="at">log</span>(total);
+total = <span class="st">24</span>;
+<span class="at">report</span>()   <span class="o">// 24</span></div>
+
+  <div class="stretch-box">
+  <h3>One call, one set of variables</h3>
+  <p>So why does React talk about "stale" values? Because of this: <strong>every call</strong> to a function creates <strong>fresh</strong> variables. A closure made during one call is linked to <em>that call's</em> variables — and a later call has different ones.</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">render</span>(count) {                 <span class="cm">// pretend this is a React component</span>
+  <span class="tg">const</span> handleClick = () =&gt; <span class="tg">console</span>.<span class="at">log</span>(<span class="st">"clicked, count was"</span>, count);
+  <span class="tg">return</span> handleClick;
+}
+
+<span class="tg">const</span> fromFirstRender = <span class="at">render</span>(<span class="st">0</span>);
+<span class="tg">const</span> fromSecondRender = <span class="at">render</span>(<span class="st">1</span>);
+<span class="at">fromFirstRender</span>()    <span class="o">// clicked, count was 0</span>
+<span class="at">fromSecondRender</span>()   <span class="o">// clicked, count was 1</span></div>
+
+  <figure class="board">
+    <svg viewBox="0 0 780 226" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Each call to render creates its own scope with its own count. The handler from the first call keeps count 0 forever; the handler from the second call has count 1.">
+      <text x="0" y="16" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">EVERY RENDER IS A FUNCTION CALL — WITH ITS OWN VARIABLES</text>
+      <rect x="0" y="34" width="330" height="112" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="14" y="56" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0B5D51" font-weight="600">render(0) — call #1</text>
+      <rect x="14" y="68" width="130" height="34" fill="#E4EEEB" stroke="#0B5D51" stroke-width="1.5"/>
+      <text x="79" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#0F1A18">count: 0</text>
+      <rect x="166" y="68" width="148" height="34" fill="#101614"/>
+      <text x="240" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#F5C518">handleClick</text>
+      <line x1="144" y1="85" x2="166" y2="85" stroke="#0B5D51" stroke-width="2"/>
+      <text x="14" y="130" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5A6B67">this handler will always see 0</text>
+      <rect x="356" y="34" width="330" height="112" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="370" y="56" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0B5D51" font-weight="600">render(1) — call #2</text>
+      <rect x="370" y="68" width="130" height="34" fill="#E4EEEB" stroke="#0B5D51" stroke-width="1.5"/>
+      <text x="435" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#0F1A18">count: 1</text>
+      <rect x="522" y="68" width="148" height="34" fill="#101614"/>
+      <text x="596" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#F5C518">handleClick</text>
+      <line x1="500" y1="85" x2="522" y2="85" stroke="#0B5D51" stroke-width="2"/>
+      <text x="370" y="130" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5A6B67">a new handler, a new count</text>
+      <rect x="0" y="172" width="686" height="46" fill="#F7E9B8" stroke="#8A6D08" stroke-width="1.5"/>
+      <text x="14" y="193" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#0F1A18">A timer or listener set up in call #1 still holds call #1's handler. It reads count 0 even while the screen</text>
+      <text x="14" y="211" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#0F1A18">shows 1. That's a stale closure: not a broken closure, just one from an older call.</text>
+    </svg>
+    <figcaption>Closures don't go stale. They belong to an older call than the one you're thinking about.</figcaption>
+  </figure>
+
+  </div>
+
+  <h3>A value only a function can change</h3>
+  <p>Put these ideas together. Lock a value inside a closure, and hand back <strong>two</strong> functions: one to read it, one to replace it. Nothing else in the program can reach the value.</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">createBox</span>(initial) {
+  <span class="tg">let</span> value = initial;
+  <span class="tg">const</span> <span class="tg">get</span> = () =&gt; value;
+  <span class="tg">const</span> <span class="tg">set</span> = (next) =&gt; { value = next; };
+  <span class="tg">return</span> [<span class="tg">get</span>, <span class="tg">set</span>];
+}
+
+<span class="tg">const</span> [getPlanner, setPlanner] = <span class="at">createBox</span>([]);
+<span class="at">setPlanner</span>([<span class="st">4</span>, <span class="st">10</span>]);
+<span class="at">getPlanner</span>()   <span class="o">// [4, 10]</span></div>
+  <p>Look at the last two lines and then back at section 02: <code>const [planner, setPlanner] = useState([])</code>. Same shape. A value you can't touch directly, and a function that is the only way to change it. Why would React <em>want</em> to force every change through a function? Because a function can do something extra every time it's called. Hold that question — section 15 answers it, and you'll build the answer yourself.</p>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>Every event handler you write in a component is a closure over <strong>that render's</strong> state and props. Usually that's exactly what you want. When a timer or a subscription outlives the render that created it, you get a stale closure — the most-asked React bug of all. The fix you already know: the updater function from section 05, <code>setCount((c) =&gt; c + 1)</code>, which never reads a captured <code>count</code> at all.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — predict, then run</h4>
+    <p>Open <code>predict/closures.js</code>. Write a prediction under every block <strong>before</strong> you run it. Then run it and, for each wrong guess, write one line on why.</p>
+  </div>
+  <div class="cmd"><span class="p">$</span> node predict/closures.js</div>
+  <div class="dothis">
+    <h4>Do this now — src/s06-closures.js</h4>
+    <ul>
+      <li><code>createIdGenerator(prefix)</code> — two generators must not share a count.</li>
+      <li><code>makeCreditCheck(limit)</code> — returns a function <code>(credits) =&gt; boolean</code> that remembers the limit.</li>
+      <li><code>createBox(initial)</code> — returns <code>[get, set]</code>, exactly as above. Type it, don't copy it.</li>
+    </ul>
+  </div>
+  <div class="cmd"><span class="p">$</span> node --test test/s06.test.js</div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>In <code>createBox</code>, how could code outside the function read <code>value</code> without calling <code>get</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>It can't. Scope only looks outward, and there's no name bound to <code>value</code> outside <code>createBox</code>. The closure keeps it alive, but only <code>get</code> and <code>set</code> can reach it. That's privacy with no keyword needed.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Why does <code>createBox</code> return an <strong>array</strong> <code>[get, set]</code> and not an object <code>{ get, set }</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>With an array, the caller picks the names when destructuring: <code>const [getPlanner, setPlanner] = createBox([])</code>, <code>const [getForm, setForm] = createBox({})</code>. An object would force the names <code>get</code> and <code>set</code> everywhere. React's <code>useState</code> returns an array for exactly this reason.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 complete — s06 tests pass, predictions written</span></label>
+</section>
+
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>this — and why React stopped needing it</h2><span class="lvl core">Core</span><span class="tagline">on the syllabus for good reason</span></div>
+
+  <div class="cue"><p class="cue-k">The rule</p><p><strong><code>this</code> is decided by how a function is called, not where it is written.</strong> The same function can see a different <code>this</code> on every call.</p></div>
+  <p class="refs">Full version → <a href="advanced-javascript.html#s11">06 · §11–13 this</a> · <a href="js-funda.html#s15">05 · §15 Methods and this</a> · <a href="js-funda.html#s17">05 · §17 Classes</a></p>
+
+  <h3>The four ways a function gets called</h3>
+  <div class="mention">
+    <div class="mrow"><b>obj.method()</b><span><code>this</code> is <code>obj</code> — the thing before the dot.</span></div>
+    <div class="mrow"><b>method()</b><span>A plain call. <code>this</code> is <code>undefined</code> (in modules and classes, which are always strict mode).</span></div>
+    <div class="mrow"><b>new Thing()</b><span><code>this</code> is the brand-new object being built.</span></div>
+    <div class="mrow"><b>m.call(x) · m.apply(x) · m.bind(x)</b><span><code>this</code> is <code>x</code>. <code>call</code>/<code>apply</code> for one call; <code>bind</code> returns a new function with <code>this</code> fixed for good.</span></div>
+  </div>
+  <p>And one exception: an <strong>arrow function has no <code>this</code> of its own</strong>. It uses the <code>this</code> of the code around it, like any other outer variable.</p>
+
+  <h3>The callback trap</h3>
+  <p>Here's a class that keeps a planner. It works when you call the method on the object — and breaks the moment you pass the method somewhere as a callback:</p>
+  <div class="cmd"><span class="tg">class</span> PlannerList {
+  <span class="tg">constructor</span>(owner) {
+    <span class="tg">this</span>.owner = owner;
+    <span class="tg">this</span>.ids = [];
+  }
+  <span class="at">add</span>(id) {
+    <span class="tg">this</span>.ids.<span class="at">push</span>(id);
+  }
+}
+
+<span class="tg">const</span> list = <span class="tg">new</span> <span class="at">PlannerList</span>(<span class="st">"Asha"</span>);
+list.<span class="at">add</span>(<span class="st">4</span>);                 <span class="cm">// fine — called as obj.method(), this = list</span>
+[<span class="st">10</span>, <span class="st">18</span>].<span class="at">forEach</span>(list.add);  <span class="cm">// TypeError: Cannot read properties of undefined (reading 'ids')</span></div>
+  <p>Why? <code>list.add</code> without parentheses is just the function — it isn't attached to <code>list</code> any more. <code>forEach</code> later calls it as a plain <code>add(10)</code>: pattern two, <code>this</code> is <code>undefined</code>, and <code>this.ids</code> crashes.</p>
+
+  <h3>Three fixes</h3>
+  <div class="cmd"><span class="cm">// 1. Bind once, in the constructor — this is fixed for good</span>
+<span class="tg">constructor</span>(owner) {
+  <span class="tg">this</span>.owner = owner;
+  <span class="tg">this</span>.ids = [];
+  <span class="tg">this</span>.add = <span class="tg">this</span>.add.<span class="at">bind</span>(<span class="tg">this</span>);
+}
+
+<span class="cm">// 2. Make the method an arrow-function class field — it takes this from the class</span>
+add = (id) =&gt; {
+  <span class="tg">this</span>.ids.<span class="at">push</span>(id);
+};
+
+<span class="cm">// 3. Don't detach it — wrap the call in an arrow at the call site</span>
+[<span class="st">10</span>, <span class="st">18</span>].<span class="at">forEach</span>((id) =&gt; list.<span class="at">add</span>(id));</div>
+
+  <h3>A short history of this in React</h3>
+  <p>Until 2019, most React components were classes, and every event handler had to be bound by hand:</p>
+  <div class="cmd"><span class="tg">class</span> Counter <span class="tg">extends</span> React.Component {
+  <span class="tg">constructor</span>(props) {
+    <span class="tg">super</span>(props);
+    <span class="tg">this</span>.state = { count: <span class="st">0</span> };
+    <span class="tg">this</span>.handleClick = <span class="tg">this</span>.handleClick.<span class="at">bind</span>(<span class="tg">this</span>);   <span class="cm">// forget this line → crash on click</span>
+  }
+  <span class="at">handleClick</span>() {
+    <span class="tg">this</span>.<span class="at">setState</span>({ count: <span class="tg">this</span>.state.count + <span class="st">1</span> });
+  }
+  <span class="at">render</span>() {
+    <span class="tg">return</span> &lt;button onClick={<span class="tg">this</span>.handleClick}&gt;{<span class="tg">this</span>.state.count}&lt;/button&gt;;
+  }
+}</div>
+  <p>Forgetting that <code>bind</code> was one of the most common React bugs there was. Then React added hooks, and components became plain functions:</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">Counter</span>() {
+  <span class="tg">const</span> [count, setCount] = <span class="at">useState</span>(<span class="st">0</span>);
+  <span class="tg">const</span> handleClick = () =&gt; <span class="at">setCount</span>(count + <span class="st">1</span>);   <span class="cm">// a closure — no this anywhere</span>
+  <span class="tg">return</span> &lt;button onClick={handleClick}&gt;{count}&lt;/button&gt;;
+}</div>
+  <p>Same behaviour, no <code>this</code>, nothing to bind. The handler gets <code>count</code> and <code>setCount</code> through a <strong>closure</strong> (section 06) instead of through <code>this</code>. That trade — <code>this</code> out, closures in — is the main reason modern React looks the way it does.</p>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>Mostly, nothing: you will rarely write <code>this</code> in React code. But you'll read class components in older codebases and tutorials, and the callback trap is still how <code>this</code> works everywhere else in JavaScript. Knowing <em>why</em> it disappeared is what makes the function-component style make sense.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — predict, then run</h4>
+    <p><code>predict/this.js</code> walks through all four call patterns, the arrow exception, and the callback trap. Predict every line first.</p>
+  </div>
+  <div class="cmd"><span class="p">$</span> node predict/this.js</div>
+  <div class="dothis">
+    <h4>Do this now — src/s07-this.js</h4>
+    <p><code>PlannerList</code> is written and broken in exactly the way above. Fix it with fix 1 <strong>or</strong> fix 2 (fix 3 isn't allowed — the tests detach the method on purpose). Be ready to say in the lab why your fix works.</p>
+  </div>
+  <div class="cmd"><span class="p">$</span> node --test test/s07.test.js</div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>After fixing the class with <code>bind</code>, what does <code>const { describe } = list; describe()</code> do?</div>
+    <details><summary>Show answer</summary><div class="a"><p>It throws. You only bound <code>add</code>. Destructuring <code>describe</code> detaches it, the plain call gives it <code>this = undefined</code>, and <code>this.owner</code> crashes. Each method that will be passed around needs its own fix.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Why does fix 2 (an arrow-function class field) work?</div>
+    <details><summary>Show answer</summary><div class="a"><p>A class field is created once per object, inside the constructor, where <code>this</code> is the new object. An arrow function has no <code>this</code> of its own, so it permanently uses that one — however it's called later.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 complete — s07 tests pass</span></label>
+</section>
+
+<div class="part">Part 3 · Data for the screen</div>
+
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>Destructuring, spread, rest and computed keys</h2><span class="lvl core">Core</span><span class="tagline">the syntax every component uses</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p><strong>Destructuring</strong> unpacks values out of an object or array into variables. <strong>Spread</strong> (<code>...x</code>) unpacks them into a new array or object. <strong>Rest</strong> (also <code>...x</code>, on the left of <code>=</code> or in parameters) collects whatever is left over.</p></div>
+  <p class="refs">Full version → <a href="js-funda.html#s10">05 · §10 Destructuring, spread, rest</a></p>
+
+  <h3>Object destructuring — by name</h3>
+  <div class="cmd"><span class="tg">const</span> course = courses[<span class="st">3</span>];
+<span class="tg">const</span> { code, title, credits } = course;
+code   <span class="o">// "CS402"</span>
+
+<span class="cm">// rename while unpacking, and give a default for missing fields</span>
+<span class="tg">const</span> { title: name, room = <span class="st">"TBA"</span> } = course;
+name   <span class="o">// "Enterprise Software Development"</span>
+room   <span class="o">// "TBA"</span>
+
+<span class="cm">// destructure right in the parameter list</span>
+<span class="tg">function</span> <span class="at">describeCourse</span>({ code, title, credits = <span class="st">3</span> }) {
+  <span class="tg">return</span> <span class="st">`${code}: ${title} (${credits} cr)`</span>;
+}
+<span class="at">describeCourse</span>(course)   <span class="o">// "CS402: Enterprise Software Development (4 cr)"</span></div>
+
+  <h3>Array destructuring — by position</h3>
+  <div class="cmd"><span class="tg">const</span> [first, second] = [<span class="st">"CS101"</span>, <span class="st">"CS201"</span>, <span class="st">"CS305"</span>];
+first    <span class="o">// "CS101"</span>
+
+<span class="tg">const</span> [, , third] = [<span class="st">"CS101"</span>, <span class="st">"CS201"</span>, <span class="st">"CS305"</span>];   <span class="cm">// skip with empty slots</span>
+third    <span class="o">// "CS305"</span>
+
+<span class="cm">// a function returning a pair — the caller chooses both names</span>
+<span class="tg">const</span> [getPlanner, setPlanner] = <span class="at">createBox</span>([]);</div>
+  <p>Object destructuring matches by <strong>name</strong>; array destructuring matches by <strong>position</strong>. That's why a pair like <code>[value, setValue]</code> comes back as an array: you can call the two things whatever suits each use.</p>
+
+  <h3>Spread — copy and merge</h3>
+  <div class="cmd"><span class="tg">const</span> planner = [<span class="st">4</span>, <span class="st">10</span>];
+<span class="tg">const</span> bigger = [...planner, <span class="st">18</span>];          <span class="o">// [4, 10, 18] — planner is unchanged</span>
+
+<span class="tg">const</span> updated = { ...course, seatsLeft: <span class="st">2</span> };   <span class="cm">// copy every field, then override one</span>
+updated.seatsLeft   <span class="o">// 2</span>
+course.seatsLeft    <span class="o">// 3 — the original is untouched</span></div>
+  <p>In an object spread, <strong>later wins</strong>. <code>{ ...course, seatsLeft: 2 }</code> overrides; <code>{ seatsLeft: 2, ...course }</code> would be overridden right back.</p>
+
+  <h3>Rest — collect what's left</h3>
+  <div class="cmd"><span class="tg">const</span> [head, ...tail] = [<span class="st">4</span>, <span class="st">10</span>, <span class="st">18</span>];
+tail   <span class="o">// [10, 18]</span>
+
+<span class="cm">// remove a field without changing the original object</span>
+<span class="tg">const</span> { description, ...summary } = course;
+summary   <span class="o">// { id: 4, code: "CS402", title: …, department: …, credits: 4, … } — no description</span></div>
+
+  <h3>Shorthand properties and computed keys</h3>
+  <div class="cmd"><span class="tg">const</span> id = <span class="st">21</span>, code2 = <span class="st">"CS610"</span>;
+<span class="tg">const</span> short = { id, code: code2 };   <span class="cm">// { id: id } can be written { id }</span>
+
+<span class="cm">// a key that lives in a variable: square brackets</span>
+<span class="tg">const</span> field = <span class="st">"title"</span>;
+<span class="tg">const</span> form = { code: <span class="st">"CS610"</span>, title: <span class="st">""</span>, credits: <span class="st">"4"</span> };
+<span class="tg">const</span> next = { ...form, [field]: <span class="st">"Compilers"</span> };
+next   <span class="o">// { code: "CS610", title: "Compilers", credits: "4" }</span></div>
+  <p>That last line is the one to remember. With a computed key, <strong>one</strong> function can update <strong>any</strong> field of a form — the field name arrives as data.</p>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>Every component receives its inputs ("props") as one object, and you destructure them: <code>function CourseCard({ course, onAdd })</code>. Every <code>useState</code> is array destructuring. And the standard form handler, which you'll write in React Lab 1, is one line: <code>setForm({ ...form, [e.target.name]: e.target.value })</code>.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — src/s08-destructuring.js</h4>
+    <ul>
+      <li><code>describeCourse({ code, title, credits = 3 })</code> — destructure in the parameter list.</li>
+      <li><code>updateField(form, name, value)</code> — new object, one field changed, computed key.</li>
+      <li><code>withoutField(obj, key)</code> — new object without <code>key</code>, using rest. (Hint: <code>const { [key]: _removed, ...rest } = obj</code>.)</li>
+      <li><code>firstAndRest(list)</code> — returns the pair <code>[first, rest]</code>.</li>
+    </ul>
+  </div>
+  <div class="cmd"><span class="p">$</span> node --test test/s08.test.js</div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>What are <code>{ ...{ a: 1, b: 2 }, a: 9 }</code> and <code>{ a: 9, ...{ a: 1, b: 2 } }</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>{ a: 9, b: 2 }</code> and <code>{ a: 1, b: 2 }</code>. Later wins. When you update state, the spread goes <strong>first</strong> and the changes after it.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 complete — s08 tests pass</span></label>
+</section>
+
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>References, equality and copies</h2><span class="lvl stretch">Stretch</span><span class="tagline">where most React bugs start</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>Numbers, strings and booleans are copied when you assign them. <strong>Objects and arrays are not.</strong> A variable holds a <em>reference</em> to the object — an arrow pointing at it — and assigning copies the arrow, not the object.</p></div>
+  <p class="refs">Full version → <a href="js-funda.html#s9">05 · §09 References and mutation</a></p>
+
+  <h3>Two names, one array</h3>
+  <div class="cmd"><span class="tg">const</span> planner = [<span class="st">4</span>, <span class="st">10</span>];
+<span class="tg">const</span> alias = planner;      <span class="cm">// copies the reference, not the array</span>
+alias.<span class="at">push</span>(<span class="st">18</span>);
+planner                     <span class="o">// [4, 10, 18] — "planner" changed too</span>
+planner === alias           <span class="o">// true — they are the same array</span></div>
+
+  <h3>=== on objects asks "same object?", not "same contents?"</h3>
+  <div class="cmd">[<span class="st">4</span>, <span class="st">10</span>] === [<span class="st">4</span>, <span class="st">10</span>]          <span class="o">// false — two different arrays that look alike</span>
+<span class="tg">const</span> a = [<span class="st">4</span>, <span class="st">10</span>];
+a === a                      <span class="o">// true</span>
+<span class="tg">Object</span>.<span class="at">is</span>(a, a)              <span class="o">// true</span></div>
+  <p><code>Object.is</code> is <code>===</code> with two edge cases fixed (<code>NaN</code> equals itself; <code>0</code> and <code>-0</code> differ). It matters here only because it's the exact check React uses to decide whether your state changed.</p>
+
+  <h3>const stops reassignment, not change</h3>
+  <div class="cmd"><span class="tg">const</span> ids = [<span class="st">1</span>];
+ids.<span class="at">push</span>(<span class="st">2</span>);       <span class="cm">// allowed: the array changed, the binding didn't</span>
+ids = [<span class="st">3</span>];         <span class="cm">// TypeError: Assignment to constant variable.</span></div>
+
+  <h3>Spread copies one level</h3>
+  <figure class="board">
+    <svg viewBox="0 0 780 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A shallow copy creates a new outer object, but its semesters field still points at the same inner object as the original.">
+      <text x="0" y="16" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">const copy = { ...plan } — A NEW OUTER OBJECT, THE SAME INSIDES</text>
+      <rect x="0" y="40" width="200" height="74" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="14" y="62" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0B5D51" font-weight="600">plan</text>
+      <text x="14" y="84" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0F1A18">student: "Asha"</text>
+      <text x="14" y="104" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0F1A18">semesters: ●</text>
+      <rect x="0" y="140" width="200" height="74" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="14" y="162" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0B5D51" font-weight="600">copy</text>
+      <text x="14" y="184" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0F1A18">student: "Asha"</text>
+      <text x="14" y="204" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0F1A18">semesters: ●</text>
+      <rect x="420" y="88" width="250" height="74" fill="#101614"/>
+      <text x="436" y="112" font-family="IBM Plex Mono, monospace" font-size="12" fill="#F5C518">{ odd: [4, 10], even: [] }</text>
+      <text x="436" y="140" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#B7C4C0">one object, two arrows to it</text>
+      <path d="M118 100 C 280 100, 300 118, 416 120" fill="none" stroke="#0B5D51" stroke-width="2"/>
+      <path d="M118 200 C 280 200, 300 136, 416 132" fill="none" stroke="#0B5D51" stroke-width="2"/>
+      <text x="230" y="60" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5A6B67">copy !== plan</text>
+      <text x="470" y="200" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5A6B67">copy.semesters === plan.semesters</text>
+    </svg>
+    <figcaption>Change copy.semesters.odd and you have changed plan's too. Spread is a shallow copy.</figcaption>
+  </figure>
+  <p><code>structuredClone(plan)</code> copies <em>every</em> level. It exists, and you should know it does — but you'll rarely need it, because the immutable updates in the next section copy only the path you change, which is cheaper and keeps everything else shared.</p>
+
+  <h3>Freezing — how the tests catch you</h3>
+  <p><code>Object.freeze(obj)</code> makes an object read-only, but only one level deep. The tests use a small helper that freezes every level. Open <code>support/helpers.js</code> and read it — it's eight lines and uses recursion, <code>Object.keys</code> and <code>Object.isFrozen</code>.</p>
+  <div class="cmd"><span class="tg">const</span> frozen = <span class="tg">Object</span>.<span class="at">freeze</span>([<span class="st">4</span>, <span class="st">10</span>]);
+frozen.<span class="at">push</span>(<span class="st">18</span>);    <span class="cm">// TypeError: Cannot add property 2, object is not extensible</span></div>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>When you call a setter, React compares the new state with the old one using <code>Object.is</code>. Same reference → "nothing changed" → no re-render. So <code>planner.push(18); setPlanner(planner)</code> does <strong>nothing on screen</strong>: you changed the array, but handed back the same reference. React can't see inside it. This is why every state update must produce a <strong>new</strong> object.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — predict, then run</h4>
+  </div>
+  <div class="cmd"><span class="p">$</span> node predict/references.js</div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>In the diagram, is <code>copy.student = "Ravi"</code> visible through <code>plan</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No. <code>student</code> is a string, stored directly in each outer object, and the outer objects are different. Only the nested object (<code>semesters</code>) is shared.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 09 complete — predictions written (stretch)</span></label>
+</section>
+
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>Immutable updates</h2><span class="lvl core">Core</span><span class="tagline">change by making something new</span></div>
+
+  <p>An <strong>immutable update</strong> never changes the value it's given. It builds and returns a new one with the change in it. You already have the pieces: spread from section 08, and <code>map</code> and <code>filter</code>, which always return new arrays.</p>
+  <div class="cue"><p class="cue-k">The one thing to know about references</p><p>A variable holding an object or array holds a <strong>reference</strong> to it, not a copy: after <code>const alias = planner</code>, both names point at the same array, and <code>alias.push(18)</code> changes "both". And <code>===</code> on objects asks "the <em>same</em> object?", not "the same contents?" — <code>[4] === [4]</code> is <code>false</code>. React decides whether your state changed with exactly this check, so a changed-in-place array looks unchanged to it. Section 09 (stretch) has the details.</p></div>
+
+  <h3>Pure functions and side effects</h3>
+  <p>A function is <strong>pure</strong> when it returns the same output for the same input and changes nothing outside itself. Anything else it does is a <strong>side effect</strong>: changing its arguments, writing to the page, logging, starting a timer, calling the network, reading <code>Math.random()</code> or the clock. Every function in <code>src/</code> is pure, which is exactly why a test can check it with one line.</p>
+
+  <h3>The patterns</h3>
+  <table class="grid">
+    <tr><th>To…</th><th>Write</th></tr>
+    <tr><td>add to an array</td><td><code>[...list, item]</code> (end) or <code>[item, ...list]</code> (start)</td></tr>
+    <tr><td>remove from an array</td><td><code>list.filter((x) =&gt; x.id !== id)</code></td></tr>
+    <tr><td>update one item</td><td><code>list.map((x) =&gt; x.id === id ? { ...x, seatsLeft: 0 } : x)</code></td></tr>
+    <tr><td>sort or reverse</td><td><code>list.toSorted(cmp)</code>, <code>list.toReversed()</code> — or <code>[...list].sort(cmp)</code></td></tr>
+    <tr><td>update an object field</td><td><code>{ ...obj, field: value }</code></td></tr>
+    <tr><td>remove an object field</td><td><code>const { field, ...rest } = obj</code> → use <code>rest</code></td></tr>
+  </table>
+  <div class="cue watch"><p class="cue-k">Never on data you were given</p><p><code>push</code>, <code>pop</code>, <code>shift</code>, <code>unshift</code>, <code>splice</code>, <code>sort</code>, <code>reverse</code>, and <code>obj.field = …</code>. They all change the original. Use them freely on arrays you just created yourself — never on the ones passed in.</p></div>
+
+  <h3>Updating one item inside a list</h3>
+  <div class="cmd"><span class="tg">function</span> <span class="at">takeSeat</span>(courses, courseId) {
+  <span class="tg">return</span> courses.<span class="at">map</span>((c) =&gt;
+    c.id === courseId ? { ...c, seatsLeft: c.seatsLeft - <span class="st">1</span> } : c
+  );
+}
+
+<span class="tg">const</span> next = <span class="at">takeSeat</span>(courses, <span class="st">5</span>);
+next === courses         <span class="o">// false — a new list</span>
+next[<span class="st">4</span>] === courses[<span class="st">4</span>]   <span class="o">// false — a new object for the course that changed</span>
+next[<span class="st">0</span>] === courses[<span class="st">0</span>]   <span class="o">// true  — every other course is the SAME object</span></div>
+  <p>Only the path to the change is new: the list, and the one course. Everything else is shared. That's what makes it cheap, and it's what lets React skip re-drawing the 19 cards that didn't change.</p>
+
+  <h3>When nothing changes, return the same thing</h3>
+  <div class="cmd"><span class="tg">function</span> <span class="at">addToPlanner</span>(planner, courseId) {
+  <span class="tg">return</span> planner.<span class="at">includes</span>(courseId) ? planner : [...planner, courseId];
+}
+<span class="tg">const</span> p = [<span class="st">4</span>, <span class="st">10</span>];
+<span class="at">addToPlanner</span>(p, <span class="st">10</span>) === p   <span class="o">// true — already there, so nothing new</span></div>
+  <p>Returning the <em>same</em> reference is how you say "no change". Given the same reference, React skips the re-render entirely.</p>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>Every state update in React is one of the patterns in that table. Adding to a list: <code>setPlanner([...planner, id])</code>. Removing: <code>setPlanner(planner.filter((x) =&gt; x !== id))</code>. Updating one item: a <code>map</code> with a spread inside. Components must also be <strong>pure</strong> — given the same props and state, render the same thing — and all side effects go in event handlers or effects. In development, React (in Strict Mode) even runs your components twice to catch impure ones.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — src/s10-immutable.js</h4>
+    <ul>
+      <li><code>addToPlanner(planner, id)</code> and <code>removeFromPlanner(planner, id)</code> — same array back when nothing changes.</li>
+      <li><code>updateCourse(course, changes)</code> — one line.</li>
+      <li><code>takeSeat(courses, id)</code> — untouched courses must be the <strong>same</strong> objects; a full or unknown course returns the same list.</li>
+    </ul>
+    <p>If a test fails with <em>Cannot assign to read only property</em>, you mutated. Find the line.</p>
+  </div>
+  <div class="cmd"><span class="p">$</span> node --test test/s10.test.js</div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Which are pure?
+      <ol><li><code>(c) =&gt; c.credits * 2</code></li><li><code>(list) =&gt; list.sort()</code></li><li><code>(c) =&gt; { console.log(c); return c; }</code></li><li><code>() =&gt; Math.random()</code></li></ol></div>
+    <details><summary>Show answer</summary><div class="a"><p>Only 1. Number 2 changes its argument. Number 3 logs (a side effect). Number 4 gives a different answer each time.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 complete — s10 tests pass</span></label>
+</section>
+
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>The array toolkit for UIs</h2><span class="lvl core">Core</span><span class="tagline">every screen is a list, transformed</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p><code>map</code> transforms every item (same length out), <code>filter</code> keeps some (fewer out), <code>reduce</code> collapses the list into one value — and always takes an initial value. None of them changes the original array.</p></div>
+  <p class="refs">Full version → <a href="js-funda.html#s13">05 · §13 map, filter, reduce</a> · <a href="js-funda.html#s14">05 · §14 The rest of the array toolkit</a></p>
+
+  <h3>Each method has a job on screen</h3>
+  <table class="grid">
+    <tr><th>Method</th><th>The UI job it does</th></tr>
+    <tr><td>map</td><td>Turn data into things to show — one card per course.</td></tr>
+    <tr><td>filter</td><td>Narrow what's shown — a search box, a department tab, "open only".</td></tr>
+    <tr><td>reduce</td><td>Totals and groupings — total credits, courses per department.</td></tr>
+    <tr><td>find / findIndex</td><td>Look up one item by id — the course behind a click.</td></tr>
+    <tr><td>some</td><td>"Is <em>anything</em> wrong?" — is any planned course full?</td></tr>
+    <tr><td>every</td><td>"Is <em>everything</em> right?" — is every form field filled?</td></tr>
+    <tr><td>includes</td><td>Membership — is this id already in the planner?</td></tr>
+    <tr><td>new Set(…)</td><td>Unique values — the list of departments for a dropdown.</td></tr>
+    <tr><td>toSorted</td><td>Order for display, without touching the original.</td></tr>
+  </table>
+
+  <h3>some and every</h3>
+  <p>Both take a test and return a boolean. <code>some</code> stops at the first <code>true</code>; <code>every</code> stops at the first <code>false</code>. On an empty array, <code>some</code> is <code>false</code> and <code>every</code> is <code>true</code> ("nothing failed").</p>
+  <div class="cmd">courses.<span class="at">some</span>((c) =&gt; c.seatsLeft === <span class="st">0</span>)     <span class="o">// true  — at least one is full</span>
+courses.<span class="at">every</span>((c) =&gt; c.credits &gt;= <span class="st">2</span>)       <span class="o">// true  — none is below 2</span>
+[].<span class="at">every</span>((c) =&gt; c.seatsLeft &gt; <span class="st">0</span>)           <span class="o">// true  — vacuously</span>
+
+<span class="cm">// a list of checks, all of which must pass</span>
+<span class="tg">const</span> checks = [course.seatsLeft &gt; <span class="st">0</span>, !planner.<span class="at">includes</span>(course.id), total + course.credits &lt;= <span class="st">24</span>];
+checks.<span class="at">every</span>(<span class="tg">Boolean</span>)   <span class="cm">// Boolean is a function too — passed, not called</span></div>
+
+  <h3>reduce into an object</h3>
+  <div class="cmd"><span class="tg">const</span> perDepartment = courses.<span class="at">reduce</span>((counts, c) =&gt; {
+  counts[c.department] = (counts[c.department] ?? <span class="st">0</span>) + <span class="st">1</span>;
+  <span class="tg">return</span> counts;
+}, {});                        <span class="cm">// ← the initial value: an empty object we just made</span>
+perDepartment   <span class="o">// { "Computer Science": 5, Electronics: 4, Mathematics: 4, … }</span></div>
+  <p>Changing <code>counts</code> inside the callback is fine: it's the object <em>you</em> created as the initial value, not data anyone gave you.</p>
+
+  <h3>Chains read like a sentence</h3>
+  <div class="cmd"><span class="cm">// "Computer Science courses with seats, by code, as cards"</span>
+<span class="tg">const</span> cards = courses
+  .<span class="at">filter</span>((c) =&gt; c.department === <span class="st">"Computer Science"</span>)
+  .<span class="at">filter</span>((c) =&gt; c.seatsLeft &gt; <span class="st">0</span>)
+  .<span class="at">toSorted</span>(<span class="at">byField</span>(<span class="st">"code"</span>))
+  .<span class="at">map</span>(toCardView);       <span class="cm">// passed, not called: map will call it per course</span></div>
+
+  <h3>Find things by id, never by position</h3>
+  <p>A course's position changes every time you sort, filter or remove something; its <code>id</code> never does. Store ids, look things up with <code>find</code>, compare with <code>===</code> on ids. The planner holds <code>[4, 10, 18]</code>, not <code>[3, 9, 17]</code>.</p>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>Lists on screen are <code>{courses.map((c) =&gt; &lt;CourseCard key={c.id} course={c} /&gt;)}</code>. That <code>key</code> is React asking for a stable id, for exactly the reason above — and using the array index instead is a classic bug you'll meet in the React Bug Lab. Totals like "credits planned" are never stored separately; they're computed with <code>reduce</code> on every render, so they can't drift out of sync.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — src/s11-catalog.js (the big one)</h4>
+    <p>Small functions, most of them one line. <code>courseCards</code> reuses <code>toCardView</code> from section 04 through an <code>import</code> at the top of the file — <code>import</code> pulls a function in from another file (section 14 has more).</p>
+    <p><span class="lvl core">Core</span></p>
+    <ul>
+      <li><code>byDepartment</code>, <code>openOnly</code>, <code>searchCourses</code>, <code>findByCode</code> — filter and find.</li>
+      <li><code>totalCredits</code>, <code>countByDepartment</code>, <code>departments</code> — reduce and <code>Set</code>.</li>
+      <li><code>anyFull</code>, <code>allHaveSeats</code> — <code>some</code> and <code>every</code>.</li>
+      <li><code>courseCards</code> — one chain.</li>
+    </ul>
+    <p><span class="lvl stretch">Stretch</span> — checked by <code>npm run test:stretch</code></p>
+    <ul>
+      <li><code>sortedBy</code> — a sorted copy, using <code>byField</code> from section 05.</li>
+      <li><code>plannerCourses</code>, <code>plannerCredits</code>, <code>canAdd</code> — ids to courses, then rules with <code>every</code>.</li>
+    </ul>
+  </div>
+  <div class="cmd"><span class="p">$</span> node --test test/s11.test.js</div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>What does <code>courses.reduce((sum, c) =&gt; sum + c.credits)</code> (no initial value) return?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Garbage. With no initial value, the first <strong>course object</strong> becomes the starting <code>sum</code>, and <code>{…} + 4</code> turns into a string like <code>"[object Object]4444…"</code>. Always pass the initial value: <code>, 0)</code>.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Why is <code>checks.every(Boolean)</code> allowed, with no arrow function?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>Boolean</code> is a function that turns any value into <code>true</code> or <code>false</code>. Passing it is the same as passing <code>(x) =&gt; Boolean(x)</code>. Functions are values — section 04.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 complete — s11 tests pass</span></label>
+</section>
+
+<div class="part">Part 4 · The browser</div>
+
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>Selecting and creating elements</h2><span class="lvl core">Core</span><span class="tagline">the DOM, from JavaScript</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>The browser turns your HTML into a tree of objects — the <strong>DOM</strong>. Every element is an object you can read and change from JavaScript, and <code>id</code> and <code>class</code> are the handles you grab them by.</p></div>
+  <p class="refs">Full version → <a href="html-forms.html#s7">03 · §07 The DOM</a> · <a href="html-forms.html#s8">§08 Reading the DOM in DevTools</a> · <a href="html-forms.html#s11">§11 id and class</a> · <a href="html-forms.html#s19">§19 Forms in the DOM</a></p>
+
+  <h3>querySelector and querySelectorAll</h3>
+  <p>Both take <strong>any CSS selector</strong> — the same ones you wrote in the CSS lab.</p>
+  <div class="mention">
+    <div class="mrow"><b>querySelector(sel)</b><span>The <strong>first</strong> matching element, or <code>null</code> if there isn't one.</span></div>
+    <div class="mrow"><b>querySelectorAll(sel)</b><span><strong>All</strong> matches, as a <code>NodeList</code> — possibly empty, never <code>null</code>.</span></div>
+    <div class="mrow"><b>el.querySelector(sel)</b><span>Searches only <em>inside</em> <code>el</code>. Use it to stay within one form.</span></div>
+  </div>
+  <div class="cmd"><span class="tg">const</span> form = <span class="tg">document</span>.<span class="at">querySelector</span>(<span class="st">"#add-course"</span>);          <span class="cm">// by id</span>
+<span class="tg">const</span> codeInput = form.<span class="at">querySelector</span>(<span class="st">'input[name="code"]'</span>);   <span class="cm">// by attribute, inside the form</span>
+<span class="tg">const</span> fields = form.<span class="at">querySelectorAll</span>(<span class="st">"input, select"</span>);        <span class="cm">// several selectors at once</span>
+<span class="tg">document</span>.<span class="at">querySelector</span>(<span class="st">".does-not-exist"</span>)                     <span class="o">// null</span></div>
+
+  <h3>A NodeList is not an array</h3>
+  <p>It has <code>length</code> and <code>forEach</code>, and nothing else from section 11 — no <code>map</code>, <code>filter</code>, <code>reduce</code> or <code>every</code>. Turn it into a real array first:</p>
+  <div class="cmd">fields.<span class="at">map</span>((f) =&gt; f.name)                       <span class="cm">// TypeError: fields.map is not a function</span>
+<span class="tg">Array</span>.<span class="tg">from</span>(fields).<span class="at">map</span>((f) =&gt; f.name)           <span class="o">// ["code", "title", "department", "credits"]</span>
+[...fields].<span class="at">every</span>((f) =&gt; f.value.<span class="at">trim</span>() !== <span class="st">""</span>) <span class="cm">// spread works too</span></div>
+
+  <h3>Creating elements</h3>
+  <div class="cmd"><span class="tg">const</span> item = <span class="tg">document</span>.<span class="at">createElement</span>(<span class="st">"li"</span>);
+item.className = <span class="st">"item"</span>;
+item.textContent = <span class="st">"CS610 · Compilers"</span>;        <span class="cm">// text, never HTML</span>
+item.dataset.id = <span class="st">"21"</span>;                        <span class="cm">// becomes data-id="21"</span>
+<span class="tg">document</span>.<span class="at">querySelector</span>(<span class="st">"#course-list"</span>).<span class="at">append</span>(item);
+
+item.classList.<span class="at">toggle</span>(<span class="st">"selected"</span>);             <span class="cm">// add/remove a class</span>
+item.<span class="at">remove</span>();                                 <span class="cm">// take it out again</span>
+<span class="tg">new</span> <span class="at">Option</span>(<span class="st">"Electronics"</span>, <span class="st">"Electronics"</span>)       <span class="cm">// a ready-made &lt;option&gt;</span></div>
+  <div class="cue watch"><p class="cue-k">textContent, not innerHTML</p><p><code>innerHTML</code> parses whatever you give it as HTML. If that text came from a user — a course title typed into a form — they can type <code>&lt;img src=x onerror="…"&gt;</code> and run their own script on your page. That's cross-site scripting (XSS). <code>textContent</code> always treats text as text.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — in the browser</h4>
+    <ol>
+      <li>Run <code>npm run web</code> and open <a href="http://localhost:5500/web/" target="_blank" rel="noopener">localhost:5500/web/</a>.</li>
+      <li>Open the console and try every line in this section's code blocks on the real page.</li>
+      <li>Add a <code>&lt;li&gt;</code> to the list by hand from the console. Then remove it.</li>
+    </ol>
+  </div>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>Almost nothing — and that's the point. In React you don't select or create elements. You write <code>&lt;li className="item"&gt;{course.title}&lt;/li&gt;</code> and React creates, updates and removes the real elements for you. React also escapes text by default, so the XSS above can't happen unless you go out of your way. This section is the work React takes off your hands.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 12 complete</span></label>
+</section>
+
+<section id="s13">
+  <div class="shead"><span class="chip">13</span><h2>Events, bubbling and forms</h2><span class="lvl core">Core</span><span class="tagline">callbacks the browser calls</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p><code>el.addEventListener("click", handler)</code> hands the browser a callback. The browser calls it on every click, with an <strong>event object</strong> describing what happened.</p></div>
+  <p class="refs">Full version → <a href="advanced-javascript.html#s3">06 · §03 addEventListener</a> · <a href="html-forms.html#s17">03 · §17 What submit does</a></p>
+
+  <h3>The event object</h3>
+  <div class="mention">
+    <div class="mrow"><b>event.target</b><span>The element the event actually happened on — the button clicked, the input typed into.</span></div>
+    <div class="mrow"><b>event.currentTarget</b><span>The element whose listener is running right now.</span></div>
+    <div class="mrow"><b>event.preventDefault()</b><span>Stop the browser's default action. For a form's <code>submit</code>, that default is reloading the page.</span></div>
+    <div class="mrow"><b>event.stopPropagation()</b><span>Stop the event bubbling any further up (below).</span></div>
+  </div>
+  <div class="mention">
+    <div class="mrow"><b>"input"</b><span>Fires on every keystroke or change in a field.</span></div>
+    <div class="mrow"><b>"change"</b><span>Fires when a field's value is committed — on blur for text, at once for a select.</span></div>
+    <div class="mrow"><b>"submit"</b><span>Fires on the <strong>form</strong>, when Enter is pressed or a submit button is clicked.</span></div>
+  </div>
+
+  <h3>Bubbling</h3>
+  <p>An event doesn't stay where it happened. After running listeners on the target, it travels <strong>up</strong> through every ancestor — the <code>li</code>, the <code>ul</code>, the <code>main</code>, all the way to <code>document</code> — running their listeners too.</p>
+  <figure class="board">
+    <svg viewBox="0 0 780 188" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A click on the Remove button runs the button's listener, then bubbles up to the list item's listener, which selects the item.">
+      <text x="0" y="16" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">ONE CLICK ON "REMOVE" — TWO LISTENERS RUN</text>
+      <rect x="0" y="36" width="560" height="140" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="14" y="58" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0B5D51" font-weight="600">&lt;ul id="course-list"&gt;</text>
+      <rect x="24" y="72" width="512" height="86" fill="#E4EEEB" stroke="#0B5D51" stroke-width="1.5"/>
+      <text x="38" y="94" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0F1A18">&lt;li class="item"&gt;  listener: toggle "selected"</text>
+      <rect x="360" y="106" width="160" height="38" fill="#101614"/>
+      <text x="440" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#F5C518">&lt;button&gt; Remove</text>
+      <text x="38" y="138" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5A6B67">CS610 · Compilers · 4 cr</text>
+      <path d="M600 130 L600 70" stroke="#C2352B" stroke-width="2.5" fill="none"/>
+      <path d="M592 80 L600 66 L608 80" fill="none" stroke="#C2352B" stroke-width="2.5"/>
+      <text x="614" y="128" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#0F1A18">1. button: remove item</text>
+      <text x="614" y="96" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#0F1A18">2. li: select item</text>
+      <text x="614" y="64" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5A6B67">3. ul, main, body…</text>
+    </svg>
+    <figcaption>The event bubbles from the button up through the li. stopPropagation() in the button's listener stops it at step 1.</figcaption>
+  </figure>
+  <div class="stretch-box">
+  <p>Bubbling is also useful. Instead of one listener per item, put <strong>one</strong> listener on the parent and work out which item was hit. This is <strong>event delegation</strong>, and it also works for items added later:</p>
+  <div class="cmd">list.<span class="at">addEventListener</span>(<span class="st">"click"</span>, (event) =&gt; {
+  <span class="tg">const</span> item = event.target.<span class="at">closest</span>(<span class="st">".item"</span>);   <span class="cm">// nearest ancestor (or itself) matching</span>
+  <span class="tg">if</span> (!item) <span class="tg">return</span>;                            <span class="cm">// a click in a gap between items</span>
+  <span class="tg">if</span> (event.target.<span class="at">matches</span>(<span class="st">"button"</span>)) item.<span class="at">remove</span>();
+  <span class="tg">else</span> item.classList.<span class="at">toggle</span>(<span class="st">"selected"</span>);
+});</div>
+
+  </div>
+
+  <h3>Reading a whole form into one object</h3>
+  <p>Four sections meet in one line: a NodeList turned into an array (12), <code>reduce</code> (11), spread (08) and a computed key (08).</p>
+  <div class="cmd"><span class="tg">const</span> fields = <span class="tg">Array</span>.<span class="tg">from</span>(form.<span class="at">querySelectorAll</span>(<span class="st">"input, select"</span>));
+
+<span class="tg">function</span> <span class="at">readForm</span>() {
+  <span class="tg">return</span> fields.<span class="at">reduce</span>((values, field) =&gt; ({ ...values, [field.name]: field.value }), {});
+}
+<span class="at">readForm</span>()   <span class="o">// { code: "cs610", title: "Compilers", department: "Computer Science", credits: "4" }</span></div>
+  <p>Note: everything comes out of an input as a <strong>string</strong>, including <code>credits</code>. Converting with <code>Number(…)</code> is your job.</p>
+
+  <h3>Validation with every</h3>
+  <div class="cmd"><span class="tg">function</span> <span class="at">isComplete</span>(values) {
+  <span class="tg">const</span> filled = <span class="tg">Object</span>.<span class="at">values</span>(values).<span class="at">every</span>((v) =&gt; v.<span class="at">trim</span>() !== <span class="st">""</span>);
+  <span class="tg">const</span> credits = <span class="tg">Number</span>(values.credits);
+  <span class="tg">return</span> filled &amp;&amp; <span class="tg">Number</span>.<span class="at">isInteger</span>(credits) &amp;&amp; credits &gt;= <span class="st">1</span> &amp;&amp; credits &lt;= <span class="st">6</span>;
+}
+
+form.<span class="at">addEventListener</span>(<span class="st">"input"</span>, () =&gt; {        <span class="cm">// every field's "input" bubbles up to the form</span>
+  submit.disabled = !<span class="at">isComplete</span>(<span class="at">readForm</span>());
+});</div>
+
+  <div class="dothis">
+    <h4>Do this now — src/s13-forms.js, then web/form.js</h4>
+    <ol>
+      <li>Write <code>isComplete(values)</code> and <code>toCourse(values, nextId)</code> in <code>src/s13-forms.js</code> and pass <code>node --test test/s13.test.js</code>. These are pure, so they're tested in Node.</li>
+      <li>Open <code>web/form.js</code> and work through steps 1–6 in its comments. Run <code>npm run web</code> and test in the browser as you go.</li>
+      <li>For step 6, first attach a listener to the <code>li</code> <em>and</em> one to its Remove button, and watch Remove also select the item. Then fix it with <code>stopPropagation</code>. <strong>Stretch:</strong> replace both with one delegated listener on the list.</li>
+    </ol>
+    <p><strong>You're done when:</strong> the button stays disabled until every field is filled and credits is 1–6; Add puts the course in the list, updates the count, shows "Added CS610." and clears the form; clicking an item selects it; Remove removes it without selecting it; the console shows no errors.</p>
+  </div>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>No <code>addEventListener</code>: you pass handlers as props — <code>&lt;form onSubmit={handleSubmit}&gt;</code>, <code>&lt;input onChange={handleChange}&gt;</code>. <code>event.preventDefault()</code> is still yours to call. React does use delegation, internally — one listener at the root for the whole app. And inputs become "controlled": their value comes from state, and <code>onChange</code> updates that state with the computed-key line from section 08.</p></div>
+
+  <div class="cue calm"><p class="cue-k">Count before you move on</p><p>When a course is added, how many separate places on the page did <strong>you</strong> have to update by hand? The list, the count, the status line, the form, the button… Write the number down. Forgetting one of them is a bug nothing warns you about. Right now the page isn't reacting to your data — <em>you</em> are, by hand, in every handler. Section 15 makes the page react by itself, and that is the reason React exists.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>The form's <code>submit</code> handler runs, the course appears for a split second, and then the page is blank again. What's missing?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>event.preventDefault()</code>. Without it, the browser does its default for a form submit: it sends the form and reloads the page, wiping out everything your script added.</p></div></details>
+  </div>
+  <div class="stretch-box">
+  <div class="quiz">
+    <div class="q"><b>Q2</b>With one delegated listener on the <code>ul</code>, inside the handler, which is the <code>ul</code>: <code>event.target</code> or <code>event.currentTarget</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>event.currentTarget</code> — the element the listener is attached to. <code>event.target</code> is whatever was actually clicked: the button, the span or the <code>li</code>.</p></div></details>
+  </div>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 13 complete — s13 tests pass, the form works</span></label>
+</section>
+
+<section id="s14">
+  <div class="shead"><span class="chip">14</span><h2>Modules</h2><span class="lvl stretch">Stretch</span><span class="tagline">one file, one job</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>A <strong>module</strong> is a file with its own scope. Nothing in it is visible outside unless it is <code>export</code>ed, and nothing from another file is visible inside unless it is <code>import</code>ed.</p></div>
+  <p class="refs">Full version → <a href="js-funda.html#s19">05 · §19 Modern conveniences — Modules, briefly</a></p>
+
+  <h3>Named and default exports</h3>
+  <div class="cmd"><span class="cm">// src/s04-functions.js — named exports: any number per file, imported by exact name</span>
+<span class="tg">export</span> <span class="tg">const</span> toCardView = (course) =&gt; ({ <span class="cm">/* … */</span> });
+<span class="tg">export</span> <span class="tg">function</span> <span class="at">buildButtons</span>(courses, onAdd) { <span class="cm">/* … */</span> }
+
+<span class="cm">// src/s11-catalog.js</span>
+<span class="tg">import</span> { toCardView } <span class="tg">from</span> <span class="st">"./s04-functions.js"</span>;        <span class="cm">// curly braces, exact name</span>
+<span class="tg">import</span> { byField as compareBy } <span class="tg">from</span> <span class="st">"./s05-higher-order.js"</span>;   <span class="cm">// rename on import</span>
+<span class="tg">import</span> * as catalog <span class="tg">from</span> <span class="st">"./s11-catalog.js"</span>;            <span class="cm">// everything, as one object</span>
+
+<span class="cm">// a default export: one per file, imported with any name, no braces</span>
+<span class="tg">export</span> <span class="tg">default</span> <span class="tg">function</span> <span class="at">CourseCard</span>({ course }) { <span class="cm">/* … */</span> }
+<span class="tg">import</span> CourseCard <span class="tg">from</span> <span class="st">"./CourseCard.js"</span>;</div>
+
+  <h3>The small print</h3>
+  <div class="mention">
+    <div class="mrow"><b>Write the .js</b><span>In the browser and in Node, a relative import needs the full file name: <code>"./s04-functions.js"</code>. Leaving it off gives <code>ERR_MODULE_NOT_FOUND</code>.</span></div>
+    <div class="mrow"><b>"type": "module"</b><span>In <code>package.json</code>, it tells Node these files use <code>import</code>/<code>export</code>. In HTML, the same job is done by <code>&lt;script type="module"&gt;</code>.</span></div>
+    <div class="mrow"><b>Not from file://</b><span>Browsers refuse to load modules from a page opened by double-clicking. That's why the form runs through <code>npm run web</code>.</span></div>
+    <div class="mrow"><b>Strict mode, always</b><span>Module code is strict, which is why a plain call gives <code>this === undefined</code> (section 07).</span></div>
+  </div>
+
+  <h3>A module runs once, and is shared</h3>
+  <p>However many files import a module, its code runs <strong>once</strong>, and every importer gets the same copy. So a variable at the top of a module is one variable shared by everyone. Find out for yourself:</p>
+  <div class="cmd"><span class="p">$</span> node predict/modules/main.js
+<span class="cm"># read counter.js, header.js and footer.js first, and predict</span></div>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>One component per file, usually <code>export default function CourseCard(…)</code>, with its imports at the top. And the module rule explains a classic beginner bug: a <code>let count = 0</code> at the top of a component file is <strong>one</strong> count shared by every <code>&lt;Counter /&gt;</code> on the page, and changing it doesn't re-render anything. Per-component values that should update the screen are what <code>useState</code> is for.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>What does <code>predict/modules/main.js</code> print, and why?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>footer sees: 3</code>. <code>counter.js</code> runs once. <code>header.js</code> and <code>footer.js</code> both import the same <code>click</code>, which closes over the same <code>clicks</code> variable. Two header clicks and one footer click make 3.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 14 complete (stretch)</span></label>
+</section>
+
+<div class="part">Part 5 · Towards React</div>
+
+<section id="s15">
+  <div class="shead"><span class="chip">15</span><h2>Reactivity — build your own useState</h2><span class="lvl core">Core</span><span class="tagline">where the name React comes from</span></div>
+
+  <div class="cue"><p class="cue-k">Reactivity, in one sentence</p><p><strong>When the data changes, everything on screen that depends on it updates by itself.</strong> You only ever change the data — the <em>state</em>. The view <em>reacts</em>. React is named for exactly this, and almost everything it does exists to make it true.</p></div>
+  <p>A spreadsheet is the classic example: change one cell and every formula that uses it recalculates — you never go round updating the totals by hand. Plain JavaScript in a web page is not like that. Section 13 ended with the question: how many places did you update by hand when a course was added? This section shrinks that problem to a single counter, makes it hurt, and then makes the page reactive — with a function you'll recognise the moment you see React.</p>
+  <div class="dothis">
+    <h4>Do this now — open the counter</h4>
+    <p>Run <code>npm run web</code> and open <a href="http://localhost:5500/web/counter.html" target="_blank" rel="noopener">localhost:5500/web/counter.html</a>. Edit <code>web/counter.js</code> as you go through the four stages below.</p>
+  </div>
+
+  <h3>Stage 1 — one number, one line</h3>
+  <div class="cmd"><span class="tg">let</span> count = <span class="st">0</span>;
+
+inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; {
+  count += <span class="st">1</span>;
+  countEl.textContent = count;   <span class="cm">// ← the line that tells the screen</span>
+});</div>
+  <p>Click <strong>+</strong> and the number goes up. Now delete the second line in the handler and click again. <code>count</code> still goes up — log it and see — but the page doesn't move. <strong>Changing a variable does nothing to the screen.</strong> The browser has no idea <code>count</code> exists. Something has to copy the value into the page, every time.</p>
+
+  <h3>Stage 2 — more buttons, more copies</h3>
+  <p>Add a <strong>−</strong> button and a <strong>Reset</strong>. Then the page grows: an "even / odd" label, the − button disabled when the count would go below zero, and the count in the browser tab's title. Every handler now has to update every one of them:</p>
+  <div class="cmd">inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; {
+  count += <span class="st">1</span>;
+  countEl.textContent = count;
+  parityEl.textContent = count % <span class="st">2</span> === <span class="st">0</span> ? <span class="st">"even"</span> : <span class="st">"odd"</span>;
+  dec.disabled = count - <span class="st">1</span> &lt; <span class="st">0</span>;
+  <span class="tg">document</span>.title = <span class="st">`Count: ${count}`</span>;
+});
+
+dec.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; {
+  count -= <span class="st">1</span>;
+  countEl.textContent = count;
+  parityEl.textContent = count % <span class="st">2</span> === <span class="st">0</span> ? <span class="st">"even"</span> : <span class="st">"odd"</span>;
+  dec.disabled = count - <span class="st">1</span> &lt; <span class="st">0</span>;
+  <span class="tg">document</span>.title = <span class="st">`Count: ${count}`</span>;
+});
+
+reset.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; {
+  count = <span class="st">0</span>;
+  countEl.textContent = count;
+  dec.disabled = <span class="tg">true</span>;
+  <span class="tg">document</span>.title = <span class="st">`Count: ${count}`</span>;
+  <span class="cm">// forgot the parity line — reset from 3 and the page says "0 · odd"</span>
+});</div>
+  <p>Three ways to change one number, four places that show it: twelve update lines, and the bug in the last handler is invisible until someone clicks Reset on an odd number. Add one more button or one more label and the count multiplies again. This is the problem from section 13, in miniature — and in a real app with forms, lists and totals, it's everywhere.</p>
+  <div class="cue watch"><p class="cue-k">What's actually wrong</p><p>The count lives in <strong>two</strong> places: the variable, and the page. Every handler is responsible for keeping them in sync, by hand, completely. Nothing checks that it did.</p></div>
+
+  <h3>Stage 3 — one render()</h3>
+  <p>Put every update in one function that turns the current <code>count</code> into the whole page, and call it after each change:</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">render</span>() {
+  countEl.textContent = count;
+  parityEl.textContent = count % <span class="st">2</span> === <span class="st">0</span> ? <span class="st">"even"</span> : <span class="st">"odd"</span>;
+  dec.disabled = count - <span class="st">1</span> &lt; <span class="st">0</span>;
+  <span class="tg">document</span>.title = <span class="st">`Count: ${count}`</span>;
+}
+
+inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; { count += <span class="st">1</span>; <span class="at">render</span>(); });
+dec.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; { count -= <span class="st">1</span>; <span class="at">render</span>(); });
+reset.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; { count = <span class="st">0</span>; <span class="at">render</span>(); });</div>
+  <p>Much better. There's now exactly one place that knows how the number becomes the page, so the Reset bug can't happen. But two problems are left. Every change still needs a <code>render()</code> after it — forget one and that button silently stops updating the page. And <code>count</code> is an ordinary variable: any code anywhere can change it without redrawing.</p>
+
+  <h3>Stage 4 — make changing and redrawing one action</h3>
+  <p>You already have the tool, from section 06: lock the value inside a closure so the <strong>only</strong> way to change it is through a function. Then put the <code>render()</code> call inside that function. Now it's impossible to change the value without redrawing.</p>
+  <div class="cmd"><span class="cm">// src/s15-state.js</span>
+<span class="tg">export</span> <span class="tg">function</span> <span class="at">useState</span>(initial, onChange) {
+  <span class="tg">let</span> value = initial;                   <span class="cm">// private: lives in the closure (06)</span>
+  <span class="tg">const</span> getState = () =&gt; value;
+  <span class="tg">const</span> setState = (next) =&gt; {
+    value = next;
+    <span class="at">onChange</span>();                          <span class="cm">// the hidden code: redraw</span>
+  };
+  <span class="tg">return</span> [getState, setState];           <span class="cm">// a pair, so you choose the names (08)</span>
+}</div>
+  <div class="cmd"><span class="cm">// web/counter.js</span>
+<span class="tg">import</span> { useState } <span class="tg">from</span> <span class="st">"../src/s15-state.js"</span>;
+
+<span class="tg">const</span> [getCount, setCount] = <span class="at">useState</span>(<span class="st">0</span>, render);
+
+<span class="tg">function</span> <span class="at">render</span>() {
+  <span class="tg">const</span> count = <span class="at">getCount</span>();
+  countEl.textContent = count;
+  parityEl.textContent = count % <span class="st">2</span> === <span class="st">0</span> ? <span class="st">"even"</span> : <span class="st">"odd"</span>;
+  dec.disabled = count - <span class="st">1</span> &lt; <span class="st">0</span>;
+  <span class="tg">document</span>.title = <span class="st">`Count: ${count}`</span>;
+}
+
+inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; <span class="at">setCount</span>(<span class="at">getCount</span>() + <span class="st">1</span>));
+dec.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; <span class="at">setCount</span>(<span class="at">getCount</span>() - <span class="st">1</span>));
+reset.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; <span class="at">setCount</span>(<span class="st">0</span>));
+<span class="at">render</span>();   <span class="cm">// draw once at the start</span></div>
+  <p>Look at the handlers. Each one is a single line, and <strong>none of them touches the page</strong>. They only say what the new state is; the setter does the rest. A second piece of state is one more line — the step input:</p>
+  <div class="cmd"><span class="tg">const</span> [getStep, setStep] = <span class="at">useState</span>(<span class="st">1</span>, render);
+stepInput.<span class="at">addEventListener</span>(<span class="st">"input"</span>, () =&gt; <span class="at">setStep</span>(<span class="tg">Number</span>(stepInput.value) || <span class="st">1</span>));
+inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; <span class="at">setCount</span>(<span class="at">getCount</span>() + <span class="at">getStep</span>()));</div>
+  <p>That's reactivity. Your handlers change state and nothing else; the screen follows. One way to say it that you'll hear again: <strong>the view is a function of the state</strong> — <code>render()</code> reads the state and produces the page, and <code>setState</code> makes sure it runs whenever the state changes.</p>
+
+  <h3>So why does useState return two things?</h3>
+  <p>Because the value on its own can't do anything when it changes — that was stage 1's lesson. The setter is the only door to the value, and the door has code bolted to it: store the new value, then redraw. That's the answer to the question from section 06. A plain variable can't notify anyone. A function can.</p>
+
+  <div class="stretch-box">
+  <h3>A smarter setState</h3>
+  <p>Two upgrades make your <code>useState</code> behave like React's. Both use ideas from earlier sections.</p>
+  <div class="cmd"><span class="tg">const</span> setState = (next) =&gt; {
+  <span class="cm">// 1. a value, or an updater function (section 05)</span>
+  <span class="tg">const</span> resolved = <span class="tg">typeof</span> next === <span class="st">"function"</span> ? <span class="at">next</span>(value) : next;
+  <span class="cm">// 2. nothing changed? then don't redraw (section 09)</span>
+  <span class="tg">if</span> (<span class="tg">Object</span>.<span class="at">is</span>(resolved, value)) <span class="tg">return</span>;
+  value = resolved;
+  <span class="at">onChange</span>();
+};</div>
+  <ol>
+    <li><strong>Accept an updater function</strong>, exactly like <code>applyUpdate</code> in section 05. Handlers become <code>setCount((c) =&gt; c + 1)</code>, which always works from the latest value.</li>
+    <li><strong>Skip the redraw when nothing changed</strong>, using <code>Object.is</code>. Notice what follows: if you <code>push</code> onto the array in state and pass the same array back, <code>Object.is</code> says "same" and nothing redraws. That's why every update must make a <strong>new</strong> value (section 10) — and React behaves exactly the same way.</li>
+  </ol>
+  <p>Make both changes and pass <code>npm run test:stretch</code>.</p>
+
+  <h3>How React's version differs</h3>
+  <div class="mention">
+    <div class="mrow"><b>No render argument</b><span>React already knows which component called <code>useState</code>, so it knows what to redraw. You never pass it a <code>render</code>.</span></div>
+    <div class="mrow"><b>A value, not a getter</b><span>React gives you <code>const [count, setCount]</code> — a plain value. It can, because it <strong>calls your component function again</strong> on every render, and each call gets a fresh <code>count</code> (the stretch part of section 06). Our script runs only once, so it needs <code>getCount()</code> to read the latest value.</span></div>
+    <div class="mrow"><b>Only what changed</b><span>Our <code>render()</code> rewrites all four places every time. React compares the new page description with the previous one and touches only the parts that differ. On Wednesday you'll see why that matters.</span></div>
+  </div>
+  </div>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>The whole counter page, as a React component — with no <code>querySelector</code>, no <code>textContent</code>, and no <code>render()</code> call, because the JSX <em>is</em> the render function:</p></div>
+  <div class="cmd"><span class="tg">function</span> <span class="at">Counter</span>() {
+  <span class="tg">const</span> [count, setCount] = <span class="at">useState</span>(<span class="st">0</span>);
+  <span class="tg">return</span> (
+    &lt;main&gt;
+      &lt;p&gt;{count}&lt;/p&gt;
+      &lt;p&gt;{count % <span class="st">2</span> === <span class="st">0</span> ? <span class="st">"even"</span> : <span class="st">"odd"</span>}&lt;/p&gt;
+      &lt;button onClick={() =&gt; <span class="at">setCount</span>((c) =&gt; c - <span class="st">1</span>)} disabled={count - <span class="st">1</span> &lt; <span class="st">0</span>}&gt;−&lt;/button&gt;
+      &lt;button onClick={() =&gt; <span class="at">setCount</span>((c) =&gt; c + <span class="st">1</span>)}&gt;+&lt;/button&gt;
+      &lt;button onClick={() =&gt; <span class="at">setCount</span>(<span class="st">0</span>)}&gt;Reset&lt;/button&gt;
+    &lt;/main&gt;
+  );
+}</div>
+
+  <div class="dothis">
+    <h4>Do this now — src/s15-state.js, then web/counter.js</h4>
+    <ol>
+      <li>Do stages 2 and 3 in <code>web/counter.js</code> by hand, exactly as above. Actually write the twelve lines — the point is to feel it.</li>
+      <li>Write the core <code>useState(initial, onChange)</code> in <code>src/s15-state.js</code> and pass <code>node --test test/s15.test.js</code>.</li>
+      <li>Stage 4: import it in <code>web/counter.js</code>, replace <code>let count</code> with <code>useState</code>, and add the step input as a second piece of state.</li>
+      <li><span class="lvl stretch">Stretch</span> Upgrade it with the smarter <code>setState</code> above and pass <code>npm run test:stretch</code>.</li>
+    </ol>
+    <p><strong>You're done when:</strong> +, − and Reset change the count by the step; the parity label and the tab title always match the number; − is disabled whenever the next press would go below zero; and no event handler contains a single line that touches the page.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>In stage 3, a teammate adds a "×2" button: <code>double.addEventListener("click", () =&gt; { count *= 2; })</code>. What goes wrong, and why can't it happen in stage 4?</div>
+    <details><summary>Show answer</summary><div class="a"><p>They forgot <code>render()</code>, so the count doubles but the page doesn't change. In stage 4 there's no <code>count</code> variable to change directly — the only way in is <code>setCount</code>, and that always redraws.</p></div></details>
+  </div>
+  <div class="stretch-box">
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Why does <code>const planner = getPlanner(); planner.push(10); setPlanner(planner)</code> not redraw?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>planner</code> is the same array the state already holds, so <code>Object.is</code> says nothing changed and <code>setState</code> returns early. The array <em>was</em> changed, but invisibly. <code>setPlanner([...getPlanner(), 10])</code> passes a new array, which redraws. React behaves exactly the same way.</p></div></details>
+  </div>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 15 complete — s15 tests pass, counter works</span></label>
+</section>
+
+<section id="s16">
+  <div class="shead"><span class="chip">16</span><h2>Reading React with what you now know</h2><span class="lvl core">Core</span><span class="tagline">section 02, again</span></div>
+
+  <p>Here are the two components from section 02 — the page, and the card it renders for each course. Read them slowly. There is no line left that needs anything beyond this document.</p>
+
+  <div class="cmd"><span class="cm">// CourseCard.js</span>
+<span class="tg">export</span> <span class="tg">default</span> <span class="tg">function</span> <span class="at">CourseCard</span>({ course, onAdd }) {
+  <span class="tg">const</span> { code, title, credits, seatsLeft } = course;
+  <span class="tg">return</span> (
+    &lt;article className=<span class="st">"card"</span>&gt;
+      &lt;h2&gt;{code} · {title}&lt;/h2&gt;
+      &lt;p&gt;{credits} credits · {seatsLeft === <span class="st">0</span> ? <span class="st">"Full"</span> : <span class="st">`${seatsLeft} left`</span>}&lt;/p&gt;
+      &lt;button onClick={onAdd} disabled={seatsLeft === <span class="st">0</span>}&gt;Add&lt;/button&gt;
+    &lt;/article&gt;
+  );
+}</div>
+  <div class="cmd"><span class="cm">// CoursePage.js</span>
+<span class="tg">import</span> { useState } <span class="tg">from</span> <span class="st">"react"</span>;
+<span class="tg">import</span> CourseCard <span class="tg">from</span> <span class="st">"./CourseCard.js"</span>;
+
+<span class="tg">export</span> <span class="tg">default</span> <span class="tg">function</span> <span class="at">CoursePage</span>({ courses }) {
+  <span class="tg">const</span> [planner, setPlanner] = <span class="at">useState</span>([]);
+
+  <span class="tg">const</span> credits = planner
+    .<span class="at">map</span>((id) =&gt; courses.<span class="at">find</span>((c) =&gt; c.id === id))
+    .<span class="at">reduce</span>((sum, c) =&gt; sum + c.credits, <span class="st">0</span>);
+
+  <span class="tg">return</span> (
+    &lt;main&gt;
+      &lt;h1&gt;Courses {planner.length &gt; <span class="st">0</span> &amp;&amp; &lt;span&gt;{planner.length} planned&lt;/span&gt;}&lt;/h1&gt;
+      {courses.<span class="at">map</span>((course) =&gt; (
+        &lt;CourseCard
+          key={course.id}
+          course={course}
+          onAdd={() =&gt; <span class="at">setPlanner</span>((prev) =&gt; [...prev, course.id])}
+        /&gt;
+      ))}
+      &lt;p&gt;{credits} credits planned&lt;/p&gt;
+    &lt;/main&gt;
+  );
+}</div>
+
+  <h3>Line by line</h3>
+  <ol>
+    <li><strong><code>export default function CourseCard({ course, onAdd })</code></strong> — a module's default export (14). A component is a function (04). Its props arrive as one object, destructured in the parameter list (08).</li>
+    <li><strong><code>{seatsLeft === 0 ? "Full" : `${seatsLeft} left`}</code></strong> — JSX braces hold one expression (03), so the either/or is a ternary, with a template literal inside.</li>
+    <li><strong><code>onClick={onAdd}</code></strong> — passing the function, not calling it (04). The card doesn't know what "add" means; its parent does. The card just calls the callback it was handed: events flow up (05).</li>
+    <li><strong><code>const [planner, setPlanner] = useState([])</code></strong> — array destructuring of a pair (08): a value you don't change directly, and the one function that changes it. Your <code>useState</code> from section 15, almost exactly.</li>
+    <li><strong><code>.map(…find…).reduce(…, 0)</code></strong> — ids to courses, then a total (11). Computed fresh on every render, never stored, so it can't drift.</li>
+    <li><strong><code>planner.length &gt; 0 &amp;&amp; &lt;span&gt;…</code></strong> — "only if", written safely so a 0 never shows (03).</li>
+    <li><strong><code>courses.map((course) =&gt; &lt;CourseCard key={course.id} … /&gt;)</code></strong> — a list on screen is <code>map</code> (11), with a stable id as the key, never the index.</li>
+    <li><strong><code>onAdd={() =&gt; setPlanner(…)}</code></strong> — a new arrow per card, which closes over <em>that</em> card's <code>course</code> (06). Exactly your <code>buildButtons</code> from section 04.</li>
+    <li><strong><code>setPlanner((prev) =&gt; [...prev, course.id])</code></strong> — an updater function, run later on the latest value (05), returning a <strong>new</strong> array (10) so <code>Object.is</code> sees a change (09).</li>
+    <li><strong>No <code>this</code>, nowhere</strong> — closures replaced it (07).</li>
+  </ol>
+
+  <h3>The page reacts — nobody updates it by hand</h3>
+  <p>In section 13 you updated five places on the page by hand every time a course was added. In <code>CoursePage</code>, nothing does. <code>setPlanner</code> is your <code>setState</code> from section 15: it stores the new array and has the page redrawn. And the JSX — everything after <code>return</code> — <em>is</em> the <code>render()</code> function, written as a description of the page instead of a list of updates.</p>
+  <p>Wednesday's lab takes your <code>useState</code> further: a whole app on it, and the problem you'll hit when "redraw everything" stops being good enough.</p>
+
+  <table class="grid">
+    <tr><th>JavaScript you now know</th><th>What React does with it</th></tr>
+    <tr><td>functions are values (04)</td><td>components, event handler props</td></tr>
+    <tr><td>callbacks (05)</td><td>a child calls <code>onAdd</code>; events flow up</td></tr>
+    <tr><td>updater functions (05)</td><td><code>setX((prev) =&gt; …)</code></td></tr>
+    <tr><td>closures (06)</td><td>every handler and hook; stale-closure bugs</td></tr>
+    <tr><td>closures instead of this (07)</td><td>function components instead of classes</td></tr>
+    <tr><td>destructuring (08)</td><td>props, <code>[value, setValue]</code></td></tr>
+    <tr><td>references, Object.is (09)</td><td>how React detects a change</td></tr>
+    <tr><td>immutable updates (10)</td><td>every state update</td></tr>
+    <tr><td>map, filter, reduce (11)</td><td>lists, filtered views, totals</td></tr>
+    <tr><td>expressions (03)</td><td>everything inside <code>{ }</code> in JSX</td></tr>
+    <tr><td>DOM and events (12–13)</td><td>what React does for you</td></tr>
+    <tr><td>modules (14)</td><td>one component per file</td></tr>
+    <tr><td>reactivity, your useState (15)</td><td>the whole point: change state, the screen reacts</td></tr>
+  </table>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 16 complete — every line explained</span></label>
+</section>
+
+<section id="s17">
+  <div class="shead"><span class="chip">17</span><h2>In the lab on Tuesday</h2><span class="lvl core">Core</span><span class="tagline">doubts first, then deeper</span></div>
+
+  <p>The lab assumes you've finished the core sections. It doesn't re-teach them. It answers your questions, then goes one level deeper on the two ideas that cause most React bugs.</p>
+  <table class="grid">
+    <tr><th>Time</th><th>What happens</th></tr>
+    <tr><td>0–20</td><td>We scroll through the <strong>core</strong> sections together at the projector — stop me anywhere with a question. Then the most common "where I got stuck" answers from the checkpoint. Questions on stretch parts are welcome too.</td></tr>
+    <tr><td>20–45</td><td><strong>References and copies, in depth.</strong> Updating data two levels deep without changing it, and which objects must be new and which must stay the same.</td></tr>
+    <tr><td>45–65</td><td><strong>Closures and this, in depth.</strong> Your predict sheets, the wrong guesses, and new puzzles live.</td></tr>
+    <tr><td>65–85</td><td><strong>In-lab task, AI closed:</strong> <code>inlab/semester.js</code>, checked with <code>npm run inlab</code>.</td></tr>
+    <tr><td>85–90</td><td>What Wednesday builds.</td></tr>
+  </table>
+  <div class="cue work"><p class="cue-k">Bring</p><p>Your laptop with <code>esd-labs/js-lab1</code>, <code>npm test</code> passing (or as close as you got), and your filled-in predict sheets. Raise a hand when you're stuck — the TAs come to you.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 17 read</span></label>
+</section>
+
+<section id="s18">
+  <div class="shead"><span class="chip">18</span><h2>When it goes wrong</h2><span class="lvl ref">Reference</span><span class="tagline">the error, and what it means</span></div>
+
+  <table class="grid">
+    <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>Cannot assign to read only property / Cannot add property … not extensible</td><td>Your function changed its input. Find the <code>push</code>, <code>sort</code>, <code>splice</code> or <code>x.field =</code> and return something new instead (section 10).</td></tr>
+    <tr><td>Error: TODO</td><td>You haven't written that function yet — or you're editing a different file from the one the test imports.</td></tr>
+    <tr><td>… is not a function</td><td>You called something that isn't a function: often a value you got by calling instead of passing (04), or <code>.map</code> on a NodeList (12).</td></tr>
+    <tr><td>Cannot read properties of undefined (reading 'ids')</td><td>A method lost its <code>this</code> because it was passed as a callback (07).</td></tr>
+    <tr><td>Cannot read properties of undefined (reading 'title')</td><td>The thing before <code>.title</code> doesn't exist — usually a <code>find</code> that matched nothing. Check the id, or use <code>?.</code> (03).</td></tr>
+    <tr><td>map returns [undefined, …]</td><td>Braces with no <code>return</code>, or an object literal without parentheses (04).</td></tr>
+    <tr><td>Expected values to be strictly equal … !==</td><td>Read both values in the message: the test printed what it expected and what you returned.</td></tr>
+    <tr><td>Expected "actual" to be strictly unequal / the SAME object</td><td>A test checks references: you returned the same object where it wanted a new one, or a new one where nothing changed (10).</td></tr>
+    <tr><td>ERR_MODULE_NOT_FOUND</td><td>A wrong path, or a missing <code>.js</code> on a relative import (14).</td></tr>
+    <tr><td>Cannot use import statement outside a module</td><td>The <code>&lt;script&gt;</code> tag needs <code>type="module"</code>, or <code>package.json</code> lost <code>"type": "module"</code>.</td></tr>
+    <tr><td>The form page is blank, console says "blocked by CORS policy" / file://</td><td>You opened the HTML file directly. Use <code>npm run web</code> and the <code>localhost</code> address (14).</td></tr>
+    <tr><td>EADDRINUSE :5500</td><td>Something is already on that port, maybe an old <code>npm run web</code>. Stop it with <kbd>Ctrl</kbd>+<kbd>C</kbd>, or run <code>PORT=5600 npm run web</code> (on Windows: <code>set PORT=5600 &amp;&amp; npm run web</code>).</td></tr>
+    <tr><td>npm : running scripts is disabled</td><td>PowerShell's execution policy (section 01). Use Command Prompt.</td></tr>
+  </table>
+
+  <div class="cue"><p class="cue-k">How to debug, generally</p><p>Read the <strong>first</strong> line of the error, then find the first line of the stack trace that's in <em>your</em> file. Put a <code>console.log</code> just before it and print the values involved. Nine times in ten, a value isn't what you assumed it was. More in <a href="js-funda.html#s20">05 · §20 Debugging in DevTools</a> and <a href="js-funda.html#s21">§21 When it goes wrong</a>.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 18 read</span></label>
+</section>
+
+<section id="s19">
+  <div class="shead"><span class="chip">19</span><h2>Practice run, unaided</h2><span class="lvl stretch">Stretch</span><span class="tagline">no tests, no hints, no looking back</span></div>
+
+  <p>Write each of these in a new file, from a blank page, without scrolling up. Run them yourself to check. Then open the answer.</p>
+
+  <div class="quiz">
+    <div class="q"><b>P1</b><code>groupByDepartment(courses)</code> → <code>{ "Computer Science": [course, …], … }</code>, using one <code>reduce</code>.</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd"><span class="tg">const</span> groupByDepartment = (courses) =&gt;
+  courses.<span class="at">reduce</span>((groups, c) =&gt; ({
+    ...groups,
+    [c.department]: [...(groups[c.department] ?? []), c],
+  }), {});</div>
+      <p>Spread, a computed key, <code>??</code> for the first course in each group, and an initial value. (Mutating <code>groups</code> inside would also be fine — you created it.)</p>
+    </div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P2</b><code>toggleInPlanner(planner, id)</code> — removes the id if it's there, adds it if not. Never changes <code>planner</code>.</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd"><span class="tg">const</span> toggleInPlanner = (planner, id) =&gt;
+  planner.<span class="at">includes</span>(id) ? planner.<span class="at">filter</span>((x) =&gt; x !== id) : [...planner, id];</div>
+    </div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P3</b><code>where(field, value)</code> returns a function, so that <code>courses.filter(where("department", "Mathematics"))</code> works.</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd"><span class="tg">const</span> where = (field, value) =&gt; (item) =&gt; item[field] === value;</div>
+      <p>A factory (06) that builds a predicate for a higher-order function (05). Two arrows in a row just means "a function that returns a function".</p>
+    </div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P4</b><code>createUndoBox(initial)</code> → <code>[get, set, undo]</code>. <code>undo()</code> goes back to the value before the last <code>set</code>; with no history left, it does nothing.</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd"><span class="tg">function</span> <span class="at">createUndoBox</span>(initial) {
+  <span class="tg">let</span> value = initial;
+  <span class="tg">let</span> history = [];
+  <span class="tg">const</span> <span class="tg">get</span> = () =&gt; value;
+  <span class="tg">const</span> <span class="tg">set</span> = (next) =&gt; { history = [...history, value]; value = next; };
+  <span class="tg">const</span> undo = () =&gt; {
+    <span class="tg">if</span> (history.length === <span class="st">0</span>) <span class="tg">return</span>;
+    value = history.<span class="at">at</span>(-<span class="st">1</span>);
+    history = history.<span class="at">slice</span>(<span class="st">0</span>, -<span class="st">1</span>);
+  };
+  <span class="tg">return</span> [<span class="tg">get</span>, <span class="tg">set</span>, undo];
+}</div>
+      <p>Two private variables in one closure, shared by three functions.</p>
+    </div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P5</b>What's wrong with this, and why would React not re-render after it?
+      <div class="cmd"><span class="tg">function</span> <span class="at">addCourse</span>(state, course) {
+  state.courses.<span class="at">push</span>(course);
+  <span class="tg">return</span> state;
+}</div></div>
+    <details><summary>Show answer</summary><div class="a">
+      <p>It changes its input, and it returns the <strong>same</strong> <code>state</code> object. React compares old and new state with <code>Object.is</code>, sees the same reference, and concludes nothing changed. Copy the path to the change instead:</p>
+      <div class="cmd"><span class="tg">const</span> addCourse = (state, course) =&gt; ({ ...state, courses: [...state.courses, course] });</div>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 19 complete — all five, unaided (stretch)</span></label>
+</section>
+
+<section id="s20">
+  <div class="shead"><span class="chip">20</span><h2>Checkpoint</h2><span class="lvl core">Core</span><span class="tagline">before 8 am on Tuesday</span></div>
+
+  <p>Fill in the checkpoint form (the link is posted on the course channel). It takes two minutes and asks for:</p>
+  <ol>
+    <li>The last lines of <code>npm test</code> — the core <code># pass</code> and <code># fail</code> counts — and, if you did any stretch, of <code>npm run test:stretch</code>.</li>
+    <li>Whether the form page (section 13) and the counter page (section 15) work.</li>
+    <li>How many of your predictions were wrong, across all four predict sheets.</li>
+    <li><strong>One line: where you got stuck</strong>, or what still feels shaky. Be specific — "section 07 fix 2, I don't get why the arrow keeps this" is useful; "this" is not.</li>
+    <li>Your confidence, 1 to 5.</li>
+  </ol>
+  <p>Not finished? Submit anyway, with the counts you have. The TAs plan the lab from these answers, and an honest "stuck on 10" helps far more than a silence.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Checkpoint submitted</span></label>
+</section>
+
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+  <div class="gloss">
+    <div class="grow"><b>arrow function</b><span><code>(x) =&gt; …</code>. Returns its expression automatically when there are no braces. Has no <code>this</code> of its own.</span></div>
+    <div class="grow"><b>bubbling</b><span>An event running listeners on its target, then on every ancestor up to <code>document</code>.</span></div>
+    <div class="grow"><b>callback</b><span>A function you pass to another function, which calls it later.</span></div>
+    <div class="grow"><b>closure</b><span>A function plus the variables it could see where it was created, kept alive after that scope ended.</span></div>
+    <div class="grow"><b>comparator</b><span>A function <code>(a, b)</code> for <code>sort</code>: negative if <code>a</code> first, positive if <code>b</code> first, 0 if equal.</span></div>
+    <div class="grow"><b>computed key</b><span><code>{ [name]: value }</code> — a property name taken from a variable.</span></div>
+    <div class="grow"><b>delegation</b><span>One listener on a parent handling events for all its children, via bubbling.</span></div>
+    <div class="grow"><b>destructuring</b><span>Unpacking an object by name or an array by position into variables.</span></div>
+    <div class="grow"><b>expression</b><span>Code that produces a value. The only thing allowed inside <code>${ }</code> and JSX braces.</span></div>
+    <div class="grow"><b>factory</b><span>A function that builds and returns another function or object.</span></div>
+    <div class="grow"><b>falsy</b><span><code>false 0 -0 0n "" null undefined NaN</code>. Everything else is truthy.</span></div>
+    <div class="grow"><b>higher-order function</b><span>A function that takes a function, returns a function, or both.</span></div>
+    <div class="grow"><b>immutable update</b><span>Producing a new value with a change in it, instead of changing the original.</span></div>
+    <div class="grow"><b>module</b><span>A file with its own scope, sharing things only through <code>export</code> and <code>import</code>. Runs once.</span></div>
+    <div class="grow"><b>NodeList</b><span>What <code>querySelectorAll</code> returns. Has <code>forEach</code>; use <code>Array.from</code> for the rest.</span></div>
+    <div class="grow"><b>Object.is</b><span>Same-object check, like <code>===</code>. The test React uses to see if state changed.</span></div>
+    <div class="grow"><b>pure function</b><span>Same output for the same input, and no side effects.</span></div>
+    <div class="grow"><b>reactivity</b><span>When state changes, everything on screen that depends on it updates by itself. The idea React is named for.</span></div>
+    <div class="grow"><b>reference</b><span>What a variable holds for an object or array: a pointer to it, not a copy.</span></div>
+    <div class="grow"><b>shallow copy</b><span>A new outer object whose nested objects are still shared. What spread makes.</span></div>
+    <div class="grow"><b>render</b><span>Turning the current state into what's on screen. One function that does all of it, instead of updates scattered through every handler.</span></div>
+    <div class="grow"><b>side effect</b><span>Anything a function does besides returning: changing inputs, the DOM, logging, timers, network.</span></div>
+    <div class="grow"><b>spread / rest</b><span><code>...x</code> unpacking into something new / collecting what's left over.</span></div>
+    <div class="grow"><b>stale closure</b><span>A closure from an older call, still seeing that call's values.</span></div>
+    <div class="grow"><b>state</b><span>The data a screen is drawn from. In React, the values held by <code>useState</code>.</span></div>
+    <div class="grow"><b>statement</b><span>Code that does something but has no value: <code>if</code>, <code>for</code>, <code>const …</code>.</span></div>
+    <div class="grow"><b>this</b><span>Set by how a function is called. Arrow functions don't have their own.</span></div>
+    <div class="grow"><b>updater function</b><span>A function handed to a setter, <code>(prev) =&gt; next</code>, run later on the latest value.</span></div>
+    <div class="grow"><b>XSS</b><span>Cross-site scripting: user text treated as HTML and run as script. Use <code>textContent</code>.</span></div>
+  </div>
+</section>
+
+<div class="finish">
+  <h2>How to know you're ready</h2>
+  <p>You're ready for Tuesday if you can do all of these <em>without looking anything up</em>:</p>
+  <ol>
+    <li>Explain the difference between <code>save</code> and <code>save()</code>, and fix <code>onClick={save()}</code>.</li>
+    <li>Say why <code>count &amp;&amp; …</code> can show a 0, and write the safe version.</li>
+    <li>Explain why three <code>setCount(count + 1)</code> calls add one, and three <code>setCount((c) =&gt; c + 1)</code> calls add three.</li>
+    <li>Write a closure with private state and two functions that share it.</li>
+    <li>Say what decides <code>this</code>, and fix a detached method two ways.</li>
+    <li>Update one item in a list without changing the list, keeping every other item the same object.</li>
+    <li>Read a form into one object with <code>querySelectorAll</code>, <code>reduce</code> and a computed key, and check it with <code>every</code>.</li>
+    <li>Say what <strong>reactivity</strong> means in one sentence, and why React is called React.</li>
+    <li>Write <code>useState</code> from memory, and say why it returns two things.</li>
+    <li>Read the <code>CoursePage</code> component in section 16 aloud, line by line.</li>
+  </ol>
+
+  <h2 style="margin-top:30px;font-size:20px">Functions card</h2>
+  <div class="cmd">save                      <span class="cm">// the function</span>
+<span class="at">save</span>()                    <span class="cm">// its result</span>
+onClick={save}            <span class="cm">// pass it</span>
+onClick={() =&gt; <span class="at">save</span>(id)}  <span class="cm">// pass a new function that calls it later</span>
+
+(x) =&gt; x * <span class="st">2</span>              <span class="cm">// implicit return</span>
+(x) =&gt; { <span class="tg">return</span> x * <span class="st">2</span>; }  <span class="cm">// block: return needed</span>
+(x) =&gt; ({ value: x })     <span class="cm">// returning an object: parens</span>
+
+<span class="tg">const</span> make = (n) =&gt; () =&gt; n;   <span class="cm">// a function that returns a function</span>
+<span class="at">setX</span>((prev) =&gt; prev + <span class="st">1</span>);      <span class="cm">// updater: run later, on the latest value</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Updates card — never change what you were given</h2>
+  <div class="cmd">[...list, item]                                    <span class="cm">// add</span>
+list.<span class="at">filter</span>((x) =&gt; x.id !== id)                    <span class="cm">// remove</span>
+list.<span class="at">map</span>((x) =&gt; x.id === id ? { ...x, f: v } : x)  <span class="cm">// update one</span>
+list.<span class="at">toSorted</span>(cmp)                                 <span class="cm">// sort a copy</span>
+{ ...obj, field: value }                           <span class="cm">// update a field</span>
+{ ...obj, [name]: value }                          <span class="cm">// update a field named in a variable</span>
+<span class="tg">const</span> { field, ...rest } = obj                     <span class="cm">// remove a field</span>
+nothingChanged ? same : next                       <span class="cm">// same reference = no re-render</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Arrays card</h2>
+  <div class="cmd">list.<span class="at">map</span>(fn)   list.<span class="at">filter</span>(test)   list.<span class="at">reduce</span>((acc, x) =&gt; …, initial)
+list.<span class="at">find</span>(test)   list.<span class="at">findIndex</span>(test)   list.<span class="at">includes</span>(value)
+list.<span class="at">some</span>(test)   <span class="cm">// anything?     list.every(test)   // everything?</span>
+[...<span class="tg">new</span> <span class="tg">Set</span>(list)]                 <span class="cm">// unique</span>
+a &amp;&amp; b   a || b   a ?? b           <span class="cm">// return an operand, not true/false</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">DOM card</h2>
+  <div class="cmd"><span class="tg">document</span>.<span class="at">querySelector</span>(<span class="st">"#id"</span>)          <span class="cm">// first match or null</span>
+form.<span class="at">querySelectorAll</span>(<span class="st">"input, select"</span>) <span class="cm">// NodeList</span>
+<span class="tg">Array</span>.<span class="tg">from</span>(nodeList)                   <span class="cm">// → real array</span>
+<span class="tg">document</span>.<span class="at">createElement</span>(<span class="st">"li"</span>)
+el.textContent = text                  <span class="cm">// never innerHTML for user text</span>
+el.classList.<span class="at">toggle</span>(<span class="st">"selected"</span>)
+parent.<span class="at">append</span>(child)   el.<span class="at">remove</span>()
+el.<span class="at">addEventListener</span>(<span class="st">"click"</span>, (event) =&gt; { … })
+event.<span class="at">preventDefault</span>()   event.<span class="at">stopPropagation</span>()
+event.target.<span class="at">closest</span>(<span class="st">".item"</span>)          <span class="cm">// delegation</span></div>
+</div>
+
+<footer>M.Tech CSE · ESD · JS Lab 1<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+</div>
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ---- */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  /* ---- progress: CORE sections drive the bar; stretch boxes are tracked separately.
+         Both are remembered in this browser, so they survive a reload. ---- */
+  function load(key){ try{ return JSON.parse(localStorage.getItem(key)||'[]'); }catch(err){ return []; } }
+  function save(key,list){ try{ localStorage.setItem(key,JSON.stringify(list.map(function(c){return c.checked}))); }catch(err){} }
+  var KEY='esd-js-lab1-progress', SKEY='esd-js-lab1-stretch';
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var extras=[].slice.call(document.querySelectorAll('.chk-s'));
+  var saved=load(KEY), savedS=load(SKEY);
+  checks.forEach(function(c,i){ if(saved[i]) c.checked=true; });
+  extras.forEach(function(c,i){ if(savedS[i]) c.checked=true; });
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=['Core first, in order — every section builds on the last.',
+             'Good start. Functions as values carry the rest of the lab.',
+             'Past halfway. References and immutable updates are the two that matter for React.',
+             'Nearly there. Section 15 is where it all comes together.',
+             'Core done. Fill in the checkpoint, then try the stretch parts if you have time.'];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    var s=extras.filter(function(c){return c.checked}).length;
+    msg.textContent=(n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))])+(s?'  ·  stretch: '+s+' / '+extras.length:'');
+    save(KEY,checks); save(SKEY,extras);
+  }
+  checks.concat(extras).forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^[$>]\s?/,'').trimEnd()}).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>
