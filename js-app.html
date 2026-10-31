@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A JavaScript app, without React — JS Lab 2</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#101614">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Condensed:wght@600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+.cue.work{border-left-color:var(--ink);background:var(--surface)}
+.cue.work .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.tg{color:var(--term-green)}
+.at{color:var(--signal)}
+.st{color:#B7C4C0}
+.tx{color:#FFFFFF}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 182px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+.quiz .a .cmd{margin-top:4px}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 168px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+/* ---- additions for the lab docs ---- */
+.cue.react{border-left-color:var(--term-green);background:var(--dark);color:#DDE3E0}
+.cue.react .cue-k{color:var(--term-green)}
+.cue.react code{background:#22302D;color:var(--term-green)}
+.cue.react strong{color:#FFF}
+.refs{font-family:var(--mono);font-size:12px;color:var(--muted);margin:-6px 0 16px;max-width:70ch}
+.refs a{color:var(--teal);font-weight:600}
+.part{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper);background:var(--ink);display:inline-block;padding:5px 10px;margin:64px 0 -28px}
+.toc .rpart{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);padding:10px 16px 6px;border-bottom:1px solid var(--line);background:var(--teal-soft);font-weight:600}
+table.grid{border-collapse:collapse;width:100%;max-width:70ch;background:var(--surface);border:1px solid var(--ink);margin:0 0 16px;font-size:14.5px}
+table.grid th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;text-align:left;color:var(--muted);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--ink)}
+table.grid td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.grid tr:last-child td{border-bottom:0}
+table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--teal);font-weight:600;white-space:nowrap}
+
+/* ---- core / stretch ---- */
+.lvl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:3px 7px;align-self:center;white-space:nowrap}
+.lvl.core{background:var(--ink);color:var(--signal)}
+.lvl.stretch-box{border:1px dashed var(--teal);color:var(--teal)}
+.lvl.ref{border:1px solid var(--muted);color:var(--muted)}
+.rrow .rl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:600;flex:0 0 auto;border:1px dashed var(--teal);padding:1px 6px;align-self:center}
+.rrow .rl.ref{color:var(--muted);border:1px solid var(--muted)}
+.rrow.is-extra .rw{color:var(--muted)}
+.stretch-box{border:1px dashed var(--teal);background:rgba(255,255,255,.55);padding:14px 16px 4px;margin:8px 0 18px}
+.stretch-box::before{content:"Stretch — optional. Do it if you can, and ask about it any time.";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600;margin-bottom:10px}
+.stretch-box h3:first-of-type{margin-top:0}
+/* tables whose first column holds long text (error messages): even, wrapping columns */
+table.grid.long-key{table-layout:fixed}
+table.grid.long-key td:first-child{white-space:normal;width:42%;overflow-wrap:anywhere}
+table.grid.long-key th:first-child{width:42%}
+.legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 0;font-size:14px;color:#2B3936}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+  table.grid td:first-child{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> JS Lab 2 · No AI</p>
+  <h1>A JavaScript app,<br><em>without</em> React</h1>
+  <p class="lede">In JS Lab 1 you built reactivity for one counter. This lab builds a whole app on it: a course browser that loads from a real API, filters and searches, keeps a planner, and has an SGPA calculator form. No framework, no build step, no <code>npm install</code>. You'll meet the two problems every real app has — waiting for the network, and keeping the screen in step with the data — and solve both with plain JavaScript. React then becomes a set of tools for jobs you've already done by hand.</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">12</span> core</div>
+      <div class="tracker-msg" id="msg">Core first, in order — every section builds on the last.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill" style="width: 0%;"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p><strong>This is a pre-lab.</strong> You work through it at home, before the lab. The lab session is for your doubts and for going deeper. It assumes you've done the core sections.</p>
+  <p><strong>It continues JS Lab 1.</strong> Same courses, same rules, same <code>useState</code>. If something from Lab 1 feels shaky, its section is linked — open <a href="js-react.html">JS Lab 1 · JavaScript for React</a> and reread it. Async JavaScript was covered in <a href="advanced-javascript.html#s14">06 · Advanced JavaScript, §14–22</a>; this lab doesn't repeat it, it uses it.</p>
+  <p><strong>The thread is still reactivity.</strong> Lab 1 ended with: <em>change the state, and the screen follows</em>. Here the state gets bigger, some of it arrives late from a server, and some of it arrives in the wrong order. Every section is about keeping that one rule true.</p>
+  <p><strong>Core and stretch.</strong> <span class="lvl core">Core</span> is mandatory — what we go through together, and what <code>npm test</code> checks. <span class="lvl stretch">Stretch</span> is extra, checked by <code>npm run test:stretch</code> where there are tests. Ask about either any time.</p>
+  <p><strong>No AI for this lab.</strong> Keep a terminal and the browser's DevTools open the whole time — especially the <em>Network</em> tab from section 04 on.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — waiting first, then state, then the app. Do every core section, in order; stretch is extra</div>
+  <div class="rpart">Part 1 · Getting set up</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">How this lab works</span></a>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">What you're building</span></a>
+  <div class="rpart">Part 2 · Waiting for things</div>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">Promises, await, and the order things happen in</span></a>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">fetch, URLs and failures</span></a>
+  <div class="rpart">Part 3 · State as data</div>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">One state object, one transition function</span></a>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">Views — and the SGPA calculator</span></a>
+  <div class="rpart">Part 4 · The app</div>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">Wire it up</span></a>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">Redraw only what changed</span></a>
+  <a class="rrow" href="#s9"><span class="rt">09</span><span class="rw">Responses that arrive out of order</span></a>
+  <a class="rrow is-extra" href="#s10"><span class="rt">10</span><span class="rw">Other servers — public APIs and CORS</span><span class="rl">stretch</span></a>
+  <div class="rpart">Part 5 · Towards React</div>
+  <a class="rrow" href="#s11"><span class="rt">11</span><span class="rw">What React will take off your hands</span></a>
+  <a class="rrow" href="#s12"><span class="rt">12</span><span class="rw">In the lab</span></a>
+  <a class="rrow is-extra" href="#s13"><span class="rt">13</span><span class="rw">When it goes wrong</span><span class="rl ref">reference</span></a>
+  <a class="rrow is-extra" href="#s14"><span class="rt">14</span><span class="rw">Practice run, unaided</span><span class="rl">stretch</span></a>
+  <a class="rrow" href="#s15"><span class="rt">15</span><span class="rw">Submitting the assignment</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; reference cards</span></a>
+</nav>
+
+<div class="part">Part 1 · Getting set up</div>
+
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>How this lab works</h2><span class="lvl core">Core</span><span class="tagline">pull, test, serve</span></div>
+
+  <p>Same setup as Lab 1: one folder, exercises in <code>src/</code>, tests you run with one command. One thing is new — a small <strong>course API</strong> that runs on your machine, so the app has a real server to talk to.</p>
+
+  <h3>Getting the starter</h3>
+  <div class="dothis">
+    <h4>Do this now — pull, and run the tests</h4>
+    <ol>
+      <li>In your <code>esd-labs</code> folder (the one you cloned for Lab 1), pull. A new <code>js-lab2</code> folder appears next to <code>js-lab1</code>; your Lab 1 work isn't touched.</li>
+      <li>Open the <strong><code>js-lab2</code> folder</strong> in VS Code and open its terminal.</li>
+    </ol>
+  </div>
+  <div class="cmd"><span class="p">$</span> cd esd-labs
+<span class="p">$</span> git pull
+<span class="p">$</span> cd js-lab2
+<span class="p">$</span> npm test
+<span class="cm"># tests 45</span>
+<span class="cm"># pass 1</span>
+<span class="cm"># fail 44</span></div>
+  <p>As before, everything starts as <code>throw new Error("TODO")</code>, and your job is to turn the 44 into 0. Nothing to install. Don't have the repo yet? Section 01 of <a href="js-react.html#s1">Lab 1</a> has the clone command.</p>
+
+  <h3>The folder</h3>
+  <div class="mention">
+    <div class="mrow"><b>src/s03-…js → s09-…js</b><span>Your exercises, one file per section. Section numbers match this doc.</span></div>
+    <div class="mrow"><b>src/state.js</b><span><code>useState</code> from Lab 1, finished. Read it; don't edit it.</span></div>
+    <div class="mrow"><b>src/catalog.js</b><span>Filtering helpers the server uses. Given.</span></div>
+    <div class="mrow"><b>web/</b><span>The app: <code>index.html</code>, <code>styles.css</code>, and <code>app.js</code>, which you finish in sections 07–09.</span></div>
+    <div class="mrow"><b>test/</b><span>The specification. Read the tests; don't edit them.</span></div>
+    <div class="mrow"><b>predict/async.js</b><span>A predict-then-run sheet for section 03.</span></div>
+    <div class="mrow"><b>tools/serve.js</b><span><code>npm run web</code>: serves the app <em>and</em> the course API on one port.</span></div>
+    <div class="mrow"><b>inlab/</b><span>For the lab session. Leave it alone until then.</span></div>
+  </div>
+
+  <h3>The commands</h3>
+  <div class="cmd"><span class="p">$</span> npm test                     # every core test
+<span class="p">$</span> node --test test/s04.test.js # one section
+<span class="p">$</span> npm run test:stretch         # the stretch tests
+<span class="p">$</span> npm run repl                 # a console with everything in src/ loaded
+<span class="p">$</span> npm run web                  # the app + the API at http://localhost:5500</div>
+  <p>The REPL supports <code>await</code> at the top level, so you can try promises directly: <code>lab2&gt; await wait(500)</code>.</p>
+
+  <h3>Submitting</h3>
+  <p>A <strong>graded assignment</strong>, like Lab 1. The lab is on <strong>Wednesday</strong>; you submit by the <strong>end of Friday</strong>. Get <code>npm test</code> fully green and the app working, then zip the <code>js-lab2</code> folder and submit it — once. Section 15 has the steps.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — npm test runs</span></label>
+</section>
+
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>What you're building</h2><span class="lvl core">Core</span><span class="tagline">one page, five regions</span></div>
+
+  <p>Run <code>npm run web</code> and open <a href="http://localhost:5500/web/" target="_blank" rel="noopener">localhost:5500/web/</a>. Right now it's an empty frame: the HTML and CSS are there, the JavaScript isn't. By the end of section 09 it will look like this, and do this:</p>
+  <div class="mention">
+    <div class="mrow"><b>Search and departments</b><span>Typing in the search box or clicking a department asks the <strong>server</strong> for the matching courses.</span></div>
+    <div class="mrow"><b>Status line</b><span>"Loading courses…", an error with a <em>Try again</em> button, or "No courses match."</span></div>
+    <div class="mrow"><b>Course cards</b><span>Code, title, credits, seats left, and an Add / Remove button. Full courses can't be added.</span></div>
+    <div class="mrow"><b>Planner</b><span>The courses you've added, with a count and total credits.</span></div>
+    <div class="mrow"><b>SGPA calculator</b><span>A form: one grade dropdown per planned course, and your SGPA, updated as you pick.</span></div>
+  </div>
+  <p>In the header there's a <strong>Network</strong> switch — Normal, Slow, Random, Failing. It tells the local server to answer slowly, in random order, or with errors, so you can watch your app cope with a bad network on purpose instead of by accident.</p>
+
+  <h3>The shape of the whole app</h3>
+  <p>Everything in this lab fits one loop. Learn it now; every section fills in one part of it.</p>
+  <div class="cmd"><span class="cm">// an EVENT happens          (a click, a keystroke, a response from the server)</span>
+<span class="cm">//   → transition(state, event) returns the NEXT state      (section 05)</span>
+<span class="cm">//   → setState(next) stores it and calls render()           (Lab 1 §15, section 07)</span>
+<span class="cm">//   → render() draws the regions whose data changed         (sections 06 and 08)</span></div>
+  <p>Nothing else is allowed to change the page. A click handler never touches the DOM; a fetch callback never touches the DOM. They describe <em>what happened</em>, and the loop does the rest. That's reactivity, scaled up from one counter to an app.</p>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>Exactly the same loop. <code>transition</code> is what React calls a <strong>reducer</strong>, used with <code>useReducer</code>. "Describe what happened" is <code>dispatch({ type: "ADD", course })</code>. The redraw is React's job. Section 11 lines them up.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 read — the app opens (empty) at localhost:5500/web/</span></label>
+</section>
+
+<div class="part">Part 2 · Waiting for things</div>
+
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>Promises, await, and the order things happen in</h2><span class="lvl core">Core</span><span class="tagline">src/s03-async.js · predict/async.js</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>A <strong>promise</strong> is a value that isn't ready yet: a placeholder for a result that will arrive later, or a failure. <code>await</code> pauses an <code>async</code> function until the promise settles, then gives you the result — or throws the failure, so <code>try/catch</code> works. Full version: <a href="advanced-javascript.html#s17">06 · §17 Promises</a> to <a href="advanced-javascript.html#s21">§21 Error handling</a>.</p></div>
+
+  <h3>JavaScript never waits — it schedules</h3>
+  <p>A browser tab runs your JavaScript on <strong>one thread</strong>. If it stopped and waited 800 ms for a server, the page would freeze: no clicks, no typing, no scrolling. So nothing waits. A slow job is <em>started</em>, the rest of your code carries on, and when the job finishes, a callback is put in a queue to run once the current code is done. That's the event loop, in one paragraph.</p>
+  <div class="cmd"><span class="tg">console</span>.<span class="at">log</span>(<span class="st">"a"</span>);
+<span class="at">setTimeout</span>(() =&gt; <span class="tg">console</span>.<span class="at">log</span>(<span class="st">"b"</span>), <span class="st">0</span>);        <span class="cm">// a timer, even 0 ms, runs LATER</span>
+<span class="tg">Promise</span>.<span class="at">resolve</span>().<span class="at">then</span>(() =&gt; <span class="tg">console</span>.<span class="at">log</span>(<span class="st">"c"</span>)); <span class="cm">// promise callbacks run before timers</span>
+<span class="tg">console</span>.<span class="at">log</span>(<span class="st">"d"</span>);
+<span class="o">// a, d, c, b</span></div>
+  <p>The current code always finishes first (<code>a</code>, <code>d</code>). Then promise callbacks (<code>c</code>), then timers (<code>b</code>). You don't need the queue names; you need the habit: <strong>code after an async call runs before its result arrives.</strong></p>
+
+  <div class="dothis">
+    <h4>Do this now — predict, then run</h4>
+    <p>Open <code>predict/async.js</code>. Under each block, write what you expect it to print. Then run <code>node predict/async.js</code> and explain every difference. Bring the sheet to the lab.</p>
+  </div>
+
+  <h3>await pauses one function, not the program</h3>
+  <div class="cmd"><span class="tg">async</span> <span class="tg">function</span> <span class="at">job</span>() {
+  <span class="tg">console</span>.<span class="at">log</span>(<span class="st">"job starts"</span>);
+  <span class="tg">await</span> <span class="at">wait</span>(<span class="st">20</span>);
+  <span class="tg">console</span>.<span class="at">log</span>(<span class="st">"job ends"</span>);
+}
+<span class="at">job</span>();                          <span class="cm">// starts, runs until the await, returns a promise</span>
+<span class="tg">console</span>.<span class="at">log</span>(<span class="st">"main carries on"</span>);
+<span class="o">// job starts, main carries on, job ends</span></div>
+  <p>Every <code>async</code> function returns a promise — always, even <code>async () =&gt; 3</code>. Calling it without <code>await</code> just starts it. That's the most common async bug: <code>const data = getJSON(url)</code> gives you <code>Promise {&lt;pending&gt;}</code>, not the data.</p>
+
+  <h3>Exercise 1 — wait(ms)</h3>
+  <p>Turn <code>setTimeout</code>, which takes a callback, into a promise you can <code>await</code>. This is the pattern for wrapping <em>any</em> callback API in a promise — the hint in the file gives it away; make sure you understand <em>why</em> it works.</p>
+  <div class="cmd"><span class="tg">await</span> <span class="at">wait</span>(<span class="st">500</span>);   <span class="cm">// half a second later…</span>
+<span class="o">// undefined</span></div>
+
+  <h3>Exercise 2 — one after another, or all at once?</h3>
+  <p>Three requests that take 100 ms each. Awaited one by one, they take 300 ms. Started together and awaited together, 100 ms.</p>
+  <div class="cmd"><span class="cm">// in order: each starts when the previous one finished</span>
+<span class="tg">for</span> (<span class="tg">const</span> task <span class="tg">of</span> tasks) results.<span class="at">push</span>(<span class="tg">await</span> <span class="at">task</span>());
+
+<span class="cm">// all at once: start them all, then wait for all of them</span>
+<span class="tg">await</span> <span class="tg">Promise</span>.<span class="at">all</span>(tasks.<span class="at">map</span>((task) =&gt; <span class="at">task</span>()));</div>
+  <p>Write <code>inOrder(tasks)</code> and <code>allAtOnce(tasks)</code>. The tests time them. Use <code>inOrder</code> when each step needs the previous one (log in, <em>then</em> load the profile). Use <code>Promise.all</code> when they're independent — and know that if <strong>any</strong> of them fails, <code>Promise.all</code> fails, with that error.</p>
+
+  <div class="cue watch"><p class="cue-k">Not with forEach</p><p><code>tasks.forEach(async (t) =&gt; results.push(await t()))</code> looks like "in order" but isn't: <code>forEach</code> doesn't wait for the async callbacks, so it starts all of them at once and returns immediately — <code>results</code> is still empty. Use <code>for…of</code> with <code>await</code>, or <code>Promise.all</code> with <code>map</code>.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b><code>async function f() { return 3; }</code> — what does <code>f()</code> return, and how do you get the 3?</div>
+    <details><summary>Show answer</summary><div class="a"><p>A promise that resolves to 3. <code>await f()</code> inside an async function (or the REPL), or <code>f().then((n) =&gt; …)</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 complete — s03 tests pass, predict sheet filled in</span></label>
+</section>
+
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>fetch, URLs and failures</h2><span class="lvl core">Core</span><span class="tagline">src/s04-api.js</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p><code>fetch(url)</code> returns a promise of a <strong>Response</strong>. The body comes separately: <code>await res.json()</code> is a second promise, because the body may still be downloading when the headers arrive. Full version: <a href="advanced-javascript.html#s22">06 · §22 fetch()</a>.</p></div>
+
+  <h3>Meet the API</h3>
+  <div class="dothis">
+    <h4>Do this now — call it from the address bar</h4>
+    <p>With <code>npm run web</code> running, open these in a browser tab. It's JSON — the same shape as the course API you'll use in the React labs.</p>
+  </div>
+  <div class="cmd"><span class="o">GET /api/courses                                  every course, sorted by code</span>
+<span class="o">GET /api/courses?department=Electronics           one department</span>
+<span class="o">GET /api/courses?q=learn                          code or title contains "learn"</span>
+<span class="o">GET /api/courses/4                                one course</span>
+<span class="o">GET /api/courses/999                              404, with an error body</span>
+<span class="o">GET /api/courses?delay=1500                       answers after 1.5 seconds</span>
+<span class="o">GET /api/courses?fail=1                           500, with an error body</span></div>
+  <p>Open DevTools → <strong>Network</strong>, reload, and click a request: you'll see its status, headers, timing and response. Keep this tab open for the rest of the lab — when the app misbehaves, it's the first place to look.</p>
+
+  <h3>Exercise 1 — buildCoursesUrl, and the &amp; problem</h3>
+  <p>One department is called <code>Data Science &amp; AI</code>. Glue it into a URL by hand and you get:</p>
+  <div class="cmd"><span class="st">`/api/courses?department=${department}`</span>
+<span class="o">// "/api/courses?department=Data Science &amp; AI"</span>
+<span class="cm">// the server reads: department = "Data Science ",  and a second, empty parameter " AI"</span></div>
+  <p>In a query string, <code>&amp;</code> separates parameters. Values have to be <strong>encoded</strong>. <code>URLSearchParams</code> does it for you:</p>
+  <div class="cmd"><span class="tg">const</span> params = <span class="tg">new</span> <span class="at">URLSearchParams</span>();
+params.<span class="tg">set</span>(<span class="st">"department"</span>, <span class="st">"Data Science &amp; AI"</span>);
+params.<span class="at">toString</span>();
+<span class="o">// "department=Data+Science+%26+AI"</span></div>
+  <p>Write <code>buildCoursesUrl({ department, q })</code>: <code>"/api/courses"</code> plus only the filters that aren't blank. Never build a query string with <code>+</code> or a template — user input will break it sooner or later.</p>
+
+  <h3>Exercise 2 — getJSON, and why a 404 isn't an error</h3>
+  <p>This surprises everyone once: <strong><code>fetch</code> only rejects when there's no response at all</strong> — no network, the server is down, the request was blocked. A 404 or a 500 <em>is</em> a response, so <code>fetch</code> resolves happily, and <code>res.json()</code> hands you the server's error body as if it were data.</p>
+  <div class="cmd"><span class="tg">const</span> res = <span class="tg">await</span> <span class="at">fetch</span>(<span class="st">"/api/courses/999"</span>);
+res.ok        <span class="o">// false</span>
+res.status    <span class="o">// 404</span>
+<span class="tg">await</span> res.<span class="at">json</span>()
+<span class="o">// { status: 404, error: "Not Found", message: "No course with id 999", … }</span></div>
+  <p>So every fetch needs a check. Write <code>getJSON(url, fetchFn = fetch)</code>: fetch, throw <code>new Error(`HTTP ${res.status}`)</code> if <code>!res.ok</code>, otherwise return the parsed body. Then <code>fetchCourses(filters, fetchFn)</code> is one line on top of the two.</p>
+
+  <h3>Why fetchFn is a parameter</h3>
+  <p>The tests can't depend on a server running, and they need to make the "server" fail on purpose. So <code>getJSON</code> takes the fetch function as an argument, defaulting to the real one, and the tests pass in a fake (<code>support/helpers.js</code>). Passing in what a function depends on, instead of reaching out for it, is called <strong>dependency injection</strong> — and it's a function-as-value idea straight from <a href="js-react.html#s4">Lab 1 · §04</a>. The app uses it too: section 07 passes a fetch that adds the Network switch's options.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>The server is down. Which line throws — <code>await fetch(url)</code>, <code>res.ok</code>, or <code>await res.json()</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>await fetch(url)</code> — it rejects with a <code>TypeError</code> ("Failed to fetch" in the browser, "fetch failed" in Node). With no response, there's no <code>res</code> to check.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>The URL is wrong and the server answers with an HTML "Not found" page. What does <code>await res.json()</code> do?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Throws a <code>SyntaxError</code>: "Unexpected token '&lt;' … is not valid JSON" — the <code>&lt;</code> is the start of <code>&lt;!DOCTYPE html&gt;</code>. Checking <code>res.ok</code> first turns that into a clear <code>HTTP 404</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 complete — s04 tests pass</span></label>
+</section>
+
+<div class="part">Part 3 · State as data</div>
+
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>One state object, one transition function</h2><span class="lvl core">Core</span><span class="tagline">src/s05-store.js</span></div>
+
+  <p>Lab 1's counter had one number of state. This app has a list from the server, whether it's loading, an error, two filters, a planner and the grades. Spread those across ten <code>let</code>s and every handler has to remember which ones to change together — the same disease as Lab 1's <a href="js-react.html#s15">stage 2</a>, one level up. So all of it goes in <strong>one object</strong>:</p>
+  <div class="cmd"><span class="tg">export</span> <span class="tg">const</span> initialState = <span class="tg">Object</span>.<span class="at">freeze</span>({
+  status: <span class="st">"idle"</span>,     <span class="cm">// "idle" | "loading" | "ready" | "error"</span>
+  courses: [],        <span class="cm">// from the last successful load</span>
+  error: <span class="tg">null</span>,        <span class="cm">// the message, when status is "error"</span>
+  departments: [],    <span class="cm">// every department name, from the first load</span>
+  department: <span class="st">""</span>,     <span class="cm">// the filter ("" = all)</span>
+  query: <span class="st">""</span>,          <span class="cm">// the search box</span>
+  planner: [],        <span class="cm">// [{ id, code, title, credits }, …]</span>
+  grades: {},         <span class="cm">// { [courseId]: "A" | "A-" | … }  — the SGPA form</span>
+});</div>
+
+  <h3>One status, not three booleans</h3>
+  <p>The natural first try is <code>isLoading</code>, <code>hasError</code>, <code>isLoaded</code>. Three booleans have eight combinations, and most are nonsense: loading <em>and</em> errored <em>and</em> loaded? Something will eventually produce one, and the page will show a spinner over an error message over a list. One <code>status</code> field with four allowed values can only ever be in one of them. That's a <strong>state machine</strong>: a fixed set of states, and events that move you between them.</p>
+  <div class="cmd"><span class="o">idle ──LOAD_START──▶ loading ──LOAD_OK───▶ ready</span>
+<span class="o">                        │                    │</span>
+<span class="o">                        └──LOAD_FAIL──▶ error ──LOAD_START──▶ loading …</span></div>
+
+  <h3>transition(state, event) → the next state</h3>
+  <p>Every change to the state is described as an <strong>event</strong> — a plain object with a <code>type</code> and whatever data it needs — and handled in one function:</p>
+  <table class="grid long-key">
+    <tr><th>Event</th><th>The next state</th></tr>
+    <tr><td><code>{ type: "LOAD_START" }</code></td><td>status <code>"loading"</code>, error cleared. Keep the old courses on screen while the new ones load.</td></tr>
+    <tr><td><code>{ type: "LOAD_OK", courses }</code></td><td>status <code>"ready"</code>, these courses. The first time only, also fill <code>departments</code>: unique, sorted.</td></tr>
+    <tr><td><code>{ type: "LOAD_FAIL", message }</code></td><td>status <code>"error"</code>, <code>error</code> = the message. Keep the old courses.</td></tr>
+    <tr><td><code>{ type: "SET_DEPARTMENT", department }</code><br><code>{ type: "SET_QUERY", query }</code></td><td>The new filter — or the <strong>same</strong> state if it didn't change.</td></tr>
+    <tr><td><code>{ type: "ADD", course }</code></td><td>Append <code>{ id, code, title, credits }</code> to the planner — not the whole course, which has fields (like <code>seatsLeft</code>) that go stale. Same state if it's already there.</td></tr>
+    <tr><td><code>{ type: "REMOVE", id }</code></td><td>Remove it from the planner, <strong>and</strong> drop its grade. Same state if it wasn't there.</td></tr>
+    <tr><td><code>{ type: "SET_GRADE", id, grade }</code></td><td>Set that course's grade; <code>""</code> removes the entry. Same state if unchanged.</td></tr>
+    <tr><td>anything else</td><td>The same state.</td></tr>
+  </table>
+  <p>The starter gives you the <code>switch</code>, one <code>case</code> per event. Each case is a Lab 1 immutable update — this section is <a href="js-react.html#s8">Lab 1 · §08</a> and <a href="js-react.html#s10">§10</a> put to work:</p>
+  <div class="cmd"><span class="tg">case</span> <span class="st">"SET_GRADE"</span>:
+  <span class="tg">return</span> { ...state, grades: { ...state.grades, [event.id]: event.grade } };  <span class="cm">// computed key (08)</span>
+
+<span class="tg">case</span> <span class="st">"REMOVE"</span>: {
+  <span class="tg">const</span> { [event.id]: _dropped, ...grades } = state.grades;  <span class="cm">// rest: every grade except this one</span>
+  <span class="tg">return</span> { ...state, planner: state.planner.<span class="at">filter</span>((c) =&gt; c.id !== event.id), grades };
+}</div>
+  <p>Neither case is finished: check the table for when each must return the <em>same</em> state, and what <code>""</code> means for a grade.</p>
+
+  <h3>Why "the same state" matters so much</h3>
+  <p>When nothing changes, return the very object you were given — not a copy. <code>useState</code> compares with <code>Object.is</code> and skips the redraw when the state is the same object (it's the Lab 1 stretch version, in <code>src/state.js</code>). Return a fresh copy every time and every no-op click redraws the whole page. Section 08 builds on this: <strong>a new object means "something changed", the same object means "nothing did"</strong>. That only works if you never change an object in place — which is why the tests freeze everything.</p>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p><code>const [state, dispatch] = useReducer(transition, initialState)</code>. Same function, same events, same rule about returning the same state. React even calls the events <em>actions</em> and the function a <em>reducer</em> — because it has the same shape as the callback you give <code>reduce</code>: <code>(accumulated, next) =&gt; accumulated</code>.</p></div>
+
+  <div class="stretch-box">
+    <h3>Stretch — rules in the transition</h3>
+    <p>A planner over 24 credits, or a full course, shouldn't be possible at all. Make <code>ADD</code> return the same state for a course with <code>seatsLeft === 0</code>, or one that would take the planner past 24 credits. Then the UI <em>can't</em> get into that state, however many buttons you add later. <code>npm run test:stretch</code>.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Why does <code>LOAD_START</code> keep the old courses instead of clearing them?</div>
+    <details><summary>Show answer</summary><div class="a"><p>So the list doesn't flash empty on every keystroke. The old results stay visible, with "Loading courses…" above them, until the new ones arrive. Clearing would be a valid choice — but it's a <em>choice</em>, made in one place, rather than something each handler decides.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 complete — s05 tests pass</span></label>
+</section>
+
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>Views — and the SGPA calculator</h2><span class="lvl core">Core</span><span class="tagline">src/s06-views.js</span></div>
+
+  <p>Between the state and the DOM sits one more layer: <strong>view functions</strong>. Each takes state and returns plain data describing what a region shows — the exact text, which button label, what's disabled. No DOM in them at all. That makes them easy to test, and it keeps the DOM code in <code>app.js</code> dumb: it just copies fields onto elements.</p>
+  <div class="cmd"><span class="at">cardView</span>(courses[<span class="st">3</span>], planner)
+<span class="o">// { id: 4, heading: "CS402 · Enterprise Software Development",</span>
+<span class="cm">//     meta: "4 credits · Computer Science", seats: "3 seats left",</span>
+<span class="cm">//     inPlanner: false, buttonLabel: "Add", disabled: false }</span>
+
+<span class="at">summaryView</span>(planner)  <span class="o">// { count: 3, credits: 10, overLimit: false, text: "3 courses · 10 credits" }</span>
+<span class="at">statusView</span>(state)     <span class="o">// { message: "Loading courses…", showRetry: false }</span></div>
+  <p>The comments above each function in the file give every case, including the singular "1 seat left" / "1 course". The tests check the exact strings.</p>
+
+  <h3>Derived data is computed, never stored</h3>
+  <p>Notice what's <em>not</em> in the state: the total credits, the button labels, the SGPA. They can all be worked out from what <em>is</em> there. If you stored the total too, every event that touches the planner would have to update it as well — and the first one that forgets makes the screen lie. Store the minimum; compute the rest on every render. (The same rule as Lab 1's <a href="js-react.html#s15">stage 2</a>: one source of truth.)</p>
+
+  <h3>The SGPA calculator</h3>
+  <p>The planner has a grade dropdown per course. That's the form; <code>state.grades</code> holds what's picked, and <code>sgpaView</code> works out the result:</p>
+  <div class="cmd">GRADE_POINTS  <span class="o">// { A: 10, "A-": 9, B: 8, "B-": 7, C: 6, D: 5, F: 0 }</span>
+
+<span class="cm">// SGPA = Σ (credits × grade points) / Σ credits — over the courses that HAVE a grade</span>
+<span class="cm">// CS402 (4 cr) A, MA101 (4 cr) B, HS101 (2 cr) not picked yet:</span>
+<span class="cm">//   (4×10 + 4×8) / (4 + 4) = 72 / 8 = 9.00</span>
+
+<span class="at">sgpaView</span>(planner, { <span class="st">4</span>: <span class="st">"A"</span>, <span class="st">10</span>: <span class="st">"B"</span> })
+<span class="o">// { graded: 2, total: 3, credits: 8, sgpa: 9, text: "SGPA 9.00 · 2 of 3 courses graded" }</span></div>
+  <p>A <code>filter</code> for the graded courses, two <code>reduce</code>s, one division — <a href="js-react.html#s11">Lab 1 · §11</a>. Two details the tests check: <code>sgpa</code> is <strong>rounded to 2 decimals</strong> as a number (<code>Math.round(x * 100) / 100</code>), and the text always shows 2 decimals (<code>toFixed(2)</code>: <code>9</code> → <code>"9.00"</code>). Make sure an ungraded course counts neither in the top nor in the bottom of the fraction.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Why does <code>cardView</code> take the planner, not just the course?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Because what a card shows depends on both: "Add" or "Remove", and whether a full course's button is disabled, depend on whether it's in the planner. A view takes everything its output depends on — and nothing it doesn't.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 complete — s06 tests pass</span></label>
+</section>
+
+<div class="part">Part 4 · The app</div>
+
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>Wire it up</h2><span class="lvl core">Core</span><span class="tagline">web/app.js</span></div>
+
+  <p>Every piece exists now. <code>web/app.js</code> already has the DOM work done for you: one function per region — <code>renderDepartments</code>, <code>renderStatus</code>, <code>renderCourses</code>, <code>renderPlanner</code>, <code>renderSgpa</code> — each taking the state and redrawing only its own part of the page with <code>createElement</code> and <code>textContent</code> (that was <a href="js-react.html#s12">Lab 1 · §12</a>). Read them once. Then fill in the four TODO steps below, refreshing the page as you go.</p>
+
+  <h3>Step 1 — the state, and the only way to change it</h3>
+  <div class="cmd"><span class="tg">const</span> [getState, setState] = <span class="at">useState</span>(initialState, render);
+<span class="tg">const</span> dispatch = (event) =&gt; <span class="at">setState</span>((state) =&gt; <span class="at">transition</span>(state, event));</div>
+  <p>Two lines, and they're the whole architecture. <code>dispatch</code> is the one door into the state: give it an event, it runs the transition on the <em>current</em> state (an updater function — <a href="js-react.html#s15">Lab 1 · §15</a> stretch), and <code>useState</code> redraws if the result is a new object. From here on, nothing in <code>app.js</code> assigns to the state or edits the page directly.</p>
+
+  <h3>Step 2 — render(), the simple version</h3>
+  <p>For now: read the state with <code>getState()</code> and call all five region functions with it. Every time. Section 08 makes it smarter.</p>
+
+  <h3>Step 3 — load()</h3>
+  <p>Fetch the courses for the current filters and tell the state machine what happened:</p>
+  <div class="cmd"><span class="tg">async</span> <span class="tg">function</span> <span class="at">load</span>() {
+  <span class="tg">const</span> { department, query } = <span class="at">getState</span>();
+  <span class="at">dispatch</span>({ type: <span class="st">"LOAD_START"</span> });
+  <span class="tg">try</span> {
+    <span class="cm">// TODO: await fetchCourses({ department, q: query }, fetchWithNetwork)</span>
+    <span class="cm">//       → dispatch LOAD_OK with the courses</span>
+  } <span class="tg">catch</span> (error) {
+    <span class="cm">// TODO: dispatch LOAD_FAIL with error.message</span>
+  }
+}</div>
+  <p>Use <code>fetchWithNetwork</code>, not plain <code>fetch</code>: it's given, and it adds the Network switch's <code>delay</code> / <code>fail</code> options to the URL. (Dependency injection from section 04, earning its keep.)</p>
+
+  <h3>Step 4 — events</h3>
+  <p>Each handler does two things at most: <code>dispatch</code> an event, and maybe <code>load()</code>. Use <strong>one listener per region</strong> and find what was hit with <code>event.target.closest(…)</code> — the cards and planner rows are rebuilt all the time, so listeners on them would be thrown away with them (delegation, <a href="js-react.html#s13">Lab 1 · §13</a>). One done for you:</p>
+  <div class="cmd">els.departments.<span class="at">addEventListener</span>(<span class="st">"click"</span>, (event) =&gt; {
+  <span class="tg">const</span> button = event.target.<span class="at">closest</span>(<span class="st">"button[data-department]"</span>);
+  <span class="tg">if</span> (!button) <span class="tg">return</span>;                 <span class="cm">// a click between the buttons</span>
+  <span class="at">dispatch</span>({ type: <span class="st">"SET_DEPARTMENT"</span>, department: button.dataset.department });
+  <span class="at">load</span>();
+});</div>
+  <p>The rest are listed in the file: the search box (<code>input</code>), the cards' Add/Remove buttons, the grade dropdowns (<code>change</code>), the planner's ✕ buttons, the form's <code>submit</code>, and <em>Try again</em>. The elements carry what you need in <code>data-</code> attributes; look at the render functions to see which. <code>dataset</code> values are always strings — <code>Number(button.dataset.id)</code> before comparing with a course's id.</p>
+  <p>Finally, at the bottom: <code>render()</code> once, so the page isn't blank, then <code>load()</code>.</p>
+
+  <div class="dothis">
+    <h4>Do this now — check it works</h4>
+    <ol>
+      <li>The courses load; the department buttons appear; "All" is highlighted.</li>
+      <li>A department, then a search ("learn") narrows the list. Search for "zzz": "No courses match."</li>
+      <li>Add three courses: the cards say Remove, the planner and its count update. A full course's Add is disabled.</li>
+      <li>Pick grades: the SGPA updates with each one. Remove a graded course: its grade goes too, and the SGPA changes.</li>
+      <li>Press <kbd>Enter</kbd> on a dropdown: the page does not reload.</li>
+      <li>Network → <strong>Failing</strong>, click a department: an error and a <em>Try again</em> button. Network → Normal, Try again: it recovers.</li>
+      <li>Network → <strong>Slow</strong>: "Loading courses…" shows while you wait, with the old list still there.</li>
+    </ol>
+  </div>
+
+  <div class="cue calm"><p class="cue-k">Look at what you didn't write</p><p>Adding a course changes the card, the planner list, the count, the credits and the SGPA text. Your Add handler is one <code>dispatch</code>. Compare with the count you wrote down at the end of <a href="js-react.html#s13">Lab 1 · §13</a>. That's reactivity working at the size of a real page.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 complete — every item on the checklist works</span></label>
+</section>
+
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>Redraw only what changed</h2><span class="lvl core">Core</span><span class="tagline">render() with reference checks</span></div>
+
+  <p>Your <code>render()</code> redraws all five regions on every event. It works — but watch what it costs.</p>
+  <div class="dothis">
+    <h4>Do this now — find the problem</h4>
+    <ol>
+      <li>Add <code>console.count("renderCourses")</code> as the first line of <code>renderCourses</code>. Type a word in the search box and pick a few grades. Every keystroke and every grade rebuilds all the cards — and neither changes a single card.</li>
+      <li>Add two courses. Now use only the keyboard: <kbd>Tab</kbd> to the first grade dropdown and pick a grade (arrow keys; on a Mac <kbd>Space</kbd>, arrows, <kbd>Enter</kbd>). Then try to pick a different grade the same way, without touching the mouse. Then type <code>document.activeElement</code> in the console.</li>
+    </ol>
+  </div>
+  <p>The second one is the real bug. Picking a grade dispatches <code>SET_GRADE</code>, render rebuilds the planner, and the dropdown you were using is <strong>thrown away and replaced</strong> by an identical new one. Focus was on the old one, so it's gone: <code>document.activeElement</code> is <code>&lt;body&gt;</code>, your keys now scroll the page instead of changing the grade, and a screen reader loses its place. For anyone not using a mouse, the form is close to unusable. The same thing would wipe a half-typed input, a text selection, or a scroll position inside a region.</p>
+
+  <h3>The fix: compare references</h3>
+  <p>Each region depends on a few fields of the state. Redraw it only if one of those fields is a <strong>different object</strong> from last time:</p>
+  <table class="grid long-key">
+    <tr><th>Region</th><th>Depends on</th></tr>
+    <tr><td><code>renderDepartments</code></td><td><code>departments</code>, <code>department</code></td></tr>
+    <tr><td><code>renderStatus</code></td><td><code>status</code>, <code>error</code>, <code>courses</code></td></tr>
+    <tr><td><code>renderCourses</code></td><td><code>courses</code>, <code>planner</code></td></tr>
+    <tr><td><code>renderPlanner</code></td><td><code>planner</code></td></tr>
+    <tr><td><code>renderSgpa</code></td><td><code>planner</code>, <code>grades</code></td></tr>
+  </table>
+  <p>Keep the previous state in a variable outside <code>render</code>. On each render, a region whose fields are all <code>===</code> to last time is skipped. On the very first render there is no previous state, so everything draws. One region, to show the idea:</p>
+  <div class="cmd"><span class="tg">let</span> previous = <span class="tg">null</span>;
+
+<span class="tg">function</span> <span class="at">render</span>() {
+  <span class="tg">const</span> state = <span class="at">getState</span>();
+  <span class="tg">if</span> (previous === <span class="tg">null</span> || previous.planner !== state.planner) <span class="at">renderPlanner</span>(state);
+  <span class="cm">// … the other four, with their own fields</span>
+  previous = state;
+}</div>
+  <p>Write it for all five — a small helper like <code>changed("courses", "planner")</code> keeps it readable. Then repeat both experiments: the counter stays still while you type, and the focus stays on the dropdown.</p>
+
+  <h3>Why a !== check is enough</h3>
+  <p>Comparing <em>contents</em> would mean walking every course in two arrays on every render. You don't need to, because of the rule you've followed since <a href="js-react.html#s10">Lab 1 · §10</a>: <strong>data is never changed in place</strong>. If <code>planner</code> is the same object as last time, it <em>cannot</em> have different contents. If anything in it changed, the transition made a new array. A cheap reference check is a complete answer — but only because every transition is immutable.</p>
+
+  <div class="cue watch"><p class="cue-k">The bug this exposes</p><p>Write <code>state.planner.push(course); return { ...state };</code> in <code>ADD</code> (the tests would catch it, but imagine they didn't). The state is a new object, so <code>useState</code> redraws — but <code>planner</code> is the <em>same</em> array, so <code>renderPlanner</code> is skipped. The course is in the data and not on the screen. That's the most common React bug there is, reproduced in your own code: React makes exactly the same reference check.</p></div>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>React re-runs your component function on every state change, and then compares what it returned with last time, element by element, touching only the real DOM nodes that differ — so a <code>&lt;select&gt;</code> whose props didn't change is the same element and keeps its focus. That comparison is called <strong>reconciliation</strong>. And <code>React.memo</code>, <code>useMemo</code> and the dependency arrays of <code>useEffect</code> all decide "did this change?" the way you just did: with <code>Object.is</code> on references.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>The search box is never redrawn by any region. Why does that matter?</div>
+    <details><summary>Show answer</summary><div class="a"><p>If a region rebuilt the input on every keystroke, you'd lose the focus and the cursor after each letter, and typing would be impossible. The search box's value lives in the input itself and is <em>copied into</em> the state, not drawn from it. React calls that an <em>uncontrolled</em> input; when React does draw it from state (a <em>controlled</em> input), reconciliation is what keeps it from being replaced.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 complete — focus survives picking a grade</span></label>
+</section>
+
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>Responses that arrive out of order</h2><span class="lvl core">Core</span><span class="tagline">src/s09-latest.js</span></div>
+
+  <div class="dothis">
+    <h4>Do this now — break it</h4>
+    <ol>
+      <li>Network → <strong>Random</strong>. The server now takes anywhere from 0.1 to 1.5 seconds per request.</li>
+      <li>Click Electronics, Humanities, Mathematics — quickly, one after another.</li>
+      <li>Wait. Mathematics is highlighted. Which department's courses are listed? Try it a few times.</li>
+    </ol>
+  </div>
+  <p>Often the list ends up showing Electronics or Humanities under a highlighted Mathematics button. Open the Network tab and you'll see why: three requests went out, and they came back in whatever order the server finished them. Each one, when it arrived, dispatched <code>LOAD_OK</code> — so <strong>whichever arrived last won</strong>, not whichever was asked for last. Typing "learn" in the search box sends five requests and has the same problem.</p>
+  <p>This is a <strong>race condition</strong>: the result depends on timing you don't control. It doesn't show up on your fast local machine with Network on Normal — which is exactly why it ships, and shows up for the user on a slow phone connection.</p>
+
+  <h3>Exercise — only the latest call counts</h3>
+  <p>Each <code>load()</code> should ask: <em>by the time my response arrived, was I still the latest request?</em> If not, throw the result away. <code>createLatestOnly()</code> returns a function <code>track(promise)</code> that answers that question:</p>
+  <div class="cmd"><span class="tg">const</span> track = <span class="at">createLatestOnly</span>();
+
+<span class="tg">const</span> result = <span class="tg">await</span> <span class="at">track</span>(<span class="at">fetchCourses</span>(filters, fetchWithNetwork));
+<span class="tg">if</span> (!result.stale) <span class="at">dispatch</span>({ type: <span class="st">"LOAD_OK"</span>, courses: result.value });
+<span class="cm">// result is { stale: false, value } — or { stale: true } if a newer track() started meanwhile</span></div>
+  <p>Inside, it's a closure with a counter (<a href="js-react.html#s6">Lab 1 · §06</a>): every call to <code>track</code> takes the next number, and when its promise settles, it compares its number with the latest one. If the promise rejects, rethrow only if it's the latest — nobody cares that an old, abandoned request failed. Make the s09 tests pass, use <code>track</code> in <code>load()</code>, and repeat the experiment: the list now always matches the button.</p>
+
+  <div class="cue"><p class="cue-k">Ignoring isn't cancelling</p><p>The stale requests still run to the end; you just ignore their answers. The browser can also <strong>cancel</strong> a request: <code>AbortController</code> gives you a signal to pass as <code>fetch(url, { signal })</code>, and <code>controller.abort()</code> stops it. That saves bandwidth but needs more code, and you still need the "is this the latest?" check for anything that isn't a fetch. Look it up if you're curious; it isn't part of this lab.</p></div>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>Loading data in React happens in <code>useEffect</code>, and the classic way to avoid exactly this race is a flag in the effect's cleanup: <code>let ignore = false; … if (!ignore) setCourses(data); … return () =&gt; { ignore = true; };</code>. React runs the cleanup of the old effect before starting the new one. Same idea as <code>track</code>: a closure that knows whether it's still current.</p></div>
+
+  <div class="stretch-box">
+    <h3>Stretch — debounce the search</h3>
+    <p>Even with <code>track</code>, typing "learning" sends eight requests to use one. Write <code>debounce(fn, ms)</code>: it returns a function that waits until it hasn't been called for <code>ms</code> milliseconds, then calls <code>fn</code> once, with the last arguments. Use it for the search box only (a click should load at once):</p>
+    <div class="cmd"><span class="tg">const</span> loadSoon = <span class="at">debounce</span>(load, <span class="st">250</span>);
+<span class="cm">// in the search handler:  dispatch SET_QUERY, then loadSoon()</span></div>
+    <p>Another closure: it remembers the pending <code>setTimeout</code> and cancels it with <code>clearTimeout</code> each time it's called again. Watch the Network tab while you type — one request. <code>npm run test:stretch</code>.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>With <code>track</code> in place, you click Electronics then Mathematics, and the Mathematics request fails while the Electronics one succeeds. What does the page show?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The error, with Try again. Electronics' response is stale and is ignored; the Mathematics failure is the latest call's, so it's rethrown and becomes <code>LOAD_FAIL</code>. Showing Electronics' courses under a Mathematics button would be the old bug again.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 09 complete — s09 tests pass, Random can't fool the list</span></label>
+</section>
+
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>Other servers — public APIs and CORS</h2><span class="lvl stretch">Stretch</span><span class="tagline">why some fetches fail before they start</span></div>
+
+  <p>Your app only talks to the server it came from. Real apps call other servers too — and the first time you try, you may meet this in the console:</p>
+  <div class="cmd"><span class="o">Access to fetch at 'https://example.com/' from origin 'http://localhost:5500' has been</span>
+<span class="o">blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the</span>
+<span class="o">requested resource.</span></div>
+
+  <h3>Origins</h3>
+  <p>An <strong>origin</strong> is scheme + host + port: <code>http://localhost:5500</code> and <code>http://localhost:5501</code> are different origins. By default, a page's JavaScript may <em>send</em> a request to another origin, but it's not allowed to <em>read the response</em> — unless that server says so, with an <code>Access-Control-Allow-Origin</code> header. That's <strong>CORS</strong>, Cross-Origin Resource Sharing. It protects you: without it, any website you visit could quietly read your mail or your bank page using your logged-in cookies.</p>
+
+  <div class="dothis">
+    <h4>Do this now — see both sides</h4>
+    <ol>
+      <li>With the app open, in its console: <code>await fetch("https://dummyjson.com/quotes/random").then((r) =&gt; r.json())</code>. It works: DummyJSON is a public API that sends the header, allowing every origin.</li>
+      <li>Now <code>await fetch("https://example.com/")</code>. "Failed to fetch", and the CORS message above. The request was sent; example.com answered; the <em>browser</em> refused to hand the answer to your code. Find the request in the Network tab.</li>
+      <li>Start a second copy of the server on another port: in a second terminal, <code>PORT=5501 npm run web</code> (Windows Command Prompt: <code>set PORT=5501 &amp;&amp; npm run web</code>). Open <code>localhost:5501/web/</code>, and in its console fetch <code>http://localhost:5500/api/courses</code>. Blocked — same machine, same code, different port.</li>
+    </ol>
+  </div>
+  <p>The lesson: a CORS error is fixed <strong>on the server</strong>, never in your <code>fetch</code>. The server has to send the header for your origin. You'll do exactly that in the Spring Boot backend when the React app (on port 5173) starts calling the API (on 8080).</p>
+
+  <h3>Try it — a quote under the header</h3>
+  <p>Use your own <code>getJSON</code> to show a random quote at the top of the page: fetch <code>https://dummyjson.com/quotes/random</code> once on start, and put <code>quote</code> and <code>author</code> in a new element. Should the quote go in the app state, with its own events? Think about what happens if the request fails, and what the user should see.</p>
+
+  <div class="cue watch"><p class="cue-k">Public APIs have limits</p><p>A whole lab of students behind one college network looks like one very busy user to an API, and many free APIs limit requests per address per hour. Don't call one in a loop, or on every keystroke.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 10 complete — seen a CORS error and why (stretch)</span></label>
+</section>
+
+<div class="part">Part 5 · Towards React</div>
+
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>What React will take off your hands</h2><span class="lvl core">Core</span><span class="tagline">everything you built, by its React name</span></div>
+
+  <p>You've now built, by hand, nearly every idea the React labs use. Here they are side by side. Nothing in the right-hand column should feel like magic any more — each one is a tool for a job you've done.</p>
+  <table class="grid long-key">
+    <tr><th>You built</th><th>In React</th></tr>
+    <tr><td><code>useState(initial, render)</code> → <code>[getState, setState]</code></td><td><code>useState(initial)</code> → <code>[state, setState]</code>. No render argument: React knows which component to re-run.</td></tr>
+    <tr><td><code>transition(state, event)</code>, <code>dispatch</code></td><td>A reducer and <code>useReducer(reducer, initialState)</code> → <code>[state, dispatch]</code>.</td></tr>
+    <tr><td>View functions: state in, plain data out</td><td>Components: props and state in, JSX out. JSX is the view <em>and</em> the DOM code in one.</td></tr>
+    <tr><td>Five region functions with <code>createElement</code></td><td>Five components. You never call <code>createElement</code> or set <code>textContent</code> yourself.</td></tr>
+    <tr><td><code>render()</code> skipping unchanged regions with <code>!==</code></td><td>Reconciliation: React compares old and new JSX and updates only what differs.</td></tr>
+    <tr><td>Event delegation with <code>closest</code></td><td><code>onClick={() =&gt; dispatch({ type: "ADD", course })}</code> on each element; React delegates internally.</td></tr>
+    <tr><td><code>load()</code> after <code>SET_DEPARTMENT</code></td><td><code>useEffect(() =&gt; { … }, [department, query])</code> — "run this when these change".</td></tr>
+    <tr><td><code>createLatestOnly</code></td><td>The <code>ignore</code> flag in an effect's cleanup.</td></tr>
+    <tr><td>Derived data, never stored</td><td>Same rule: compute it during render; <code>useMemo</code> if it's expensive.</td></tr>
+  </table>
+
+  <p>And a course card, as a React component — every line is something from this lab or the last:</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">CourseCard</span>({ course, planner, dispatch }) {
+  <span class="tg">const</span> view = <span class="at">cardView</span>(course, planner);              <span class="cm">// your view function, unchanged</span>
+  <span class="tg">return</span> (
+    &lt;li className={view.inPlanner ? <span class="st">"card in-planner"</span> : <span class="st">"card"</span>}&gt;
+      &lt;h3&gt;{view.heading}&lt;/h3&gt;
+      &lt;p&gt;{view.meta}&lt;/p&gt;
+      &lt;p className={view.seats === <span class="st">"Full"</span> ? <span class="st">"seats full"</span> : <span class="st">"seats"</span>}&gt;{view.seats}&lt;/p&gt;
+      &lt;button
+        disabled={view.disabled}
+        onClick={() =&gt; <span class="at">dispatch</span>(view.inPlanner
+          ? { type: <span class="st">"REMOVE"</span>, id: course.id }
+          : { type: <span class="st">"ADD"</span>, course })}
+      &gt;
+        {view.buttonLabel}
+      &lt;/button&gt;
+    &lt;/li&gt;
+  );
+}</div>
+  <p>Put it next to <code>renderCourses</code> in your <code>app.js</code>. Same output; a third of the code; and no way to forget to redraw it.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 read</span></label>
+</section>
+
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>In the lab</h2><span class="lvl core">Core</span><span class="tagline">doubts first, then deeper</span></div>
+
+  <p>The lab assumes you've finished the core sections. It answers your questions, then goes deeper on the parts that are hardest to get right alone.</p>
+  <ol>
+    <li>We scroll through the <strong>core</strong> sections together at the projector — stop me anywhere with a question. Questions on stretch parts are welcome too.</li>
+    <li><strong>The event loop, in depth.</strong> Your predict sheets, the wrong guesses, and new ordering puzzles live.</li>
+    <li><strong>State machines, in depth.</strong> What happens if you click Add while a load is in flight, or Retry twice? Which events are allowed in which states?</li>
+    <li><strong>In-lab task, AI closed:</strong> <code>inlab/retry.js</code> — retry a failing request a few times before giving up — checked with <code>npm run inlab</code>.</li>
+    <li>What the React labs build on this.</li>
+  </ol>
+  <div class="cue work"><p class="cue-k">Bring</p><p>Your laptop with <code>esd-labs/js-lab2</code>, as far through the core as you got, your filled-in predict sheet, and your questions. Raise a hand when you're stuck — the TAs come to you.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 12 read</span></label>
+</section>
+
+<section id="s13">
+  <div class="shead"><span class="chip">13</span><h2>When it goes wrong</h2><span class="lvl ref">Reference</span><span class="tagline">the error, and what it means</span></div>
+
+  <table class="grid long-key">
+    <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>Promise {&lt;pending&gt;}</td><td>You forgot <code>await</code>: you have the promise, not its result (03).</td></tr>
+    <tr><td>await is only valid in async functions</td><td>The function containing the <code>await</code> isn't marked <code>async</code> — often an inner arrow function, like a callback.</td></tr>
+    <tr><td>Results empty, or in the wrong order, after a loop</td><td><code>forEach</code> with an async callback. Use <code>for…of</code> with <code>await</code>, or <code>Promise.all</code> (03).</td></tr>
+    <tr><td>Unexpected token '&lt;' … is not valid JSON</td><td>The server sent HTML — usually a wrong URL that hit a "Not found" page. Check <code>res.ok</code> before <code>res.json()</code> (04).</td></tr>
+    <tr><td>TypeError: Failed to fetch / fetch failed</td><td>No response at all: the server isn't running (<code>npm run web</code>), the URL's host or port is wrong, or CORS blocked it — the console says which (04, 10).</td></tr>
+    <tr><td>Couldn't load courses: HTTP 500</td><td>The Network switch is on Failing. That's working as intended.</td></tr>
+    <tr><td>The department filter does nothing for "Data Science &amp; AI"</td><td>The <code>&amp;</code> wasn't encoded. Use <code>URLSearchParams</code> (04).</td></tr>
+    <tr><td>Error: TODO: SET_GRADE (or any event)</td><td>That <code>case</code> of <code>transition</code> isn't written yet (05).</td></tr>
+    <tr><td>The data changed but the screen didn't</td><td>Something changed state in place, so the reference didn't change and the region was skipped (08). Find the <code>push</code> or the assignment.</td></tr>
+    <tr><td>Every click does something twice</td><td>A listener was added inside a render function, so a new one is added on every render. Listeners go once, on the region's container (07).</td></tr>
+    <tr><td>The list doesn't match the highlighted department</td><td>Out-of-order responses. Use <code>track</code> in <code>load()</code> (09).</td></tr>
+    <tr><td>The page reloads when you press Enter</td><td>The form's <code>submit</code> isn't prevented (07).</td></tr>
+    <tr><td>Clicking a card's button does nothing</td><td>Compare types: <code>dataset.id</code> is a string, course ids are numbers. <code>Number(…)</code> it.</td></tr>
+    <tr><td>Blank page, "blocked by CORS policy" on app.js</td><td>You opened <code>index.html</code> as a file. Use <code>npm run web</code> and <code>localhost:5500/web/</code>.</td></tr>
+    <tr><td>EADDRINUSE :5500</td><td>An old <code>npm run web</code> is still running. Stop it with <kbd>Ctrl</kbd>+<kbd>C</kbd>, or use another port as in section 10.</td></tr>
+  </table>
+
+  <div class="cue"><p class="cue-k">How to debug the app</p><p>Put <code>console.log(event.type, getState())</code> at the start of <code>render</code>… or better, inside <code>dispatch</code>: <code>const dispatch = (event) =&gt; { console.log(event); setState(…); }</code>. Now every change to your app is in the console, in order, with what caused it. When something looks wrong, find the event that made it wrong. That's the whole point of routing every change through one door.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 13 read</span></label>
+</section>
+
+<section id="s14">
+  <div class="shead"><span class="chip">14</span><h2>Practice run, unaided</h2><span class="lvl stretch">Stretch</span><span class="tagline">no tests, no hints, no looking back</span></div>
+
+  <p>Write each of these from a blank file, without scrolling up. Run them to check. Then open the answer.</p>
+
+  <div class="quiz">
+    <div class="q"><b>P1</b><code>timeout(promise, ms)</code>: resolves like <code>promise</code>, but rejects with <code>new Error("Timed out")</code> if it takes longer than <code>ms</code>.</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd"><span class="tg">const</span> timeout = (promise, ms) =&gt;
+  <span class="tg">Promise</span>.<span class="at">race</span>([
+    promise,
+    <span class="tg">new</span> <span class="tg">Promise</span>((_, reject) =&gt; <span class="at">setTimeout</span>(() =&gt; <span class="at">reject</span>(<span class="tg">new</span> <span class="at">Error</span>(<span class="st">"Timed out"</span>)), ms)),
+  ]);</div>
+      <p><code>Promise.race</code> settles like whichever promise settles first. (The losing timer still fires later; it just doesn't matter.)</p>
+    </div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>P2</b>Fetch courses 1, 2 and 3 from <code>/api/courses/:id</code> at the same time, and log their total credits.</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd"><span class="tg">const</span> list = <span class="tg">await</span> <span class="tg">Promise</span>.<span class="at">all</span>([<span class="st">1</span>, <span class="st">2</span>, <span class="st">3</span>].<span class="at">map</span>((id) =&gt; <span class="at">getJSON</span>(<span class="st">`/api/courses/${id}`</span>)));
+<span class="tg">console</span>.<span class="at">log</span>(list.<span class="at">reduce</span>((sum, c) =&gt; sum + c.credits, <span class="st">0</span>));</div>
+    </div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>P3</b>Add a <code>CLEAR_PLANNER</code> event to <code>transition</code>. What should it return when the planner is already empty?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd"><span class="tg">case</span> <span class="st">"CLEAR_PLANNER"</span>:
+  <span class="tg">return</span> state.planner.length === <span class="st">0</span> ? state : { ...state, planner: [], grades: {} };</div>
+      <p>The same state when nothing changes — and the grades go with the planner, or the next SGPA would count ghosts.</p>
+    </div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>P4</b>Make the course list show "Loading…" in place of the cards on the <em>first</em> load only, and keep the old cards on later loads. Where does that decision go?</div>
+    <details><summary>Show answer</summary><div class="a"><p>In a view, not in the state: the first load is the one where <code>status === "loading"</code> and <code>courses.length === 0</code>. That's derived from what's already there, so there's nothing new to store and no new event — <code>renderCourses</code> (or a small view function) checks it.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 14 complete (stretch)</span></label>
+</section>
+
+<section id="s15">
+  <div class="shead"><span class="chip">15</span><h2>Submitting the assignment</h2><span class="lvl core">Core</span><span class="tagline">due by the end of Friday</span></div>
+
+  <div class="cue watch"><p class="cue-k">Complete means complete</p><p>This lab is graded. The lab session is on <strong>Wednesday</strong>, and you have until the <strong>end of Friday</strong> to submit. Submit <strong>once</strong>, and only when <code>npm test</code> is entirely green and the app does everything on the checklist in section 07. Incomplete work is not accepted, and there is no partial credit for a partial submission. Stuck? Don't submit — ask in the lab, or ask a TA.</p></div>
+
+  <h3>1. Get npm test fully green</h3>
+  <div class="cmd"><span class="p">$</span> cd esd-labs/js-lab2
+<span class="p">$</span> npm test
+<span class="cm"># tests 45</span>
+<span class="cm"># pass 45</span>
+<span class="cm"># fail 0</span></div>
+  <p><code># fail 0</code> is the only acceptable result. When we grade, we <strong>put our own copy of the tests back in</strong> before running <code>npm test</code> — so editing or deleting a test can only cost you marks.</p>
+
+  <h3>2. Check the app</h3>
+  <p><code>npm run web</code>, open <code>localhost:5500/web/</code>, and go through the section 07 checklist one last time — with the section 08 and 09 fixes in place: focus stays on a grade dropdown, and Random can't make the list disagree with the department.</p>
+
+  <h3>3. Zip the js-lab2 folder — and only that folder</h3>
+  <p>Zip <code>js-lab2</code> itself, not the whole <code>esd-labs</code> folder, and leave out <code>node_modules</code> if you ever created one. From inside <code>esd-labs</code>:</p>
+  <div class="cmd"><span class="cm"># macOS / Linux</span>
+<span class="p">$</span> zip -r js-lab2.zip js-lab2 -x "js-lab2/node_modules/*"
+
+<span class="cm"># Windows (PowerShell) — delete js-lab2\node_modules first if it exists</span>
+<span class="p">$</span> Compress-Archive -Path js-lab2 -DestinationPath js-lab2.zip</div>
+  <p>Open the zip once to check it contains the <code>js-lab2</code> folder with your <code>src/</code> and <code>web/</code> inside.</p>
+
+  <h3>4. Submit the zip</h3>
+  <p>Upload <code>js-lab2.zip</code> on the submission platform before the end of Friday. Run <code>npm test</code> right before you zip, so what you submit is what you tested. Stretch work is never required; your zip carries it anyway.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Submitted — npm test green, app checked, js-lab2.zip uploaded</span></label>
+</section>
+
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+  <div class="gloss">
+    <div class="grow"><b>async function</b><span>A function that always returns a promise, and may use <code>await</code> inside.</span></div>
+    <div class="grow"><b>await</b><span>Pause this async function until a promise settles; give its value, or throw its error.</span></div>
+    <div class="grow"><b>CORS</b><span>Cross-Origin Resource Sharing: a server's permission, in a response header, for pages from other origins to read its responses.</span></div>
+    <div class="grow"><b>debounce</b><span>Wait until calls stop for a moment, then act once, on the last one.</span></div>
+    <div class="grow"><b>dependency injection</b><span>Passing in what a function depends on (like <code>fetchFn</code>) instead of it reaching out for it. Makes it testable.</span></div>
+    <div class="grow"><b>derived data</b><span>Anything you can compute from the state. Computed on render, never stored.</span></div>
+    <div class="grow"><b>dispatch</b><span>Send an event to the state machine: <code>dispatch({ type: "ADD", course })</code>.</span></div>
+    <div class="grow"><b>encoding (URL)</b><span>Writing special characters like <code>&amp;</code> and spaces so a URL keeps its meaning. <code>URLSearchParams</code> does it.</span></div>
+    <div class="grow"><b>event (state machine)</b><span>A plain object describing what happened: a <code>type</code> plus data. React calls it an action.</span></div>
+    <div class="grow"><b>event loop</b><span>How one thread handles many things: run the current code to the end, then take the next queued callback.</span></div>
+    <div class="grow"><b>origin</b><span>Scheme + host + port. <code>http://localhost:5500</code>.</span></div>
+    <div class="grow"><b>promise</b><span>A placeholder for a value that will arrive later — or a failure.</span></div>
+    <div class="grow"><b>Promise.all</b><span>Wait for many promises at once; fails as soon as any one fails.</span></div>
+    <div class="grow"><b>race condition</b><span>A bug where the result depends on which of several things finishes first.</span></div>
+    <div class="grow"><b>reconciliation</b><span>React comparing the new output with the old and updating only the DOM that differs.</span></div>
+    <div class="grow"><b>reducer</b><span>React's name for a transition function: <code>(state, action) =&gt; next state</code>.</span></div>
+    <div class="grow"><b>reference check</b><span><code>a !== b</code> on objects: "is this a different object?" Enough to detect change when data is immutable.</span></div>
+    <div class="grow"><b>res.ok</b><span><code>true</code> for a 2xx status. <code>fetch</code> doesn't reject on 404/500; check this.</span></div>
+    <div class="grow"><b>state machine</b><span>A fixed set of states, and events that move between them. One <code>status</code> field, not several booleans.</span></div>
+    <div class="grow"><b>stale response</b><span>The answer to a request that's no longer the latest one. Ignore it.</span></div>
+    <div class="grow"><b>view function</b><span>A pure function from state to plain data describing what to show.</span></div>
+  </div>
+</section>
+
+<div class="finish">
+  <h2>How to know you're ready</h2>
+  <p>You're ready for the lab if you can do all of these <em>without looking anything up</em>:</p>
+  <ol>
+    <li>Predict the order of a <code>console.log</code>, a <code>setTimeout(…, 0)</code> and a <code>.then</code>, and say why.</li>
+    <li>Say what <code>getJSON(url)</code> without <code>await</code> gives you.</li>
+    <li>Choose between a <code>for…of</code> with <code>await</code> and <code>Promise.all</code> for a given job, and say what each costs.</li>
+    <li>Explain why <code>fetch</code> resolves for a 404, and what you do about it.</li>
+    <li>Explain why the app has one <code>status</code> field and not three booleans.</li>
+    <li>Write a transition case that returns the same state when nothing changes, and say why that matters.</li>
+    <li>Say why a <code>!==</code> check is enough to know whether a region needs redrawing — and what breaks it.</li>
+    <li>Explain the Random-network bug and how <code>track</code> fixes it.</li>
+    <li>Name the React tool that replaces each thing you built.</li>
+  </ol>
+
+  <h2 style="margin-top:30px;font-size:20px">Async card</h2>
+  <div class="cmd"><span class="tg">const</span> wait = (ms) =&gt; <span class="tg">new</span> <span class="tg">Promise</span>((resolve) =&gt; <span class="at">setTimeout</span>(resolve, ms));
+
+<span class="tg">const</span> data = <span class="tg">await</span> <span class="at">getJSON</span>(url);                  <span class="cm">// inside an async function</span>
+<span class="tg">for</span> (<span class="tg">const</span> t <span class="tg">of</span> tasks) results.<span class="at">push</span>(<span class="tg">await</span> <span class="at">t</span>());   <span class="cm">// one after another</span>
+<span class="tg">await</span> <span class="tg">Promise</span>.<span class="at">all</span>(tasks.<span class="at">map</span>((t) =&gt; <span class="at">t</span>()));         <span class="cm">// all at once</span>
+
+<span class="tg">try</span> { … <span class="tg">await</span> … } <span class="tg">catch</span> (error) { … }             <span class="cm">// failures become exceptions</span>
+
+<span class="tg">const</span> res = <span class="tg">await</span> <span class="at">fetch</span>(url);
+<span class="tg">if</span> (!res.ok) <span class="tg">throw</span> <span class="tg">new</span> <span class="at">Error</span>(<span class="st">`HTTP ${res.status}`</span>);
+<span class="tg">const</span> body = <span class="tg">await</span> res.<span class="at">json</span>();
+
+<span class="tg">const</span> params = <span class="tg">new</span> <span class="at">URLSearchParams</span>({ department, q });  <span class="cm">// encodes &amp; and spaces</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">App card</h2>
+  <div class="cmd"><span class="tg">const</span> [getState, setState] = <span class="at">useState</span>(initialState, render);
+<span class="tg">const</span> dispatch = (event) =&gt; <span class="at">setState</span>((s) =&gt; <span class="at">transition</span>(s, event));
+
+<span class="tg">function</span> <span class="at">transition</span>(state, event) {
+  <span class="tg">switch</span> (event.type) {
+    <span class="tg">case</span> <span class="st">"X"</span>: <span class="tg">return</span> nothingChanged ? state : { ...state, field: value };
+    <span class="tg">default</span>:  <span class="tg">return</span> state;
+  }
+}
+
+<span class="tg">function</span> <span class="at">render</span>() {
+  <span class="tg">const</span> state = <span class="at">getState</span>();
+  <span class="tg">if</span> (previous === <span class="tg">null</span> || previous.list !== state.list) <span class="at">renderList</span>(state);
+  previous = state;
+}
+
+region.<span class="at">addEventListener</span>(<span class="st">"click"</span>, (e) =&gt; {
+  <span class="tg">const</span> button = e.target.<span class="at">closest</span>(<span class="st">"button[data-id]"</span>);
+  <span class="tg">if</span> (button) <span class="at">dispatch</span>({ type: <span class="st">"X"</span>, id: <span class="tg">Number</span>(button.dataset.id) });
+});</div>
+</div>
+
+<footer>M.Tech CSE · ESD · JS Lab 1<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+</div>
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ---- */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  /* ---- progress: CORE sections drive the bar; stretch boxes are tracked separately.
+         Both are remembered in this browser, so they survive a reload. ---- */
+  function load(key){ try{ return JSON.parse(localStorage.getItem(key)||'[]'); }catch(err){ return []; } }
+  function save(key,list){ try{ localStorage.setItem(key,JSON.stringify(list.map(function(c){return c.checked}))); }catch(err){} }
+  var KEY='esd-js-lab2-progress', SKEY='esd-js-lab2-stretch';
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var extras=[].slice.call(document.querySelectorAll('.chk-s'));
+  var saved=load(KEY), savedS=load(SKEY);
+  checks.forEach(function(c,i){ if(saved[i]) c.checked=true; });
+  extras.forEach(function(c,i){ if(savedS[i]) c.checked=true; });
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=['Core first, in order — every section builds on the last.',
+             'Good start. Functions as values carry the rest of the lab.',
+             'Past halfway. References and immutable updates are the two that matter for React.',
+             'Nearly there. Section 15 is where it all comes together.',
+             'Core done. npm test green? Zip js-lab1 and submit (section 20) — then try the stretch parts.'];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    var s=extras.filter(function(c){return c.checked}).length;
+    msg.textContent=(n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))])+(s?'  ·  stretch: '+s+' / '+extras.length:'');
+    save(KEY,checks); save(SKEY,extras);
+  }
+  checks.concat(extras).forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^[$>]\s?/,'').trimEnd()}).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>

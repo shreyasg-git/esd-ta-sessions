@@ -183,6 +183,10 @@ table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--t
 .stretch-box{border:1px dashed var(--teal);background:rgba(255,255,255,.55);padding:14px 16px 4px;margin:8px 0 18px}
 .stretch-box::before{content:"Stretch — optional. Do it if you can, and ask about it any time.";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600;margin-bottom:10px}
 .stretch-box h3:first-of-type{margin-top:0}
+/* tables whose first column holds long text (error messages): even, wrapping columns */
+table.grid.long-key{table-layout:fixed}
+table.grid.long-key td:first-child{white-space:normal;width:42%;overflow-wrap:anywhere}
+table.grid.long-key th:first-child{width:42%}
 .legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 0;font-size:14px;color:#2B3936}
 
 @media (max-width:640px){
@@ -198,7 +202,7 @@ table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--t
 <body>
 <div class="wrap">
 <header class="masthead">
-  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> JS Lab 1 · Tue Nov 3 · No AI</p>
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> JS Lab 1 · No AI</p>
   <h1>JavaScript<br>for <em>React</em></h1>
   <p class="lede">React is named after one idea: <strong>reactivity</strong> — you change the data, and the screen <em>reacts</em> by updating itself. Under the name it is ordinary JavaScript: functions handed around as values, closures that remember things, data that is never changed in place. This lab builds that JavaScript from the bottom up, on one small course-catalogue app, and then you build reactivity yourself — a working <code>useState</code> — so that React reads like code you already know.</p>
 
@@ -213,10 +217,10 @@ table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--t
 
 <div class="cue calm" style="margin-top:24px">
   <p class="cue-k">Read this before anything else</p>
-  <p><strong>This is a pre-lab.</strong> You work through it at home, at your own pace, before Tuesday. The 90 minutes in the lab are for your doubts and for one harder topic that only makes sense once you've done this. If you arrive without it, the lab won't make sense.</p>
+  <p><strong>This is a pre-lab.</strong> You work through it at home, at your own pace, before the lab. The lab session is for your doubts and for one harder topic that only makes sense once you've done this. If you arrive without it, the lab won't make sense.</p>
   <p><strong>The thread through all of it is reactivity.</strong> Sections 03–14 are the JavaScript it needs. Section 13 shows what a page is like without it, and section 15 is where you build it. Keep asking, at every section: <em>how would this help the screen update itself?</em></p>
   <p><strong>It builds on two documents you already have:</strong> <a href="js-funda.html">05 · Functions, arrays &amp; objects</a> and <a href="advanced-javascript.html">06 · Advanced JavaScript</a>. This lab doesn't repeat them. Each section starts with a short refresher and a link to the full version. If a refresher feels unfamiliar, open the link before going on.</p>
-  <p><strong>Core and stretch.</strong> Every section and some parts within sections are marked: <span class="lvl core">Core</span> is mandatory — it's what we go through together in the lab, and what <code>npm test</code> checks. <span class="lvl stretch">Stretch</span> is extra: worth doing, checked by <code>npm run test:stretch</code>, and you can ask about it any time. Plan for <strong>about four hours of core</strong>, split across two sittings if you like; stretch adds two to three more.</p>
+  <p><strong>Core and stretch.</strong> Every section and some parts within sections are marked: <span class="lvl core">Core</span> is mandatory — it's what we go through together in the lab, and what <code>npm test</code> checks. <span class="lvl stretch">Stretch</span> is extra: worth doing, checked by <code>npm run test:stretch</code>, and you can ask about it any time.</p>
   <p><strong>No AI for this lab.</strong> Not for the exercises, not for explanations. The tests tell you when you're right; your own confusion tells you where to look. Keep a terminal and a browser console open the whole time and run every snippet.</p>
 </div>
 
@@ -243,10 +247,10 @@ table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--t
   <div class="rpart">Part 5 · Towards React</div>
   <a class="rrow" href="#s15"><span class="rt">15</span><span class="rw">Reactivity — build your own useState</span></a>
   <a class="rrow" href="#s16"><span class="rt">16</span><span class="rw">Reading React with what you now know</span></a>
-  <a class="rrow" href="#s17"><span class="rt">17</span><span class="rw">In the lab on Tuesday</span></a>
+  <a class="rrow" href="#s17"><span class="rt">17</span><span class="rw">In the lab</span></a>
   <a class="rrow is-extra" href="#s18"><span class="rt">18</span><span class="rw">When it goes wrong</span><span class="rl ref">reference</span></a>
   <a class="rrow is-extra" href="#s19"><span class="rt">19</span><span class="rw">Practice run, unaided</span><span class="rl">stretch</span></a>
-  <a class="rrow" href="#s20"><span class="rt">20</span><span class="rw">Checkpoint</span></a>
+  <a class="rrow" href="#s20"><span class="rt">20</span><span class="rw">Submitting the assignment</span></a>
   <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; reference cards</span></a>
 </nav>
 
@@ -294,7 +298,7 @@ table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--t
     <div class="mrow"><b>test/</b><span>The tests. Read them — they're the exact specification. Don't edit them.</span></div>
     <div class="mrow"><b>predict/</b><span>Predict-then-run sheets. Write what you expect, then run, then explain the difference.</span></div>
     <div class="mrow"><b>web/</b><span>The browser exercises: the form (sections 12–13) and the counter (section 15).</span></div>
-    <div class="mrow"><b>inlab/</b><span>For Tuesday. Leave it alone until then.</span></div>
+    <div class="mrow"><b>inlab/</b><span>For the lab session. Leave it alone until then.</span></div>
     <div class="mrow"><b>tools/</b><span><code>npm run repl</code> (a console with everything loaded) and <code>npm run web</code> (serves the browser exercise).</span></div>
   </div>
 
@@ -320,8 +324,8 @@ table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--t
 <span class="o">TypeError: Cannot assign to read only property 'seatsLeft' of object</span></div>
   <p>That's deliberate. Changing data in place is the single most common React bug, and in React it doesn't throw — the screen just quietly fails to update. Here, you find out at once. Section 10 explains why this matters so much.</p>
 
-  <h3>Getting it checked</h3>
-  <p>Before Tuesday, fill in the <a href="#s20">checkpoint</a> (section 20): your <code>npm test</code> summary, and one line on where you got stuck. The TAs read every "where I got stuck" line the morning of the lab and start the session with the most common ones.</p>
+  <h3>Submitting</h3>
+  <p>This is a <strong>graded assignment</strong>. The lab is on <strong>Tuesday</strong>; you submit by the <strong>end of Wednesday</strong>. Get <code>npm test</code> fully green, then zip the <code>js-lab1</code> folder and submit the zip — once, when it's complete. Section 20 has the steps.</p>
 
   <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — npm test runs</span></label>
 </section>
@@ -1411,7 +1415,7 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
   <div class="mention">
     <div class="mrow"><b>No render argument</b><span>React already knows which component called <code>useState</code>, so it knows what to redraw. You never pass it a <code>render</code>.</span></div>
     <div class="mrow"><b>A value, not a getter</b><span>React gives you <code>const [count, setCount]</code> — a plain value. It can, because it <strong>calls your component function again</strong> on every render, and each call gets a fresh <code>count</code> (the stretch part of section 06). Our script runs only once, so it needs <code>getCount()</code> to read the latest value.</span></div>
-    <div class="mrow"><b>Only what changed</b><span>Our <code>render()</code> rewrites all four places every time. React compares the new page description with the previous one and touches only the parts that differ. On Wednesday you'll see why that matters.</span></div>
+    <div class="mrow"><b>Only what changed</b><span>Our <code>render()</code> rewrites all four places every time. React compares the new page description with the previous one and touches only the parts that differ. The next lab shows why that matters.</span></div>
   </div>
   </div>
 
@@ -1512,7 +1516,7 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
 
   <h3>The page reacts — nobody updates it by hand</h3>
   <p>In section 13 you updated five places on the page by hand every time a course was added. In <code>CoursePage</code>, nothing does. <code>setPlanner</code> is your <code>setState</code> from section 15: it stores the new array and has the page redrawn. And the JSX — everything after <code>return</code> — <em>is</em> the <code>render()</code> function, written as a description of the page instead of a list of updates.</p>
-  <p>Wednesday's lab takes your <code>useState</code> further: a whole app on it, and the problem you'll hit when "redraw everything" stops being good enough.</p>
+  <p>The next lab takes your <code>useState</code> further: a whole app on it, and the problem you'll hit when "redraw everything" stops being good enough.</p>
 
   <table class="grid">
     <tr><th>JavaScript you now know</th><th>What React does with it</th></tr>
@@ -1535,18 +1539,17 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
 </section>
 
 <section id="s17">
-  <div class="shead"><span class="chip">17</span><h2>In the lab on Tuesday</h2><span class="lvl core">Core</span><span class="tagline">doubts first, then deeper</span></div>
+  <div class="shead"><span class="chip">17</span><h2>In the lab</h2><span class="lvl core">Core</span><span class="tagline">doubts first, then deeper</span></div>
 
   <p>The lab assumes you've finished the core sections. It doesn't re-teach them. It answers your questions, then goes one level deeper on the two ideas that cause most React bugs.</p>
-  <table class="grid">
-    <tr><th>Time</th><th>What happens</th></tr>
-    <tr><td>0–20</td><td>We scroll through the <strong>core</strong> sections together at the projector — stop me anywhere with a question. Then the most common "where I got stuck" answers from the checkpoint. Questions on stretch parts are welcome too.</td></tr>
-    <tr><td>20–45</td><td><strong>References and copies, in depth.</strong> Updating data two levels deep without changing it, and which objects must be new and which must stay the same.</td></tr>
-    <tr><td>45–65</td><td><strong>Closures and this, in depth.</strong> Your predict sheets, the wrong guesses, and new puzzles live.</td></tr>
-    <tr><td>65–85</td><td><strong>In-lab task, AI closed:</strong> <code>inlab/semester.js</code>, checked with <code>npm run inlab</code>.</td></tr>
-    <tr><td>85–90</td><td>What Wednesday builds.</td></tr>
-  </table>
-  <div class="cue work"><p class="cue-k">Bring</p><p>Your laptop with <code>esd-labs/js-lab1</code>, <code>npm test</code> passing (or as close as you got), and your filled-in predict sheets. Raise a hand when you're stuck — the TAs come to you.</p></div>
+  <ol>
+    <li>We scroll through the <strong>core</strong> sections together at the projector — stop me anywhere with a question. Questions on stretch parts are welcome too.</li>
+    <li><strong>References and copies, in depth.</strong> Updating data two levels deep without changing it, and which objects must be new and which must stay the same.</li>
+    <li><strong>Closures and this, in depth.</strong> Your predict sheets, the wrong guesses, and new puzzles live.</li>
+    <li><strong>In-lab task, AI closed:</strong> <code>inlab/semester.js</code>, checked with <code>npm run inlab</code>.</li>
+    <li>What the next lab builds.</li>
+  </ol>
+  <div class="cue work"><p class="cue-k">Bring</p><p>Your laptop with <code>esd-labs/js-lab1</code>, as far through the core as you got, your filled-in predict sheets, and your questions. Raise a hand when you're stuck — the TAs come to you.</p></div>
 
   <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 17 read</span></label>
 </section>
@@ -1554,7 +1557,7 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
 <section id="s18">
   <div class="shead"><span class="chip">18</span><h2>When it goes wrong</h2><span class="lvl ref">Reference</span><span class="tagline">the error, and what it means</span></div>
 
-  <table class="grid">
+  <table class="grid long-key">
     <tr><th>You see</th><th>It usually means</th></tr>
     <tr><td>Cannot assign to read only property / Cannot add property … not extensible</td><td>Your function changed its input. Find the <code>push</code>, <code>sort</code>, <code>splice</code> or <code>x.field =</code> and return something new instead (section 10).</td></tr>
     <tr><td>Error: TODO</td><td>You haven't written that function yet — or you're editing a different file from the one the test imports.</td></tr>
@@ -1640,19 +1643,32 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
 </section>
 
 <section id="s20">
-  <div class="shead"><span class="chip">20</span><h2>Checkpoint</h2><span class="lvl core">Core</span><span class="tagline">before 8 am on Tuesday</span></div>
+  <div class="shead"><span class="chip">20</span><h2>Submitting the assignment</h2><span class="lvl core">Core</span><span class="tagline">due by the end of Wednesday</span></div>
 
-  <p>Fill in the checkpoint form (the link is posted on the course channel). It takes two minutes and asks for:</p>
-  <ol>
-    <li>The last lines of <code>npm test</code> — the core <code># pass</code> and <code># fail</code> counts — and, if you did any stretch, of <code>npm run test:stretch</code>.</li>
-    <li>Whether the form page (section 13) and the counter page (section 15) work.</li>
-    <li>How many of your predictions were wrong, across all four predict sheets.</li>
-    <li><strong>One line: where you got stuck</strong>, or what still feels shaky. Be specific — "section 07 fix 2, I don't get why the arrow keeps this" is useful; "this" is not.</li>
-    <li>Your confidence, 1 to 5.</li>
-  </ol>
-  <p>Not finished? Submit anyway, with the counts you have. The TAs plan the lab from these answers, and an honest "stuck on 10" helps far more than a silence.</p>
+  <div class="cue watch"><p class="cue-k">Complete means complete</p><p>This lab is graded. The lab session is on <strong>Tuesday</strong>, and you have until the <strong>end of Wednesday</strong> to submit. Submit <strong>once</strong>, and only when <code>npm test</code> is entirely green. Incomplete work is not accepted, and there is no partial credit for a partial submission. Stuck? Don't submit — ask in the lab, or ask a TA.</p></div>
 
-  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Checkpoint submitted</span></label>
+  <h3>1. Get npm test fully green</h3>
+  <div class="cmd"><span class="p">$</span> cd esd-labs/js-lab1
+<span class="p">$</span> npm test
+<span class="cm"># tests 63</span>
+<span class="cm"># pass 63</span>
+<span class="cm"># fail 0</span></div>
+  <p><code># fail 0</code> is the only acceptable result. When we grade, we <strong>put our own copy of the tests back in</strong> before running <code>npm test</code> — so editing or deleting a test can only cost you marks, never gain them.</p>
+
+  <h3>2. Zip the js-lab1 folder — and only that folder</h3>
+  <p>Zip <code>js-lab1</code> itself, not the whole <code>esd-labs</code> folder, and leave out <code>node_modules</code> if you ever created one (this lab doesn't need it). From inside <code>esd-labs</code>:</p>
+  <div class="cmd"><span class="cm"># macOS / Linux</span>
+<span class="p">$</span> zip -r js-lab1.zip js-lab1 -x "js-lab1/node_modules/*"
+
+<span class="cm"># Windows (PowerShell) — delete js-lab1\node_modules first if it exists</span>
+<span class="p">$</span> Compress-Archive -Path js-lab1 -DestinationPath js-lab1.zip</div>
+  <p>Or in a file manager: right-click the <code>js-lab1</code> folder → <em>Compress</em> (macOS) or <em>Send to → Compressed (zipped) folder</em> (Windows). Open the zip once to check it contains the <code>js-lab1</code> folder with your <code>src/</code> inside.</p>
+
+  <h3>3. Submit the zip</h3>
+  <p>Upload <code>js-lab1.zip</code> on the submission platform before the end of Wednesday. Run <code>npm test</code> one last time right before you zip, so what you submit is what you tested.</p>
+  <p>Stretch work is never required. Your zip carries it anyway — it's all in the same folder.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Submitted — npm test green, js-lab1.zip uploaded</span></label>
 </section>
 
 <section id="gloss">
@@ -1692,7 +1708,7 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
 
 <div class="finish">
   <h2>How to know you're ready</h2>
-  <p>You're ready for Tuesday if you can do all of these <em>without looking anything up</em>:</p>
+  <p>You're ready for the lab if you can do all of these <em>without looking anything up</em>:</p>
   <ol>
     <li>Explain the difference between <code>save</code> and <code>save()</code>, and fix <code>onClick={save()}</code>.</li>
     <li>Say why <code>count &amp;&amp; …</code> can show a 0, and write the safe version.</li>
@@ -1804,7 +1820,7 @@ event.target.<span class="at">closest</span>(<span class="st">".item"</span>)   
              'Good start. Functions as values carry the rest of the lab.',
              'Past halfway. References and immutable updates are the two that matter for React.',
              'Nearly there. Section 15 is where it all comes together.',
-             'Core done. Fill in the checkpoint, then try the stretch parts if you have time.'];
+             'Core done. npm test green? Zip js-lab1 and submit (section 20) — then try the stretch parts.'];
   function update(){
     var n=checks.filter(function(c){return c.checked}).length;
     var pct=checks.length?n/checks.length:0;
