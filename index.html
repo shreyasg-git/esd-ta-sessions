@@ -43,6 +43,9 @@ h1 em{font-style:normal;color:var(--teal)}
 
 /* ---------- cards ---------- */
 .cards{display:grid;gap:16px}
+.partition{display:flex;align-items:center;gap:16px;margin:22px 0 10px}
+.partition .wave{flex:1;min-width:24px;height:12px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12' viewBox='0 0 24 12'%3E%3Cpath d='M0 6 Q6 0 12 6 T24 6' fill='none' stroke='%230B5D51' stroke-width='2'/%3E%3C/svg%3E") repeat-x left center/24px 12px}
+.partition span{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);background:var(--signal);padding:5px 10px;font-weight:600;white-space:nowrap}
 .card{
   display:block;text-decoration:none;color:inherit;background:var(--surface);
   border:1px solid var(--ink);border-left:6px solid var(--teal);
@@ -192,6 +195,10 @@ footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.
     </div>
     <span class="card-go">Open</span>
   </a>
+
+  <div class="partition" role="separator" aria-label="The labs start here">
+    <i class="wave" aria-hidden="true"></i><span>The labs start here</span><i class="wave" aria-hidden="true"></i>
+  </div>
 
     <a class="card" href="js-react.html">
     <span class="file">js-react.html</span>

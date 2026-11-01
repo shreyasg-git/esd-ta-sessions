@@ -219,7 +219,7 @@ table.grid.long-key th:first-child{width:42%}
 <div class="cue calm" style="margin-top:24px">
   <p class="cue-k">Read this before anything else</p>
   <p><strong>This is a pre-lab.</strong> You work through it at home, before the lab. The lab session is for your doubts, for going one level deeper, for a short quiz, and for one AI task. It assumes you've done the core sections.</p>
-  <p><strong>It continues React Lab 2.</strong> The folder starts from the finished Lab 2 code — the API client, <code>useCourses</code>, the list and the form — so you're never blocked by something you didn't finish. Lab 2's course search isn't carried over: the router app keeps the Courses page only. Two small changes to it are explained in section 09. If a Lab 1 or Lab 2 idea feels shaky, open <a href="react-lab1.html">React Lab 1</a> or <a href="react-lab2.html">React Lab 2</a> again; this lab uses them, it doesn't repeat them.</p>
+  <p><strong>It continues React Lab 2 — yours.</strong> The starter doesn't contain Lab 2's answers; step 0 (<a href="#step0">section 01</a>) brings your own Lab 2 Courses page into this folder with one command — <code>useCourses</code>, the list and the form. If your Lab 2 isn't finished, ask your TA: the solution may be handed out later, and the same command works from it. Lab 2's course search isn't carried over: the router app keeps the Courses page only. The API client is given, with one change (section 09). If a Lab 1 or Lab 2 idea feels shaky, open <a href="react-lab1.html">React Lab 1</a> or <a href="react-lab2.html">React Lab 2</a> again; this lab uses them, it doesn't repeat them.</p>
   <p><strong>The thread is still reactivity.</strong> Lab 1: change the state, the screen follows. Lab 2: the state arrives from a server. Here, two more things become state the screen follows: <em>the URL</em>, and <em>who is logged in</em>.</p>
   <p><strong>Core and stretch.</strong> <span class="lvl core">Core</span> is mandatory — what we go through together, and what <code>npm test</code> checks. <span class="lvl stretch">Stretch</span> is extra, checked by <code>npm run test:stretch</code>. Ask about either any time.</p>
   <p><strong>AI: not in the pre-lab.</strong> Type the code yourself — routing and auth bugs are confusing until you've made a few by hand. AI is for the in-lab task only (section 15), where you restrict it and judge what it gives you, as in Lab 2.</p>
@@ -274,21 +274,45 @@ table.grid.long-key th:first-child{width:42%}
 <span class="p">$</span> npm install
 <span class="p">$</span> npm test
 <span class="o"> Test Files  6 failed (6)</span>
+<span class="o">      Tests  40 failed (40)</span></div>
+  <p>One new package since Lab 2: <code>react-router</code>, version 7. Before anything else, one more command.</p>
+
+  <h3 id="step0">Step 0 — bring your React Lab 2 answers</h3>
+  <p>This lab builds on the Courses page you made on Lab 2's lab day, but the starter doesn't contain it — nobody's Lab 2 answers are public. <code>src/courses/useCourses.js</code>, <code>CoursesView.jsx</code>, <code>AddCourseForm.jsx</code> and <code>CoursesPage.jsx</code> are Lab 2's stubs. One command copies <strong>yours</strong> in, from the <code>react-lab2</code> folder next door:</p>
+  <div class="dothis">
+    <h4>Do this now — carry your Lab 2 page over</h4>
+    <div class="cmd"><span class="p">$</span> npm run carry -- ../react-lab2
+<span class="o">Copied 4 files from ../react-lab2:</span>
+<span class="o">  src/courses/useCourses.js</span>
+<span class="o">  src/courses/CoursesView.jsx</span>
+<span class="o">  src/courses/AddCourseForm.jsx</span>
+<span class="o">  src/courses/CoursesPage.jsx</span>
+<span class="o">What they replaced is saved in .carry-backup/…/</span>
+<span class="p">$</span> npm test
 <span class="o">      Tests  39 failed | 1 passed (40)</span></div>
-  <p>Every exercise starts as a <code>TODO</code> comment, and your job is to turn the 39 into 0. One new package since Lab 2: <code>react-router</code>, version 7. Then start the app:</p>
+    <ol>
+      <li>It copies those four files whole, and keeps the stubs they replace in <code>.carry-backup/</code>. It never changes anything in <code>react-lab2</code>. There's nothing to merge by hand.</li>
+      <li>It worked when <code>npm run dev</code> shows <em>your</em> Lab 2 page on the home page again — the twenty courses and your add form — and <code>npm test</code> says <code>39 failed | 1 passed</code>.</li>
+      <li>If carry says a file still throws "TODO", that part of your Lab 2 isn't finished. Finish it in <code>react-lab2</code> and carry again — or finish it here.</li>
+    </ol>
+  </div>
+  <p>Three small changes to those files come later, each where it belongs: section 06 makes each course's name a link, section 09 sends the token from <code>useCourses</code>, and section 15 moves the add form to an admin page. <strong>If your Lab 2 isn't finished, ask your TA</strong> — the solution may be handed out later, and <code>npm run carry -- &lt;that folder&gt;</code> works from it too.</p>
+
+  <p>Every Lab 3 exercise starts as a <code>TODO</code> comment, and your job is to turn the 39 into 0. Then start the app:</p>
   <div class="cmd"><span class="p">$</span> npm run dev
 <span class="o">  ➜  Local:   http://localhost:5173/</span></div>
-  <p>Open <a href="http://localhost:5173/" target="_blank" rel="noopener">localhost:5173</a>. Right now it's Lab 2's course list, without the form, at <em>every</em> URL — try <code>localhost:5173/anything</code>. By the end of section 13 each URL is its own screen. The mock API has two accounts you'll use all the time: <code>student@esd.local</code> / <code>student12345</code> (Sam Student) and <code>admin@esd.local</code> / <code>admin12345</code> (Course Admin). Every restart of <code>npm run dev</code> resets the data.</p>
+  <p>Open <a href="http://localhost:5173/" target="_blank" rel="noopener">localhost:5173</a>. Right now it's your Lab 2 page at <em>every</em> URL — try <code>localhost:5173/anything</code>. By the end of section 13 each URL is its own screen. The mock API has two accounts you'll use all the time: <code>student@esd.local</code> / <code>student12345</code> (Sam Student) and <code>admin@esd.local</code> / <code>admin12345</code> (Course Admin). Every restart of <code>npm run dev</code> resets the data.</p>
 
   <h3>The folder</h3>
   <div class="mention">
     <div class="mrow"><b>src/App.jsx</b><span>The route table: which screen for which URL. Sections 04–05.</span></div>
     <div class="mrow"><b>src/pages/</b><span><code>Layout</code> (the header around every page), <code>NotFound</code>, <code>LoginPage</code>. Sections 05 and 10.</span></div>
-    <div class="mrow"><b>src/courses/</b><span>From Lab 2: <code>useCourses</code>, <code>CoursesView</code>, <code>AddCourseForm</code>, <code>CoursesPage</code> — given, finished. New: <code>useCourse</code> + <code>CourseDetail</code>, the page for one course (sections 06 and 13).</span></div>
+    <div class="mrow"><b>src/courses/</b><span>From Lab 2: <code>useCourses</code>, <code>CoursesView</code>, <code>AddCourseForm</code>, <code>CoursesPage</code> — yours, after step 0. New: <code>useCourse</code> + <code>CourseDetail</code>, the page for one course (sections 06 and 13).</span></div>
     <div class="mrow"><b>src/auth/</b><span><code>AuthContext</code> (who's logged in) and <code>RequireAuth</code> (a protected route). Sections 10–11. <code>RequireRole</code> is the in-lab task.</span></div>
     <div class="mrow"><b>src/me/</b><span>My courses: <code>useMyEnrollments</code> and <code>MyCoursesPage</code>. Section 12.</span></div>
     <div class="mrow"><b>src/api/client.js</b><span><code>apiFetch</code> and <code>ApiError</code> from Lab 2, with one change (section 09). Given.</span></div>
     <div class="mrow"><b>src/main.jsx</b><span>Starts the app inside a <code>&lt;BrowserRouter&gt;</code>. Given; section 04 explains it.</span></div>
+    <div class="mrow"><b>tools/carry.js</b><span><code>npm run carry</code>: step 0.</span></div>
     <div class="mrow"><b>test/</b><span>The specification, one file per exercise; <code>test/support/</code> runs the real mock API in memory for them. Read the tests; don't edit them.</span></div>
     <div class="mrow"><b>inlab/</b><span>The in-lab AI task: <code>CONTRACT.md</code>, its tests, and <code>PROMPTS.md</code> for your prompt log. Leave it until the lab.</span></div>
     <div class="mrow"><b>mock/</b><span>The mock course API. Never edit it.</span></div>
@@ -303,9 +327,9 @@ table.grid.long-key th:first-child{width:42%}
   <p>The tests render the whole app at a URL and click through it like a user, against a fresh copy of the mock API for every test. When one fails, its name says what it expected, and the output shows the screen it found.</p>
 
   <h3>Submitting</h3>
-  <p>A <strong>graded assignment</strong>: <code>npm test</code> and <code>npm run inlab</code> fully green, and your prompt log filled in, zipped and submitted once, by the end of the day of the lab. The next lab's starter — which contains this lab's finished code — is released that night, so late submissions can't be accepted. Section 18 has the steps.</p>
+  <p>A <strong>graded assignment</strong>: <code>npm test</code> and <code>npm run inlab</code> fully green, and your prompt log filled in, zipped and submitted once, by the end of the day of the lab. The next lab starts from this one (its own <code>npm run carry</code> brings your code over), and this lab's solution may be handed out after the deadline, so late submissions can't be accepted. Section 18 has the steps.</p>
 
-  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — npm test runs, the app opens</span></label>
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — step 0 brought my Lab 2 page over, npm test runs, the app opens</span></label>
 </section>
 
 <section id="s2">
@@ -509,7 +533,7 @@ id === <span class="st">4</span>     <span class="o">// false   — compare with
   <p>Here the id goes straight back into another URL, <code>/api/courses/${id}</code>, so the string is fine as it is.</p>
 
   <h3>Step 1 — link every course to its page</h3>
-  <p>In <code>src/courses/CoursesView.jsx</code> (Lab 2's View, otherwise unchanged), make <code>CourseName</code> return a <code>&lt;Link&gt;</code> to <code>/courses/&lt;the course's id&gt;</code>, with the same text, <code>CS402 · Enterprise Software Development</code>. A template literal builds the path.</p>
+  <p>In <code>src/courses/CoursesView.jsx</code> — your Lab 2 View, from step 0 — make each course's name a <code>&lt;Link&gt;</code> to <code>/courses/&lt;the course's id&gt;</code>, with the same text, <code>CS402 · Enterprise Software Development</code> (import <code>Link</code> from <code>react-router</code>). A template literal builds the path. Change nothing else in the file.</p>
 
   <h3>Step 2 — useCourse(id): fetch one course</h3>
   <p>Same seam as Lab 2 (<a href="react-lab2.html#s7">React Lab 2 · §07</a>): the fetching lives in a hook, the page only renders. <code>src/courses/useCourse.js</code> has the state; write the effect that loads <code>GET /api/courses/{id}</code> — the Lab 2 pattern, <code>ignore</code> flag and all (<a href="react-lab2.html#s5">§05</a>). Two differences from <code>useCourses</code>:</p>
@@ -703,7 +727,7 @@ location        <span class="o">// { pathname: "/login", search: "", hash: "", s
 <span class="at">apiFetch</span>(<span class="st">"/api/users/me/enrollments"</span>, { token })              <span class="cm">// a logged-in call</span>
 <span class="at">apiFetch</span>(<span class="st">"/api/courses"</span>)                                       <span class="cm">// public: no token, no header</span></div>
   <p>Why pass it in, rather than have <code>apiFetch</code> find the token itself? For the same reason <code>getJSON</code> took <code>fetchFn</code> in <a href="js-app.html#s4">JS Lab 2 · §04</a>: a function that gets what it needs from its arguments is easy to read, test and trust. The token lives in React state; the components that have it hand it over.</p>
-  <p><strong>2. <code>src/courses/useCourses.js</code> reads the token from context</strong> — one line, <code>const { token } = useAuth();</code> — and <code>addCourse</code> passes it on. Nothing else in Lab 2's files changed, except that the list's course names become links (section 06) and the form moves to the admin page (section 15).</p>
+  <p><strong>2. Your <code>src/courses/useCourses.js</code> reads the token from context.</strong> This one is yours to do, in the file step 0 brought over: import <code>useAuth</code> from <code>../auth/AuthContext.jsx</code>, add one line at the top of the hook — <code>const { token } = useAuth();</code> — and pass <code>token</code> along in <code>addCourse</code>'s <code>apiFetch</code> options. (Until section 10, <code>token</code> is always <code>null</code>; the in-lab task in section 15 is what needs it.) Nothing else in Lab 2's files changes, except that the list's course names become links (section 06) and the form moves to the admin page (section 15).</p>
 
   <div class="quiz">
     <div class="q"><b>Q1</b>Logging out could just forget the token in the browser. Why does the contract make you call <code>POST /api/auth/logout</code>?</div>
@@ -932,7 +956,7 @@ location        <span class="o">// { pathname: "/login", search: "", hash: "", s
   <div class="cue"><p class="cue-k">Refresher</p><p>React Lab 2's method: give the AI a precise contract and a constraint prompt, then <em>judge</em> what it hands back — nothing missing, nothing extra, nothing from the "not yet" list — and keep a prompt log (<a href="react-lab2.html#s11">React Lab 2 · §11–14</a>). Same method here, on a smaller slice. Start only when <code>npm test</code> is green.</p></div>
 
   <h3>The task</h3>
-  <p>Lab 2's add form becomes an admin page, <code>/admin/courses/new</code>, and only admins get in. The full spec is <code>inlab/CONTRACT.md</code>; in short:</p>
+  <p>Lab 2's add form becomes an admin page, <code>/admin/courses/new</code>, and only admins get in. First, by hand: take <code>&lt;AddCourseForm&gt;</code> (and its import) out of your <code>CoursesPage.jsx</code> — the home page becomes the list only. The full spec for the rest is <code>inlab/CONTRACT.md</code>; in short:</p>
   <ul>
     <li><strong><code>RequireRole</code></strong> (<code>src/auth/RequireRole.jsx</code>) — <code>&lt;RequireRole role="ADMIN"&gt;…&lt;/RequireRole&gt;</code>. Not logged in: off to log in, like <code>RequireAuth</code>. Logged in with the wrong role: a <strong>"You don't have access"</strong> page, right there. Otherwise: the page.</li>
     <li><strong><code>NewCoursePage</code></strong> (<code>src/admin/NewCoursePage.jsx</code>) — a "New course" heading and Lab 2's <code>AddCourseForm</code>, unchanged, saving through <code>useCourses().addCourse</code> (which sends the token); on success, go to the new course's page.</li>
@@ -975,6 +999,7 @@ location        <span class="o">// { pathname: "/login", search: "", hash: "", s
 
   <table class="grid long-key">
     <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>"From React Lab 2: run npm run carry…" on the home page, or Error: TODO — from React Lab 2</td><td>Lab 2's files are still the starter's stubs: you haven't done <a href="#step0">step 0</a>. Run <code>npm run carry -- ../react-lab2</code>.</td></tr>
     <tr><td>useNavigate() may be used only in the context of a &lt;Router&gt; component</td><td>A component using a router hook was rendered outside any router. In the app: <code>main.jsx</code> lost its <code>&lt;BrowserRouter&gt;</code>. In a test of your own: wrap what you render in a <code>&lt;MemoryRouter&gt;</code>. Same for <code>useLocation()</code>, <code>&lt;Link&gt;</code> and <code>&lt;Routes&gt;</code> (04).</td></tr>
     <tr><td>No routes matched location "/courses/4" (a console warning)</td><td>No <code>&lt;Route&gt;</code> fits that URL: a typo in a path, a leading <code>/</code> on a child path that doesn't start with the parent's path, or a page missing from the table. A <code>path="*"</code> route turns it into your 404 page (05).</td></tr>
     <tr><td>The same screen at every URL</td><td><code>App</code> renders a page directly instead of through <code>&lt;Routes&gt;</code> — the starter's state (04).</td></tr>
@@ -1096,7 +1121,7 @@ location        <span class="o">// { pathname: "/login", search: "", hash: "", s
   <p>Open the zip once to check it has the <code>react-lab3</code> folder with your <code>src/</code> and <code>inlab/PROMPTS.md</code> inside, and no <code>node_modules</code>. (On Windows, run <code>npm install</code> again afterwards to keep working.)</p>
 
   <h3>4. Submit the zip</h3>
-  <p>Upload <code>react-lab3.zip</code> on the submission platform, by the end of the day of the lab. The next lab's starter — which contains this lab's finished code — is released that night, so late submissions can't be accepted. Run both test commands right before you zip, so what you submit is what you tested.</p>
+  <p>Upload <code>react-lab3.zip</code> on the submission platform, by the end of the day of the lab. The next lab starts from this one (its <code>npm run carry</code> brings your code over), and this lab's solution may be handed out after the deadline, so late submissions can't be accepted. Run both test commands right before you zip, so what you submit is what you tested.</p>
 
   <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Submitted — both test commands green, PROMPTS.md filled, react-lab3.zip uploaded</span></label>
 </section>

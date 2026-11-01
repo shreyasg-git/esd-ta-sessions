@@ -220,7 +220,7 @@ table.grid.long-key th:first-child{width:42%}
 <div class="cue calm" style="margin-top:24px">
   <p class="cue-k">Read this before anything else</p>
   <p><strong>This is a pre-lab.</strong> You work through it at home, before the lab. The lab session is for your doubts, for going one level deeper, and for one AI task on your own backend. It assumes you've done the core sections.</p>
-  <p><strong>It continues React Labs 3 and 4.</strong> The folder starts from the finished React Lab 4 app — routes, protected routes and <code>AuthContext</code> from Lab 3; the hardened API client, the "session expired" flow, signup and the admin pages from Lab 4 — so you're never blocked by something you didn't finish. React Lab 4 also pointed the app at <em>your own</em> Spring Boot backend and added CORS; you want that backend (conformance level C and CORS green) in the lab, not for the pre-lab. If routing or context feels shaky, open <a href="react-lab3.html">React Lab 3</a> again; for your backend and CORS, <a href="react-lab4.html">React Lab 4</a> and <a href="api-contract.html">the backend contract</a>. This lab uses them; it doesn't repeat them.</p>
+  <p><strong>It continues React Labs 3 and 4 — yours.</strong> The starter doesn't contain their answers; step 0 (<a href="#step0">section 01</a>) brings your own React Lab 4 app into this folder — routes, protected routes and <code>AuthContext</code> from Lab 3; the hardened API client, the "session expired" flow, signup and the admin pages from Lab 4 — with one command and one file copied by hand. If your Lab 4 isn't finished, ask your TA: the solution may be handed out later, and the same command works from it. React Lab 4 also pointed the app at <em>your own</em> Spring Boot backend and added CORS; you want that backend (conformance level C and CORS green) in the lab, not for the pre-lab. If routing or context feels shaky, open <a href="react-lab3.html">React Lab 3</a> again; for your backend and CORS, <a href="react-lab4.html">React Lab 4</a> and <a href="api-contract.html">the backend contract</a>. This lab uses them; it doesn't repeat them.</p>
   <p><strong>Graded in two parts.</strong> The frontend — <code>npm test</code>, which runs against the mock, so it never depends on your backend. And, graded separately, your backend — the Google sign-in you build on it in the lab, with its evidence. If your backend isn't ready, you still do every React part with the mock and submit the frontend part; only the backend part's marks are at stake.</p>
   <p><strong>The thread is still reactivity.</strong> Who's logged in is state in <code>AuthContext</code>. Whether it changes because of a password or because of Google, the header, the guards and every page follow — none of them change in this lab.</p>
   <p><strong>Core and stretch.</strong> <span class="lvl core">Core</span> is mandatory — what we go through together, and what <code>npm test</code> checks. <span class="lvl stretch">Stretch</span> is extra, checked by <code>npm run test:stretch</code>. Ask about either any time.</p>
@@ -279,6 +279,35 @@ table.grid.long-key th:first-child{width:42%}
 <span class="o">      Tests  17 failed | 14 passed (31)</span></div>
   <p>The 14 that pass from the start are <code>test/google-verify.test.js</code>: nothing to write there — it's the list of what "verify a Google token" means, as tests, and section 05 has you read it. Your job is the other 17. No new packages since React Lab 4: Google's code isn't an npm package, it's a script loaded from Google (section 06).</p>
 
+  <h3 id="step0">Step 0 — bring your React Lab 4 answers</h3>
+  <p>This lab adds Google to <em>your</em> React Lab 4 app, but the starter doesn't contain it — nobody's Lab 2, 3 or 4 answers are public. The files you wrote in those labs are their stubs here. One command copies <strong>yours</strong> in, from the <code>react-lab4</code> folder next door:</p>
+  <div class="dothis">
+    <h4>Do this now — carry your Lab 4 app over</h4>
+    <div class="cmd"><span class="p">$</span> npm run carry -- ../react-lab4
+<span class="o">Copied 18 files from ../react-lab4:</span>
+<span class="o">  src/App.jsx</span>
+<span class="o">  src/admin/EditCoursePage.jsx</span>
+<span class="o">  src/admin/NewCoursePage.jsx</span>
+<span class="o">  src/api/client.js</span>
+<span class="o">  …</span>
+<span class="o">What they replaced is saved in .carry-backup/…/</span>
+
+<span class="o">By hand — both labs change this file, so carry leaves it alone:</span>
+<span class="o">  1. Open src/auth/AuthContext.jsx here AND ../react-lab4/src/auth/AuthContext.jsx.</span>
+<span class="o">     Copy into the TODOs marked "from React Lab 4", in order:</span>
+<span class="o">       - KEY and loadSession()</span>
+<span class="o">       - AuthProvider, from its first line down to (not including) the context value</span>
+<span class="o">       - the context value and the return</span>
+<span class="o">       - the body of useAuth()</span></div>
+    <ol>
+      <li>Carry copies 18 files whole — everything in <code>src/</code> you wrote in Labs 2–4 except <code>AuthContext.jsx</code>: <code>App.jsx</code>, <code>src/api/client.js</code>, the guards, the course, admin and My courses files, and <code>Layout</code>, <code>LoginPage</code>, <code>NotFound</code>, <code>SignupPage</code>. It keeps whatever it replaces in <code>.carry-backup/</code>, and never changes <code>react-lab4</code>.</li>
+      <li><strong>One file by hand: <code>src/auth/AuthContext.jsx</code>.</strong> This lab adds <code>loginWithGoogle</code> to it (section 09), so carry doesn't overwrite it. Open it next to your Lab 4 one, and copy your code into the four TODOs marked <em>from React Lab 4</em>: <code>KEY</code> and <code>loadSession()</code> at the top; your <code>AuthProvider</code> from its first line down to the end of <code>signup()</code>; the context value and <code>return</code>; and the body of <code>useAuth()</code>. Leave the <code>loginWithGoogle</code> TODO for section 09.</li>
+      <li>It worked when <code>npm run dev</code> is your Lab 4 app again — log in with a password, enroll, log out — and <code>npm test</code> still says <code>17 failed | 14 passed (31)</code>: every one of the 17 needs this lab's code.</li>
+    </ol>
+  </div>
+  <p><strong>Two of React Lab 3's stretch parts are needed here</strong>, because this lab's tests use them: the session kept in <code>sessionStorage</code> (a Google session must survive a reload too) and the user's role in the header (<a href="react-lab3.html#s10">React Lab 3 · §10</a>). Carry warns if your folder seems to lack them; if you skipped them, add them now. If carry says a file still throws "TODO", that part of your Lab 4 isn't finished.</p>
+  <p><strong>If your Lab 4 isn't finished, ask your TA</strong> — the solution may be handed out later, and <code>npm run carry -- &lt;that folder&gt;</code> works from it too.</p>
+
   <h3>The client ID is already there</h3>
   <p>Open <code>.env</code>. It holds one line your TAs filled in before the lab was released:</p>
   <div class="cmd"><span class="o">VITE_GOOGLE_CLIENT_ID=123456789012-abc123def456.apps.googleusercontent.com</span></div>
@@ -287,16 +316,18 @@ table.grid.long-key th:first-child{width:42%}
   <h3>Run it — at exactly this address</h3>
   <div class="cmd"><span class="p">$</span> npm run dev
 <span class="o">  ➜  Local:   http://localhost:5173/</span></div>
-  <p>Open <a href="http://localhost:5173/login" target="_blank" rel="noopener">localhost:5173/login</a> — not <code>127.0.0.1:5173</code>, not another port. Google only lets its button work on addresses the client ID lists, and for this course that's <code>http://localhost:5173</code> (and <code>http://localhost</code>). <code>vite.config.js</code> refuses to start on another port for the same reason. Right now the login page is React Lab 4's, with an empty "Or use your Google account" box — sections 08–10 fill it.</p>
+  <p>Open <a href="http://localhost:5173/login" target="_blank" rel="noopener">localhost:5173/login</a> — not <code>127.0.0.1:5173</code>, not another port. Google only lets its button work on addresses the client ID lists, and for this course that's <code>http://localhost:5173</code> (and <code>http://localhost</code>). <code>vite.config.js</code> refuses to start on another port for the same reason. Right now the login page is your React Lab 4 one — sections 08–10 add the "Or use your Google account" box to it.</p>
 
   <h3>The folder</h3>
   <div class="mention">
     <div class="mrow"><b>src/auth/GoogleSignInButton.jsx</b><span>Google's button as a React component. <strong>You write it</strong> — sections 07–08.</span></div>
-    <div class="mrow"><b>src/auth/AuthContext.jsx</b><span>React Lab 4's, finished — plus <code>loginWithGoogle</code>, which <strong>you write</strong>. Section 09.</span></div>
-    <div class="mrow"><b>src/pages/LoginPage.jsx</b><span>React Lab 4's login page; <strong>you add</strong> the Google button. Section 10.</span></div>
+    <div class="mrow"><b>src/auth/AuthContext.jsx</b><span>Your React Lab 4 one (copied in by hand, step 0) — plus <code>loginWithGoogle</code>, which <strong>you write</strong>. Section 09.</span></div>
+    <div class="mrow"><b>src/pages/GoogleLoginBox.jsx</b><span>The "Or use your Google account" box: Google's button, and what happens when someone uses it. <strong>You write</strong> it. Section 10.</span></div>
+    <div class="mrow"><b>src/pages/LoginPage.jsx</b><span>Your React Lab 4 login page; <strong>you add</strong> one line — the Google box. Section 10.</span></div>
     <div class="mrow"><b>src/auth/loadGoogle.js</b><span>Loads Google's script once. Given; section 06 explains it.</span></div>
     <div class="mrow"><b>src/auth/decodeJwt.js</b><span>Stretch: reading a token's payload, for display only. Section 10.</span></div>
-    <div class="mrow"><b>everything else in src/</b><span>The finished React Lab 4 app: routes, guards, signup, the course and admin pages, <code>src/api/client.js</code>. Given, unchanged.</span></div>
+    <div class="mrow"><b>everything else in src/</b><span>Your React Lab 4 app, from step 0: routes, guards, signup, the course and admin pages, <code>src/api/client.js</code>. This lab doesn't change it. (<code>src/main.jsx</code> and <code>styles.css</code> are given.)</span></div>
+    <div class="mrow"><b>tools/carry.js</b><span><code>npm run carry</code>: step 0.</span></div>
     <div class="mrow"><b>test/</b><span>The specification. <code>test/support/google.js</code> is a <strong>pretend Google</strong>: its own signing key, and a fake of Google's browser library. The tests never talk to Google.</span></div>
     <div class="mrow"><b>inlab/</b><span>The in-lab task on your backend: <code>BACKEND.md</code> (the task and the prompt) and <code>AUDIT.md</code> (what you fill in). Read <code>BACKEND.md</code> before the lab.</span></div>
     <div class="mrow"><b>mock/</b><span>The mock course API. Never edit it. Given a client ID, it verifies <em>real</em> Google tokens.</span></div>
@@ -312,7 +343,7 @@ table.grid.long-key th:first-child{width:42%}
   <h3>Submitting</h3>
   <p>A <strong>graded assignment</strong>, in two parts, graded separately. <strong>The frontend part</strong> (complete means complete): <code>npm test</code> fully green — graded against the mock, so it never depends on your backend. <strong>The backend part</strong>: the evidence from the lab — your backend's level-D conformance run, a screenshot of a real Google sign-in against your own backend, the backend files you changed, and your audit. If your backend isn't there yet, submit the frontend part anyway: the missing backend part costs only its own marks, and you can still use the mock for everything in the lab. Zipped and submitted once, before the deadline announced for this lab. Section 18 has the steps.</p>
 
-  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — npm test runs, the app opens at localhost:5173</span></label>
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — step 0 done (my Lab 4 app is back), npm test runs, the app opens at localhost:5173</span></label>
 </section>
 
 <section id="s2">
@@ -706,7 +737,7 @@ callback: (response) =&gt; onCredentialRef.<span class="at">current</span>(respo
 <section id="s9">
   <div class="shead"><span class="chip">09</span><h2>loginWithGoogle — the same session, another door</h2><span class="lvl core">Core</span><span class="tagline">src/auth/AuthContext.jsx</span></div>
 
-  <div class="cue"><p class="cue-k">Refresher</p><p><code>login(email, password)</code> from <a href="react-lab3.html#s10">React Lab 3 · §10</a>: POST, then <code>GET /api/users/me</code> with the new token, then <code>setSession({ token, user })</code>; on failure it throws the <code>ApiError</code> and changes nothing. <a href="react-lab4.html#s5">React Lab 4 · §05</a> added one line: <code>setExpired(false)</code>, so the "session expired" notice goes once you're back in. It's in the file, finished.</p></div>
+  <div class="cue"><p class="cue-k">Refresher</p><p><code>login(email, password)</code> from <a href="react-lab3.html#s10">React Lab 3 · §10</a>: POST, then <code>GET /api/users/me</code> with the new token, then <code>setSession({ token, user })</code>; on failure it throws the <code>ApiError</code> and changes nothing. <a href="react-lab4.html#s5">React Lab 4 · §05</a> added one line: <code>setExpired(false)</code>, so the "session expired" notice goes once you're back in. Both are in your <code>AuthContext.jsx</code>, since step 0.</p></div>
 
   <p>The contract's endpoint (<code>openapi.yaml</code> → <code>POST /api/auth/google</code>):</p>
   <div class="cmd"><span class="o">POST /api/auth/google   { "idToken": "eyJhbGciOiJSUzI1NiIs…" }          no Authorization header</span>
@@ -716,7 +747,7 @@ callback: (response) =&gt; onCredentialRef.<span class="at">current</span>(respo
 
 <span class="o">GET  /api/users/me      Authorization: Bearer eyJhbGciOiJIUzI1NiJ9…</span>
 <span class="o">     → 200 { "id": 4, "email": "asha.rao@example.com", "fullName": "Asha Rao", "role": "STUDENT", … }</span></div>
-  <p>The answer is <strong>identical to login's</strong> — the contract says so. So <code>loginWithGoogle(credential)</code> is <code>login</code> with a different first request: <code>apiFetch("/api/auth/google", { method: "POST", body: { idToken: credential } })</code>, then the same steps — <code>/api/users/me</code>, <code>setSession</code>, <code>setExpired(false)</code>. (Plain <code>apiFetch</code>, not <code>api</code>: nobody is logged in yet, so there's no session to expire.) Write it in <code>AuthProvider</code> (the starter has a stub that throws), and add it to the context's <code>value</code> — the starter already did that line for you. Don't catch errors: the login page shows them, exactly as it does for a wrong password.</p>
+  <p>The answer is <strong>identical to login's</strong> — the contract says so. So <code>loginWithGoogle(credential)</code> is <code>login</code> with a different first request: <code>apiFetch("/api/auth/google", { method: "POST", body: { idToken: credential } })</code>, then the same steps — <code>/api/users/me</code>, <code>setSession</code>, <code>setExpired(false)</code>. (Plain <code>apiFetch</code>, not <code>api</code>: nobody is logged in yet, so there's no session to expire.) Write it in <code>AuthProvider</code> (the starter has a stub that throws, after the TODO you filled in step 0), and add it to your context <code>value</code>, next to <code>login</code>. Don't catch errors: the login page shows them, exactly as it does for a wrong password.</p>
   <p>(Two functions that share two of their three lines? You may pull the shared part into a helper — <code>startSession(accessToken)</code> — and have both call it. Or leave the repetition: three lines, side by side, are easy to read. Either passes.)</p>
 
   <h3>Look at what you're storing</h3>
@@ -740,21 +771,20 @@ callback: (response) =&gt; onCredentialRef.<span class="at">current</span>(respo
 </section>
 
 <section id="s10">
-  <div class="shead"><span class="chip">10</span><h2>The login page, and a real sign-in</h2><span class="lvl core">Core</span><span class="tagline">src/pages/LoginPage.jsx</span></div>
+  <div class="shead"><span class="chip">10</span><h2>The login page, and a real sign-in</h2><span class="lvl core">Core</span><span class="tagline">src/pages/GoogleLoginBox.jsx · LoginPage.jsx</span></div>
 
-  <p>The page keeps React Lab 4's form, unchanged, and gets a second way in, in the "Or use your Google account" box. Add a handler next to <code>handleSubmit</code> — the same shape:</p>
+  <p>The page keeps your React Lab 4 form, unchanged, and gets a second way in: the "Or use your Google account" box, a component of its own in <code>src/pages/GoogleLoginBox.jsx</code>. In it, write <code>handleGoogle</code> — your login page's submit handler, for Google. It works out <code>from</code> exactly as your login page does (<code>useNavigate</code>, <code>useLocation</code>), and then:</p>
   <div class="cmd"><span class="tg">async</span> <span class="tg">function</span> <span class="at">handleGoogle</span>(credential) {
   <span class="at">setError</span>(<span class="tg">null</span>);
-  <span class="at">setBusy</span>(<span class="tg">true</span>);
   <span class="tg">try</span> {
     <span class="tg">await</span> <span class="at">loginWithGoogle</span>(credential);
     <span class="at">navigate</span>(<span class="tg">from</span>, { replace: <span class="tg">true</span> });     <span class="cm">// back to where they were going — as for a password</span>
   } <span class="tg">catch</span> (err) {
-    <span class="at">setError</span>(err);                         <span class="cm">// the backend's 401 — the page shows err.message</span>
-    <span class="at">setBusy</span>(<span class="tg">false</span>);
+    <span class="at">setError</span>(err);                         <span class="cm">// the backend's 401 — the box shows err.message</span>
   }
 }</div>
-  <p>Then, in the box: when <code>clientId</code> (read from <code>import.meta.env.VITE_GOOGLE_CLIENT_ID</code>, already in the starter) has a value, render <code>&lt;GoogleSignInButton clientId={clientId} onCredential={handleGoogle} /&gt;</code>. When it's empty, render a short note instead that starts <strong>"Google sign-in isn't set up"</strong> and says where the value goes (<code>.env</code>) — a person who sees it should know what to do. The error paragraph (<code>role="alert"</code>) is already below both ways in, so a refused Google token shows there.</p>
+  <p>Then, in the box: when <code>clientId</code> (read from <code>import.meta.env.VITE_GOOGLE_CLIENT_ID</code>, already in the starter) has a value, render <code>&lt;GoogleSignInButton clientId={clientId} onCredential={handleGoogle} /&gt;</code>. When it's empty, render a short note instead that starts <strong>"Google sign-in isn't set up"</strong> and says where the value goes (<code>.env</code>) — a person who sees it should know what to do. The box's error paragraph (<code>role="alert"</code>) is already in the starter, so a refused Google token shows there.</p>
+  <p>Last, one line in your <code>LoginPage.jsx</code>: render <code>&lt;GoogleLoginBox /&gt;</code> right after your <code>&lt;form&gt;</code> (import it from <code>./GoogleLoginBox.jsx</code>). Wrap the form and the box in <code>&lt;div className="login-options"&gt;</code> and <code>styles.css</code> puts them side by side.</p>
   <p>Notice that <code>handleGoogle</code> is a new function on every render. That's fine: it's exactly the case the box in the button handles.</p>
   <div class="cmd"><span class="p">$</span> npx vitest run test/google-login.test.jsx
 <span class="p">$</span> npm test                      # all core: 31 passed</div>
@@ -773,12 +803,12 @@ callback: (response) =&gt; onCredentialRef.<span class="at">current</span>(respo
 
   <div class="stretch-box">
     <h3>Stretch 1 — decode the credential, for display only</h3>
-    <p>While the backend checks the token, the page could say whose account is signing in. The email is right there in the payload. Write <code>decodeJwtPayload(token)</code> in <code>src/auth/decodeJwt.js</code>: split on dots (throw if there aren't three parts), turn the middle part from base64url into base64, <code>atob</code> it — which gives one character per <em>byte</em> — turn those into a <code>Uint8Array</code>, and <code>new TextDecoder().decode(bytes)</code> them back into text before <code>JSON.parse</code>. That last step is what makes "Zoë" and "आशा" come out right. Then, in <code>handleGoogle</code>, keep <code>decodeJwtPayload(credential).email</code> in state (or <code>null</code> if decoding throws) and show <code>&lt;p role="status"&gt;Signing in as {email}…&lt;/p&gt;</code> until the backend answers.</p>
+    <p>While the backend checks the token, the page could say whose account is signing in. The email is right there in the payload. Write <code>decodeJwtPayload(token)</code> in <code>src/auth/decodeJwt.js</code>: split on dots (throw if there aren't three parts), turn the middle part from base64url into base64, <code>atob</code> it — which gives one character per <em>byte</em> — turn those into a <code>Uint8Array</code>, and <code>new TextDecoder().decode(bytes)</code> them back into text before <code>JSON.parse</code>. That last step is what makes "Zoë" and "आशा" come out right. Then, in <code>GoogleLoginBox</code>'s <code>handleGoogle</code>, keep <code>decodeJwtPayload(credential).email</code> in state (or <code>null</code> if decoding throws) and show <code>&lt;p role="status"&gt;Signing in as {email}…&lt;/p&gt;</code> until the backend answers.</p>
     <div class="cue watch"><p class="cue-k">Decoding is not verifying</p><p><code>decodeJwtPayload</code> checks nothing — not the signature, not <code>aud</code>, not <code>exp</code>. One of its tests decodes a token with a made-up signature and gets <code>admin@esd.local</code> out of it, happily. Use it for a label on the screen, never for a decision. Who is logged in still comes from <code>/api/users/me</code>, after your backend verified the token. (And your <em>own</em> API's token stays opaque, as in React Lab 3.)</p></div>
     <p><code>npx vitest run --mode stretch test/stretch/decode.test.js test/stretch/signing-in-as.test.jsx</code>.</p>
 
     <h3>Stretch 2 — One Tap</h3>
-    <p>One Tap is Google's "Continue as Asha" prompt: no button press needed. Give <code>GoogleSignInButton</code> a <code>oneTap</code> prop (default <code>false</code>): when it's true, call <code>google.accounts.id.prompt()</code> after <code>renderButton</code>, and <code>google.accounts.id.cancel()</code> in the cleanup, so the prompt doesn't outlive the page. Add <code>oneTap</code> to the effect's dependencies, and pass it from the login page. The callback is the same one, so nothing else changes. <code>test/stretch/one-tap.test.jsx</code>.</p>
+    <p>One Tap is Google's "Continue as Asha" prompt: no button press needed. Give <code>GoogleSignInButton</code> a <code>oneTap</code> prop (default <code>false</code>): when it's true, call <code>google.accounts.id.prompt()</code> after <code>renderButton</code>, and <code>google.accounts.id.cancel()</code> in the cleanup, so the prompt doesn't outlive the page. Add <code>oneTap</code> to the effect's dependencies, and pass it from <code>GoogleLoginBox</code>. The callback is the same one, so nothing else changes. <code>test/stretch/one-tap.test.jsx</code>.</p>
     <p>In Chrome, One Tap is drawn by the browser itself (a feature called FedCM) and shows the site's domain, not the app's name. It doesn't appear if Chrome's <em>Third-party sign-in</em> setting is off, and closing it starts a cool-down during which it stays hidden — reset it from the padlock icon in the address bar. If you ever turn on automatic sign-in (<code>auto_select: true</code>), call <code>google.accounts.id.disableAutoSelect()</code> on logout, or logging out signs you straight back in.</p>
   </div>
 
@@ -1034,6 +1064,7 @@ res.status
   <h3>In the browser, before your backend is involved</h3>
   <table class="grid long-key">
     <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>Error: TODO — from React Lab 4 (or 3, or 2): run npm run carry…</td><td>Those files are still the starter's stubs: you haven't run <code>npm run carry -- ../react-lab4</code>, or <code>src/auth/AuthContext.jsx</code> — copied by hand — still has its "from React Lab 4" TODOs (<a href="#step0">step 0</a>).</td></tr>
     <tr><td>"Google sign-in isn't set up" on the login page</td><td><code>VITE_GOOGLE_CLIENT_ID</code> is empty. It's in <code>.env</code> (the TAs fill it in); Vite reads it at start, so restart <code>npm run dev</code> after any change (01).</td></tr>
     <tr><td>The Google box stays empty — no button, no error</td><td>The effect never draws: <code>renderButton</code> not called, called before <code>initialize</code>, or given <code>buttonRef</code> instead of the element (<code>buttonRef.current</code>, or the copy <code>div</code>). Or the <code>ref</code> isn't on the <code>&lt;div&gt;</code> (08).</td></tr>
     <tr><td>"Couldn't load Google sign-in. Are you offline, or is a blocker…"</td><td>Google's script didn't load: no internet, or a privacy extension / ad blocker (or a browser's built-in shield) blocking <code>accounts.google.com</code>. Turn it off for <code>localhost</code>.</td></tr>

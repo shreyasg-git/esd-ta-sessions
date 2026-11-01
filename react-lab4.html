@@ -219,7 +219,7 @@ table.grid.long-key th:first-child{width:42%}
 <div class="cue calm" style="margin-top:24px">
   <p class="cue-k">Read this before anything else</p>
   <p><strong>This is a pre-lab.</strong> You work through it at home, before the lab. The lab session is for your doubts, for going one level deeper, for the end-to-end check against your backend, and for one AI task. It assumes you've done the core sections.</p>
-  <p><strong>It continues React Lab 3.</strong> The folder starts from the <em>finished</em> Lab 3 app — routes, <code>AuthContext</code> with <code>sessionStorage</code>, <code>RequireAuth</code>, <code>RequireRole</code>, the admin page — so you're never blocked by something you didn't finish. If routing, context or the login flow feel shaky, open <a href="react-lab3.html">React Lab 3</a> again; this lab uses them, it doesn't repeat them.</p>
+  <p><strong>It continues React Lab 3 — yours.</strong> The starter doesn't contain Lab 3's (or Lab 2's) answers; step 0 (<a href="#step0">section 01</a>) brings your own Lab 3 app into this folder — routes, <code>AuthContext</code>, <code>RequireAuth</code>, <code>RequireRole</code>, the admin page — with one command and one file copied by hand. If your Lab 3 isn't finished, ask your TA: the solution may be handed out later, and the same command works from it. If routing, context or the login flow feel shaky, open <a href="react-lab3.html">React Lab 3</a> again; this lab uses them, it doesn't repeat them.</p>
   <p><strong>Aim to have your backend at conformance level C before the lab.</strong> That's the <a href="api-contract.html">backend contract</a> pack you've been working through alongside the React labs (<a href="api-contract.html#s13">its section 13</a> is level C). Sections 03–08 of this lab don't need it (they use the mock); sections 09–13 do.</p>
   <p><strong>Graded in two parts.</strong> The frontend — <code>npm test</code> and <code>npm run inlab</code>, which run against the mock, so they never depend on your backend. And, graded separately, your backend — its conformance report at level C, CORS included. If your backend isn't ready, you still do every exercise with the mock and submit the frontend part; only the backend part's marks are at stake.</p>
   <p><strong>Core and stretch.</strong> <span class="lvl core">Core</span> is mandatory — what we go through together, and what <code>npm test</code> checks. <span class="lvl stretch">Stretch</span> is extra, checked by <code>npm run test:stretch</code>. Ask about either any time.</p>
@@ -275,20 +275,54 @@ table.grid.long-key th:first-child{width:42%}
 <span class="p">$</span> npm install
 <span class="p">$</span> npm test
 <span class="o"> Test Files  4 failed (4)</span>
-<span class="o">      Tests  27 failed | 7 passed (34)</span></div>
-  <p>The 7 that pass already are things Lab 3's app does right (a 403 isn't an expired session, say). Your job is to turn the 27 into 0. No new packages since Lab 3. Then start the app:</p>
+<span class="o">      Tests  30 failed | 4 passed (34)</span></div>
+  <p>No new packages since Lab 3. Before anything else: step 0.</p>
+
+  <h3 id="step0">Step 0 — bring your React Lab 3 answers</h3>
+  <p>This lab hardens <em>your</em> Lab 3 app, but the starter doesn't contain it — nobody's Lab 3 answers are public. The files you wrote in Labs 2 and 3 are their stubs here. One command copies <strong>yours</strong> in, from the <code>react-lab3</code> folder next door:</p>
+  <div class="dothis">
+    <h4>Do this now — carry your Lab 3 app over</h4>
+    <div class="cmd"><span class="p">$</span> npm run carry -- ../react-lab3
+<span class="o">Copied 15 files from ../react-lab3:</span>
+<span class="o">  src/App.jsx</span>
+<span class="o">  src/admin/NewCoursePage.jsx</span>
+<span class="o">  src/auth/RequireAuth.jsx</span>
+<span class="o">  src/auth/RequireRole.jsx</span>
+<span class="o">  src/courses/AddCourseForm.jsx</span>
+<span class="o">  …</span>
+<span class="o">What they replaced is saved in .carry-backup/…/</span>
+
+<span class="o">By hand — both labs change this file, so carry leaves it alone:</span>
+<span class="o">  1. Open src/auth/AuthContext.jsx here AND ../react-lab3/src/auth/AuthContext.jsx.</span>
+<span class="o">     Copy into the TODOs marked "from React Lab 3", in order:</span>
+<span class="o">       - KEY and loadSession() — Lab 3's sessionStorage stretch (this lab's tests need it)</span>
+<span class="o">       - the first part of AuthProvider: its state, login() and logout() (and the stretch's effect)</span>
+<span class="o">       - the end of AuthProvider: the context value and the return</span>
+<span class="o">       - the body of useAuth()</span></div>
+    <ol>
+      <li>Carry copies 15 files whole: <code>App.jsx</code>, the admin page, <code>RequireAuth</code>, <code>RequireRole</code>, everything in <code>src/courses/</code> and <code>src/me/</code>, and <code>Layout</code>, <code>LoginPage</code>, <code>NotFound</code>. It keeps whatever it replaces in <code>.carry-backup/</code>, and never changes <code>react-lab3</code>.</li>
+      <li><strong>One file by hand: <code>src/auth/AuthContext.jsx</code>.</strong> This lab adds its own parts to it (section 05), so carry doesn't overwrite it. Open it next to your Lab 3 one, and copy your code into the four TODOs marked <em>from React Lab 3</em>: <code>KEY</code> and <code>loadSession()</code> at the top; the first part of <code>AuthProvider</code> — your session state, <code>login()</code>, <code>logout()</code> and the <code>sessionStorage</code> effect; the context value and <code>return</code> at its end; and the body of <code>useAuth()</code>. Leave this lab's own TODOs (<code>expired</code>, <code>api</code>, <code>signup</code>) for sections 05–07.</li>
+      <li>It worked when <code>npm run dev</code> is your Lab 3 app again — log in, enroll, My courses, log out — and <code>npm test</code> says <code>27 failed | 7 passed (34)</code>.</li>
+    </ol>
+  </div>
+  <p><strong>Two of Lab 3's stretch parts are needed here</strong>, because this lab's tests use them: the session kept in <code>sessionStorage</code> (<a href="react-lab3.html#s10">React Lab 3 · §10</a>) and the header's <em>Log in</em> link remembering where you were (<a href="react-lab3.html#s11">§11</a>). So is Lab 2's stretch of showing each <code>fieldErrors</code> message under its field, for one in-lab test. Carry warns if your folder seems to lack them; if you skipped them, do them now — each is a few lines, and Lab 3's doc shows how. If carry says a file still throws "TODO", that part of your Lab 3 isn't finished.</p>
+  <p><strong>If your Lab 3 isn't finished, ask your TA</strong> — the solution may be handed out later, and <code>npm run carry -- &lt;that folder&gt;</code> works from it too.</p>
+
+  <p>The 7 tests that pass after step 0 are things your Lab 3 app already does right (a 403 isn't an expired session, say). Your job is to turn the 27 into 0. Sections 05–08 change several of the files carry brought over — each section names them. Then start the app:</p>
   <div class="cmd"><span class="p">$</span> npm run dev
 <span class="o">  ➜  Local:   http://localhost:5173/</span></div>
-  <p>Open <a href="http://localhost:5173/" target="_blank" rel="noopener">localhost:5173</a>. It's Lab 3's app, finished, with one addition: a line at the bottom of every page — <strong>API: the mock, on this server (/api)</strong>. In section 09 it changes to your backend's address; it's how you'll know, at a glance, which server the app is talking to. Accounts: <code>student@esd.local</code> / <code>student12345</code> (Sam), <code>riya@esd.local</code> / <code>riya12345</code> (Riya, already in the five full courses), <code>admin@esd.local</code> / <code>admin12345</code>.</p>
+  <p>Open <a href="http://localhost:5173/" target="_blank" rel="noopener">localhost:5173</a>. It's your Lab 3 app, with one addition: a line at the bottom of every page — <strong>API: the mock, on this server (/api)</strong> (it's in <code>src/main.jsx</code>). In section 09 it changes to your backend's address; it's how you'll know, at a glance, which server the app is talking to. Accounts: <code>student@esd.local</code> / <code>student12345</code> (Sam), <code>riya@esd.local</code> / <code>riya12345</code> (Riya, already in the five full courses), <code>admin@esd.local</code> / <code>admin12345</code>.</p>
 
   <h3>The folder</h3>
   <div class="mention">
     <div class="mrow"><b>src/api/client.js</b><span><code>apiFetch</code>, <code>ApiError</code> — and now <code>NetworkError</code> and <code>onUnauthorized</code>. Sections 03 and 05.</span></div>
-    <div class="mrow"><b>src/auth/AuthContext.jsx</b><span>Lab 3's, plus <code>api</code>, <code>expired</code> and <code>signup</code>. Sections 05 and 07.</span></div>
-    <div class="mrow"><b>src/pages/</b><span><code>LoginPage</code> (a message and a link, sections 06–07) and the new <code>SignupPage</code> (section 07). <code>Layout</code> and <code>NotFound</code> as in Lab 3.</span></div>
-    <div class="mrow"><b>src/courses/</b><span><code>CourseDetail</code> and <code>useCourse</code> — conflicts as states (section 08). The rest as in Lab 3; <code>AddCourseForm</code> grows in the lab (section 15).</span></div>
-    <div class="mrow"><b>src/me/</b><span>My courses, as in Lab 3; its hook goes through <code>api</code> (section 06).</span></div>
-    <div class="mrow"><b>src/admin/</b><span>Lab 3's New course page, and <code>EditCoursePage</code> — the in-lab task.</span></div>
+    <div class="mrow"><b>src/auth/AuthContext.jsx</b><span>Your Lab 3 one (copied in by hand, step 0), plus <code>api</code>, <code>expired</code> and <code>signup</code>. Sections 05 and 07.</span></div>
+    <div class="mrow"><b>src/pages/</b><span>Your <code>LoginPage</code> (a message and a link, sections 06–07), and the new <code>SignupPage</code> (section 07). Your <code>Layout</code> and <code>NotFound</code>, unchanged.</span></div>
+    <div class="mrow"><b>src/courses/</b><span>Yours, from Labs 2–3. <code>CourseDetail</code> and <code>useCourse</code> get conflicts as states (section 08), the hooks go through <code>api</code> (section 06), and <code>AddCourseForm</code> grows in the lab (section 15).</span></div>
+    <div class="mrow"><b>src/me/</b><span>Your My courses; its hook goes through <code>api</code> (section 06).</span></div>
+    <div class="mrow"><b>src/admin/</b><span>Your New course page, and <code>EditCoursePage</code> — the in-lab task.</span></div>
+    <div class="mrow"><b>src/main.jsx</b><span>Given. Starts the app in the router — and draws the API line under every page (section 09).</span></div>
+    <div class="mrow"><b>tools/carry.js</b><span><code>npm run carry</code>: step 0.</span></div>
     <div class="mrow"><b>test/</b><span>The specification. <code>test/support/</code> runs the real mock in memory, and can now <em>restart</em> it — which is how the tests make tokens die (section 04).</span></div>
     <div class="mrow"><b>inlab/</b><span>The in-lab AI task: <code>CONTRACT.md</code>, its tests, <code>PROMPTS.md</code>. Leave it until the lab.</span></div>
     <div class="mrow"><b>mock/</b><span>The mock course API. Never edit it. <code>npm run mock</code> runs it on its own, like a real backend (section 10).</span></div>
@@ -303,9 +337,9 @@ table.grid.long-key th:first-child{width:42%}
 <span class="p">$</span> npm run mock                           # the mock API alone, on :8080, like a real backend</div>
 
   <h3>Submitting</h3>
-  <p>A <strong>graded assignment</strong>, in two parts, graded separately. <strong>The frontend part</strong> (complete means complete): <code>npm test</code> and <code>npm run inlab</code> fully green — graded against the mock, so it never depends on your backend — and your prompt log filled in. <strong>The backend part</strong>: <code>conformance-report.txt</code> in the folder, with levels A, B, C and CORS ✓. If your backend isn't there yet, submit the frontend part anyway: the missing backend part costs only its own marks, and you can still use the mock for everything in the lab. Zipped and submitted once, by the end of the day of the lab. The next lab's starter — which contains this lab's finished code — is released that night, so late submissions can't be accepted. Section 18 has the steps.</p>
+  <p>A <strong>graded assignment</strong>, in two parts, graded separately. <strong>The frontend part</strong> (complete means complete): <code>npm test</code> and <code>npm run inlab</code> fully green — graded against the mock, so it never depends on your backend — and your prompt log filled in. <strong>The backend part</strong>: <code>conformance-report.txt</code> in the folder, with levels A, B, C and CORS ✓. If your backend isn't there yet, submit the frontend part anyway: the missing backend part costs only its own marks, and you can still use the mock for everything in the lab. Zipped and submitted once, by the end of the day of the lab. The next lab starts from this one (its <code>npm run carry</code> brings your code over), and this lab's solution may be handed out after the deadline, so late submissions can't be accepted. Section 18 has the steps.</p>
 
-  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — npm test runs, the app opens, I've seen the API line</span></label>
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — step 0 done (my Lab 3 app is back), npm test runs, I've seen the API line</span></label>
 </section>
 
 <section id="s2">
@@ -457,7 +491,7 @@ table.grid.long-key th:first-child{width:42%}
   <p>Each condition earns its place. <code>401</code>, not 403 (section 04). <code>token</code>: a 401 on a request <em>without</em> a token is just an answer — a wrong password at login is a 401 with no token, and must not say "your session has expired". <code>onUnauthorized</code>: it's optional, so <code>apiFetch</code> still works for code that doesn't pass one.</p>
 
   <h3>Step 2 — AuthProvider reacts</h3>
-  <p>In <code>AuthContext.jsx</code>: an <code>expired</code> state, <code>false</code> to start; <code>login</code> sets it back to <code>false</code>; and <code>sessionExpired</code>:</p>
+  <p>In <code>AuthContext.jsx</code>: an <code>expired</code> state, <code>false</code> to start; your <code>login</code> sets it back to <code>false</code> once it has stored the new session; and <code>sessionExpired</code>. Below, the session is one state value, <code>session</code>, as React Lab 3 §10 had it — if yours is shaped differently, forget it the way your <code>logout()</code> does after its request:</p>
   <div class="cmd"><span class="tg">const</span> [expired, setExpired] = <span class="at">useState</span>(<span class="tg">false</span>);     <span class="cm">// why nobody is logged in</span>
 <span class="tg">const</span> navigate = <span class="at">useNavigate</span>();
 <span class="tg">const</span> location = <span class="at">useLocation</span>();
@@ -474,10 +508,8 @@ table.grid.long-key th:first-child{width:42%}
   <h3>Step 3 — api connects them</h3>
   <div class="cmd"><span class="tg">function</span> <span class="at">api</span>(path, options = {}) {
   <span class="tg">return</span> <span class="at">apiFetch</span>(path, { ...options, token: session?.token, onUnauthorized: sessionExpired });
-}
-
-<span class="tg">const</span> value = { user: session?.user ?? <span class="tg">null</span>, token: session?.token ?? <span class="tg">null</span>, expired, login, signup, logout, api };</div>
-  <p>Remove the two placeholders the starter left (<code>const expired = false</code> and the <code>api</code> that throws) when you write the real ones.</p>
+}</div>
+  <p><code>session?.token</code> is the logged-in user's token — whatever your <code>AuthProvider</code> keeps it in. Then put <code>expired</code> and <code>api</code> in your context value, next to <code>user</code>, <code>token</code>, <code>login</code> and <code>logout</code> (section 07 adds <code>signup</code>). Remove the two placeholders the starter left (<code>const expired = false</code> and the <code>api</code> that throws) when you write the real ones.</p>
 
   <div class="cue react"><p class="cue-k">api is a closure</p><p><code>api</code> remembers <code>session</code> and <code>sessionExpired</code> from the render of <code>AuthProvider</code> that made it (<a href="js-react.html#s6">JS Lab 1 · §06</a>). A new render makes a new <code>api</code> with the new session. That's why callers never pass a token: the function already holds the right one.</p></div>
 
@@ -503,19 +535,19 @@ table.grid.long-key th:first-child{width:42%}
 <section id="s6">
   <div class="shead"><span class="chip">06</span><h2>Every logged-in call through api</h2><span class="lvl core">Core</span><span class="tagline">the hooks · LoginPage.jsx</span></div>
 
-  <p><code>api</code> only helps the requests that use it. Find every <code>apiFetch(…, { token })</code> in the app and route it through <code>api</code> instead — the token drops out of the call, because <code>api</code> adds it:</p>
-  <div class="cmd"><span class="cm">// before (Lab 3)</span>
+  <p><code>api</code> only helps the requests that use it. Find every <code>apiFetch(…, { token })</code> in your hooks — the files step 0 brought over from Labs 2 and 3 — and route it through <code>api</code> instead. The token drops out of the call, because <code>api</code> adds it:</p>
+  <div class="cmd"><span class="cm">// before (Lab 3): the hook reads the token, and hands it to apiFetch</span>
 <span class="tg">const</span> { token } = <span class="at">useAuth</span>();
-<span class="tg">await</span> <span class="at">apiFetch</span>(<span class="st">"/api/enrollments"</span>, { method: <span class="st">"POST"</span>, body: { courseId: course.id }, token });
+<span class="tg">await</span> <span class="at">apiFetch</span>(path, { method, body, token });
 
-<span class="cm">// after</span>
+<span class="cm">// after: api adds the token itself — and handles a 401</span>
 <span class="tg">const</span> { api } = <span class="at">useAuth</span>();
-<span class="tg">await</span> <span class="at">api</span>(<span class="st">"/api/enrollments"</span>, { method: <span class="st">"POST"</span>, body: { courseId: course.id } });</div>
+<span class="tg">await</span> <span class="at">api</span>(path, { method, body });</div>
   <table class="grid long-key">
     <tr><th>File</th><th>Calls to change</th></tr>
     <tr><td><code>src/courses/useCourses.js</code></td><td><code>addCourse</code> — POST /api/courses</td></tr>
     <tr><td><code>src/courses/useCourse.js</code></td><td><code>enroll</code> — POST /api/enrollments</td></tr>
-    <tr><td><code>src/me/useMyEnrollments.js</code></td><td>the effect — GET /api/users/me/enrollments — and <code>drop</code> — DELETE /api/enrollments/{id}</td></tr>
+    <tr><td><code>src/me/useMyEnrollments.js</code></td><td>the effect — GET /api/users/me/enrollments — and <code>drop</code> — DELETE /api/enrollments/{id}. This hook still reads <code>token</code> too (<code>const { token, api } = useAuth()</code>): it's the effect's dependency (below).</td></tr>
   </table>
 
   <h3>Which calls stay on plain apiFetch</h3>
@@ -531,7 +563,7 @@ table.grid.long-key th:first-child{width:42%}
   <h3>The login page says why</h3>
   <p>In <code>LoginPage.jsx</code>, read <code>expired</code> from <code>useAuth()</code> and, when it's true, show a message above the form:</p>
   <div class="cmd">{expired &amp;&amp; &lt;p role=<span class="st">"status"</span> className=<span class="st">"notice"</span>&gt;Your session has expired — log <span class="tg">in</span> again.&lt;/p&gt;}</div>
-  <p><code>role="status"</code>, not <code>"alert"</code>: it's information, and the form already uses <code>role="alert"</code> for a failed login. <code>LoginPage</code>'s <code>error</code> state is now the whole error object, not just its message — the stretch in section 07 needs its <code>fieldErrors</code>.</p>
+  <p><code>role="status"</code>, not <code>"alert"</code>: it's information, and the form already uses <code>role="alert"</code> for a failed login. One more change in your <code>LoginPage</code>: keep the whole error in its <code>error</code> state, not just its message — <code>setError(err)</code> in the <code>catch</code>, and <code>{error.message}</code> where the alert shows it. The stretch in section 07 needs its <code>fieldErrors</code>.</p>
 
   <div class="dothis">
     <h4>Do this now — both triggers again</h4>
@@ -595,7 +627,7 @@ table.grid.long-key th:first-child{width:42%}
   <p>An <code>&lt;input type="email"&gt;</code> makes the browser check the address before submitting, with its own little bubble — so your page would never see the server's message for a bad email. Put <code>noValidate</code> on the <code>&lt;form&gt;</code> for this page: the browser still gives the right keyboard on a phone, but the server judges. In a real app you'd often keep both — the browser's checks are fast, the server's are the ones that count.</p>
 
   <h3>Step 3 — the route and the link</h3>
-  <p>In <code>App.jsx</code>, a <code>signup</code> route for <code>&lt;SignupPage /&gt;</code>. On the login page, under the form: <em>No account yet?</em> <code>&lt;Link to="/signup" state={location.state}&gt;Sign up&lt;/Link&gt;</code>. Passing <code>location.state</code> along keeps the <code>from</code> a guard put there: open <code>/me</code> logged out, take the detour through Sign up, and you still land on My courses.</p>
+  <p>In your <code>App.jsx</code>, a <code>signup</code> route for <code>&lt;SignupPage /&gt;</code> (import it from <code>./pages/SignupPage.jsx</code>). On your login page, under the form: <em>No account yet?</em> <code>&lt;Link to="/signup" state={location.state}&gt;Sign up&lt;/Link&gt;</code> (<code>Link</code> comes from <code>react-router</code>). Passing <code>location.state</code> along keeps the <code>from</code> a guard put there: open <code>/me</code> logged out, take the detour through Sign up, and you still land on My courses.</p>
 
   <div class="dothis">
     <h4>Do this now</h4>
@@ -648,26 +680,26 @@ table.grid.long-key th:first-child{width:42%}
 }</div>
 
   <h3>Step 2 — handleEnroll and the render</h3>
-  <div class="cmd"><span class="tg">try</span> {
-  <span class="tg">await</span> <span class="at">enroll</span>();
-  <span class="at">setNotice</span>({ ok: <span class="tg">true</span>, text: <span class="st">"You're enrolled."</span>, toMine: <span class="tg">true</span> });
-} <span class="tg">catch</span> (err) {
+  <p>In your <code>handleEnroll</code> (Lab 3 §13), two changes. The success notice gets <code>toMine: true</code>, so it links to My courses. And the <code>catch</code> no longer shows the raw message — it becomes:</p>
+  <div class="cmd">} <span class="tg">catch</span> (err) {
   <span class="tg">if</span> (err.status === <span class="st">401</span>) <span class="tg">return</span>;     <span class="cm">// the session ended: section 05 is taking us to log in</span>
   <span class="at">setNotice</span>(<span class="at">enrollNotice</span>(err));
 }</div>
   <p>In the JSX: <code>const full = course.seatsLeft === 0;</code> — derived during render, never stored — and <code>&lt;button … disabled={full}&gt;Enroll&lt;/button&gt;</code>. The notice keeps <code>role="status"</code> (success) or <code>role="alert"</code> (refused), and when <code>notice.toMine</code> is true it ends with <code>&lt;Link to="/me"&gt;My courses&lt;/Link&gt;</code>.</p>
 
   <h3>Step 3 — after a 409, ask again</h3>
-  <p>A 409 often means the page is out of date: it said "1 seat left" because that was true when it loaded. Someone else took the seat since. So after a 409, <code>enroll()</code> in <code>useCourse.js</code> reloads the course before it passes the error on — <code>refresh()</code> is given:</p>
-  <div class="cmd"><span class="tg">async</span> <span class="tg">function</span> <span class="at">enroll</span>() {
+  <p>A 409 often means the page is out of date: it said "1 seat left" because that was true when it loaded. Someone else took the seat since. So after a 409, <code>enroll()</code> in your <code>useCourse.js</code> reloads the course before it passes the error on. First, paste this helper into <code>useCourse</code>, after <code>enroll</code> — it's given; it reloads the course quietly, and keeps what's there if that fails too:</p>
+  <div class="cmd"><span class="tg">async</span> <span class="tg">function</span> <span class="at">refresh</span>() {
   <span class="tg">try</span> {
-    <span class="tg">const</span> enrollment = <span class="tg">await</span> <span class="at">api</span>(<span class="st">"/api/enrollments"</span>, { method: <span class="st">"POST"</span>, body: { courseId: course.id } });
-    <span class="at">setCourse</span>(enrollment.course);        <span class="cm">// success: the server's numbers, as in Lab 3</span>
-    <span class="tg">return</span> enrollment;
-  } <span class="tg">catch</span> (err) {
-    <span class="tg">if</span> (err.status === <span class="st">409</span>) <span class="tg">await</span> <span class="at">refresh</span>();   <span class="cm">// a conflict: the server's numbers, now</span>
-    <span class="tg">throw</span> err;
+    <span class="at">setCourse</span>(<span class="tg">await</span> <span class="at">apiFetch</span>(<span class="st">`/api/courses/${id}`</span>));   <span class="cm">// public: plain apiFetch</span>
+  } <span class="tg">catch</span> {
+    <span class="cm">// the page still shows the last numbers it had</span>
   }
+}</div>
+  <p>Then wrap what your <code>enroll()</code> does (since section 06, through <code>api</code>) in a <code>try</code>, and add this <code>catch</code>:</p>
+  <div class="cmd">} <span class="tg">catch</span> (err) {
+  <span class="tg">if</span> (err.status === <span class="st">409</span>) <span class="tg">await</span> <span class="at">refresh</span>();   <span class="cm">// a conflict: the server's numbers, now</span>
+  <span class="tg">throw</span> err;                                 <span class="cm">// …and the page still shows the 409</span>
 }</div>
   <p>Never patch the numbers yourself (<code>seatsLeft: 0</code>) — after "Already enrolled" or "Credit limit" the seats didn't change at all. The server knows; ask it.</p>
   <p>Lab 3 left Enroll enabled on a full course so you'd see the server refuse. Now that you have, the disabled button is a courtesy — and only that. The rule still lives on the server, and a stale page still gets the 409. That's what step 3 is for.</p>
@@ -1006,6 +1038,15 @@ public SecurityFilterChain <span class="at">securityFilterChain</span>(HttpSecur
 <section id="s16">
   <div class="shead"><span class="chip">16</span><h2>When it goes wrong</h2><span class="lvl ref">Reference</span><span class="tagline">the message, and what it means</span></div>
 
+
+  <h3>Step 0 — carrying your Lab 3 app over</h3>
+  <table class="grid long-key">
+    <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>Error: TODO — from React Lab 3 (or Lab 2): run npm run carry…; a page that says "TODO"</td><td>Those files are still the starter's stubs: you haven't run <code>npm run carry -- ../react-lab3</code> (<a href="#step0">step 0</a>).</td></tr>
+    <tr><td>Logging in fails with "TODO — from React Lab 3: copy your AuthContext in"</td><td>Carry ran, but <code>src/auth/AuthContext.jsx</code> — the one file you copy by hand — still has its "from React Lab 3" TODOs (<a href="#step0">step 0</a>).</td></tr>
+    <tr><td>expiry or conflicts tests fail right after logging in from the header</td><td>Your Lab 3 lacks one of its stretch parts this lab's tests use: the session in <code>sessionStorage</code> (Lab 3 §10), or the header's <em>Log in</em> link remembering where you were (Lab 3 §11). Carry warns about both. Add them now.</td></tr>
+  </table>
+
   <h3>CORS — read the Console line, then fix the server</h3>
   <table class="grid long-key">
     <tr><th>The Console says</th><th>It usually means</th></tr>
@@ -1156,7 +1197,7 @@ http.<span class="at">cors</span>(Customizer.<span class="at">withDefaults</span
   <p>Open the zip once to check it has the <code>react-lab4</code> folder with your <code>src/</code>, <code>inlab/PROMPTS.md</code> and <code>conformance-report.txt</code> inside, and no <code>node_modules</code>. (On Windows, run <code>npm install</code> again afterwards to keep working.)</p>
 
   <h3>4. Submit the zip</h3>
-  <p>Upload <code>react-lab4.zip</code> on the submission platform, by the end of the day of the lab. The next lab's starter — which contains this lab's finished code — is released that night, so late submissions can't be accepted. Run both test commands and the suite right before you zip, so what you submit is what you tested.</p>
+  <p>Upload <code>react-lab4.zip</code> on the submission platform, by the end of the day of the lab. The next lab starts from this one (its <code>npm run carry</code> brings your code over), and this lab's solution may be handed out after the deadline, so late submissions can't be accepted. Run both test commands and the suite right before you zip, so what you submit is what you tested.</p>
 
   <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Submitted — both test commands green, PROMPTS.md filled, conformance-report.txt at level C (if my backend is ready), react-lab4.zip uploaded</span></label>
 </section>

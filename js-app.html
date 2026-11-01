@@ -273,15 +273,31 @@ table.grid.long-key th:first-child{width:42%}
 <span class="cm"># fail 44</span></div>
   <p>As before, everything starts as <code>throw new Error("TODO")</code>, and your job is to turn the 44 into 0. Nothing to install. Don't have the repo yet? Section 01 of <a href="js-react.html#s1">Lab 1</a> has the clone command.</p>
 
+  <h3 id="step0">Step 0 — bring your JS Lab 1 answer</h3>
+  <p>The app in this lab is built on <strong>your</strong> <code>useState</code> from <a href="js-react.html#s15">JS Lab 1 · §15</a>, so the starter doesn't contain it: <code>src/state.js</code> is a stub that throws <code>"TODO"</code>. One command copies yours in.</p>
+  <div class="dothis">
+    <h4>Do this now — carry your useState over</h4>
+    <div class="cmd"><span class="p">$</span> npm run carry -- ../js-lab1
+<span class="o">Copied 1 file from ../js-lab1:</span>
+<span class="o">  src/state.js  (from src/s15-state.js)</span>
+<span class="o">What they replaced is saved in .carry-backup/…/</span></div>
+    <ol>
+      <li>It copies your <code>js-lab1/src/s15-state.js</code> over <code>src/state.js</code>. The stub it replaces is kept in <code>.carry-backup/</code>; nothing else changes, here or in <code>js-lab1</code>. There's nothing to merge by hand.</li>
+      <li>This lab needs §15's <strong>stretch</strong> too — updater functions, and no redraw when the new value is the same (<code>Object.is</code>): section 07 is built on both. In <code>js-lab1</code>, <code>npm run test:stretch</code> should pass <code>s15.stretch.test.js</code>. If it doesn't, finish it there and run carry again.</li>
+      <li>Check it worked: <code>npm run repl</code>, then <code>const [get, set] = useState(1, () =&gt; {}); set((n) =&gt; n + 1); get()</code> gives <code>2</code>. (<code>npm test</code> doesn't use <code>state.js</code>, so its count doesn't change.)</li>
+    </ol>
+  </div>
+  <p><strong>If your Lab 1 isn't finished, ask your TA</strong> — the solution may be handed out later, and <code>npm run carry -- &lt;that folder&gt;</code> works from it too. If carry says a file still throws "TODO", that part of your Lab 1 isn't finished yet.</p>
+
   <h3>The folder</h3>
   <div class="mention">
     <div class="mrow"><b>src/s03-…js → s09-…js</b><span>Your exercises, one file per section. Section numbers match this doc.</span></div>
-    <div class="mrow"><b>src/state.js</b><span><code>useState</code> from Lab 1, finished. Read it; don't edit it.</span></div>
-    <div class="mrow"><b>src/catalog.js</b><span>Filtering helpers the server uses. Given.</span></div>
+    <div class="mrow"><b>src/state.js</b><span><code>useState</code> — yours, from Lab 1 §15. Step 0 copies it in; until then it's a stub that throws.</span></div>
     <div class="mrow"><b>web/</b><span>The app: <code>index.html</code>, <code>styles.css</code>, and <code>app.js</code>, which you finish in sections 07–09.</span></div>
     <div class="mrow"><b>test/</b><span>The specification. Read the tests; don't edit them.</span></div>
     <div class="mrow"><b>predict/async.js</b><span>A predict-then-run sheet for section 03.</span></div>
-    <div class="mrow"><b>tools/serve.js</b><span><code>npm run web</code>: serves the app <em>and</em> the course API on one port.</span></div>
+    <div class="mrow"><b>tools/serve.js</b><span><code>npm run web</code>: serves the app <em>and</em> the course API on one port. The API filters the courses itself — it doesn't use anything in <code>src/</code>.</span></div>
+    <div class="mrow"><b>tools/carry.js</b><span><code>npm run carry</code>: step 0.</span></div>
     <div class="mrow"><b>inlab/</b><span>For the lab session. Leave it alone until then.</span></div>
   </div>
 
@@ -296,7 +312,7 @@ table.grid.long-key th:first-child{width:42%}
   <h3>Submitting</h3>
   <p>A <strong>graded assignment</strong>, like Lab 1. The lab is on <strong>Wednesday</strong>; you submit by the <strong>end of Friday</strong>. Get <code>npm test</code> fully green and the app working, then zip the <code>js-lab2</code> folder and submit it — once. Section 15 has the steps.</p>
 
-  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — npm test runs</span></label>
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — npm test runs, and step 0 brought my useState over</span></label>
 </section>
 
 <section id="s2">
@@ -483,7 +499,7 @@ res.status    <span class="o">// 404</span>
   <p>Neither case is finished: check the table for when each must return the <em>same</em> state, and what <code>""</code> means for a grade.</p>
 
   <h3>Why "the same state" matters so much</h3>
-  <p>When nothing changes, return the very object you were given — not a copy. <code>useState</code> compares with <code>Object.is</code> and skips the redraw when the state is the same object (it's the Lab 1 stretch version, in <code>src/state.js</code>). Return a fresh copy every time and every no-op click redraws the whole page. Section 08 builds on this: <strong>a new object means "something changed", the same object means "nothing did"</strong>. That only works if you never change an object in place — which is why the tests freeze everything.</p>
+  <p>When nothing changes, return the very object you were given — not a copy. <code>useState</code> compares with <code>Object.is</code> and skips the redraw when the state is the same object (that's §15's stretch — your Lab 1 version, in <code>src/state.js</code> since <a href="#step0">step 0</a>). Return a fresh copy every time and every no-op click redraws the whole page. Section 08 builds on this: <strong>a new object means "something changed", the same object means "nothing did"</strong>. That only works if you never change an object in place — which is why the tests freeze everything.</p>
 
   <div class="cue react"><p class="cue-k">In React, this becomes…</p><p><code>const [state, dispatch] = useReducer(transition, initialState)</code>. Same function, same events, same rule about returning the same state. React even calls the events <em>actions</em> and the function a <em>reducer</em> — because it has the same shape as the callback you give <code>reduce</code>: <code>(accumulated, next) =&gt; accumulated</code>.</p></div>
 
@@ -779,6 +795,8 @@ res.status    <span class="o">// 404</span>
 
   <table class="grid long-key">
     <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>Error: TODO — from JS Lab 1 §15: run npm run carry …</td><td><code>src/state.js</code> is still the starter's stub: you haven't done <a href="#step0">step 0</a>. Run <code>npm run carry -- ../js-lab1</code>.</td></tr>
+    <tr><td>setState(fn) stores the function itself; or every click redraws everything</td><td>Your Lab 1 <code>useState</code> doesn't have §15's stretch (updater functions, the <code>Object.is</code> skip). Finish it in <code>js-lab1</code>, then carry again (<a href="#step0">step 0</a>).</td></tr>
     <tr><td>Promise {&lt;pending&gt;}</td><td>You forgot <code>await</code>: you have the promise, not its result (03).</td></tr>
     <tr><td>await is only valid in async functions</td><td>The function containing the <code>await</code> isn't marked <code>async</code> — often an inner arrow function, like a callback.</td></tr>
     <tr><td>Results empty, or in the wrong order, after a loop</td><td><code>forEach</code> with an async callback. Use <code>for…of</code> with <code>await</code>, or <code>Promise.all</code> (03).</td></tr>
