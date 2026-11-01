@@ -295,8 +295,8 @@ table.grid.long-key th:first-child{width:42%}
 <span class="o">By hand — both labs change this file, so carry leaves it alone:</span>
 <span class="o">  1. Open src/auth/AuthContext.jsx here AND ../react-lab3/src/auth/AuthContext.jsx.</span>
 <span class="o">     Copy into the TODOs marked "from React Lab 3", in order:</span>
-<span class="o">       - KEY and loadSession() — Lab 3's sessionStorage stretch (this lab's tests need it)</span>
-<span class="o">       - the first part of AuthProvider: its state, login() and logout() (and the stretch's effect)</span>
+<span class="o">       - KEY and loadSession() — Lab 3's sessionStorage (§10, step 4; this lab's tests need it)</span>
+<span class="o">       - the first part of AuthProvider: its state, the sessionStorage effect, login() and logout()</span>
 <span class="o">       - the end of AuthProvider: the context value and the return</span>
 <span class="o">       - the body of useAuth()</span></div>
     <ol>
@@ -305,7 +305,7 @@ table.grid.long-key th:first-child{width:42%}
       <li>It worked when <code>npm run dev</code> is your Lab 3 app again — log in, enroll, My courses, log out — and <code>npm test</code> says <code>27 failed | 7 passed (34)</code>.</li>
     </ol>
   </div>
-  <p><strong>Two of Lab 3's stretch parts are needed here</strong>, because this lab's tests use them: the session kept in <code>sessionStorage</code> (<a href="react-lab3.html#s10">React Lab 3 · §10</a>) and the header's <em>Log in</em> link remembering where you were (<a href="react-lab3.html#s11">§11</a>). So is Lab 2's stretch of showing each <code>fieldErrors</code> message under its field, for one in-lab test. Carry warns if your folder seems to lack them; if you skipped them, do them now — each is a few lines, and Lab 3's doc shows how. If carry says a file still throws "TODO", that part of your Lab 3 isn't finished.</p>
+  <p><strong>This lab's tests lean on three parts of your earlier labs</strong>: the session kept in <code>sessionStorage</code> (<a href="react-lab3.html#s10">React Lab 3 · §10</a>), the header's <em>Log in</em> link remembering where you were (<a href="react-lab3.html#s11">§11</a>), and, for two in-lab tests, the course form's field errors a screen reader can find (<a href="react-lab2.html#s13">React Lab 2 · §13</a>). Carry warns if your folder seems to lack one; if it does, finish it there and carry again — each is a few lines, and those docs show how. If carry says a file still throws "TODO", that part of your Lab 3 isn't finished.</p>
   <p><strong>If your Lab 3 isn't finished, ask your TA</strong> — the solution may be handed out later, and <code>npm run carry -- &lt;that folder&gt;</code> works from it too.</p>
 
   <p>The 7 tests that pass after step 0 are things your Lab 3 app already does right (a 403 isn't an expired session, say). Your job is to turn the 27 into 0. Sections 05–08 change several of the files carry brought over — each section names them. Then start the app:</p>
@@ -428,7 +428,7 @@ table.grid.long-key th:first-child{width:42%}
 <section id="s4">
   <div class="shead"><span class="chip">04</span><h2>When a token dies in the middle of a session</h2><span class="lvl core">Core</span><span class="tagline">see the problem — no code yet</span></div>
 
-  <div class="cue"><p class="cue-k">Refresher</p><p>A 401 means "who are you?" — no token, or one that's invalid, expired or logged out (<a href="react-lab3.html#s9">React Lab 3 · §09</a>). This app keeps the session in <code>sessionStorage</code>, so it survives a reload (<a href="react-lab3.html#s10">Lab 3 · §10's stretch</a>, given here).</p></div>
+  <div class="cue"><p class="cue-k">Refresher</p><p>A 401 means "who are you?" — no token, or one that's invalid, expired or logged out (<a href="react-lab3.html#s9">React Lab 3 · §09</a>). This app keeps the session in <code>sessionStorage</code>, so it survives a reload (<a href="react-lab3.html#s10">Lab 3 · §10</a>).</p></div>
 
   <p>The app decides you're logged in when it <em>has</em> a token. The server decides when the token <em>works</em>. Those two can disagree, and they will. A token stops working when:</p>
   <ul>
@@ -1044,7 +1044,7 @@ public SecurityFilterChain <span class="at">securityFilterChain</span>(HttpSecur
     <tr><th>You see</th><th>It usually means</th></tr>
     <tr><td>Error: TODO — from React Lab 3 (or Lab 2): run npm run carry…; a page that says "TODO"</td><td>Those files are still the starter's stubs: you haven't run <code>npm run carry -- ../react-lab3</code> (<a href="#step0">step 0</a>).</td></tr>
     <tr><td>Logging in fails with "TODO — from React Lab 3: copy your AuthContext in"</td><td>Carry ran, but <code>src/auth/AuthContext.jsx</code> — the one file you copy by hand — still has its "from React Lab 3" TODOs (<a href="#step0">step 0</a>).</td></tr>
-    <tr><td>expiry or conflicts tests fail right after logging in from the header</td><td>Your Lab 3 lacks one of its stretch parts this lab's tests use: the session in <code>sessionStorage</code> (Lab 3 §10), or the header's <em>Log in</em> link remembering where you were (Lab 3 §11). Carry warns about both. Add them now.</td></tr>
+    <tr><td>expiry or conflicts tests fail right after logging in from the header</td><td>Your Lab 3 lacks one of the parts this lab's tests use: the session in <code>sessionStorage</code> (Lab 3 §10), or the header's <em>Log in</em> link remembering where you were (Lab 3 §11). Carry warns about both. Finish them in Lab 3 and carry again, or add them here.</td></tr>
   </table>
 
   <h3>CORS — read the Console line, then fix the server</h3>

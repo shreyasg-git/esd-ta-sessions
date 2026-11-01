@@ -273,9 +273,9 @@ table.grid.long-key th:first-child{width:42%}
 <span class="p">$</span> cd react-lab2
 <span class="p">$</span> npm install
 <span class="p">$</span> npm test
-<span class="o"> Test Files  7 failed | 1 passed (8)</span>
-<span class="o">      Tests  52 failed | 8 passed (60)</span></div>
-  <p>Eight pass from the start: the seven tests of the API client, which is given, and one search test that passes because the placeholder does nothing. The rest is yours. At home you turn the 20 tests in <code>test/search/</code> green. In the lab, with AI, the 33 in <code>test/courses/</code>.</p>
+<span class="o"> Test Files  8 failed | 1 passed (9)</span>
+<span class="o">      Tests  54 failed | 8 passed (62)</span></div>
+  <p>Eight pass from the start: the seven tests of the API client, which is given, and one search test that passes because the placeholder does nothing. The rest is yours. At home you turn the 20 tests in <code>test/search/</code> green. In the lab, with AI, the 35 in <code>test/courses/</code>.</p>
 
   <h3>Run the app</h3>
   <div class="cmd"><span class="p">$</span> npm run dev
@@ -980,7 +980,7 @@ res.status
   <ol>
     <li><strong><code>CoursesView</code></strong> first: the easiest, because it's mostly deleting. Take the JSX for the four states and the list, make it a function of <code>{ courses, status, error }</code>, and remove everything else. <code>npm test -- courses/CoursesView</code>.</li>
     <li><strong><code>useCourses</code></strong>: the state, the effect with its ignore flag, and <code>addCourse</code>, which inserts the 201 body in code order as a new array and lets an <code>ApiError</code> through. <code>npm test -- courses/useCourses</code>.</li>
-    <li><strong><code>AddCourseForm</code></strong>: the six controlled inputs, <code>Number(…)</code> on submit, <code>await onAdd(…)</code>, and the error display — the form's own state. <code>npm test -- courses/AddCourseForm</code>.</li>
+    <li><strong><code>AddCourseForm</code></strong>: the six controlled inputs, <code>Number(…)</code> on submit, <code>await onAdd(…)</code>, and the error display — the form's own state, marked up so a screen reader finds it (below). <code>npm test -- courses/AddCourseForm courses/fieldErrors</code>.</li>
     <li><strong><code>CoursesPage</code></strong>: one hook call, a heading, two components. <code>npm test -- courses/CoursesPage</code>.</li>
   </ol>
   <p>Delete any file of the AI's that nothing imports any more. Then the whole of <code>npm test</code>, and the browser checks from section 11 again.</p>
@@ -1012,11 +1012,8 @@ res.status
     <tr><td>Found multiple elements with the text: …</td><td>The same text is on screen twice — a reason shown both in a summary and under its field, say.</td></tr>
   </table>
 
-  <div class="stretch-box">
-    <h3>Stretch — field errors a screen reader can find</h3>
-    <p>A red line under an input is invisible to a screen reader. Mark each input that has an error with <code>aria-invalid="true"</code>, give its reason an <code>id</code>, and point the input at it with <code>aria-describedby</code>. A screen reader then reads "Code, invalid entry, must be 2–4 uppercase letters…". Put <code>role="alert"</code> on the form's message so it's announced when it appears. <code>npm run test:stretch</code>.</p>
-    <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Stretch — accessible field errors</span></label>
-  </div>
+  <h3>Field errors a screen reader can find</h3>
+  <p>A red line under an input is invisible to a screen reader. Mark each input that has an error with <code>aria-invalid="true"</code>, give its reason an <code>id</code>, and point the input at it with <code>aria-describedby</code>. A screen reader then reads "Code, invalid entry, must be 2–4 uppercase letters…". Put <code>role="alert"</code> on the form's message so it's announced when it appears. <code>CONTRACT.md</code> §4 asks for both, and <code>npm test -- courses/fieldErrors</code> checks them. React Labs 3 and 4 reuse this form, and their tests find its messages exactly this way.</p>
 
   <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 13 complete — npm test fully green, the browser checks pass</span></label>
 </section>
@@ -1129,8 +1126,8 @@ res.status
   <h3>1. Get npm test fully green</h3>
   <div class="cmd"><span class="p">$</span> cd esd-labs/react-lab2
 <span class="p">$</span> npm test
-<span class="o"> Test Files  8 passed (8)</span>
-<span class="o">      Tests  60 passed (60)</span></div>
+<span class="o"> Test Files  9 passed (9)</span>
+<span class="o">      Tests  62 passed (62)</span></div>
   <p>Nothing failing is the only acceptable result. When we grade, we <strong>put our own copy of the tests back in</strong> before running <code>npm test</code> — so editing or deleting a test can only cost you marks.</p>
 
   <h3>2. Check the two files</h3>

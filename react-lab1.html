@@ -729,7 +729,7 @@ heading
   <h3>Why the setter gets a function</h3>
   <p><code>setMatrix((prev) =&gt; incrementAt(prev, row, col))</code> hands React an <strong>updater</strong>: "whatever the matrix is when you get to this, here's how to make the next one". That's <code>applyUpdate</code> from <a href="js-react.html#s5">JS Lab 1 · §05</a>. <code>setMatrix(incrementAt(matrix, row, col))</code> also works for a single click, but it uses this render's <code>matrix</code>; two updates before the next render would both start from the same old value, and one would be lost. The updater never is.</p>
 
-  <div class="cue watch"><p class="cue-k">Why not matrix[row][col] += 1?</p><p>Because then you hand React the <strong>same</strong> array it already has. React compares old and new with <code>Object.is</code> — the check you wrote in JS Lab 1 §15's stretch — sees the same object, and concludes nothing changed: no re-render, nothing on screen moves. The data is changed and the page doesn't know. Section 10 has you do it on purpose and watch.</p></div>
+  <div class="cue watch"><p class="cue-k">Why not matrix[row][col] += 1?</p><p>Because then you hand React the <strong>same</strong> array it already has. React compares old and new with <code>Object.is</code> — the check you wrote in <a href="js-react.html#s15">JS Lab 1 · §15</a> — sees the same object, and concludes nothing changed: no re-render, nothing on screen moves. The data is changed and the page doesn't know. Section 10 has you do it on purpose and watch.</p></div>
 
   <div class="dothis">
     <h4>Do this now — three files</h4>

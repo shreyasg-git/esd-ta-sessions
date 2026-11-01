@@ -283,7 +283,7 @@ table.grid.long-key th:first-child{width:42%}
 <span class="o">What they replaced is saved in .carry-backup/…/</span></div>
     <ol>
       <li>It copies your <code>js-lab1/src/s15-state.js</code> over <code>src/state.js</code>. The stub it replaces is kept in <code>.carry-backup/</code>; nothing else changes, here or in <code>js-lab1</code>. There's nothing to merge by hand.</li>
-      <li>This lab needs §15's <strong>stretch</strong> too — updater functions, and no redraw when the new value is the same (<code>Object.is</code>): section 07 is built on both. In <code>js-lab1</code>, <code>npm run test:stretch</code> should pass <code>s15.stretch.test.js</code>. If it doesn't, finish it there and run carry again.</li>
+      <li>This lab needs all of §15, including "A smarter setState" — updater functions, and no redraw when the new value is the same (<code>Object.is</code>): section 07 is built on both. In <code>js-lab1</code>, <code>npm test</code> should pass <code>s15-smarter.test.js</code>. If it doesn't, finish it there and run carry again.</li>
       <li>Check it worked: <code>npm run repl</code>, then <code>const [get, set] = useState(1, () =&gt; {}); set((n) =&gt; n + 1); get()</code> gives <code>2</code>. (<code>npm test</code> doesn't use <code>state.js</code>, so its count doesn't change.)</li>
     </ol>
   </div>
@@ -295,7 +295,7 @@ table.grid.long-key th:first-child{width:42%}
     <div class="mrow"><b>src/state.js</b><span><code>useState</code> — yours, from Lab 1 §15. Step 0 copies it in; until then it's a stub that throws.</span></div>
     <div class="mrow"><b>web/</b><span>The app: <code>index.html</code>, <code>styles.css</code>, and <code>app.js</code>, which you finish in sections 07–09.</span></div>
     <div class="mrow"><b>test/</b><span>The specification. Read the tests; don't edit them.</span></div>
-    <div class="mrow"><b>predict/async.js</b><span>A predict-then-run sheet for section 03.</span></div>
+    <div class="mrow"><b>predict/async.js</b><span>A predict-then-run sheet for section 03 (stretch).</span></div>
     <div class="mrow"><b>tools/serve.js</b><span><code>npm run web</code>: serves the app <em>and</em> the course API on one port. The API filters the courses itself — it doesn't use anything in <code>src/</code>.</span></div>
     <div class="mrow"><b>tools/carry.js</b><span><code>npm run carry</code>: step 0.</span></div>
     <div class="mrow"><b>inlab/</b><span>For the lab session. Leave it alone until then.</span></div>
@@ -344,7 +344,7 @@ table.grid.long-key th:first-child{width:42%}
 <div class="part">Part 2 · Waiting for things</div>
 
 <section id="s3">
-  <div class="shead"><span class="chip">03</span><h2>Promises, await, and the order things happen in</h2><span class="lvl core">Core</span><span class="tagline">src/s03-async.js · predict/async.js</span></div>
+  <div class="shead"><span class="chip">03</span><h2>Promises, await, and the order things happen in</h2><span class="lvl core">Core</span><span class="tagline">src/s03-async.js</span></div>
 
   <div class="cue"><p class="cue-k">Refresher</p><p>A <strong>promise</strong> is a value that isn't ready yet: a placeholder for a result that will arrive later, or a failure. <code>await</code> pauses an <code>async</code> function until the promise settles, then gives you the result — or throws the failure, so <code>try/catch</code> works. Full version: <a href="advanced-javascript.html#s17">06 · §17 Promises</a> to <a href="advanced-javascript.html#s21">§21 Error handling</a>.</p></div>
 
@@ -357,9 +357,9 @@ table.grid.long-key th:first-child{width:42%}
 <span class="o">// a, d, c, b</span></div>
   <p>The current code always finishes first (<code>a</code>, <code>d</code>). Then promise callbacks (<code>c</code>), then timers (<code>b</code>). You don't need the queue names; you need the habit: <strong>code after an async call runs before its result arrives.</strong></p>
 
-  <div class="dothis">
-    <h4>Do this now — predict, then run</h4>
-    <p>Open <code>predict/async.js</code>. Under each block, write what you expect it to print. Then run <code>node predict/async.js</code> and explain every difference. Bring the sheet to the lab.</p>
+  <div class="stretch-box">
+    <h3>Stretch — predict, then run</h3>
+    <p>Open <code>predict/async.js</code>. Under each block, write what you expect it to print. Then run <code>node predict/async.js</code> and explain every difference.</p>
   </div>
 
   <h3>await pauses one function, not the program</h3>
@@ -394,7 +394,7 @@ table.grid.long-key th:first-child{width:42%}
     <details><summary>Show answer</summary><div class="a"><p>A promise that resolves to 3. <code>await f()</code> inside an async function (or the REPL), or <code>f().then((n) =&gt; …)</code>.</p></div></details>
   </div>
 
-  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 complete — s03 tests pass, predict sheet filled in</span></label>
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 complete — s03 tests pass</span></label>
 </section>
 
 <section id="s4">
@@ -499,7 +499,7 @@ res.status    <span class="o">// 404</span>
   <p>Neither case is finished: check the table for when each must return the <em>same</em> state, and what <code>""</code> means for a grade.</p>
 
   <h3>Why "the same state" matters so much</h3>
-  <p>When nothing changes, return the very object you were given — not a copy. <code>useState</code> compares with <code>Object.is</code> and skips the redraw when the state is the same object (that's §15's stretch — your Lab 1 version, in <code>src/state.js</code> since <a href="#step0">step 0</a>). Return a fresh copy every time and every no-op click redraws the whole page. Section 08 builds on this: <strong>a new object means "something changed", the same object means "nothing did"</strong>. That only works if you never change an object in place — which is why the tests freeze everything.</p>
+  <p>When nothing changes, return the very object you were given — not a copy. <code>useState</code> compares with <code>Object.is</code> and skips the redraw when the state is the same object (that's §15's smarter <code>setState</code> — your Lab 1 version, in <code>src/state.js</code> since <a href="#step0">step 0</a>). Return a fresh copy every time and every no-op click redraws the whole page. Section 08 builds on this: <strong>a new object means "something changed", the same object means "nothing did"</strong>. That only works if you never change an object in place — which is why the tests freeze everything.</p>
 
   <div class="cue react"><p class="cue-k">In React, this becomes…</p><p><code>const [state, dispatch] = useReducer(transition, initialState)</code>. Same function, same events, same rule about returning the same state. React even calls the events <em>actions</em> and the function a <em>reducer</em> — because it has the same shape as the callback you give <code>reduce</code>: <code>(accumulated, next) =&gt; accumulated</code>.</p></div>
 
@@ -562,7 +562,7 @@ res.status    <span class="o">// 404</span>
   <h3>Step 1 — the state, and the only way to change it</h3>
   <div class="cmd"><span class="tg">const</span> [getState, setState] = <span class="at">useState</span>(initialState, render);
 <span class="tg">const</span> dispatch = (event) =&gt; <span class="at">setState</span>((state) =&gt; <span class="at">transition</span>(state, event));</div>
-  <p>Two lines, and they're the whole architecture. <code>dispatch</code> is the one door into the state: give it an event, it runs the transition on the <em>current</em> state (an updater function — <a href="js-react.html#s15">Lab 1 · §15</a> stretch), and <code>useState</code> redraws if the result is a new object. From here on, nothing in <code>app.js</code> assigns to the state or edits the page directly.</p>
+  <p>Two lines, and they're the whole architecture. <code>dispatch</code> is the one door into the state: give it an event, it runs the transition on the <em>current</em> state (an updater function — <a href="js-react.html#s15">Lab 1 · §15</a>), and <code>useState</code> redraws if the result is a new object. From here on, nothing in <code>app.js</code> assigns to the state or edits the page directly.</p>
 
   <h3>Step 2 — render(), the simple version</h3>
   <p>For now: read the state with <code>getState()</code> and call all five region functions with it. Every time. Section 08 makes it smarter.</p>
@@ -780,12 +780,11 @@ res.status    <span class="o">// 404</span>
   <p>The lab assumes you've finished the core sections. It answers your questions, then goes deeper on the parts that are hardest to get right alone.</p>
   <ol>
     <li>We scroll through the <strong>core</strong> sections together at the projector — stop me anywhere with a question. Questions on stretch parts are welcome too.</li>
-    <li><strong>The event loop, in depth.</strong> Your predict sheets, the wrong guesses, and new ordering puzzles live.</li>
     <li><strong>State machines, in depth.</strong> What happens if you click Add while a load is in flight, or Retry twice? Which events are allowed in which states?</li>
     <li><strong>In-lab task, AI closed:</strong> <code>inlab/retry.js</code> — retry a failing request a few times before giving up — checked with <code>npm run inlab</code>.</li>
     <li>What the React labs build on this.</li>
   </ol>
-  <div class="cue work"><p class="cue-k">Bring</p><p>Your laptop with <code>esd-labs/js-lab2</code>, as far through the core as you got, your filled-in predict sheet, and your questions. Raise a hand when you're stuck — the TAs come to you.</p></div>
+  <div class="cue work"><p class="cue-k">Bring</p><p>Your laptop with <code>esd-labs/js-lab2</code>, as far through the core as you got, and your questions. Raise a hand when you're stuck — the TAs come to you.</p></div>
 
   <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 12 read</span></label>
 </section>
@@ -796,7 +795,7 @@ res.status    <span class="o">// 404</span>
   <table class="grid long-key">
     <tr><th>You see</th><th>It usually means</th></tr>
     <tr><td>Error: TODO — from JS Lab 1 §15: run npm run carry …</td><td><code>src/state.js</code> is still the starter's stub: you haven't done <a href="#step0">step 0</a>. Run <code>npm run carry -- ../js-lab1</code>.</td></tr>
-    <tr><td>setState(fn) stores the function itself; or every click redraws everything</td><td>Your Lab 1 <code>useState</code> doesn't have §15's stretch (updater functions, the <code>Object.is</code> skip). Finish it in <code>js-lab1</code>, then carry again (<a href="#step0">step 0</a>).</td></tr>
+    <tr><td>setState(fn) stores the function itself; or every click redraws everything</td><td>Your Lab 1 <code>useState</code> doesn't have §15's smarter <code>setState</code> (updater functions, the <code>Object.is</code> skip). Finish it in <code>js-lab1</code>, then carry again (<a href="#step0">step 0</a>).</td></tr>
     <tr><td>Promise {&lt;pending&gt;}</td><td>You forgot <code>await</code>: you have the promise, not its result (03).</td></tr>
     <tr><td>await is only valid in async functions</td><td>The function containing the <code>await</code> isn't marked <code>async</code> — often an inner arrow function, like a callback.</td></tr>
     <tr><td>Results empty, or in the wrong order, after a loop</td><td><code>forEach</code> with an async callback. Use <code>for…of</code> with <code>await</code>, or <code>Promise.all</code> (03).</td></tr>
@@ -923,7 +922,7 @@ res.status    <span class="o">// 404</span>
   <h2>How to know you're ready</h2>
   <p>You're ready for the lab if you can do all of these <em>without looking anything up</em>:</p>
   <ol>
-    <li>Predict the order of a <code>console.log</code>, a <code>setTimeout(…, 0)</code> and a <code>.then</code>, and say why.</li>
+    <li>Say why the line after an async call runs before its result arrives.</li>
     <li>Say what <code>getJSON(url)</code> without <code>await</code> gives you.</li>
     <li>Choose between a <code>for…of</code> with <code>await</code> and <code>Promise.all</code> for a given job, and say what each costs.</li>
     <li>Explain why <code>fetch</code> resolves for a 404, and what you do about it.</li>

@@ -273,8 +273,8 @@ table.grid.long-key th:first-child{width:42%}
 <span class="p">$</span> cd react-lab3
 <span class="p">$</span> npm install
 <span class="p">$</span> npm test
-<span class="o"> Test Files  6 failed (6)</span>
-<span class="o">      Tests  40 failed (40)</span></div>
+<span class="o"> Test Files  9 failed (9)</span>
+<span class="o">      Tests  46 failed (46)</span></div>
   <p>One new package since Lab 2: <code>react-router</code>, version 7. Before anything else, one more command.</p>
 
   <h3 id="step0">Step 0 — bring your React Lab 2 answers</h3>
@@ -289,16 +289,16 @@ table.grid.long-key th:first-child{width:42%}
 <span class="o">  src/courses/CoursesPage.jsx</span>
 <span class="o">What they replaced is saved in .carry-backup/…/</span>
 <span class="p">$</span> npm test
-<span class="o">      Tests  39 failed | 1 passed (40)</span></div>
+<span class="o">      Tests  45 failed | 1 passed (46)</span></div>
     <ol>
       <li>It copies those four files whole, and keeps the stubs they replace in <code>.carry-backup/</code>. It never changes anything in <code>react-lab2</code>. There's nothing to merge by hand.</li>
-      <li>It worked when <code>npm run dev</code> shows <em>your</em> Lab 2 page on the home page again — the twenty courses and your add form — and <code>npm test</code> says <code>39 failed | 1 passed</code>.</li>
-      <li>If carry says a file still throws "TODO", that part of your Lab 2 isn't finished. Finish it in <code>react-lab2</code> and carry again — or finish it here.</li>
+      <li>It worked when <code>npm run dev</code> shows <em>your</em> Lab 2 page on the home page again — the twenty courses and your add form — and <code>npm test</code> says <code>45 failed | 1 passed</code>.</li>
+      <li>If carry says a file still throws "TODO", that part of your Lab 2 isn't finished. Finish it in <code>react-lab2</code> and carry again — or finish it here. The same goes for its warnings: the in-lab task (section 15) reuses your <code>AddCourseForm</code>, and its test finds the form's message by <code>role="alert"</code>, from <a href="react-lab2.html#s13">Lab 2's section 13</a>.</li>
     </ol>
   </div>
   <p>Three small changes to those files come later, each where it belongs: section 06 makes each course's name a link, section 09 sends the token from <code>useCourses</code>, and section 15 moves the add form to an admin page. <strong>If your Lab 2 isn't finished, ask your TA</strong> — the solution may be handed out later, and <code>npm run carry -- &lt;that folder&gt;</code> works from it too.</p>
 
-  <p>Every Lab 3 exercise starts as a <code>TODO</code> comment, and your job is to turn the 39 into 0. Then start the app:</p>
+  <p>Every Lab 3 exercise starts as a <code>TODO</code> comment, and your job is to turn the 45 into 0. Then start the app:</p>
   <div class="cmd"><span class="p">$</span> npm run dev
 <span class="o">  ➜  Local:   http://localhost:5173/</span></div>
   <p>Open <a href="http://localhost:5173/" target="_blank" rel="noopener">localhost:5173</a>. Right now it's your Lab 2 page at <em>every</em> URL — try <code>localhost:5173/anything</code>. By the end of section 13 each URL is its own screen. The mock API has two accounts you'll use all the time: <code>student@esd.local</code> / <code>student12345</code> (Sam Student) and <code>admin@esd.local</code> / <code>admin12345</code> (Course Admin). Every restart of <code>npm run dev</code> resets the data.</p>
@@ -432,7 +432,7 @@ history.<span class="at">back</span>()                         <span class="cm">
   <table class="grid long-key">
     <tr><th>You write</th><th>What happens on click</th></tr>
     <tr><td><code>&lt;Link to="/me"&gt;</code></td><td>The URL changes, the router draws the new screen. No request for a page. All React state — including who's logged in — is still there.</td></tr>
-    <tr><td><code>&lt;a href="/me"&gt;</code></td><td>A full page load: the browser asks the server for <code>/me</code>, gets <code>index.html</code>, and starts the app <strong>from scratch</strong>. Every piece of state is gone. After section 10, that includes your login.</td></tr>
+    <tr><td><code>&lt;a href="/me"&gt;</code></td><td>A full page load: the browser asks the server for <code>/me</code>, gets <code>index.html</code>, and starts the app <strong>from scratch</strong>. Every piece of React state is gone. Your login survives only because section 10 keeps a copy of it in <code>sessionStorage</code>.</td></tr>
   </table>
   <div class="dothis">
     <h4>Do this now — see the difference in the Network tab</h4>
@@ -712,8 +712,8 @@ location        <span class="o">// { pathname: "/login", search: "", hash: "", s
 (<span class="tg">await</span> <span class="at">fetch</span>(<span class="st">"/api/users/me"</span>, { headers: auth })).status                          <span class="o">// 401 — the same token, revoked</span></div>
   <p>Find each request in the Network tab and look at its <em>Request Headers</em>. Everything the app does in sections 10–13 is these calls, made by components.</p>
 
-  <h3>Where the token lives: in memory</h3>
-  <p>The app keeps the token in <strong>React state</strong>, inside <code>AuthProvider</code>, and nowhere else. That has a consequence you'll see at once: a <strong>reload</strong>, a typed-in URL, a new tab or an <code>&lt;a href&gt;</code> click restarts the JavaScript, and the token is gone — you're logged out. That's the honest default, and the core of this lab. (Section 10's stretch keeps it in <code>sessionStorage</code> instead, and spells out what that costs.)</p>
+  <h3>Where the token lives</h3>
+  <p>The app keeps the token in <strong>React state</strong>, inside <code>AuthProvider</code>. On its own, that has a consequence you'll see at once: a <strong>reload</strong>, a typed-in URL, a new tab or an <code>&lt;a href&gt;</code> click restarts the JavaScript, and the token is gone — you're logged out. So section 10 also keeps a copy in <code>sessionStorage</code>, which survives a reload in the same tab, and spells out what that costs.</p>
 
   <h3>The two changes to Lab 2's code</h3>
   <p><strong>1. <code>src/api/client.js</code> takes a token.</strong> In Lab 2, <code>apiFetch</code> logged in as the admin behind your back, so the add form worked before there was a login screen. That stand-in is gone. Now <code>apiFetch</code> takes a <code>token</code> option, and sends it as the header when it's given:</p>
@@ -774,7 +774,7 @@ location        <span class="o">// { pathname: "/login", search: "", hash: "", s
   <p>For now <code>from</code> is always <code>"/"</code>; in section 11 a protected route starts filling it in. <code>?.</code> and <code>??</code> handle "nobody sent me here": no state, no <code>from</code>, so <code>"/"</code>.</p>
 
   <h3>Step 3 — the header knows who's logged in</h3>
-  <p>In <code>Layout</code>, read <code>const { user, logout } = useAuth();</code>. Logged out: the <em>Log in</em> link. Logged in: <code>Logged in as &lt;strong&gt;{user.fullName}&lt;/strong&gt;</code> and a <strong>Log out</strong> button. The button's handler goes home and logs out — in that order:</p>
+  <p>In <code>Layout</code>, read <code>const { user, logout } = useAuth();</code>. Logged out: the <em>Log in</em> link. Logged in: <code>Logged in as &lt;strong&gt;{user.fullName}&lt;/strong&gt;</code>, the role in a badge — <code>&lt;span className="badge"&gt;{user.role}&lt;/span&gt;</code>, so it reads <em>Logged in as <strong>Course Admin</strong> ADMIN</em> (<code>.badge</code> is in <code>styles.css</code>) — and a <strong>Log out</strong> button. The button's handler goes home and logs out — in that order:</p>
   <div class="cmd"><span class="tg">async</span> <span class="tg">function</span> <span class="at">handleLogout</span>() {
   <span class="at">navigate</span>(<span class="st">"/"</span>);      <span class="cm">// first: leave whatever page we're on…</span>
   <span class="tg">await</span> <span class="at">logout</span>();     <span class="cm">// …then forget the user. (The other order is a bug — section 11.)</span>
@@ -782,35 +782,31 @@ location        <span class="o">// { pathname: "/login", search: "", hash: "", s
 
   <div class="dothis">
     <h4>Do this now — log in, watch, reload</h4>
-    <div class="cmd"><span class="p">$</span> npx vitest run test/auth.test.jsx</div>
+    <div class="cmd"><span class="p">$</span> npx vitest run test/auth.test.jsx test/badge.test.jsx</div>
     <ol>
       <li>In the browser, log in with a wrong password: the server's message appears. Then log in properly: the header changes. In the Network tab: <code>login</code>, then <code>me</code> with an <code>Authorization</code> header.</li>
-      <li>Click around with the header links: still logged in. Now press reload: logged out. The token lived in memory, and a reload starts the app from scratch.</li>
+      <li>Click around with the header links: still logged in. Now press reload: logged out. The token lived in memory, and a reload starts the app from scratch. Step 4 fixes that.</li>
       <li>Log in, log out, and find the <code>logout</code> request and its header.</li>
     </ol>
   </div>
 
-  <div class="stretch-box">
-    <h3>Stretch 1 — survive a reload, and know what it costs</h3>
-    <p>Keep the session in <code>sessionStorage</code> as well, so a reload doesn't log you out. Two pieces, both in <code>AuthProvider</code>:</p>
-    <div class="cmd"><span class="tg">const</span> [session, setSession] = <span class="at">useState</span>(loadSession);   <span class="cm">// a function: React calls it once, at the start</span>
+  <h3>Step 4 — survive a reload, and know what it costs</h3>
+  <p>Keep the session in <code>sessionStorage</code> as well, so a reload doesn't log you out. Two pieces, both in <code>AuthProvider</code> — the first replaces step 1's <code>useState(null)</code>:</p>
+  <div class="cmd"><span class="tg">const</span> [session, setSession] = <span class="at">useState</span>(loadSession);   <span class="cm">// a function: React calls it once, at the start</span>
 
 <span class="at">useEffect</span>(() =&gt; {                                      <span class="cm">// copy every change out of React</span>
   <span class="tg">if</span> (session) sessionStorage.<span class="at">setItem</span>(<span class="st">"esd-session"</span>, <span class="tg">JSON</span>.<span class="at">stringify</span>(session));
   <span class="tg">else</span> sessionStorage.<span class="at">removeItem</span>(<span class="st">"esd-session"</span>);
 }, [session]);</div>
-    <p>Write <code>loadSession()</code> to read it back (and return <code>null</code> if there's nothing, or it isn't valid JSON). The effect is effects doing their real job: keeping something <em>outside</em> React in step with state inside it.</p>
-    <p>The trade-off is real. <strong>Memory:</strong> a reload or a new tab logs you out. <strong><code>sessionStorage</code>:</strong> a reload keeps you logged in (in that tab, until it closes) — and any script running on the page can read the token with one line and send it somewhere. If an attacker ever gets their JavaScript onto your page (that's <strong>XSS</strong>, cross-site scripting), the storage is the first place they look. <strong><code>localStorage</code>:</strong> every tab, even after the browser closes; the most convenient, and the longest-lived target. Many real apps use a cookie the server sets as <code>httpOnly</code>, which JavaScript can't read at all — with its own rules to learn. This contract uses Bearer tokens, so here it's memory or storage. <code>npx vitest run --mode stretch test/stretch/session.test.jsx</code>.</p>
-    <h3>Stretch 2 — a role badge</h3>
-    <p>Show the role next to the name — <em>Logged in as <strong>Course Admin</strong> ADMIN</em> — with the role in a <code>&lt;span className="badge"&gt;{user.role}&lt;/span&gt;</code> (<code>.badge</code> is in <code>styles.css</code>). <code>test/stretch/badge.test.jsx</code>.</p>
-  </div>
+  <p>Write <code>loadSession()</code> to read it back (and return <code>null</code> if there's nothing, or it isn't valid JSON). The effect is effects doing their real job: keeping something <em>outside</em> React in step with state inside it.</p>
+  <p>The trade-off is real. <strong>Memory:</strong> a reload or a new tab logs you out. <strong><code>sessionStorage</code>:</strong> a reload keeps you logged in (in that tab, until it closes) — and any script running on the page can read the token with one line and send it somewhere. If an attacker ever gets their JavaScript onto your page (that's <strong>XSS</strong>, cross-site scripting), the storage is the first place they look. <strong><code>localStorage</code>:</strong> every tab, even after the browser closes; the most convenient, and the longest-lived target. Many real apps use a cookie the server sets as <code>httpOnly</code>, which JavaScript can't read at all — with its own rules to learn. This contract uses Bearer tokens, so here it's memory or storage — and this app, React Lab 4 and the OAuth lab keep the session in <code>sessionStorage</code>. <code>npx vitest run test/session.test.jsx</code>, then in the browser: log in, reload — still logged in; log out, reload — logged out.</p>
 
   <div class="quiz">
     <div class="q"><b>Q1</b><code>login()</code> throws on a wrong password. Where should it be caught, and why there?</div>
     <details><summary>Show answer</summary><div class="a"><p>In <code>LoginPage</code>'s submit handler. The page owns the error message (it's the page's state, shown on the page). <code>AuthContext</code> stays free of UI: it says what happened, by returning or throwing, and lets whoever called it decide what to show — the same split as <code>AddCourseForm</code> and <code>addCourse</code> in Lab 2.</p></div></details>
   </div>
 
-  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 complete — auth.test.jsx passes</span></label>
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 complete — auth, badge and session tests pass</span></label>
 </section>
 
 <section id="s11">
@@ -851,17 +847,15 @@ location        <span class="o">// { pathname: "/login", search: "", hash: "", s
   <h3>Why Log out navigates first</h3>
   <p>Section 10 had you write <code>navigate("/")</code> <em>before</em> <code>await logout()</code>. Swap them and log out while you're on <code>/me</code>: you land on the login page, not the course list. Here's why. React Router applies every navigation as a <strong>transition</strong> — a low-priority update that waits behind ordinary ones. <code>logout()</code>'s <code>setSession(null)</code> is ordinary, so React draws it first, while the URL is still <code>/me</code>. <code>RequireAuth</code> sees no user and renders <code>&lt;Navigate to="/login" replace&gt;</code>, which replaces the <code>/</code> you asked for. Navigating first means the guarded page is already gone when the user disappears. A test checks it.</p>
 
-  <div class="stretch-box">
-    <h3>Stretch — log in from anywhere, land back there</h3>
-    <p>Open <code>/courses/4</code> logged out and click <em>Log in</em> in the header: after logging in you're on <code>/</code>, not the course. Make the header's link carry the same state: <code>&lt;Link to="/login" state={{ from: location }}&gt;</code>. One catch: on the login page itself, that would overwrite the <code>from</code> a redirect put there — so on <code>/login</code>, pass the current <code>location.state</code> along instead. <code>test/stretch/from-anywhere.test.jsx</code>.</p>
-  </div>
+  <h3>Log in from anywhere, land back there</h3>
+  <p>Open <code>/courses/4</code> logged out and click <em>Log in</em> in the header: after logging in you're on <code>/</code>, not the course. Make the header's link carry the same state: <code>&lt;Link to="/login" state={{ from: location }}&gt;</code>. One catch: on the login page itself, that would overwrite the <code>from</code> a redirect put there — so on <code>/login</code>, pass the current <code>location.state</code> along instead. <code>npx vitest run test/from-anywhere.test.jsx</code>.</p>
 
   <div class="quiz">
     <div class="q"><b>Q1</b>A student deletes <code>RequireAuth</code> from their copy of the app. Can they now see someone else's enrollments?</div>
     <details><summary>Show answer</summary><div class="a"><p>No. <code>GET /api/users/me/enrollments</code> returns the enrollments of <em>whoever owns the token</em> — with no token, a 401. There's no way to ask for someone else's. The data is protected by the API's rules, not by which pages the app shows.</p></div></details>
   </div>
 
-  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 complete — protected.test.jsx passes</span></label>
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 complete — protected and from-anywhere tests pass</span></label>
 </section>
 
 <section id="s12">
@@ -915,14 +909,14 @@ location        <span class="o">// { pathname: "/login", search: "", hash: "", s
   <div class="dothis">
     <h4>Do this now — tests, then the whole app by hand</h4>
     <div class="cmd"><span class="p">$</span> npx vitest run test/enroll.test.jsx
-<span class="p">$</span> npm test                    # everything core: 40 passed</div>
+<span class="p">$</span> npm test                    # everything core: 46 passed</div>
     <p>Restart <code>npm run dev</code> (fresh data) and walk it, Network tab open:</p>
     <ol>
       <li><code>/</code> → click CS402 → its page, 3 seats left.</li>
       <li>Enroll (logged out) → the login page. A wrong password → the server's message. The right one → back on CS402.</li>
       <li>Enroll → "You're enrolled.", 2 seats left. Enroll again → "Already enrolled in this course".</li>
       <li>CS201 (full) → Enroll → "Course is full".</li>
-      <li>My courses → CS402, 4 of 24 credits. Drop → gone.</li>
+      <li>My courses → CS402, 4 of 24 credits. Reload → still logged in, still there. Drop → gone.</li>
       <li>Log out while on My courses → the course list. Click My courses → the login page.</li>
       <li><code>/courses/9999</code> → Course not found. <code>/nope</code> → Page not found.</li>
       <li>Press <kbd>Back</kbd> through the whole history: every step makes sense, nothing bounces you.</li>
@@ -1004,8 +998,8 @@ location        <span class="o">// { pathname: "/login", search: "", hash: "", s
     <tr><td>No routes matched location "/courses/4" (a console warning)</td><td>No <code>&lt;Route&gt;</code> fits that URL: a typo in a path, a leading <code>/</code> on a child path that doesn't start with the parent's path, or a page missing from the table. A <code>path="*"</code> route turns it into your 404 page (05).</td></tr>
     <tr><td>The same screen at every URL</td><td><code>App</code> renders a page directly instead of through <code>&lt;Routes&gt;</code> — the starter's state (04).</td></tr>
     <tr><td>The header shows, the page under it is blank</td><td><code>Layout</code> has no <code>&lt;Outlet /&gt;</code> (05).</td></tr>
-    <tr><td>Clicking a link reloads the page — a <em>Doc</em> request in the Network tab — and you're logged out</td><td>An <code>&lt;a href&gt;</code> where a <code>&lt;Link to&gt;</code> belongs. A full page load starts the app from scratch, and the in-memory token goes with it (04, 09).</td></tr>
-    <tr><td>Logged out after a reload, a typed URL or a new tab</td><td>Expected: the token lives in memory. Log in again — or do section 10's stretch, and know its cost.</td></tr>
+    <tr><td>Clicking a link reloads the page — a <em>Doc</em> request in the Network tab</td><td>An <code>&lt;a href&gt;</code> where a <code>&lt;Link to&gt;</code> belongs. A full page load starts the app from scratch: all React state is rebuilt, and only what's in <code>sessionStorage</code> survives (04, 10).</td></tr>
+    <tr><td>Logged out after a reload or a typed URL</td><td>The session isn't kept in <code>sessionStorage</code>: look in DevTools → <em>Application</em> → <em>Session storage</em>. The effect must save every change, and <code>useState</code> must start from <code>loadSession</code> (10, step 4). A <em>new tab</em> starting logged out is expected: <code>sessionStorage</code> belongs to one tab.</td></tr>
     <tr><td>Cannot destructure property 'user' of 'useAuth(...)' as it is null (or undefined)</td><td>The component is outside <code>&lt;AuthProvider&gt;</code>, and <code>useAuth</code> doesn't check — <code>useContext</code> returned the context's default. With the check from section 10 you get the clearer "useAuth() must be used inside &lt;AuthProvider&gt;". Is <code>AuthProvider</code> around <code>&lt;Routes&gt;</code> in <code>App.jsx</code>?</td></tr>
     <tr><td>Maximum update depth exceeded, or the URL flickers between two pages</td><td>A redirect loop: a guard sends you to a page whose own guard sends you back — for example a role guard that redirects a logged-in student to <code>/login</code>, and a login page that redirects logged-in users onwards. Show a no-access page instead of redirecting (15).</td></tr>
     <tr><td>You should call navigate() in a React.useEffect(), not when your component is first rendered</td><td><code>navigate()</code> was called during render. In render, return <code>&lt;Navigate to=… /&gt;</code>; call <code>navigate()</code> in event handlers (07).</td></tr>
@@ -1043,9 +1037,9 @@ location        <span class="o">// { pathname: "/login", search: "", hash: "", s
     <details><summary>Show answer</summary><div class="a"><p><strong>b.</strong> <code>index</code> is the parent's own URL. <code>*</code> would match <code>/</code> too, but an index route ranks above it.</p></div></details>
   </div>
   <div class="quiz">
-    <div class="q"><b>P3</b>Core lab, no stretch. You log in, then type <code>localhost:5173/me</code> in the address bar and press <kbd>Enter</kbd>. What do you see?
+    <div class="q"><b>P3</b>You log in, then type <code>localhost:5173/me</code> in the address bar and press <kbd>Enter</kbd>. What do you see?
       <ol type="a"><li>My courses</li><li>The login page</li><li>"Authentication required"</li><li>Page not found</li></ol></div>
-    <details><summary>Show answer</summary><div class="a"><p><strong>b.</strong> Typing a URL is a full page load: the app starts from scratch, the in-memory token is gone, and <code>RequireAuth</code> sends you to log in — with <code>/me</code> as <code>from</code>, so you land back there afterwards.</p></div></details>
+    <details><summary>Show answer</summary><div class="a"><p><strong>a.</strong> Typing a URL is a full page load: the app starts from scratch and the token in React state is gone — but <code>AuthProvider</code> starts from the copy in <code>sessionStorage</code> (section 10), so <code>RequireAuth</code> finds a user. Without that copy it would be <strong>b</strong>: the login page, with <code>/me</code> as <code>from</code>.</p></div></details>
   </div>
   <div class="quiz">
     <div class="q"><b>P4</b>Sam, with a valid token, sends <code>DELETE /api/enrollments/1</code> — enrollment 1 is Riya's. The answer?
@@ -1103,7 +1097,7 @@ location        <span class="o">// { pathname: "/login", search: "", hash: "", s
   <h3>1. Get both test commands fully green</h3>
   <div class="cmd"><span class="p">$</span> cd esd-labs/react-lab3
 <span class="p">$</span> npm test
-<span class="o">      Tests  40 passed (40)</span>
+<span class="o">      Tests  46 passed (46)</span>
 <span class="p">$</span> npm run inlab
 <span class="o">      Tests  6 passed (6)</span></div>
   <p>Nothing failed is the only acceptable result. When we grade, we <strong>put our own copy of the tests back in</strong> — <code>test/</code>, <code>test/support/</code> and <code>inlab/admin.test.jsx</code> — before running them, so editing a test can only cost you marks. Stretch is never required; your zip carries it anyway.</p>
@@ -1168,6 +1162,7 @@ location        <span class="o">// { pathname: "/login", search: "", hash: "", s
     <li>Say when to call <code>navigate()</code> and when to return <code>&lt;Navigate /&gt;</code>, and when to use <code>replace</code>.</li>
     <li>Name the value in this app that earns a context, and one that doesn't — and why.</li>
     <li>Walk through the login: the two requests, where the token goes, and what a reload does to it.</li>
+    <li>Say what keeping the session in <code>sessionStorage</code> buys you, and what it costs.</li>
     <li>Tell 401 from 403, with an example of each from this API.</li>
     <li>Explain redirect-back with <code>location.state</code>, step by step.</li>
     <li>Explain why a protected route is not security, and what is.</li>
@@ -1202,7 +1197,8 @@ location        <span class="o">// { pathname: "/login", search: "", hash: "", s
   <div class="cmd"><span class="tg">const</span> AuthContext = <span class="at">createContext</span>(<span class="tg">null</span>);
 
 <span class="tg">export</span> <span class="tg">function</span> <span class="at">AuthProvider</span>({ children }) {
-  <span class="tg">const</span> [session, setSession] = <span class="at">useState</span>(<span class="tg">null</span>);                 <span class="cm">// { token, user } — in memory</span>
+  <span class="tg">const</span> [session, setSession] = <span class="at">useState</span>(loadSession);          <span class="cm">// { token, user } or null, from sessionStorage</span>
+  <span class="at">useEffect</span>(() =&gt; { <span class="cm">/* save the session to sessionStorage; remove it when null */</span> }, [session]);
   <span class="tg">async</span> <span class="tg">function</span> <span class="at">login</span>(email, password) {
     <span class="tg">const</span> { accessToken } = <span class="tg">await</span> <span class="at">apiFetch</span>(<span class="st">"/api/auth/login"</span>, { method: <span class="st">"POST"</span>, body: { email, password } });
     <span class="tg">const</span> user = <span class="tg">await</span> <span class="at">apiFetch</span>(<span class="st">"/api/users/me"</span>, { token: accessToken });

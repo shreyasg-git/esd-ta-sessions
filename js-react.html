@@ -282,10 +282,10 @@ table.grid.long-key th:first-child{width:42%}
 <span class="p">$</span> node -v
 <span class="o">v22.11.0</span>
 <span class="p">$</span> npm test
-<span class="cm"># tests 63</span>
+<span class="cm"># tests 66</span>
 <span class="cm"># pass 1</span>
-<span class="cm"># fail 62</span></div>
-  <p>Almost everything fails, and that's correct: every function starts as <code>throw new Error("TODO")</code>. Your job is to turn the 62 into 0. (The stretch tests are separate: <code>npm run test:stretch</code>.) There is nothing to <code>npm install</code> — the tests use the runner built into Node.</p>
+<span class="cm"># fail 65</span></div>
+  <p>Almost everything fails, and that's correct: every function starts as <code>throw new Error("TODO")</code>. Your job is to turn the 65 into 0. (The stretch tests are separate: <code>npm run test:stretch</code>.) There is nothing to <code>npm install</code> — the tests use the runner built into Node.</p>
 
   <div class="cue"><p class="cue-k">Keeping your work, and getting the next lab</p><p>Commit your work as you go (<code>git add -A</code>, <code>git commit -m "…"</code>) — <a href="git-basics.html">01 · Git, from absolute zero</a> covers it. Before each lab, run <code>git pull</code> in the <code>esd-labs</code> folder. New labs only <strong>add</strong> folders, so a pull never fights with your work. Each folder stands alone, with its own <code>npm test</code>: a half-finished lab can never break the next one. No git yet? Use <em>Code → Download ZIP</em> on the GitHub page — but you'll have to download again for each lab.</p></div>
 
@@ -853,6 +853,18 @@ tail   <span class="o">// [10, 18]</span>
 <span class="tg">const</span> { description, ...summary } = course;
 summary   <span class="o">// { id: 4, code: "CS402", title: …, department: …, credits: 4, … } — no description</span></div>
 
+  <h3>Default parameters — a value for an argument that's left out</h3>
+  <p>The <code>=</code> you used inside <code>{ credits = 3 }</code> works on plain parameters too. If the caller leaves the argument out, the default is used instead:</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">seatsLabel</span>(seatsLeft, whenFull = <span class="st">"Full"</span>) {
+  <span class="tg">return</span> seatsLeft &gt; <span class="st">0</span> ? <span class="st">`${seatsLeft} seats left`</span> : whenFull;
+}
+<span class="at">seatsLabel</span>(<span class="st">3</span>)               <span class="o">// "3 seats left"</span>
+<span class="at">seatsLabel</span>(<span class="st">0</span>)               <span class="o">// "Full"</span>
+<span class="at">seatsLabel</span>(<span class="st">0</span>, <span class="st">"Waitlist"</span>)   <span class="o">// "Waitlist"</span>
+<span class="at">seatsLabel</span>(<span class="st">0</span>, <span class="tg">undefined</span>)    <span class="o">// "Full"  — undefined counts as "left out"</span>
+<span class="at">seatsLabel</span>(<span class="st">0</span>, <span class="tg">null</span>)         <span class="o">// null    — null doesn't</span></div>
+  <p>The default is worked out on every call that needs it, so <code>items = []</code> gives each call its own new array. You'll lean on this in JS Lab 2: <code>getJSON(url, fetchFn = fetch)</code> uses the real <code>fetch</code> when the app calls it with one argument, and the tests pass a fake one as the second (<a href="js-app.html#s4">JS Lab 2 · §04</a>).</p>
+
   <h3>Shorthand properties and computed keys</h3>
   <div class="cmd"><span class="tg">const</span> id = <span class="st">21</span>, code2 = <span class="st">"CS610"</span>;
 <span class="tg">const</span> short = { id, code: code2 };   <span class="cm">// { id: id } can be written { id }</span>
@@ -1391,10 +1403,11 @@ stepInput.<span class="at">addEventListener</span>(<span class="st">"input"</spa
 inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; <span class="at">setCount</span>(<span class="at">getCount</span>() + <span class="at">getStep</span>()));</div>
   <p>That's reactivity. Your handlers change state and nothing else; the screen follows. One way to say it that you'll hear again: <strong>the view is a function of the state</strong> — <code>render()</code> reads the state and produces the page, and <code>setState</code> makes sure it runs whenever the state changes.</p>
 
+  <div class="cue"><p class="cue-k">Seen in the JavaScript concepts lecture</p><p>The shop demo's <code>setState(next)</code> — replace the state, then call <code>render</code> — is this stage 4, with the state in a top-level variable instead of a closure. Its <code>Object.is</code> check and the updater-function fix for stale closures are the two upgrades in "A smarter setState" below.</p></div>
+
   <h3>So why does useState return two things?</h3>
   <p>Because the value on its own can't do anything when it changes — that was stage 1's lesson. The setter is the only door to the value, and the door has code bolted to it: store the new value, then redraw. That's the answer to the question from section 06. A plain variable can't notify anyone. A function can.</p>
 
-  <div class="stretch-box">
   <h3>A smarter setState</h3>
   <p>Two upgrades make your <code>useState</code> behave like React's. Both use ideas from earlier sections.</p>
   <div class="cmd"><span class="tg">const</span> setState = (next) =&gt; {
@@ -1409,8 +1422,9 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
     <li><strong>Accept an updater function</strong>, exactly like <code>applyUpdate</code> in section 05. Handlers become <code>setCount((c) =&gt; c + 1)</code>, which always works from the latest value.</li>
     <li><strong>Skip the redraw when nothing changed</strong>, using <code>Object.is</code>. Notice what follows: if you <code>push</code> onto the array in state and pass the same array back, <code>Object.is</code> says "same" and nothing redraws. That's why every update must make a <strong>new</strong> value (section 10) — and React behaves exactly the same way.</li>
   </ol>
-  <p>Make both changes and pass <code>npm run test:stretch</code>.</p>
+  <p>Make both changes and pass <code>node --test test/s15-smarter.test.js</code>.</p>
 
+  <div class="stretch-box">
   <h3>How React's version differs</h3>
   <div class="mention">
     <div class="mrow"><b>No render argument</b><span>React already knows which component called <code>useState</code>, so it knows what to redraw. You never pass it a <code>render</code>.</span></div>
@@ -1437,9 +1451,9 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
     <h4>Do this now — src/s15-state.js, then web/counter.js</h4>
     <ol>
       <li>Do stages 2 and 3 in <code>web/counter.js</code> by hand, exactly as above. Actually write the twelve lines — the point is to feel it.</li>
-      <li>Write the core <code>useState(initial, onChange)</code> in <code>src/s15-state.js</code> and pass <code>node --test test/s15.test.js</code>.</li>
+      <li>Write the stage 4 <code>useState(initial, onChange)</code> in <code>src/s15-state.js</code> and pass <code>node --test test/s15.test.js</code>.</li>
       <li>Stage 4: import it in <code>web/counter.js</code>, replace <code>let count</code> with <code>useState</code>, and add the step input as a second piece of state.</li>
-      <li><span class="lvl stretch">Stretch</span> Upgrade it with the smarter <code>setState</code> above and pass <code>npm run test:stretch</code>.</li>
+      <li>Upgrade it with the smarter <code>setState</code> above and pass <code>node --test test/s15-smarter.test.js</code>.</li>
     </ol>
     <p><strong>You're done when:</strong> +, − and Reset change the count by the step; the parity label and the tab title always match the number; − is disabled whenever the next press would go below zero; and no event handler contains a single line that touches the page.</p>
   </div>
@@ -1448,14 +1462,12 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
     <div class="q"><b>Q1</b>In stage 3, a teammate adds a "×2" button: <code>double.addEventListener("click", () =&gt; { count *= 2; })</code>. What goes wrong, and why can't it happen in stage 4?</div>
     <details><summary>Show answer</summary><div class="a"><p>They forgot <code>render()</code>, so the count doubles but the page doesn't change. In stage 4 there's no <code>count</code> variable to change directly — the only way in is <code>setCount</code>, and that always redraws.</p></div></details>
   </div>
-  <div class="stretch-box">
   <div class="quiz">
     <div class="q"><b>Q2</b>Why does <code>const planner = getPlanner(); planner.push(10); setPlanner(planner)</code> not redraw?</div>
     <details><summary>Show answer</summary><div class="a"><p><code>planner</code> is the same array the state already holds, so <code>Object.is</code> says nothing changed and <code>setState</code> returns early. The array <em>was</em> changed, but invisibly. <code>setPlanner([...getPlanner(), 10])</code> passes a new array, which redraws. React behaves exactly the same way.</p></div></details>
   </div>
-  </div>
 
-  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 15 complete — s15 tests pass, counter works</span></label>
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 15 complete — s15 and s15-smarter tests pass, counter works</span></label>
 </section>
 
 <section id="s16">
@@ -1680,6 +1692,7 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
     <div class="grow"><b>closure</b><span>A function plus the variables it could see where it was created, kept alive after that scope ended.</span></div>
     <div class="grow"><b>comparator</b><span>A function <code>(a, b)</code> for <code>sort</code>: negative if <code>a</code> first, positive if <code>b</code> first, 0 if equal.</span></div>
     <div class="grow"><b>computed key</b><span><code>{ [name]: value }</code> — a property name taken from a variable.</span></div>
+    <div class="grow"><b>default parameter</b><span><code>function f(x, y = 1)</code> — the value <code>y</code> gets when the caller leaves it out (or passes <code>undefined</code>).</span></div>
     <div class="grow"><b>delegation</b><span>One listener on a parent handling events for all its children, via bubbling.</span></div>
     <div class="grow"><b>destructuring</b><span>Unpacking an object by name or an array by position into variables.</span></div>
     <div class="grow"><b>expression</b><span>Code that produces a value. The only thing allowed inside <code>${ }</code> and JSX braces.</span></div>
@@ -1718,7 +1731,7 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
     <li>Update one item in a list without changing the list, keeping every other item the same object.</li>
     <li>Read a form into one object with <code>querySelectorAll</code>, <code>reduce</code> and a computed key, and check it with <code>every</code>.</li>
     <li>Say what <strong>reactivity</strong> means in one sentence, and why React is called React.</li>
-    <li>Write <code>useState</code> from memory, and say why it returns two things.</li>
+    <li>Write <code>useState</code> from memory — with the updater function and the <code>Object.is</code> skip — and say why it returns two things.</li>
     <li>Read the <code>CoursePage</code> component in section 16 aloud, line by line.</li>
   </ol>
 
