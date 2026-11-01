@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The backend contract — ESD</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#101614">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Condensed:wght@600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+.cue.work{border-left-color:var(--ink);background:var(--surface)}
+.cue.work .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.tg{color:var(--term-green)}
+.at{color:var(--signal)}
+.st{color:#B7C4C0}
+.tx{color:#FFFFFF}
+.an{color:#9FC5E8}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 182px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+.quiz .a .cmd{margin-top:4px}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 168px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+/* ---- additions for the lab docs ---- */
+.cue.react{border-left-color:var(--term-green);background:var(--dark);color:#DDE3E0}
+.cue.react .cue-k{color:var(--term-green)}
+.cue.react code{background:#22302D;color:var(--term-green)}
+.cue.react strong{color:#FFF}
+.refs{font-family:var(--mono);font-size:12px;color:var(--muted);margin:-6px 0 16px;max-width:70ch}
+.refs a{color:var(--teal);font-weight:600}
+.part{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper);background:var(--ink);display:inline-block;padding:5px 10px;margin:64px 0 -28px}
+.toc .rpart{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);padding:10px 16px 6px;border-bottom:1px solid var(--line);background:var(--teal-soft);font-weight:600}
+table.grid{border-collapse:collapse;width:100%;max-width:70ch;background:var(--surface);border:1px solid var(--ink);margin:0 0 16px;font-size:14.5px}
+table.grid th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;text-align:left;color:var(--muted);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--ink)}
+table.grid td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.grid tr:last-child td{border-bottom:0}
+table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--teal);font-weight:600;white-space:nowrap}
+
+/* ---- core / stretch ---- */
+.lvl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:3px 7px;align-self:center;white-space:nowrap}
+.lvl.core{background:var(--ink);color:var(--signal)}
+.lvl.stretch{border:1px dashed var(--teal);color:var(--teal)}
+.lvl.ref{border:1px solid var(--muted);color:var(--muted)}
+.rrow .rl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:600;flex:0 0 auto;border:1px dashed var(--teal);padding:1px 6px;align-self:center}
+.rrow .rl.ref{color:var(--muted);border:1px solid var(--muted)}
+.rrow.is-extra .rw{color:var(--muted)}
+.stretch-box{border:1px dashed var(--teal);background:rgba(255,255,255,.55);padding:14px 16px 4px;margin:8px 0 18px}
+.stretch-box::before{content:"Stretch — optional. Do it if you can, and ask about it any time.";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600;margin-bottom:10px}
+.stretch-box h3:first-of-type{margin-top:0}
+/* tables whose first column holds long text (error messages): even, wrapping columns */
+table.grid.long-key{table-layout:fixed}
+table.grid.long-key td:first-child{white-space:normal;width:42%;overflow-wrap:anywhere}
+table.grid.long-key th:first-child{width:42%}
+.legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 0;font-size:14px;color:#2B3936}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+  table.grid td:first-child{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> Backend contract · Your own code · AI allowed</p>
+  <h1>The backend<br><em>contract</em></h1>
+  <p class="lede">In the Spring Boot labs you built a Course CRUD by hand, then a JWT-protected slice with AI. This manual turns that code into a backend the course's React app can rely on: the endpoints, the JSON and the errors of a published contract, checked by a suite you run yourself. It's your own code, grown one level at a time. Start now, and work through levels A → C over the React labs.</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">16</span> core</div>
+      <div class="tracker-msg" id="msg">Core first, in order. Read the contract before you change any code.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill" style="width: 0%;"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p><strong>This is a manual, not a lab session.</strong> It runs alongside the React labs, at your own pace. There is no lab slot for it: bring your questions to any lab, and the TAs will help.</p>
+  <p><strong>It's your own code.</strong> You don't get a starter. You grow <em>your</em> Spring Boot project from the Spring Boot labs until it matches a contract, <code>openapi.yaml</code>. A conformance suite tells you, check by check, how close you are.</p>
+  <p><strong>AI is allowed</strong>, the way Spring Boot Lab 2 allowed it: you restrict it to the contract, you judge what it writes, and you own every line. If a TA points at a line, you explain it. Section 16 shows how.</p>
+  <p><strong>Four levels, as milestones.</strong> A — the catalogue. B — accounts. C — enrollments and admin: with A and B, everything React Lab 4 needs, and what it grades as its own part — <strong>aim to have A + B + C green before it</strong>. D — Google sign-in, built in the OAuth lab. Nothing in the React labs calls your own backend before React Lab 4 (they use a mock), so A and B are steps on the way to C, not deadlines of their own. Start now, and work A → B → C alongside the React labs.</p>
+  <p><strong>Core and stretch.</strong> <span class="lvl core">Core</span> is the path to level C. <span class="lvl stretch">Stretch</span> is extra. <span class="lvl ref">Reference</span> is for looking things up.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — read the contract first, then build it level by level. Core in order; stretch is extra</div>
+  <div class="rpart">Part 1 · Start here</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">Where you are, and where this goes</span></a>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">Get the pack, and see a green run</span></a>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">What an API contract is</span></a>
+  <div class="rpart">Part 2 · Reading openapi.yaml</div>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">Paths and operations</span></a>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">Schemas and $ref</span></a>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">Responses, errors and security</span></a>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">The rules written in words</span></a>
+  <div class="rpart">Part 3 · Your backend, level by level</div>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">The gap from your Spring Boot labs</span></a>
+  <a class="rrow" href="#s9"><span class="rt">09</span><span class="rw">Level A — the catalogue</span></a>
+  <a class="rrow" href="#s10"><span class="rt">10</span><span class="rw">One error shape for everything</span></a>
+  <a class="rrow" href="#s11"><span class="rt">11</span><span class="rw">Loading the seed</span></a>
+  <a class="rrow" href="#s12"><span class="rt">12</span><span class="rw">Level B — accounts on your JWT</span></a>
+  <a class="rrow" href="#s13"><span class="rt">13</span><span class="rw">Level C — enrollments, admin and the 409 rules</span></a>
+  <a class="rrow is-extra" href="#s14"><span class="rt">14</span><span class="rw">Level D and CORS — not yet</span><span class="rl ref">reference</span></a>
+  <div class="rpart">Part 4 · Checking your work</div>
+  <a class="rrow" href="#s15"><span class="rt">15</span><span class="rw">Reading the suite's output</span></a>
+  <a class="rrow" href="#s16"><span class="rt">16</span><span class="rw">Working with AI on this</span></a>
+  <a class="rrow is-extra" href="#s17"><span class="rt">17</span><span class="rw">A second opinion: Schemathesis</span><span class="rl">stretch</span></a>
+  <a class="rrow is-extra" href="#s18"><span class="rt">18</span><span class="rw">When it goes wrong</span><span class="rl ref">reference</span></a>
+  <a class="rrow" href="#s19"><span class="rt">19</span><span class="rw">What you hand in, and when</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; reference cards</span></a>
+</nav>
+
+<div class="part">Part 1 · Start here</div>
+
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>Where you are, and where this goes</h2><span class="lvl core">Core</span><span class="tagline">from your labs to a real API</span></div>
+
+  <p>Two Spring Boot labs left you with real code. Look at it again before you read on.</p>
+  <div class="mention">
+    <div class="mrow"><b>Spring Boot Lab 1</b><span>By hand: a <code>Course { id, code, title, credits }</code> entity, a repository, a service and a controller. <code>GET /courses</code>, <code>GET /courses/{id}</code>, <code>POST /courses</code>, <code>PUT /courses/{id}</code>, on MySQL. The entity went in and came out as JSON — no DTOs, no validation, no error handling.</span></div>
+    <div class="mrow"><b>Spring Boot Lab 2</b><span>With AI, on a scaffold that already had a <code>SecurityConfig</code> and a JWT filter: a richer slice where a student signs up for a course (a subscription), with DTOs and a mapper, <code>@Valid</code>, <code>@Transactional</code>, and real exception handling. You audited every line against the slice sheet.</span></div>
+  </div>
+
+  <p>The React labs build a course app: a catalogue with filters, login, enrolling and dropping, an admin screen. Until React Lab 4 that app talks to a <strong>mock</strong> API that ships inside each React lab. In React Lab 4 you point it at <strong>your</strong> backend instead. For that to work, your backend has to answer every request exactly as the app expects: same paths, same JSON, same status codes, same errors. That agreement is written down in one file, <code>openapi.yaml</code>: the <strong>contract</strong>.</p>
+
+  <h3>The finish line, and the milestones on the way</h3>
+  <p>The finish line is React Lab 4: the first time the React app calls your backend. It needs levels A, B and C. The levels build on each other, so they're the order to work in.</p>
+  <table class="grid">
+    <tr><th>Level</th><th>What your backend can do</th></tr>
+    <tr><td>A</td><td>The catalogue: list (sorted, filtered) and one course, the seed data, one error shape</td></tr>
+    <tr><td>B</td><td>Accounts: signup, login, who-am-I, logout, and the 401 rules</td></tr>
+    <tr><td>C</td><td>Enroll and drop, list my enrollments, admin course writes, every conflict rule. <strong>Aim to have A + B + C green before React Lab 4 — it's graded there as its own part.</strong></td></tr>
+    <tr><td>D</td><td>Sign in with Google — built in the OAuth lab, not here</td></tr>
+  </table>
+  <p>CORS, which a browser needs before it lets the app read your backend's answers, is checked on its own line and added in React Lab 4 itself (section 14). You'll know where you stand at every moment, because one command checks all of it: <code>npm run conformance</code>. Start now: A, then B, then C, a little alongside each React lab.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 read — I know which of my projects I'm growing</span></label>
+</section>
+
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>Get the pack, and see a green run</h2><span class="lvl core">Core</span><span class="tagline">esd-labs/api-contract</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>You cloned <code>esd-labs</code> for the JS labs, and you get each new folder with <code>git pull</code>. Commit your own work first. Full version: <a href="git-basics.html#s11">Git basics · §11 git push and git pull</a>.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — pull, and run the suite against the mock</h4>
+    <ol>
+      <li>In your <code>esd-labs</code> folder, commit anything of yours, then <code>git pull</code>. A new <code>api-contract</code> folder appears.</li>
+      <li>Open a terminal in <code>esd-labs/api-contract</code> and start the mock API. Leave it running.</li>
+      <li>Open a second terminal in the same folder and run the suite.</li>
+    </ol>
+  </div>
+  <div class="cmd"><span class="cm"># terminal 1</span>
+<span class="p">$</span> cd esd-labs/api-contract
+<span class="p">$</span> npm run mock
+<span class="o">Mock course API on http://localhost:8080/api/courses</span>
+
+<span class="cm"># terminal 2</span>
+<span class="p">$</span> npm run conformance</div>
+  <p>Node.js 20.19 or newer, and nothing to install. You'll see about a hundred checks scroll past, in groups, each with a ✓. It ends like this:</p>
+  <div class="cmd"><span class="o">Level A ✓  Level B ✓  Level C ✓  Level D —  CORS ✓</span>
+<span class="o">Ready for React Lab 4 ✓ — CORS too</span>
+<span class="o">OAuth lab: needs D (built in that lab; check it with --level D)</span></div>
+  <p>That's what "done" looks like. The mock passes everything, because the mock is what the React labs were built against. Now stop the mock with <kbd>Ctrl</kbd>+<kbd>C</kbd>, start <strong>your</strong> backend on port 8080, and run the suite again. Expect a wall of ✗. That wall is your to-do list, and every item says exactly what it wants.</p>
+
+  <h3>The folder</h3>
+  <div class="mention">
+    <div class="mrow"><b>openapi.yaml</b><span>The contract. Read-only. Part 2 of this manual teaches you to read it.</span></div>
+    <div class="mrow"><b>seed/seed.json</b><span>The users, courses and enrollments your backend must start with. <code>seed/README.md</code> shows how to load them (section 11).</span></div>
+    <div class="mrow"><b>conformance/</b><span>The suite. It talks to a running backend over HTTP, nothing else. Don't edit it.</span></div>
+    <div class="mrow"><b>mock/</b><span>The mock API — the same one the React labs use. Here you only start it, with <code>npm run mock</code>.</span></div>
+  </div>
+
+  <h3>The commands</h3>
+  <div class="cmd"><span class="p">$</span> npm run conformance                            # A–C + CORS, on localhost:8080
+<span class="p">$</span> npm run conformance -- --level A               # only A (levels add up)
+<span class="p">$</span> npm run conformance -- --level D               # everything, Google included
+<span class="p">$</span> npm run conformance -- http://localhost:9090   # another port
+<span class="p">$</span> npm run mock                                   # the mock on :8080
+<span class="p">$</span> npm run -s token                               # print an admin token</div>
+  <p>The suite changes data: each run signs up a few accounts and creates (then deletes) a few courses, with new names every time. You can run it as often as you like against the same server, without restarting it.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 complete — a green run against the mock, a red one against my backend</span></label>
+</section>
+
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>What an API contract is</h2><span class="lvl core">Core</span><span class="tagline">two teams, one interface</span></div>
+
+  <p>A frontend and a backend are usually built by different people, at the same time. The frontend team can't write a single <code>fetch</code> until it knows what <code>/api/courses</code> returns: an array or an object? Is the field <code>seatsLeft</code> or <code>seats_left</code>? What comes back when the course doesn't exist — a 404 with JSON, or an HTML page?</p>
+  <p>A <strong>contract</strong> answers all of that before anyone writes code. It lists every endpoint, every request and response body, every status code and every error. Then both teams build against the contract, not against each other:</p>
+  <ul>
+    <li>The frontend team builds against a <strong>mock</strong> that follows the contract, so it never waits for the backend. That's exactly how the React labs work.</li>
+    <li>The backend team builds to the contract, and <strong>tests</strong> against it, so it never waits for a finished frontend.</li>
+    <li>When the two meet, they fit. If they don't, the contract says who's wrong.</li>
+  </ul>
+  <p>You've already been on the frontend side of this. In JS Lab 2, your app called a local course API whose responses you were told in advance; you checked <code>res.ok</code> and built URLs with <code>URLSearchParams</code> because of what that API promised (<a href="js-app.html#s4">JS Lab 2 · §04 fetch, URLs and failures</a>). Now you're on the other side: you make the promises.</p>
+
+  <h3>OpenAPI</h3>
+  <p><strong>OpenAPI</strong> is the standard way to write such a contract: a YAML (or JSON) file that people and tools can both read. Because tools can read it, one file gives you documentation (Swagger UI renders it as a web page), mocks, generated client code, and tests. This course's contract is <code>openapi.yaml</code>, OpenAPI version 3.0.</p>
+  <p>Its first lines make a promise worth reading twice: <em>any backend that conforms to this document works with the course's React app</em>. "Conforms" isn't a matter of opinion; the conformance suite checks it.</p>
+
+  <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>The React app calls <code>fetch(`${BASE}/api/courses`)</code>, where <code>BASE</code> comes from <code>VITE_API_URL</code>. Empty means the mock; <code>http://localhost:8080</code> means your backend. Nothing else in the app changes — which only works if your backend and the mock give the same answers.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Your backend answers a missing course with <code>{"error": "not found"}</code> and status 404. The React app shows <code>body.message</code>. What does the user see, and whose bug is it?</div>
+    <details><summary>Show answer</summary><div class="a"><p>"undefined" (or nothing). It's the backend's bug: the contract says every error has a <code>message</code>, so the frontend was right to rely on it. That's the point of a contract — it settles the argument.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 read</span></label>
+</section>
+
+<div class="part">Part 2 · Reading openapi.yaml</div>
+
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>Paths and operations</h2><span class="lvl core">Core</span><span class="tagline">what you can call</span></div>
+
+  <p>Open <code>openapi.yaml</code> in VS Code. It's long, but it has only seven top-level keys:</p>
+  <div class="mention">
+    <div class="mrow"><b>openapi</b><span>The first line: which version of OpenAPI the file is written in, <code>3.0.3</code>.</span></div>
+    <div class="mrow"><b>info</b><span>Title, version, and a long <code>description</code>: the rules that can't be written as schemas. Section 07.</span></div>
+    <div class="mrow"><b>servers</b><span>Where the API runs by default: <code>http://localhost:8080</code>.</span></div>
+    <div class="mrow"><b>tags</b><span>Groups for the docs: Auth, Users, Courses, Enrollments.</span></div>
+    <div class="mrow"><b>paths</b><span>Every URL, and what each HTTP method does on it. This section.</span></div>
+    <div class="mrow"><b>components</b><span>Reusable pieces — schemas, parameters, responses — that <code>paths</code> refers to. Sections 05–06.</span></div>
+    <div class="mrow"><b>security</b><span>The default: every operation needs a bearer token unless it says otherwise. Section 06.</span></div>
+  </div>
+
+  <h3>A path, and its operations</h3>
+  <p>Under <code>paths</code>, each key is a URL. Under each URL, each key is an HTTP method. One method on one path is an <strong>operation</strong>. Here's <code>/api/courses</code>, shortened:</p>
+  <div class="cmd"><span class="at">/api/courses</span>:<span class="st"></span>
+  <span class="at">get</span>:<span class="st"></span>
+    <span class="at">operationId</span>:<span class="st"> listCourses</span>
+    <span class="at">summary</span>:<span class="st"> List courses, optionally filtered</span>
+    <span class="at">security</span>:<span class="st"> []                      <span class="cm"> # public: no token needed</span></span>
+    <span class="at">parameters</span>:<span class="st"></span>
+      - <span class="at">name</span>:<span class="st"> department</span>
+        <span class="at">in</span>:<span class="st"> query                     <span class="cm"> # ?department=...</span></span>
+        <span class="at">required</span>:<span class="st"> false</span>
+        <span class="at">schema</span>:<span class="st"> { type: string }</span>
+      - <span class="at">name</span>:<span class="st"> q</span>
+        <span class="at">in</span>:<span class="st"> query</span>
+        <span class="at">required</span>:<span class="st"> false</span>
+        <span class="at">schema</span>:<span class="st"> { type: string }</span>
+    <span class="at">responses</span>:<span class="st"></span>
+      <span class="at">'200'</span>:<span class="st"></span>
+        <span class="at">description</span>:<span class="st"> Courses sorted by `code` ascending</span>
+        <span class="at">content</span>:<span class="st"></span>
+          <span class="at">application/json</span>:<span class="st"></span>
+            <span class="at">schema</span>:<span class="st"></span>
+              <span class="at">type</span>:<span class="st"> array</span>
+              <span class="at">items</span>:<span class="st"> { $ref: '#/components/schemas/Course' }</span>
+  <span class="at">post</span>:<span class="st"></span>
+    <span class="at">operationId</span>:<span class="st"> createCourse</span>
+    <span class="at">summary</span>:<span class="st"> Create a course (ADMIN)</span>
+    <span class="at">requestBody</span>:<span class="st"></span>
+      <span class="at">required</span>:<span class="st"> true</span>
+      <span class="at">content</span>:<span class="st"></span>
+        <span class="at">application/json</span>:<span class="st"></span>
+          <span class="at">schema</span>:<span class="st"> { $ref: '#/components/schemas/CourseRequest' }</span>
+    <span class="at">responses</span>:<span class="st"></span>
+      <span class="at">'201'</span>:<span class="st"> ...</span>
+      <span class="at">'400'</span>:<span class="st"> ...</span></div>
+  <p>Read it as a sentence. "<code>GET /api/courses</code> takes two optional query parameters, needs no token, and answers 200 with a JSON array of Course objects. <code>POST /api/courses</code> takes a CourseRequest body and answers 201, or 400…" The <code>in:</code> of a parameter says where it goes: <code>query</code> is after the <code>?</code>, <code>path</code> is inside the URL, like the <code>{id}</code> in <code>/api/courses/{id}</code>.</p>
+  <p>In Spring, each operation is one controller method: <code>@GetMapping</code> on <code>/api/courses</code> with two <code>@RequestParam(required = false)</code> parameters. The <code>operationId</code> is a good name for the method.</p>
+
+  <h3>All thirteen operations</h3>
+  <table class="grid">
+    <tr><th>Operation</th><th>Token?</th><th>Level</th></tr>
+    <tr><td>GET /api/courses</td><td>no</td><td>A</td></tr>
+    <tr><td>GET /api/courses/{id}</td><td>no</td><td>A</td></tr>
+    <tr><td>POST /api/auth/signup</td><td>no</td><td>B</td></tr>
+    <tr><td>POST /api/auth/login</td><td>no</td><td>B</td></tr>
+    <tr><td>GET /api/users/me</td><td>yes</td><td>B</td></tr>
+    <tr><td>POST /api/auth/logout</td><td>yes</td><td>B</td></tr>
+    <tr><td>POST /api/courses</td><td>ADMIN</td><td>C</td></tr>
+    <tr><td>PUT /api/courses/{id}</td><td>ADMIN</td><td>C</td></tr>
+    <tr><td>DELETE /api/courses/{id}</td><td>ADMIN</td><td>C</td></tr>
+    <tr><td>POST /api/enrollments</td><td>yes</td><td>C</td></tr>
+    <tr><td>DELETE /api/enrollments/{id}</td><td>yes</td><td>C</td></tr>
+    <tr><td>GET /api/users/me/enrollments</td><td>yes</td><td>C</td></tr>
+    <tr><td>POST /api/auth/google</td><td>no</td><td>D</td></tr>
+  </table>
+
+  <div class="dothis">
+    <h4>Do this now — find them yourself</h4>
+    <p>Search <code>openapi.yaml</code> for <code>operationId:</code> and check this table against it. For each one, find the line that makes it public (<code>security: []</code>) or not. Then compare with the controllers you have: which paths already exist, under a different URL?</p>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 complete — I can find any operation in openapi.yaml</span></label>
+</section>
+
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>Schemas and $ref</h2><span class="lvl core">Core</span><span class="tagline">the shape of the JSON</span></div>
+
+  <h3>Following a $ref</h3>
+  <p><code>$ref: '#/components/schemas/Course'</code> means "the thing at that address in this same file": <code>#</code> is the top of the file, then <code>components</code> → <code>schemas</code> → <code>Course</code>. A <code>$ref</code> lets one definition be used in many places. In VS Code, search for <code>    Course:</code> (four spaces, so you land on the definition):</p>
+  <div class="cmd"><span class="at">Course</span>:<span class="st"></span>
+  <span class="at">type</span>:<span class="st"> object</span>
+  <span class="at">required</span>:<span class="st"> [id, code, title, description, department, credits, capacity, seatsLeft]</span>
+  <span class="at">properties</span>:<span class="st"></span>
+    <span class="at">id</span>:<span class="st"> { type: integer, format: int64, example: 7 }</span>
+    <span class="at">code</span>:<span class="st"> { type: string, example: CS501 }</span>
+    <span class="at">title</span>:<span class="st"> { type: string, example: Distributed Systems }</span>
+    <span class="at">description</span>:<span class="st"> { type: string, nullable: true }</span>
+    <span class="at">department</span>:<span class="st"> { type: string, example: Computer Science }</span>
+    <span class="at">credits</span>:<span class="st"> { type: integer, example: 4 }</span>
+    <span class="at">capacity</span>:<span class="st"> { type: integer, example: 60 }</span>
+    <span class="at">seatsLeft</span>:<span class="st"></span>
+      <span class="at">type</span>:<span class="st"> integer</span>
+      <span class="at">minimum</span>:<span class="st"> 0</span>
+      <span class="at">description</span>:<span class="st"> '`capacity` minus current enrollments; computed by the server'</span></div>
+  <ul>
+    <li><code>required</code> lists the fields that must be <strong>present</strong>. <code>description</code> is in it <em>and</em> is <code>nullable</code>: a course with no description still has <code>"description": null</code> in its JSON. Leaving the key out is a contract break.</li>
+    <li><code>type: integer, format: int64</code> is a Java <code>Long</code>. <code>type: string, format: date-time</code> (in other schemas) is an ISO-8601 timestamp, which in Java is an <code>Instant</code>.</li>
+    <li><code>seatsLeft</code> is "computed by the server": it's not a column you store. Section 09.</li>
+  </ul>
+
+  <h3>Request schemas aren't response schemas</h3>
+  <p>Compare <code>CourseRequest</code>, the body of <code>POST</code> and <code>PUT</code>, with <code>Course</code>, what comes back. The request has no <code>id</code> (the server assigns ids) and no <code>seatsLeft</code> (the server computes it). Two shapes for one entity: that's exactly why Spring Boot Lab 2 gave you request and response DTOs and a mapper. Here the contract decides the shapes, so your DTOs copy them field for field.</p>
+  <div class="cmd"><span class="at">CourseRequest</span>:<span class="st"></span>
+  <span class="at">type</span>:<span class="st"> object</span>
+  <span class="at">required</span>:<span class="st"> [code, title, department, credits, capacity]</span>
+  <span class="at">properties</span>:<span class="st"></span>
+    <span class="at">code</span>:<span class="st"> { type: string, pattern: '^[A-Z]{2,4}[0-9]{3}$' }</span>
+    <span class="at">title</span>:<span class="st"> { type: string, minLength: 1, maxLength: 150, pattern: '[^\u0000- ]' }</span>
+    <span class="at">description</span>:<span class="st"> { type: string, maxLength: 1000, nullable: true }</span>
+    <span class="at">department</span>:<span class="st"> { type: string, minLength: 1, maxLength: 60, pattern: '[^\u0000- ]' }</span>
+    <span class="at">credits</span>:<span class="st"> { type: integer, minimum: 1, maximum: 6 }</span>
+    <span class="at">capacity</span>:<span class="st"> { type: integer, minimum: 1, maximum: 500 }</span></div>
+
+  <h3>From schema keywords to Bean Validation</h3>
+  <p>Every limit in a request schema becomes an annotation on your request DTO, and <code>@Valid</code> on the controller parameter enforces them all.</p>
+  <table class="grid">
+    <tr><th>In the schema</th><th>On the DTO field</th></tr>
+    <tr><td>in required</td><td><code>@NotNull</code> (a string that must not be blank: <code>@NotBlank</code>)</td></tr>
+    <tr><td>pattern: '[^\u0000- ]'</td><td><code>@NotBlank</code> — the contract's "not blank", see its Conventions</td></tr>
+    <tr><td>minLength / maxLength</td><td><code>@Size(min = …, max = …)</code></td></tr>
+    <tr><td>pattern: '^[A-Z]…'</td><td><code>@Pattern(regexp = "^[A-Z]{2,4}[0-9]{3}$")</code></td></tr>
+    <tr><td>minimum / maximum</td><td><code>@Min</code> / <code>@Max</code> (or <code>@Positive</code> for minimum 1)</td></tr>
+    <tr><td>format: email</td><td><code>@Email</code></td></tr>
+    <tr><td>nullable: true, not required</td><td>no <code>@NotNull</code></td></tr>
+  </table>
+  <p>A Java <code>record</code> makes a tidy DTO, and the annotations go straight on its components:</p>
+  <div class="cmd"><span class="tg">public</span> <span class="tg">record</span> <span class="at">CourseRequest</span>(
+        <span class="an">@NotNull</span> <span class="an">@Pattern</span>(regexp = <span class="st">"^[A-Z]{2,4}[0-9]{3}$"</span>) <span class="tg">String</span> code,
+        <span class="an">@NotBlank</span> <span class="an">@Size</span>(max = <span class="st">150</span>) <span class="tg">String</span> title,
+        <span class="cm">// … the other four fields, the same way</span>
+) {}</div>
+
+  <div class="quiz">
+    <div class="q"><b>Q2</b>A course has no description. Which of these responses conform? (a) <code>{…, "description": null, …}</code> (b) <code>{…, "description": "", …}</code> (c) no <code>description</code> key at all.</div>
+    <details><summary>Show answer</summary><div class="a"><p>(a) and (b). <code>description</code> is required, so the key must be there, and it's a nullable string, so <code>null</code> or any string is fine. (c) breaks the contract. Spring's default Jackson setup writes nulls, so a record or DTO with a null field gives you (a) — unless someone turned on <code>NON_NULL</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 complete — I can follow a $ref and turn a schema into a DTO</span></label>
+</section>
+
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>Responses, errors and security</h2><span class="lvl core">Core</span><span class="tagline">status codes, ApiError, bearer tokens</span></div>
+
+  <h3>One status code, one meaning</h3>
+  <p>Each operation's <code>responses</code> is keyed by status code, as a string. That list is the complete set of answers the operation may give. <code>POST /api/enrollments</code>, for example, lists <code>201</code>, <code>400</code>, <code>401</code>, <code>404</code> and <code>409</code> — so a <code>500</code> or a <code>200</code> from it is a contract break, even if the data is right. Learn the codes the contract uses, because the React app reacts to each one differently:</p>
+  <table class="grid">
+    <tr><th>Status</th><th>Means, in this contract</th></tr>
+    <tr><td>200 OK</td><td>Here's what you asked for.</td></tr>
+    <tr><td>201 Created</td><td>Created; the body is the new resource. Not 200.</td></tr>
+    <tr><td>204 No Content</td><td>Done, and there's no body: logout, drop, delete.</td></tr>
+    <tr><td>400 Bad Request</td><td>Your request is wrong: invalid fields, broken JSON, an id like <code>abc</code>.</td></tr>
+    <tr><td>401 Unauthorized</td><td>I don't know who you are: no token, or a bad, expired or logged-out one.</td></tr>
+    <tr><td>403 Forbidden</td><td>I know who you are, and you may not: a STUDENT creating a course.</td></tr>
+    <tr><td>404 Not Found</td><td>No such course, enrollment or endpoint.</td></tr>
+    <tr><td>405 Method Not Allowed</td><td>The path exists, the method doesn't. An <code>Allow</code> header lists the ones that do.</td></tr>
+    <tr><td>409 Conflict</td><td>Valid request, but it breaks a rule: already enrolled, course full, code taken…</td></tr>
+  </table>
+
+  <h3>Shared responses, and the one error shape</h3>
+  <p>Many operations say <code>'400': { $ref: '#/components/responses/ValidationError' }</code>. Under <code>components/responses</code> you find <code>ValidationError</code>, <code>BadRequest</code>, <code>Unauthorized</code>, <code>Forbidden</code> and <code>NotFound</code> — and every one of them has the same schema, <code>ApiError</code>:</p>
+  <div class="cmd">{
+  <span class="st">"timestamp"</span>: <span class="st">"2026-01-15T09:30:00Z"</span>,
+  <span class="st">"status"</span>: <span class="st">400</span>,
+  <span class="st">"error"</span>: <span class="st">"Bad Request"</span>,
+  <span class="st">"message"</span>: <span class="st">"Validation failed"</span>,
+  <span class="st">"path"</span>: <span class="st">"/api/auth/signup"</span>,
+  <span class="st">"fieldErrors"</span>: {
+    <span class="st">"email"</span>: <span class="st">"must be a well-formed email address"</span>,
+    <span class="st">"password"</span>: <span class="st">"size must be between 8 and 64"</span>
+  }
+}</div>
+  <p>Six fields, always all six. <code>status</code> repeats the HTTP status. <code>error</code> is the status's reason phrase. <code>message</code> is for the user. <code>path</code> is the request's path. <code>fieldErrors</code> maps each bad field to a reason for a validation error, and is <code>null</code> for every other error. One shape means the frontend needs one piece of code to show any error. Section 10 builds it.</p>
+
+  <h3>Security</h3>
+  <div class="cmd"><span class="at">components</span>:<span class="st"></span>
+  <span class="at">securitySchemes</span>:<span class="st"></span>
+    <span class="at">bearerAuth</span>:<span class="st"> { type: http, scheme: bearer, bearerFormat: JWT }</span>
+<span class="at">security</span>:<span class="st"></span>
+  - <span class="at">bearerAuth</span>:<span class="st"> []       <span class="cm"> # the default for every operation…</span></span>
+<span class="cm"># …unless the operation says  security: []  (public)</span></div>
+  <p>So "needs a token" is the default, and the five public operations opt out. A client sends the token as a header: <code>Authorization: Bearer eyJhbGciOi…</code>. The schema can't say <em>which</em> tokens are good or what "ADMIN only" means; that's in the words of section 07.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 read — I know the ApiError fields and what each status means</span></label>
+</section>
+
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>The rules written in words</h2><span class="lvl core">Core</span><span class="tagline">info.description</span></div>
+
+  <p>A schema can say "credits is an integer from 1 to 6". It can't say "a student may not go over 24 credits", or "a logged-out token must stop working". Those rules are in the <code>description</code> at the top of the file, in plain English, under headings. Read it now, all of it. It's short, and the conformance suite checks almost every sentence.</p>
+  <div class="mention">
+    <div class="mrow"><b>Conventions</b><span>JSON everywhere; unknown request fields are ignored; timestamps in UTC; courses sorted by code, enrollments by enrolledAt; 201 carries the new resource; blank query parameters are ignored; what "not blank" means.</span></div>
+    <div class="mrow"><b>Errors</b><span>Every non-2xx is an ApiError — even 401 and 403 from the security layer. Which problems are 400, 404, 405, 500.</span></div>
+    <div class="mrow"><b>Authentication</b><span>What's inside the token; 401 versus 403; authentication is checked before the body; what logout must do.</span></div>
+    <div class="mrow"><b>Roles</b><span>STUDENT for every signup; ADMIN is seeded only.</span></div>
+    <div class="mrow"><b>Business rules</b><span>Enrolled at most once; full courses take no one; 24 credits at most; codes unique; capacity never below enrollments; deleting a course deletes its enrollments; and the order the enroll rules are checked in.</span></div>
+    <div class="mrow"><b>Required seed data</b><span>The users, courses and enrollments every backend starts with. Section 11.</span></div>
+    <div class="mrow"><b>CORS</b><span>What a browser needs. React Lab 4's job (section 14).</span></div>
+  </div>
+
+  <h3>Fixed messages</h3>
+  <p>Clients show <code>message</code> and never parse it — except these, which the contract fixes word for word, so a client may compare them exactly. The suite checks them exactly too: same spelling, same capitals, no full stop.</p>
+  <table class="grid long-key">
+    <tr><th>message</th><th>When</th></tr>
+    <tr><td>Validation failed</td><td>Any 400 with <code>fieldErrors</code>.</td></tr>
+    <tr><td>Authentication required</td><td>Any 401 from a protected endpoint.</td></tr>
+    <tr><td>Access denied</td><td>A 403: wrong role, or someone else's enrollment.</td></tr>
+    <tr><td>Invalid email or password</td><td>The 401 from login — for an unknown email <em>and</em> for a wrong password.</td></tr>
+    <tr><td>Already enrolled in this course</td><td>409 from enroll.</td></tr>
+    <tr><td>Course is full</td><td>409 from enroll.</td></tr>
+    <tr><td>Credit limit of 24 exceeded</td><td>409 from enroll.</td></tr>
+  </table>
+  <p>Other messages ("No course with id 7", "Email already registered") are yours to word; the suite only checks they exist.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q3</b>Riya is enrolled in CS201, which is full. She tries to enroll in CS201 again. Which 409 message does she get, and which line of the contract decides it?</div>
+    <details><summary>Show answer</summary><div class="a"><p>"Already enrolled in this course". Both rules are broken, and the last business rule says the first in this order wins: not found, <strong>already enrolled</strong>, full, credit limit. Your code must check them in that order.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 complete — I've read the whole description</span></label>
+</section>
+
+<div class="part">Part 3 · Your backend, level by level</div>
+
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>The gap from your Spring Boot labs</h2><span class="lvl core">Core</span><span class="tagline">what changes, and in what order</span></div>
+
+  <h3>Which project to grow</h3>
+  <p>Grow your <strong>Spring Boot Lab 2</strong> project. It already has the security scaffold, DTOs, validation and an exception handler — the patterns this needs. Bring the Course pieces over from Lab 1 if Lab 2 didn't have them. Keep the shape you learned: Controller → Service → Repository, constructor injection, one job per layer. Commit before you start, and after every level.</p>
+
+  <h3>The gap, line by line</h3>
+  <table class="grid">
+    <tr><th>Your labs had</th><th>The contract wants</th></tr>
+    <tr><td>/courses</td><td>Everything under <code>/api</code>: <code>/api/courses</code>, <code>/api/auth/…</code>, <code>/api/users/me</code>, <code>/api/enrollments</code>.</td></tr>
+    <tr><td>Course: id, code, title, credits</td><td>Plus <code>description</code> (nullable), <code>department</code>, <code>capacity</code>, and a computed <code>seatsLeft</code>. <code>code</code> unique.</td></tr>
+    <tr><td>Entity in, entity out (Lab 1)</td><td>A request DTO in, a response DTO out, shaped exactly like the schemas.</td></tr>
+    <tr><td>Lists in table order</td><td>Sorted by code; <code>department</code> and <code>q</code> filters.</td></tr>
+    <tr><td>POST answers 200</td><td>POST answers 201 with the created resource.</td></tr>
+    <tr><td>Spring's default errors</td><td>One ApiError for every error, including 401/403 from security, 404 for unknown paths, 405 with <code>Allow</code>.</td></tr>
+    <tr><td>Hard-coded or no data</td><td>The seed in <code>seed.json</code>, loaded once.</td></tr>
+    <tr><td>A pre-built JWT filter (Lab 2)</td><td>Plus signup, login that issues your own token, <code>/api/users/me</code>, and a logout that really revokes the token.</td></tr>
+    <tr><td>A subscription slice (Lab 2)</td><td>Enrollments: enroll, drop, list mine — with the 409 rules.</td></tr>
+    <tr><td>No roles</td><td>STUDENT and ADMIN; course writes are ADMIN-only.</td></tr>
+  </table>
+
+  <h3>The order to work in</h3>
+  <ol>
+    <li><strong>Level A</strong>: the catalogue (section 09), the error shape (10) and the seed (11). No login involved.</li>
+    <li><strong>Level B</strong>: accounts (12), on top of your JWT scaffold.</li>
+    <li><strong>Level C</strong>: enrollments, admin writes and the conflict rules (13).</li>
+  </ol>
+  <p>After every change, run the suite at the level you're on. A green check you didn't have before is real progress; a check that went red tells you which change broke it.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 complete — project chosen, committed, and I know the order</span></label>
+</section>
+
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>Level A — the catalogue</h2><span class="lvl core">Core</span><span class="tagline">GET /api/courses, GET /api/courses/{id}</span></div>
+
+  <h3>The entity and the response</h3>
+  <p>Add <code>description</code> (nullable, up to 1000 characters), <code>department</code> and <code>capacity</code> to your Course entity, and make <code>code</code> unique. Don't add a <code>seatsLeft</code> column. A stored counter can drift away from the truth (the Spring Boot bug lab's half-write bug is exactly that). Compute it instead, each time you build the response:</p>
+  <div class="cmd"><span class="cm">// in the service, when mapping a course to its response DTO</span>
+<span class="tg">long</span> enrolled = enrollmentRepository.<span class="at">countByCourseId</span>(course.<span class="at">getId</span>());
+<span class="tg">int</span> seatsLeft = (<span class="tg">int</span>) Math.<span class="at">max</span>(<span class="st">0</span>, course.<span class="at">getCapacity</span>() - enrolled);</div>
+  <p>That means level A already needs a minimal <strong>Enrollment</strong> entity (a user, a course, an <code>enrolledAt</code>) and a <strong>User</strong> entity, because the seed fills five courses with enrollments and the suite checks their <code>seatsLeft</code> is 0. The enrollment <em>endpoints</em> wait for level C.</p>
+  <div class="cue watch"><p class="cue-k">Watch the query count</p><p>Counting per course inside a loop over 20 courses is 21 queries: the N+1 problem from the Spring Boot bug lab. Fine to start with. Stretch: one grouped query, <code>select e.course.id, count(e) from Enrollment e group by e.course.id</code>, then look counts up in a map.</p></div>
+
+  <h3>Sorting and filtering</h3>
+  <ul>
+    <li><strong>Sorted by code.</strong> <code>findAllByOrderByCodeAsc()</code>, or <code>findAll(Sort.by("code"))</code>. Filtered lists are sorted too.</li>
+    <li><strong><code>department</code></strong>: an exact match, ignoring case. <code>?department=data science %26 ai</code> finds the Data Science &amp; AI courses.</li>
+    <li><strong><code>q</code></strong>: a substring of the code <em>or</em> the title, ignoring case. <code>?q=data</code> finds CS201 Data Structures, CS305 Database Systems and DS101.</li>
+    <li><strong>Both</strong>: both must match. <strong>Blank</strong> (<code>?q=</code>, <code>?q=%20</code>): ignored, as if absent. <strong>No match</strong>: <code>200 []</code>, not 404.</li>
+  </ul>
+  <p>Take both as <code>@RequestParam(required = false) String</code>. Derived queries like <code>findByDepartmentIgnoreCaseOrderByCodeAsc</code> work. So does loading all courses sorted and filtering in Java: the catalogue is small, and the contract says so (no paging).</p>
+  <div class="cue watch"><p class="cue-k">H2 and MySQL disagree about case</p><p>MySQL's default collation ignores case, so <code>findByDepartment("data science &amp; ai")</code> matches on MySQL — and finds nothing on H2. Use <code>IgnoreCase</code> (or compare lowercased strings) so your code doesn't depend on the database.</p></div>
+
+  <h3>The &amp; in "Data Science &amp; AI"</h3>
+  <p>In a URL, <code>&amp;</code> separates parameters, so a client must send it encoded: <code>?department=Data%20Science%20%26%20AI</code> (<a href="js-app.html#s4">JS Lab 2 · §04</a>: <code>URLSearchParams</code> does it). Spring decodes it before your code sees it — there's nothing to do on the server, except not to break it. Try it with curl:</p>
+  <div class="cmd"><span class="p">$</span> curl "http://localhost:8080/api/courses?department=Data%20Science%20%26%20AI"</div>
+  <p>On Windows PowerShell, type <code>curl.exe</code> instead of <code>curl</code> (plain <code>curl</code> there is a different command), and put a command that's split with <code>\</code> on one line.</p>
+
+  <h3>One course, and bad ids</h3>
+  <table class="grid">
+    <tr><th>Request</th><th>Answer</th></tr>
+    <tr><td>/api/courses/7</td><td>200 and the course, or 404 ApiError if there's none</td></tr>
+    <tr><td>/api/courses/abc</td><td>400: Spring can't turn it into a <code>long</code> (a <code>MethodArgumentTypeMismatchException</code>, section 10)</td></tr>
+    <tr><td>/api/courses/0, /-1</td><td>400: not a positive integer. Check <code>id &lt; 1</code> yourself.</td></tr>
+    <tr><td>…/9223372036854775808</td><td>400: too big for a <code>long</code> — the same exception as <code>abc</code></td></tr>
+    <tr><td>…/9223372036854775807</td><td>404: the largest <code>long</code> is a valid id; there just isn't one</td></tr>
+  </table>
+
+  <div class="dothis">
+    <h4>Do this now — level A, part one</h4>
+    <p>Move the controller under <code>/api/courses</code>, add the fields, compute <code>seatsLeft</code>, sort, filter. Then <code>npm run conformance -- --level A</code>. The checks that name a course (A04–A06, A10–A15) need the seed from section 11, and A07–A09 need the error shape from section 10 — expect those red for now, and read the rest.</p>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 09 complete — the catalogue checks are green</span></label>
+</section>
+
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>One error shape for everything</h2><span class="lvl core">Core</span><span class="tagline">ApiError and @RestControllerAdvice</span></div>
+
+  <p>Spring Boot Lab 2 had an exception handler. Here it grows into the single place every error passes through. Start with the shape:</p>
+  <div class="cmd"><span class="tg">public</span> <span class="tg">record</span> <span class="at">ApiError</span>(<span class="tg">Instant</span> timestamp, <span class="tg">int</span> status, <span class="tg">String</span> error, <span class="tg">String</span> message,
+                       <span class="tg">String</span> path, <span class="tg">Map</span>&lt;<span class="tg">String</span>, <span class="tg">String</span>&gt; fieldErrors) {
+
+    <span class="tg">public</span> <span class="tg">static</span> ApiError <span class="at">of</span>(<span class="tg">HttpStatus</span> status, <span class="tg">String</span> message, <span class="tg">String</span> path,
+                              <span class="tg">Map</span>&lt;<span class="tg">String</span>, <span class="tg">String</span>&gt; fieldErrors) {
+        <span class="tg">return</span> <span class="tg">new</span> <span class="at">ApiError</span>(<span class="tg">Instant</span>.<span class="at">now</span>(), status.<span class="at">value</span>(), status.<span class="at">getReasonPhrase</span>(),
+                            message, path, fieldErrors);
+    }
+}</div>
+  <p>Three details the suite checks: <code>Instant</code>, not <code>LocalDateTime</code>, so the timestamp ends in <code>Z</code> (it's UTC); <code>getReasonPhrase()</code> ("Not Found"), not <code>name()</code> ("NOT_FOUND"); and <code>path</code> from <code>request.getRequestURI()</code>.</p>
+
+  <h3>One advice, one method per kind of error</h3>
+  <p>A <code>@RestControllerAdvice</code> class catches exceptions thrown anywhere in your controllers and services, and turns each into a <code>ResponseEntity&lt;ApiError&gt;</code>. Here's the validation one — the method that builds <code>fieldErrors</code>:</p>
+  <div class="cmd"><span class="an">@ExceptionHandler</span>(MethodArgumentNotValidException.<span class="tg">class</span>)
+<span class="tg">public</span> <span class="tg">ResponseEntity</span>&lt;ApiError&gt; <span class="at">handleInvalid</span>(MethodArgumentNotValidException ex,
+                                              <span class="tg">HttpServletRequest</span> request) {
+    <span class="tg">Map</span>&lt;<span class="tg">String</span>, <span class="tg">String</span>&gt; fieldErrors = <span class="tg">new</span> LinkedHashMap&lt;&gt;();
+    <span class="tg">for</span> (FieldError fe : ex.<span class="at">getBindingResult</span>().<span class="at">getFieldErrors</span>()) {
+        <span class="cm">// the first reason for each field wins</span>
+        fieldErrors.<span class="at">putIfAbsent</span>(fe.<span class="at">getField</span>(), fe.<span class="at">getDefaultMessage</span>());
+    }
+    ApiError body = ApiError.<span class="at">of</span>(<span class="tg">HttpStatus</span>.BAD_REQUEST, <span class="st">"Validation failed"</span>,
+                                request.<span class="at">getRequestURI</span>(), fieldErrors);
+    <span class="tg">return</span> <span class="tg">ResponseEntity</span>.<span class="at">badRequest</span>().<span class="at">body</span>(body);
+}</div>
+  <p>The others follow the same pattern. This is the list the suite needs:</p>
+  <table class="grid long-key">
+    <tr><th>Exception</th><th>Answer</th></tr>
+    <tr><td>your own (not found, conflict, forbidden…)</td><td>Its status and message. One exception class carrying an <code>HttpStatus</code> is enough; Lab 2 may already have one.</td></tr>
+    <tr><td>MethodArgumentNotValidException</td><td>400, "Validation failed", <code>fieldErrors</code> (above).</td></tr>
+    <tr><td>HttpMessageNotReadableException</td><td>400, <code>fieldErrors: null</code>: no body, or broken JSON.</td></tr>
+    <tr><td>MethodArgumentTypeMismatchException</td><td>400: <code>/api/courses/abc</code>.</td></tr>
+    <tr><td>NoResourceFoundException</td><td>404: no endpoint at that path (Spring Boot 3.2 and later).</td></tr>
+    <tr><td>HttpRequestMethodNotSupportedException</td><td>405, with an <code>Allow</code> header: <code>.allow(ex.getSupportedHttpMethods().toArray(HttpMethod[]::new))</code> on the <code>ResponseEntity</code> builder.</td></tr>
+    <tr><td>Exception</td><td>500, "Unexpected server error". Log the exception; never send it.</td></tr>
+  </table>
+  <div class="cue"><p class="cue-k">Not everything reaches the advice</p><p>The advice only sees exceptions thrown while Spring MVC handles the request. A request with no token is turned away earlier, by the security filters, before any controller runs — so its 401 never passes through here. Section 12 handles those.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q4</b>You call <code>/api/courses/abc</code> and get a 500 with <code>"message": "Failed to convert value of type 'java.lang.String' to required type 'long'…"</code>. Two things are wrong. What are they?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The status: a bad id is the client's fault, so 400 — handle <code>MethodArgumentTypeMismatchException</code>. And the message leaks Java internals; the generic 500 handler should never echo <code>ex.getMessage()</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 complete — A07–A09 green; every error I can trigger is an ApiError</span></label>
+</section>
+
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>Loading the seed</h2><span class="lvl core">Core</span><span class="tagline">seed/seed.json, once</span></div>
+
+  <p>The contract says every backend starts with exactly the data in <code>seed/seed.json</code>: three users, twenty courses in five departments, and five enrollments that fill the five full courses. The React labs, the suite and the TAs all count on those logins and those courses.</p>
+  <table class="grid">
+    <tr><th>Login</th><th>Password</th><th>Role</th></tr>
+    <tr><td>admin@esd.local</td><td>admin12345</td><td>ADMIN</td></tr>
+    <tr><td>student@esd.local</td><td>student12345</td><td>STUDENT</td></tr>
+    <tr><td>riya@esd.local</td><td>riya12345</td><td>STUDENT — enrolled in the five full courses</td></tr>
+  </table>
+  <p><code>seed/README.md</code> walks you through loading it: copy the file into <code>src/main/resources</code>, and write an <code>ApplicationRunner</code> that reads it with Jackson and saves through your repositories — users (with hashed passwords), then courses, then enrollments.</p>
+  <div class="cue watch"><p class="cue-k">Idempotent: seeding twice must change nothing</p><p>On MySQL your data survives a restart. A runner that always inserts would add a second admin and twenty more courses every time — or crash on a unique constraint. Seed only an empty database: <code>if (userRepository.count() &gt; 0) return;</code> at the top of the runner. With H2 in memory every start is empty anyway, which hides the bug until the day you switch.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — seed, restart, check</h4>
+    <p>Write the runner. Start your backend, stop it, start it again. Then <code>npm run conformance -- --level A</code>: A04 (all twenty courses, exactly as seeded) and A05 (the five full courses have <code>seatsLeft</code> 0) should pass, and <code>GET /api/courses</code> should still have twenty courses, not forty.</p>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 complete — level A is green (CORS aside)</span></label>
+</section>
+
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>Level B — accounts on your JWT</h2><span class="lvl core">Core</span><span class="tagline">signup, login, me, logout, 401</span></div>
+
+  <p>Your Lab 2 scaffold already has a <code>SecurityConfig</code> and a JWT filter that checks tokens. Level B adds what turns that into accounts: a way to get a token, a way to ask "who am I?", and a way to give a token up. Read your scaffold's security code again first — you'll change it, so know what each line does.</p>
+
+  <h3>Which endpoints are public</h3>
+  <p>Exactly five: <code>POST</code> signup, login and google, and <code>GET</code> on <code>/api/courses</code> and <code>/api/courses/*</code>. Everything else needs a token. In <code>SecurityConfig</code>, permit those by method and path and end with <code>.anyRequest().authenticated()</code> — deny by default. That one line also gives you the rule "authentication before the body": the filters reject a request with no token before any controller reads the body, so a bad body with no token is a 401, never a 400.</p>
+
+  <h3>Signup</h3>
+  <ul>
+    <li>A <code>SignupRequest</code> DTO with <code>email</code>, <code>password</code>, <code>fullName</code> — and <strong>no role field</strong>. Jackson in Spring Boot ignores unknown fields, so a <code>"role": "ADMIN"</code> in the JSON simply goes nowhere. Every account is a STUDENT.</li>
+    <li>Trim and lowercase the email before you store or compare it. A record's compact constructor does it before validation runs: <code>public SignupRequest { email = email == null ? null : email.trim().toLowerCase(Locale.ROOT); }</code></li>
+    <li>Store a BCrypt hash, never the password. Email taken → 409. Success → 201 and a user DTO: <code>id, email, fullName, role, createdAt</code>, no password, no hash.</li>
+  </ul>
+
+  <h3>Login, and what goes in the token</h3>
+  <p>Wrong password and unknown email get the <strong>same</strong> 401, "Invalid email or password", so nobody can find out which emails have accounts. Success → 200 <code>{ accessToken, tokenType: "Bearer", expiresIn: 3600 }</code>. The token must carry five claims:</p>
+  <table class="grid">
+    <tr><th>Claim</th><th>Value</th></tr>
+    <tr><td>sub</td><td>the user's email</td></tr>
+    <tr><td>role</td><td>"STUDENT" or "ADMIN"</td></tr>
+    <tr><td>jti</td><td>a unique id for this token: <code>UUID.randomUUID().toString()</code>. Logout needs it.</td></tr>
+    <tr><td>iat, exp</td><td>issued and expires, in whole seconds; <code>exp − iat</code> = <code>expiresIn</code></td></tr>
+  </table>
+  <p>If your scaffold already issues tokens, add the missing claims. If it only verifies them, issue one with the same library and the same key it verifies with. With Spring's <code>JwtEncoder</code> the claims look like this (jjwt's builder has the same five pieces):</p>
+  <div class="cmd"><span class="tg">Instant</span> now = <span class="tg">Instant</span>.<span class="at">now</span>().<span class="at">truncatedTo</span>(ChronoUnit.SECONDS);
+JwtClaimsSet claims = JwtClaimsSet.<span class="at">builder</span>()
+        .<span class="at">subject</span>(user.<span class="at">getEmail</span>())
+        .<span class="at">claim</span>(<span class="st">"role"</span>, user.<span class="at">getRole</span>().<span class="at">name</span>())
+        .<span class="at">id</span>(<span class="tg">UUID</span>.<span class="at">randomUUID</span>().<span class="at">toString</span>())          <span class="cm">// jti</span>
+        .<span class="at">issuedAt</span>(now)
+        .<span class="at">expiresAt</span>(now.<span class="at">plusSeconds</span>(<span class="st">3600</span>))
+        .<span class="at">build</span>();</div>
+
+  <h3>Who am I</h3>
+  <p><code>GET /api/users/me</code> looks the user up by the token's <code>sub</code>. Identity comes from the verified token, never from the request — the lesson of Lab 2's audit.</p>
+
+  <h3>Every 401 and 403 as an ApiError</h3>
+  <p>When the security filters turn a request away, Spring Security answers with an empty body. The contract wants an ApiError with "Authentication required". Give Spring Security an <code>AuthenticationEntryPoint</code> (401) and an <code>AccessDeniedHandler</code> (403, "Access denied") that write one:</p>
+  <div class="cmd"><span class="an">@Component</span>
+<span class="tg">public</span> <span class="tg">class</span> ApiErrorEntryPoint <span class="tg">implements</span> AuthenticationEntryPoint {
+    <span class="tg">private</span> <span class="tg">final</span> ObjectMapper objectMapper;   <span class="cm">// Spring's: writes Instant as "…Z"</span>
+
+    <span class="tg">public</span> <span class="at">ApiErrorEntryPoint</span>(ObjectMapper objectMapper) {
+        <span class="tg">this</span>.objectMapper = objectMapper;
+    }
+
+    <span class="an">@Override</span>
+    <span class="tg">public</span> <span class="tg">void</span> <span class="at">commence</span>(<span class="tg">HttpServletRequest</span> request, <span class="tg">HttpServletResponse</span> response,
+                         AuthenticationException ex) <span class="tg">throws</span> IOException {
+        response.<span class="at">setStatus</span>(<span class="st">401</span>);
+        response.<span class="at">setContentType</span>(<span class="st">"application/json"</span>);
+        ApiError body = ApiError.<span class="at">of</span>(<span class="tg">HttpStatus</span>.UNAUTHORIZED, <span class="st">"Authentication required"</span>,
+                                    request.<span class="at">getRequestURI</span>(), <span class="tg">null</span>);
+        objectMapper.<span class="at">writeValue</span>(response.<span class="at">getOutputStream</span>(), body);
+    }
+}</div>
+  <p>Register it in <code>SecurityConfig</code> with <code>.exceptionHandling(e -&gt; e.authenticationEntryPoint(…).accessDeniedHandler(…))</code>. If your JWT filter writes its own 401 when a token is bad, make it write the same ApiError — or let it pass the request on unauthenticated and let the entry point answer.</p>
+
+  <h3>Logout that means it</h3>
+  <p>A JWT stays valid until it expires; deleting it in the browser doesn't stop a copy from working. So logout tells the <strong>server</strong>: remember this token's <code>jti</code> on a denylist, and refuse it from now on. A <code>Map&lt;String, Instant&gt;</code> from jti to expiry, in a <code>@Component</code>, is enough (drop entries once they'd have expired anyway). Then, in the filter, after the signature and expiry checks pass: a denylisted <code>jti</code> is a 401. Revoke by <code>jti</code>, not by user: the same user's other tokens — another browser, another device — keep working, and the suite checks that.</p>
+
+  <div class="dothis">
+    <h4>Do this now — level B</h4>
+    <p><code>npm run conformance -- --level B</code>. B24 and B25 also check that an unknown path is a 404 and a wrong method a 405 with <code>Allow</code>, sent with a valid token — the advice from section 10, reached through your security.</p>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 12 complete — level B is green</span></label>
+</section>
+
+<section id="s13">
+  <div class="shead"><span class="chip">13</span><h2>Level C — enrollments, admin and the 409 rules</h2><span class="lvl core">Core</span><span class="tagline">the one React Lab 4 needs</span></div>
+
+  <h3>Enrollments replace your subscriptions</h3>
+  <p>Your Lab 2 slice let a student subscribe to a course. An enrollment is the same idea with the contract's names and rules. The entity: a user, a course, an <code>enrolledAt</code> (<code>Instant</code>), and a unique constraint on (user, course).</p>
+  <table class="grid">
+    <tr><th>Operation</th><th>Does</th></tr>
+    <tr><td>POST /api/enrollments</td><td>Body <code>{ "courseId": 7 }</code> — nothing else; the user is the token's. 201 and <code>{ id, course, enrolledAt }</code>, where <code>course</code> is a full Course whose <code>seatsLeft</code> already counts this enrollment.</td></tr>
+    <tr><td>GET /api/users/me/enrollments</td><td>Mine, oldest first (ties by id), each with its full Course.</td></tr>
+    <tr><td>DELETE /api/enrollments/{id}</td><td>204. No such enrollment → 404. Someone else's → 403 "Access denied".</td></tr>
+  </table>
+
+  <h3>The rules, in order</h3>
+  <p>Enroll checks four things, and when several fail, the first one in this order decides the answer. Write them in this order, top to bottom, in your service:</p>
+  <div class="cmd"><span class="cm">// 1. the course exists                → else 404</span>
+<span class="cm">// 2. I'm not enrolled in it already    → else 409 "Already enrolled in this course"</span>
+<span class="cm">// 3. its enrollments &lt; its capacity    → else 409 "Course is full"</span>
+<span class="cm">// 4. my credits + its credits &lt;= 24    → else 409 "Credit limit of 24 exceeded"</span>
+<span class="cm">// then save, and return the enrollment with the course's new seatsLeft</span></div>
+  <p>Exactly 24 credits is allowed; 25 is not. Count only the user's current enrollments, so dropping a course frees its credits.</p>
+  <div class="cue"><p class="cue-k">@Transactional, where it's earned</p><p>Enroll reads (is there a seat?) and then writes; two requests for the last seat must not both succeed. Deleting a course is two writes — its enrollments, then the course — that must happen together. Both are service methods with <code>@Transactional</code>. (For the last-seat race, a <code>@Lock(LockModeType.PESSIMISTIC_WRITE)</code> query that loads the course is the usual fix. Stretch.)</p></div>
+
+  <h3>ADMIN course writes</h3>
+  <ul>
+    <li><code>POST /api/courses</code> → 201 and the Course (<code>seatsLeft</code> = capacity). A code that exists → 409.</li>
+    <li><code>PUT /api/courses/{id}</code> → a <strong>full</strong> replacement: every field is required except <code>description</code>, which becomes null when it's left out. Keeping the course's own code is fine; another course's code → 409; a capacity below its current enrollments → 409.</li>
+    <li><code>DELETE /api/courses/{id}</code> → 204, and the course's enrollments go with it (delete them first: the foreign key won't let you delete a course that still has enrollments).</li>
+  </ul>
+  <p>Put the role check in <code>SecurityConfig</code>: <code>.requestMatchers(HttpMethod.POST, "/api/courses").hasRole("ADMIN")</code>, and the same for <code>PUT</code> and <code>DELETE</code> on <code>/api/courses/*</code>. A URL rule runs in the filters, before the body is read — so a STUDENT gets 403 whatever they send. <code>hasRole("ADMIN")</code> looks for the authority <code>ROLE_ADMIN</code>, so the role you read from the token's <code>role</code> claim needs that <code>ROLE_</code> prefix.</p>
+
+  <div class="cue watch"><p class="cue-k">LazyInitializationException</p><p>A <code>@ManyToOne</code> is loaded eagerly unless you mark it <code>fetch = FetchType.LAZY</code>, and Spring Boot's <code>open-in-view</code> is on by default (it logs a warning at startup), so mapping an enrollment's <code>course</code> in the controller often just works. It throws "could not initialize proxy - no Session" when the relation is lazy and the session has already closed: <code>open-in-view</code> turned off, or code running outside a request. Don't depend on either: map it to the DTO inside the <code>@Transactional</code> service method, or load it with the enrollments (<code>join fetch e.course</code>).</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — level C</h4>
+    <p><code>npm run conformance</code> (C is the default). The suite creates its own courses for these checks and deletes them at the end, so your seed stays as it was. When A, B and C all show ✓, the summary says <strong>Ready for React Lab 4 ✓ — add CORS there</strong>. That's the milestone this manual is for.</p>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 13 complete — level C is green</span></label>
+</section>
+
+<section id="s14">
+  <div class="shead"><span class="chip">14</span><h2>Level D and CORS — not yet</h2><span class="lvl ref">Reference</span><span class="tagline">what the suite checks that you'll build later</span></div>
+
+  <h3>CORS — React Lab 4</h3>
+  <p>A React app served from <code>http://localhost:5173</code> that calls <code>http://localhost:8080</code> is calling another <strong>origin</strong>. The browser lets it read the answers only if your backend says it may, in <code>Access-Control-Allow-Origin</code> headers, and it first sends a "preflight" <code>OPTIONS</code> request, without a token, to ask. You met this from the browser's side in <a href="js-app.html#s10">JS Lab 2 · §10 Other servers — public APIs and CORS</a>.</p>
+  <p>The suite checks CORS on its own line, and React Lab 4 is where you add it, in Spring Security. Until then, CORS ✗ is expected. Leave it.</p>
+
+  <h3>Level D — the OAuth lab</h3>
+  <p><code>POST /api/auth/google</code> takes a Google ID token, verifies it completely (signature, issuer, audience, expiry), and answers with <em>your</em> token, exactly like login. The OAuth lab builds it. The suite can't sign in to Google, so level D only checks that bad requests are 400 and that every token Google didn't issue for your app — garbage, forged, self-signed, unsigned — is 401. Run it with <code>--level D</code> once you've built it.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 14 read</span></label>
+</section>
+
+<div class="part">Part 4 · Checking your work</div>
+
+<section id="s15">
+  <div class="shead"><span class="chip">15</span><h2>Reading the suite's output</h2><span class="lvl core">Core</span><span class="tagline">expected, received, hint</span></div>
+
+  <p>Every check has an id (A07, C21…) and a one-line title saying what it wants. A failed check adds the request it sent, what the contract expected, what came back, and often a hint:</p>
+  <div class="cmd"><span class="o">✗ A07  GET /api/courses/999999999 → 404 with the ApiError shape</span>
+<span class="o">      request   GET /api/courses/999999999</span>
+<span class="o">      expected  "timestamp": ISO-8601 in UTC, like "2026-01-15T09:30:00Z"</span>
+<span class="o">      received  HTTP 404  application/json</span>
+<span class="o">                {"timestamp":"2026-01-15T09:30:00.1234","status":404,…}</span>
+<span class="o">      hint      Use java.time.Instant. A LocalDateTime has no zone,</span>
+<span class="o">                so it has no Z at the end.</span></div>
+  <p>Read it in that order: what was sent, what was wanted, what came back. Here the status is right and the timestamp has no <code>Z</code> — a <code>LocalDateTime</code>. One line to change.</p>
+
+  <h3>A way of working</h3>
+  <ol>
+    <li>Run one level at a time: <code>--level A</code> until it's green, then B, then C.</li>
+    <li>Fix the <strong>first</strong> failure in the lowest level first. Later failures often follow from it: if login fails, most of B and C fail with it.</li>
+    <li>Reproduce the request by hand — curl or Postman — and watch your backend's log while you do. The <code>request</code> and <code>sent</code> lines tell you exactly what to send. For a request that needs a token, get one with <code>npm run -s token</code>.</li>
+    <li>Change one thing, rerun, and see the check go green.</li>
+  </ol>
+  <div class="cmd"><span class="p">$</span> curl -i http://localhost:8080/api/courses/999999999
+<span class="p">$</span> curl -i -X POST http://localhost:8080/api/enrollments \
+    -H "Content-Type: application/json" -d "{}"</div>
+  <p><code>-i</code> prints the status line and headers too, which is usually where the answer is.</p>
+  <div class="cue"><p class="cue-k">If a run stops halfway</p><p>The suite cleans up after itself, even when checks fail. If you kill it mid-run, a few test courses (department "Conformance Testing") may stay behind. They don't break later runs; delete them as the admin, or restart H2.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 15 read — I've fixed at least one failure from its output</span></label>
+</section>
+
+<section id="s16">
+  <div class="shead"><span class="chip">16</span><h2>Working with AI on this</h2><span class="lvl core">Core</span><span class="tagline">restrict, judge, own</span></div>
+
+  <p>AI is allowed for this, on the terms of Spring Boot Lab 2. The skill is the same one: <strong>restrict</strong> what it generates to a precise contract, and <strong>judge</strong> what comes back. Here the contract is already written, and a suite checks the result — but the suite can only tell you <em>whether</em> it conforms, not whether you understand it. You will be asked about your code.</p>
+
+  <h3>Restrict</h3>
+  <ul>
+    <li><strong>Give it the contract, not a wish.</strong> Paste the operation from <code>openapi.yaml</code>, the schemas it refers to, and the sentences from the description that apply. "Make enrollments work" is not a prompt.</li>
+    <li><strong>One level, or one rule, at a time.</strong> Small asks are easy to check, and they save your free-tier prompts.</li>
+    <li><strong>Name your constraints.</strong> Your packages and class names; Controller → Service → Repository; constructor injection; records for DTOs; no new dependencies; don't touch the security scaffold unless asked.</li>
+    <li><strong>Paste a failing check.</strong> The expected/received block from the suite is a precise bug report.</li>
+  </ul>
+  <div class="cue work"><p class="cue-k">A prompt that restricts</p><p>"Here is <code>POST /api/enrollments</code> and the <code>EnrollmentRequest</code>, <code>Enrollment</code> and <code>ApiError</code> schemas from my OpenAPI contract, and its business rules. My project has <code>Course</code>, <code>User</code> and <code>Enrollment</code> entities (pasted) and an <code>ApiException(HttpStatus, message)</code>. Write only <code>EnrollmentService.enroll(String email, long courseId)</code>: check the rules in the contract's order, throw <code>ApiException</code> with the exact messages, use constructor injection, and don't change any other class."</p></div>
+
+  <h3>Judge</h3>
+  <ul>
+    <li>Read every line before you paste it. For each one, name the contract rule that earns it; cut what nothing earns. AI loves to add pagination, extra fields, caching, new libraries — none of which the contract asks for.</li>
+    <li>Run the suite. A change that turns one check green and two others red isn't progress.</li>
+    <li>Watch the classics: entities returned from controllers (a password hash in the JSON), <code>permitAll()</code> on everything, <code>LocalDateTime</code>, <code>HttpStatus.name()</code>, a stored <code>seatsLeft</code>, rules checked in the wrong order.</li>
+  </ul>
+  <div class="cue watch"><p class="cue-k">Never let it edit the judge</p><p>Don't let an AI change <code>openapi.yaml</code>, the seed or the suite to make a check pass — it will offer. A green run against an edited suite proves nothing, and React Lab 4 runs against the real one.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 16 read</span></label>
+</section>
+
+<section id="s17">
+  <div class="shead"><span class="chip">17</span><h2>A second opinion: Schemathesis</h2><span class="lvl stretch">Stretch</span><span class="tagline">hundreds of requests, generated from the schema</span></div>
+
+  <p>The conformance suite checks the rules the contract states <strong>in words</strong>: the 409 messages, the credit limit, logout revocation, the seed, auth before body, CORS. No tool can work those out from a schema. <a href="https://schemathesis.readthedocs.io/" target="_blank" rel="noopener">Schemathesis</a> does the opposite job: it reads <code>openapi.yaml</code>, generates hundreds of requests — normal ones and very odd ones — and checks every response against the <strong>declared shapes and status codes</strong>. It is very good at finding the 500 you get from input you never imagined. Both green means your backend is ready.</p>
+
+  <div class="cmd"><span class="cm"># once — Python 3.9 or newer</span>
+<span class="p">$</span> pip install schemathesis           # or: pipx install schemathesis
+<span class="p">$</span> st --version</div>
+  <div class="cue watch"><p class="cue-k">It changes and deletes data</p><p>Schemathesis runs as the admin, so it creates, edits and <strong>deletes courses — seeded ones included</strong>. Run it after the conformance suite, against a database you can throw away: restart H2, or reset MySQL afterwards.</p></div>
+  <div class="cmd"><span class="cm"># macOS / Linux — from esd-labs/api-contract, with your backend running</span>
+<span class="p">$</span> st run openapi.yaml --url http://localhost:8080 --checks all \
+    --exclude-checks ensure_resource_availability \
+    -H "Authorization: Bearer $(npm run -s token)" \
+    --exclude-path /api/auth/logout --generation-codec ascii</div>
+  <div class="cmd"><span class="cm"># Windows (PowerShell): a backtick ` continues a line</span>
+<span class="p">$</span> $t = npm run -s token
+<span class="p">$</span> st run openapi.yaml --url http://localhost:8080 --checks all `
+    --exclude-checks ensure_resource_availability `
+    -H "Authorization: Bearer $t" `
+    --exclude-path /api/auth/logout --generation-codec ascii</div>
+  <table class="grid long-key">
+    <tr><th>Option</th><th>Why</th></tr>
+    <tr><td>-H "Authorization: Bearer …"</td><td>Calls everything as <code>admin@esd.local</code>, so the protected operations are tested too. <code>npm run -s token</code> logs in and prints the token.</td></tr>
+    <tr><td>--exclude-path /api/auth/logout</td><td>Otherwise one of its requests logs that token out, and everything after it is a 401.</td></tr>
+    <tr><td>--generation-codec ascii</td><td>The contract counts string lengths in characters; Spring's <code>@Size</code> counts an emoji as two. ASCII-only input avoids reports about that difference.</td></tr>
+    <tr><td>--exclude-checks ensure_resource_availability</td><td>That check reports "created resource not found" when it enrolls, deletes the course, then can't find the enrollment. But deleting a course deletes its enrollments: the contract says so.</td></tr>
+  </table>
+  <p>Each finding has a code (like <code>ST202</code>; <code>st explain ST202</code> says what it means) and a <code>curl</code> command that reproduces it. The ones Spring backends usually show:</p>
+  <ul>
+    <li><strong>A 500 on odd input</strong> — an exception your advice doesn't map. The curl command shows the input; find what threw.</li>
+    <li><strong>Schema-invalid data accepted</strong> — Jackson is lenient: <code>"credits": "4"</code> becomes 4, <code>"credits": 4.5</code> becomes 4, <code>"title": 7</code> becomes "7". The contract says integer and string. Turning off those coercions in Jackson makes them 400s.</li>
+    <li><strong>A response that doesn't match its schema</strong> — a missing <code>"description": null</code>, a field with another name, a status the operation doesn't list.</li>
+    <li><strong>405 without <code>Allow</code></strong> — section 10's last-but-one row.</li>
+  </ul>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 17 complete — Schemathesis ran, and I understood every finding (stretch)</span></label>
+</section>
+
+<section id="s18">
+  <div class="shead"><span class="chip">18</span><h2>When it goes wrong</h2><span class="lvl ref">Reference</span><span class="tagline">the symptom, and what it means</span></div>
+
+  <table class="grid long-key">
+    <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>Can't reach http://localhost:8080 (ECONNREFUSED)</td><td>Your backend isn't running, or runs on another port. Wait for "Started …Application" in its log; pass the URL if the port differs.</td></tr>
+    <tr><td>401 or 403 with an empty body</td><td>Spring Security's defaults. Register your <code>AuthenticationEntryPoint</code> and <code>AccessDeniedHandler</code> (12).</td></tr>
+    <tr><td>403 where the contract says 401 (no token sent)</td><td>No entry point is configured, so Spring Security falls back to a 403. Register yours (12).</td></tr>
+    <tr><td>An HTML page: "Whitelabel Error Page"</td><td>An exception your advice doesn't handle reached Spring Boot's error page. Add a handler for it (10).</td></tr>
+    <tr><td>{"timestamp":…,"status":404,"error":"Not Found","path":…} without message and fieldErrors</td><td>Spring Boot's own default error JSON. Handle <code>NoResourceFoundException</code> (or whichever exception it was) in your advice (10).</td></tr>
+    <tr><td>500 for broken JSON, or for /api/courses/abc</td><td>Map <code>HttpMessageNotReadableException</code> and <code>MethodArgumentTypeMismatchException</code> to 400 (10).</td></tr>
+    <tr><td>"error": "NOT_FOUND"</td><td><code>HttpStatus.name()</code>. Use <code>getReasonPhrase()</code>: "Not Found".</td></tr>
+    <tr><td>"path": "uri=/api/courses/7"</td><td><code>WebRequest.getDescription(false)</code>. Use <code>HttpServletRequest.getRequestURI()</code>.</td></tr>
+    <tr><td>timestamp without a Z at the end</td><td>A <code>LocalDateTime</code>. Use <code>Instant</code> (10).</td></tr>
+    <tr><td>400 instead of 401 for a bad body with no token</td><td>The endpoint is <code>permitAll()</code> and checks the token itself, after the body. Let Spring Security require authentication (12).</td></tr>
+    <tr><td>200 instead of 401 with no token</td><td>A <code>permitAll()</code> that's too broad — the Spring Boot bug lab's unguarded route. Permit only the five public operations (12).</td></tr>
+    <tr><td>403 "Access denied" for the admin</td><td>The role claim isn't mapped to <code>ROLE_ADMIN</code>; <code>hasRole("ADMIN")</code> needs the prefix (13).</td></tr>
+    <tr><td>After logout, the token still works</td><td>Logout didn't store the <code>jti</code>, or the filter never checks the denylist (12).</td></tr>
+    <tr><td>After logout, the user's other token stops working too</td><td>You revoked by user (or by email) instead of by <code>jti</code> (12).</td></tr>
+    <tr><td>Signup creates an ADMIN when asked to</td><td>The request DTO has a <code>role</code> field, or the entity is bound straight from the body. Drop the field; set STUDENT in the service (12).</td></tr>
+    <tr><td>A password hash in a response</td><td>An entity returned from a controller — the Spring Boot bug lab's leak. Return a DTO.</td></tr>
+    <tr><td>LazyInitializationException: could not initialize proxy - no Session</td><td>A lazy relation read after the transaction closed. Map inside the <code>@Transactional</code> service method, or <code>join fetch</code> it (13).</td></tr>
+    <tr><td>Twenty more courses after every restart, or a unique-constraint crash on startup</td><td>The seed runner isn't idempotent. Seed only an empty database (11).</td></tr>
+    <tr><td>Filters work on MySQL but find nothing on H2</td><td>MySQL ignores case by default; H2 doesn't. Use <code>IgnoreCase</code> or compare lowercased (09).</td></tr>
+    <tr><td>Courses in the wrong order</td><td>No <code>ORDER BY</code>: use <code>findAllByOrderByCodeAsc()</code> or <code>Sort.by("code")</code> (09).</td></tr>
+    <tr><td>A05 fails: full courses have seatsLeft 1</td><td>The seed enrollments didn't load, or <code>seatsLeft</code> isn't counting them (09, 11).</td></tr>
+    <tr><td>"Course is full" for riya on CS201</td><td>The rules run in the wrong order: "already enrolled" comes before "full" (13).</td></tr>
+    <tr><td>Credit limit hit at exactly 24</td><td><code>&gt;=</code> where you need <code>&gt;</code>. 24 is allowed (13).</td></tr>
+    <tr><td>DataIntegrityViolationException deleting a course</td><td>Its enrollments still point at it. Delete them first, in the same transaction (13).</td></tr>
+    <tr><td>405 without an Allow header</td><td>Copy <code>ex.getSupportedHttpMethods()</code> into the response's <code>Allow</code> header (10).</td></tr>
+    <tr><td>/api/courses/0 gives 404, not 400</td><td>A missing <code>id &lt; 1</code> check (09).</td></tr>
+    <tr><td>Every CORS check fails</td><td>Expected until React Lab 4 (14).</td></tr>
+  </table>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 18 read</span></label>
+</section>
+
+<section id="s19">
+  <div class="shead"><span class="chip">19</span><h2>What you hand in, and when</h2><span class="lvl core">Core</span><span class="tagline">the suite's output at level C</span></div>
+
+  <p>Nothing, for this manual on its own. It's the road to a backend you'll need later, and the suite is how you know you're on it.</p>
+  <p><strong>React Lab 4 grades the conformance output at level C as its own part</strong> — every level ✓, with CORS added in that lab. A backend that isn't ready by then doesn't block React Lab 4's frontend grade: that part is graded against the mock, and only the backend part's marks are at stake. Its doc says exactly what to submit, and how. Until then:</p>
+  <ul>
+    <li>Keep your backend in a Git repository of its own, and commit after every level.</li>
+    <li>Run the suite after every change, so the summary line only ever moves forward.</li>
+    <li>Stuck on a check? Bring its id and its output to any lab. "C24 says <em>Course is full</em>, I expected <em>Already enrolled</em>" is a question a TA can answer.</li>
+  </ul>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 19 read — my backend is in Git, and I know what React Lab 4 will ask for</span></label>
+</section>
+
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+  <div class="gloss">
+    <div class="grow"><b>$ref</b><span>"Use the definition at this address": <code>#/components/schemas/Course</code> is a place in the same file.</span></div>
+    <div class="grow"><b>ApiError</b><span>The contract's one error shape: timestamp, status, error, message, path, fieldErrors.</span></div>
+    <div class="grow"><b>authentication</b><span>Who are you? Failing it is a 401.</span></div>
+    <div class="grow"><b>authorisation</b><span>Are you allowed? Failing it is a 403.</span></div>
+    <div class="grow"><b>bearer token</b><span>A token sent as <code>Authorization: Bearer &lt;token&gt;</code>: whoever holds it is let in.</span></div>
+    <div class="grow"><b>conformance</b><span>Behaving exactly as the contract says. Checked by <code>npm run conformance</code>.</span></div>
+    <div class="grow"><b>contract</b><span>The written agreement between frontend and backend about requests, responses and errors.</span></div>
+    <div class="grow"><b>CORS</b><span>A server's permission, in response headers, for pages from other origins to read its responses.</span></div>
+    <div class="grow"><b>denylist</b><span>Tokens the server refuses even though they're validly signed: logged-out ones.</span></div>
+    <div class="grow"><b>DTO</b><span>Data Transfer Object: the shape a request or response has, separate from the entity.</span></div>
+    <div class="grow"><b>entry point</b><span>Spring Security's <code>AuthenticationEntryPoint</code>: what it answers when a request isn't authenticated.</span></div>
+    <div class="grow"><b>idempotent</b><span>Doing it twice has the same effect as doing it once. The seed loader must be.</span></div>
+    <div class="grow"><b>jti</b><span>JWT ID: a claim that names one token uniquely. Logout revokes by it.</span></div>
+    <div class="grow"><b>JWT</b><span>A signed token: header, claims and signature, base64url-encoded and joined by dots.</span></div>
+    <div class="grow"><b>mock</b><span>A stand-in that follows the contract, so one side can work before the other exists.</span></div>
+    <div class="grow"><b>N+1</b><span>One query for a list, then one more per item. A grouped or joined query avoids it.</span></div>
+    <div class="grow"><b>OpenAPI</b><span>The standard format for writing an HTTP API contract, in YAML or JSON.</span></div>
+    <div class="grow"><b>operation</b><span>One HTTP method on one path: <code>POST /api/enrollments</code>.</span></div>
+    <div class="grow"><b>preflight</b><span>The <code>OPTIONS</code> request a browser sends first, to ask whether a cross-origin request is allowed.</span></div>
+    <div class="grow"><b>schema</b><span>The description of one JSON shape: its fields, their types and limits.</span></div>
+    <div class="grow"><b>seed</b><span>The data a fresh backend starts with.</span></div>
+  </div>
+</section>
+
+<div class="finish">
+  <h2>How to know you're ready</h2>
+  <p>You're ready for React Lab 4 when <code>npm run conformance</code> shows levels A, B and C all ✓ — and you can do all of these <em>without looking anything up</em>:</p>
+  <ol>
+    <li>Find any operation in <code>openapi.yaml</code>, follow its <code>$ref</code>s, and say what it answers for each status.</li>
+    <li>Name the six fields of an ApiError, and say when <code>fieldErrors</code> isn't null.</li>
+    <li>Explain the difference between 401 and 403, with one example of each from this API.</li>
+    <li>Explain why a bad body with no token is 401, and which line of your SecurityConfig makes it so.</li>
+    <li>Say where your 401 body comes from, and why <code>@RestControllerAdvice</code> can't produce it.</li>
+    <li>Explain why <code>seatsLeft</code> isn't a column, and how you compute it.</li>
+    <li>Say what logout stores, where, and why another token of the same user still works.</li>
+    <li>Recite the enroll rules in order, with their messages.</li>
+    <li>Explain why your seed loader is safe to run on every start.</li>
+    <li>Point at any line of your backend and say which part of the contract earns it.</li>
+  </ol>
+
+  <h2 style="margin-top:30px;font-size:20px">Commands card</h2>
+  <div class="cmd"><span class="p">$</span> npm run conformance                            # A–C + CORS, localhost:8080
+<span class="p">$</span> npm run conformance -- --level B               # up to level B
+<span class="p">$</span> npm run conformance -- http://localhost:9090   # another port
+<span class="p">$</span> npm run mock                                   # the mock: what green looks like
+<span class="p">$</span> npm run -s token                               # an admin token, for curl etc.
+<span class="p">$</span> curl -i http://localhost:8080/api/courses/7    # one request, with status and headers</div>
+
+  <h2 style="margin-top:24px;font-size:20px">Contract card</h2>
+  <div class="cmd"><span class="cm"># public        GET /api/courses[?department=&amp;q=]   GET /api/courses/{id}</span>
+<span class="cm">#               POST /api/auth/signup   POST /api/auth/login   POST /api/auth/google</span>
+<span class="cm"># any token     GET /api/users/me   POST /api/auth/logout</span>
+<span class="cm">#               GET /api/users/me/enrollments</span>
+<span class="cm">#               POST /api/enrollments   DELETE /api/enrollments/{id}</span>
+<span class="cm"># ADMIN         POST /api/courses   PUT /api/courses/{id}   DELETE /api/courses/{id}</span>
+<span class="cm">#</span>
+<span class="cm"># errors        ApiError { timestamp, status, error, message, path, fieldErrors }</span>
+<span class="cm"># enroll        404 → "Already enrolled in this course" → "Course is full"</span>
+<span class="cm">#                   → "Credit limit of 24 exceeded"</span>
+<span class="cm"># token         sub=email  role  jti  iat  exp      expiresIn = exp − iat = 3600</span>
+<span class="cm"># seed          admin@esd.local / admin12345     student@esd.local / student12345</span>
+<span class="cm">#               riya@esd.local / riya12345</span></div>
+</div>
+
+<footer>M.Tech CSE · ESD · The backend contract<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+</div>
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ---- */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  /* ---- progress: CORE sections drive the bar; stretch boxes are tracked separately.
+         Both are remembered in this browser, so they survive a reload. ---- */
+  function load(key){ try{ return JSON.parse(localStorage.getItem(key)||'[]'); }catch(err){ return []; } }
+  function save(key,list){ try{ localStorage.setItem(key,JSON.stringify(list.map(function(c){return c.checked}))); }catch(err){} }
+  var KEY='esd-api-contract-progress', SKEY='esd-api-contract-stretch';
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var extras=[].slice.call(document.querySelectorAll('.chk-s'));
+  var saved=load(KEY), savedS=load(SKEY);
+  checks.forEach(function(c,i){ if(saved[i]) c.checked=true; });
+  extras.forEach(function(c,i){ if(savedS[i]) c.checked=true; });
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=['Core first, in order. Read the contract before you change any code.',
+             'Good start. Sections 04–07 are the contract itself: everything later points back to them.',
+             'Past halfway. Level A first, then B, then C — run the suite after every change.',
+             'Nearly there. Level C is the one React Lab 4 needs.',
+             'Core done. Keep the suite green as you work; React Lab 4 will ask for its level C output.'];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    var s=extras.filter(function(c){return c.checked}).length;
+    msg.textContent=(n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))])+(s?'  ·  stretch: '+s+' / '+extras.length:'');
+    save(KEY,checks); save(SKEY,extras);
+  }
+  checks.concat(extras).forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^[$>]\s?/,'').trimEnd()}).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>
