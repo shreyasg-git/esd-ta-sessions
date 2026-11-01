@@ -232,6 +232,85 @@ footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.
     <span class="card-go">Open</span>
   </a>
 
+    <a class="card" href="react-lab1.html">
+    <span class="file">react-lab1.html</span>
+    <div class="card-top">
+      <span class="card-num">10</span>
+      <h2>React Lab 1 — Your first React app, by hand</h2>
+    </div>
+    <p>The pre-lab for React Lab 1, the first React lab. A clickable number grid with live stats, built by hand in Vite: JSX, components and props, lists and keys, React's <code>useState</code>, events up through callback props, and an immutable 2-D update. The stats sit outside the grid, so the state has to live in App — then the numbers come from the server with <code>useEffect</code>. Everything set side by side with the <code>useState</code> and redraws you wrote by hand in the JS labs.</p>
+    <div class="tags">
+      <i>Vite</i><i>JSX</i><i>components</i><i>props</i><i>composition</i><i>lists &amp; keys</i><i>useState</i><i>events up</i><i>lifting state</i><i>immutable updates</i><i>derived values</i><i>re-render</i><i>StrictMode</i><i>useEffect</i>
+    </div>
+    <span class="card-go">Open</span>
+  </a>
+
+    <a class="card" href="react-lab2.html">
+    <span class="file">react-lab2.html</span>
+    <div class="card-top">
+      <span class="card-num">11</span>
+      <h2>React Lab 2 — Restrict, then judge (AI)</h2>
+    </div>
+    <p>The pre-lab, by hand: read the course API contract for one slice, then build a course search with loading, error and empty states, an effect that fetches and cleans up, and a controlled input. In the lab, AI is required: it generates a Courses page (list + add) against a precise contract, and you audit it against the Good React Slice sheet, fix it to a dumb View plus a custom hook, and strip the “not yet” hooks.</p>
+    <div class="tags">
+      <i>OpenAPI contract</i><i>ApiError</i><i>fieldErrors</i><i>loading / error / empty</i><i>useEffect</i><i>dependency array</i><i>cleanup</i><i>ignore flag</i><i>controlled inputs</i><i>custom hooks</i><i>Good React Slice</i><i>“not yet” list</i><i>prompt log</i><i>AI audit</i>
+    </div>
+    <span class="card-go">Open</span>
+  </a>
+
+    <a class="card" href="react-lab3.html">
+    <span class="file">react-lab3.html</span>
+    <div class="card-top">
+      <span class="card-num">12</span>
+      <h2>React Lab 3 — Screens, routes and logging in</h2>
+    </div>
+    <p>The Lab 2 course app becomes many screens with React Router — layouts, URL parameters, a 404 — then gets a real login: an <code>AuthContext</code> holding the token in memory, protected routes with redirect-back, enrolling and dropping against the API, and an admin-only page built in the lab with AI.</p>
+    <div class="tags">
+      <i>react router</i><i>routes</i><i>Link</i><i>layouts &amp; Outlet</i><i>useParams</i><i>useNavigate</i><i>Navigate</i><i>children</i><i>context</i><i>JWT</i><i>Bearer token</i><i>401 vs 403</i><i>protected routes</i><i>redirect-back</i>
+    </div>
+    <span class="card-go">Open</span>
+  </a>
+
+    <a class="card" href="react-bug-lab.html">
+    <span class="file">react-bug-lab.html</span>
+    <div class="card-top">
+      <span class="card-num">13</span>
+      <h2>React Bug Lab — predict, then prove it</h2>
+    </div>
+    <p>One small React app you've never seen, one bug report, one planted bug. Before running anything you write down what's wrong, where, and what you'll see; then trigger it, fix it, and trigger it again. The eight bugs React won't warn you about, and the tools that catch them.</p>
+    <div class="tags">
+      <i>predict → trigger → fix</i><i>bug reports</i><i>Network tab</i><i>React warnings</i><i>StrictMode</i><i>keys</i><i>effect dependencies</i><i>cleanup &amp; races</i><i>stale closures</i><i>immutable updates</i><i>derived state</i><i>res.ok</i><i>AI after prediction</i>
+    </div>
+    <span class="card-go">Open</span>
+  </a>
+
+    <a class="card" href="react-lab4.html">
+    <span class="file">react-lab4.html</span>
+    <div class="card-top">
+      <span class="card-num">14</span>
+      <h2>React Lab 4 — Your own backend, end to end</h2>
+    </div>
+    <p>The course app learns to expect a real server — no answer, a session that dies mid-use, refused enrollments, signup with the server's field messages — and then talks to your own Spring Boot backend: <code>VITE_API_URL</code>, CORS in Spring Security, the conformance report graded as its own part, and an end-to-end check in two browser windows.</p>
+    <div class="tags">
+      <i>CORS</i><i>preflight</i><i>Spring Security</i><i>VITE_API_URL</i><i>.env.local</i><i>conformance</i><i>network errors</i><i>401</i><i>session expiry</i><i>fieldErrors</i><i>409 Conflict</i><i>signup</i><i>Network tab</i><i>AI-assisted</i>
+    </div>
+    <span class="card-go">Open</span>
+  </a>
+
+    <a class="card" href="oauth-lab.html">
+    <span class="file">oauth-lab.html</span>
+    <div class="card-top">
+      <span class="card-num">15</span>
+      <h2>OAuth2 Lab — Sign in with Google</h2>
+    </div>
+    <p>Add “Sign in with Google” to the course app: Google's button in React (and why it finally earns <code>useRef</code>), the ID token taken apart by hand, and an exchange for your own API's token in <code>AuthContext</code>. In the lab, AI writes your Spring Boot endpoint and you audit it — signature, audience, issuer, expiry — then prove it with conformance level D and a real sign-in.</p>
+    <div class="tags">
+      <i>OAuth 2.0</i><i>OpenID Connect</i><i>Google Identity Services</i><i>ID token</i><i>JWT</i><i>JWKS</i><i>RS256</i><i>useRef</i><i>StrictMode</i><i>AuthContext</i><i>Spring Security</i><i>NimbusJwtDecoder</i><i>conformance level D</i><i>AI audit</i>
+    </div>
+    <span class="card-go">Open</span>
+  </a>
+
+
 </div>
 
 <p class="sectitle">How to use them</p>

@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Screens, routes and logging in — React Lab 3</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#101614">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Condensed:wght@600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+.cue.work{border-left-color:var(--ink);background:var(--surface)}
+.cue.work .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.tg{color:var(--term-green)}
+.at{color:var(--signal)}
+.st{color:#B7C4C0}
+.tx{color:#FFFFFF}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 182px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+.quiz .a .cmd{margin-top:4px}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 168px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+/* ---- additions for the lab docs ---- */
+.cue.react{border-left-color:var(--term-green);background:var(--dark);color:#DDE3E0}
+.cue.react .cue-k{color:var(--term-green)}
+.cue.react code{background:#22302D;color:var(--term-green)}
+.cue.react strong{color:#FFF}
+.refs{font-family:var(--mono);font-size:12px;color:var(--muted);margin:-6px 0 16px;max-width:70ch}
+.refs a{color:var(--teal);font-weight:600}
+.part{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper);background:var(--ink);display:inline-block;padding:5px 10px;margin:64px 0 -28px}
+.toc .rpart{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);padding:10px 16px 6px;border-bottom:1px solid var(--line);background:var(--teal-soft);font-weight:600}
+table.grid{border-collapse:collapse;width:100%;max-width:70ch;background:var(--surface);border:1px solid var(--ink);margin:0 0 16px;font-size:14.5px}
+table.grid th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;text-align:left;color:var(--muted);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--ink)}
+table.grid td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.grid tr:last-child td{border-bottom:0}
+table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--teal);font-weight:600;white-space:nowrap}
+
+/* ---- core / stretch ---- */
+blockquote.prompt{margin:0 0 16px;max-width:70ch;background:var(--surface);border:1px solid var(--ink);border-left:5px solid var(--signal);padding:14px 17px;font-family:var(--mono);font-size:13px;line-height:1.7}
+.lvl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:3px 7px;align-self:center;white-space:nowrap}
+.lvl.core{background:var(--ink);color:var(--signal)}
+.lvl.stretch,.lvl.stretch-box{border:1px dashed var(--teal);color:var(--teal)}
+.lvl.ref{border:1px solid var(--muted);color:var(--muted)}
+.rrow .rl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:600;flex:0 0 auto;border:1px dashed var(--teal);padding:1px 6px;align-self:center}
+.rrow .rl.ref{color:var(--muted);border:1px solid var(--muted)}
+.rrow.is-extra .rw{color:var(--muted)}
+.stretch-box{border:1px dashed var(--teal);background:rgba(255,255,255,.55);padding:14px 16px 4px;margin:8px 0 18px}
+.stretch-box::before{content:"Stretch — optional. Do it if you can, and ask about it any time.";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600;margin-bottom:10px}
+.stretch-box h3:first-of-type{margin-top:0}
+/* tables whose first column holds long text (error messages): even, wrapping columns */
+table.grid.long-key{table-layout:fixed}
+table.grid.long-key td:first-child{white-space:normal;width:42%;overflow-wrap:anywhere}
+table.grid.long-key th:first-child{width:42%}
+.legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 0;font-size:14px;color:#2B3936}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+  table.grid td:first-child{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> React Lab 3 · AI-assisted</p>
+  <h1>Screens, routes<br>and <em>logging in</em></h1>
+  <p class="lede">React Lab 2 gave you one screen: a course list and a form, talking to the API. Real apps have many screens — a list, a page per course, a login page, your own courses, an admin page — and some of them are only for some people. This lab adds React Router for the screens and context for the logged-in user, and puts the course API's login, enroll and drop behind them. It's the shape of your mini-project: a multi-screen app where some screens need you to log in.</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">16</span> core</div>
+      <div class="tracker-msg" id="msg">Core first, in order — each screen builds on the last.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill" style="width: 0%;"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p><strong>This is a pre-lab.</strong> You work through it at home, before the lab. The lab session is for your doubts, for going one level deeper, for a short quiz, and for one AI task. It assumes you've done the core sections.</p>
+  <p><strong>It continues React Lab 2.</strong> The folder starts from the finished Lab 2 code — the API client, <code>useCourses</code>, the list and the form — so you're never blocked by something you didn't finish. Lab 2's course search isn't carried over: the router app keeps the Courses page only. Two small changes to it are explained in section 09. If a Lab 1 or Lab 2 idea feels shaky, open <a href="react-lab1.html">React Lab 1</a> or <a href="react-lab2.html">React Lab 2</a> again; this lab uses them, it doesn't repeat them.</p>
+  <p><strong>The thread is still reactivity.</strong> Lab 1: change the state, the screen follows. Lab 2: the state arrives from a server. Here, two more things become state the screen follows: <em>the URL</em>, and <em>who is logged in</em>.</p>
+  <p><strong>Core and stretch.</strong> <span class="lvl core">Core</span> is mandatory — what we go through together, and what <code>npm test</code> checks. <span class="lvl stretch">Stretch</span> is extra, checked by <code>npm run test:stretch</code>. Ask about either any time.</p>
+  <p><strong>AI: not in the pre-lab.</strong> Type the code yourself — routing and auth bugs are confusing until you've made a few by hand. AI is for the in-lab task only (section 15), where you restrict it and judge what it gives you, as in Lab 2.</p>
+  <p>Keep the browser's DevTools open the whole time, on the <strong>Network</strong> tab. Half of this lab is about which requests go out, and with which headers.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — screens first, then who's logged in, then the lab. Do every core section, in order; stretch is extra</div>
+  <div class="rpart">Part 1 · Getting set up</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">How this lab works</span></a>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">What you're building</span></a>
+  <div class="rpart">Part 2 · Screens and URLs</div>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">One page, many screens — the URL is state</span></a>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">Routes, Route and Link</span></a>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">Layouts, Outlet and the 404 route</span></a>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">URL parameters — a page per course</span></a>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">Navigating from code</span></a>
+  <div class="rpart">Part 3 · Who's logged in</div>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">Context — sharing without passing down</span></a>
+  <a class="rrow" href="#s9"><span class="rt">09</span><span class="rw">Authentication in a single-page app</span></a>
+  <a class="rrow" href="#s10"><span class="rt">10</span><span class="rw">AuthContext and the login page</span></a>
+  <a class="rrow" href="#s11"><span class="rt">11</span><span class="rw">Protected routes</span></a>
+  <a class="rrow" href="#s12"><span class="rt">12</span><span class="rw">My courses — and dropping one</span></a>
+  <a class="rrow" href="#s13"><span class="rt">13</span><span class="rw">Enrolling — the whole flow</span></a>
+  <div class="rpart">Part 4 · The lab</div>
+  <a class="rrow" href="#s14"><span class="rt">14</span><span class="rw">In the lab</span></a>
+  <a class="rrow" href="#s15"><span class="rt">15</span><span class="rw">The in-lab task — an admin-only page, with AI</span></a>
+  <a class="rrow is-extra" href="#s16"><span class="rt">16</span><span class="rw">When it goes wrong</span><span class="rl ref">reference</span></a>
+  <a class="rrow is-extra" href="#s17"><span class="rt">17</span><span class="rw">Practice run, unaided</span><span class="rl">stretch</span></a>
+  <a class="rrow" href="#s18"><span class="rt">18</span><span class="rw">Submitting the assignment</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; reference cards</span></a>
+</nav>
+
+<div class="part">Part 1 · Getting set up</div>
+
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>How this lab works</h2><span class="lvl core">Core</span><span class="tagline">pull, install, test, run</span></div>
+
+  <p>Same setup as React Lab 2: one folder, a Vite app, tests you run with one command, and the mock course API served by <code>npm run dev</code> on the app's own address — so there's no CORS to think about yet.</p>
+
+  <h3>Getting the starter</h3>
+  <div class="dothis">
+    <h4>Do this now — pull, install, and run the tests</h4>
+    <ol>
+      <li>In your <code>esd-labs</code> folder, commit your own work, then pull. A new <code>react-lab3</code> folder appears next to the others; your Lab 2 work isn't touched.</li>
+      <li>Open the <strong><code>react-lab3</code> folder</strong> in VS Code and open its terminal.</li>
+    </ol>
+  </div>
+  <div class="cmd"><span class="p">$</span> cd esd-labs
+<span class="p">$</span> git pull
+<span class="p">$</span> cd react-lab3
+<span class="p">$</span> npm install
+<span class="p">$</span> npm test
+<span class="o"> Test Files  6 failed (6)</span>
+<span class="o">      Tests  39 failed | 1 passed (40)</span></div>
+  <p>Every exercise starts as a <code>TODO</code> comment, and your job is to turn the 39 into 0. One new package since Lab 2: <code>react-router</code>, version 7. Then start the app:</p>
+  <div class="cmd"><span class="p">$</span> npm run dev
+<span class="o">  ➜  Local:   http://localhost:5173/</span></div>
+  <p>Open <a href="http://localhost:5173/" target="_blank" rel="noopener">localhost:5173</a>. Right now it's Lab 2's course list, without the form, at <em>every</em> URL — try <code>localhost:5173/anything</code>. By the end of section 13 each URL is its own screen. The mock API has two accounts you'll use all the time: <code>student@esd.local</code> / <code>student12345</code> (Sam Student) and <code>admin@esd.local</code> / <code>admin12345</code> (Course Admin). Every restart of <code>npm run dev</code> resets the data.</p>
+
+  <h3>The folder</h3>
+  <div class="mention">
+    <div class="mrow"><b>src/App.jsx</b><span>The route table: which screen for which URL. Sections 04–05.</span></div>
+    <div class="mrow"><b>src/pages/</b><span><code>Layout</code> (the header around every page), <code>NotFound</code>, <code>LoginPage</code>. Sections 05 and 10.</span></div>
+    <div class="mrow"><b>src/courses/</b><span>From Lab 2: <code>useCourses</code>, <code>CoursesView</code>, <code>AddCourseForm</code>, <code>CoursesPage</code> — given, finished. New: <code>useCourse</code> + <code>CourseDetail</code>, the page for one course (sections 06 and 13).</span></div>
+    <div class="mrow"><b>src/auth/</b><span><code>AuthContext</code> (who's logged in) and <code>RequireAuth</code> (a protected route). Sections 10–11. <code>RequireRole</code> is the in-lab task.</span></div>
+    <div class="mrow"><b>src/me/</b><span>My courses: <code>useMyEnrollments</code> and <code>MyCoursesPage</code>. Section 12.</span></div>
+    <div class="mrow"><b>src/api/client.js</b><span><code>apiFetch</code> and <code>ApiError</code> from Lab 2, with one change (section 09). Given.</span></div>
+    <div class="mrow"><b>src/main.jsx</b><span>Starts the app inside a <code>&lt;BrowserRouter&gt;</code>. Given; section 04 explains it.</span></div>
+    <div class="mrow"><b>test/</b><span>The specification, one file per exercise; <code>test/support/</code> runs the real mock API in memory for them. Read the tests; don't edit them.</span></div>
+    <div class="mrow"><b>inlab/</b><span>The in-lab AI task: <code>CONTRACT.md</code>, its tests, and <code>PROMPTS.md</code> for your prompt log. Leave it until the lab.</span></div>
+    <div class="mrow"><b>mock/</b><span>The mock course API. Never edit it.</span></div>
+  </div>
+
+  <h3>The commands</h3>
+  <div class="cmd"><span class="p">$</span> npm test                              # every core test
+<span class="p">$</span> npx vitest run test/routes.test.jsx   # one exercise
+<span class="p">$</span> npm run test:stretch                  # the stretch tests
+<span class="p">$</span> npm run inlab                         # the in-lab task's tests (in the lab)
+<span class="p">$</span> npm run dev                           # the app + the mock API at http://localhost:5173</div>
+  <p>The tests render the whole app at a URL and click through it like a user, against a fresh copy of the mock API for every test. When one fails, its name says what it expected, and the output shows the screen it found.</p>
+
+  <h3>Submitting</h3>
+  <p>A <strong>graded assignment</strong>: <code>npm test</code> and <code>npm run inlab</code> fully green, and your prompt log filled in, zipped and submitted once, by the end of the day of the lab. The next lab's starter — which contains this lab's finished code — is released that night, so late submissions can't be accepted. Section 18 has the steps.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — npm test runs, the app opens</span></label>
+</section>
+
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>What you're building</h2><span class="lvl core">Core</span><span class="tagline">six screens, one header</span></div>
+
+  <p>One app, one header on every screen, and a screen for each URL:</p>
+  <table class="grid long-key">
+    <tr><th>URL</th><th>Screen — and who may see it</th></tr>
+    <tr><td><code>/</code></td><td><strong>Courses</strong> — the list from Lab 2. Each course is a link to its page. Anyone.</td></tr>
+    <tr><td><code>/courses/:id</code></td><td><strong>One course</strong> — details, seats left, and an <em>Enroll</em> button. Anyone can look; enrolling needs a login.</td></tr>
+    <tr><td><code>/login</code></td><td><strong>Log in</strong> — email and password. Afterwards, back to wherever you were going.</td></tr>
+    <tr><td><code>/me</code></td><td><strong>My courses</strong> — what you're enrolled in, with <em>Drop</em>. Logged-in users only: everyone else is sent to log in first.</td></tr>
+    <tr><td><code>/admin/courses/new</code></td><td><strong>New course</strong> — Lab 2's form. Admins only. Built in the lab, with AI.</td></tr>
+    <tr><td>anything else</td><td><strong>Page not found.</strong></td></tr>
+  </table>
+  <p>The header shows <em>Courses</em> and <em>My courses</em> links, and either a <em>Log in</em> link or the logged-in user's name with a <em>Log out</em> button.</p>
+
+  <h3>The flow you'll be able to click through</h3>
+  <div class="cmd"><span class="o">/  →  click CS402  →  /courses/4  →  Enroll  →  /login  (not logged in yet)</span>
+<span class="o">   →  log in as Sam  →  back on /courses/4  →  Enroll  →  "You're enrolled."  2 seats left</span>
+<span class="o">   →  My courses  →  /me  →  CS402 is there  →  Drop  →  gone</span>
+<span class="o">   →  Log out  →  /  →  My courses  →  /login  (protected again)</span></div>
+  <p>Every step of that is a test in <code>test/</code>, and section 13 has you walk it in the browser.</p>
+
+  <div class="cue react"><p class="cue-k">The thread</p><p>In <a href="react-lab1.html#s10">Lab 1</a> a click changed state and the screen followed. In <a href="react-lab2.html#s5">Lab 2</a> the state came from a server. In this lab the <strong>URL</strong> is state too — the router reads it and draws the matching screen — and so is <strong>who's logged in</strong>, shared through context. Change either one, and the screen follows. Same rule, two new sources.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 read — I know the six screens</span></label>
+</section>
+
+<div class="part">Part 2 · Screens and URLs</div>
+
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>One page, many screens — the URL is state</h2><span class="lvl core">Core</span><span class="tagline">why a router exists</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>In JS Lab 2 you kept everything the page shows in <strong>one state object</strong> and drew the screen from it (<a href="js-app.html#s5">JS Lab 2 · §05</a>). There's one more piece of state you didn't put in it, because the browser already keeps it for you: <strong>the URL</strong>.</p></div>
+
+  <h3>What the URL does for a user</h3>
+  <p>Think about what people do with a link to a course page. They press <kbd>Back</kbd> to return to the list. They bookmark it. They paste it to a friend. They reload it. They open it in a new tab. Every one of those only works if <em>the screen can be rebuilt from the URL alone</em>. So the URL has to say which screen, and which course — and the app has to draw the screen from it, the same way it draws from any other state.</p>
+
+  <h3>Websites did this with files; single-page apps can't</h3>
+  <p>On an old-style website, each URL is a different HTML file on the server. Click a link, the browser asks the server for the next page, and the whole page is thrown away and replaced — including every JavaScript variable. A React app is <strong>one</strong> HTML page, <code>index.html</code>, with JavaScript that swaps what's on it. If it did nothing about the URL, the address bar would say <code>localhost:5173/</code> forever: no Back, no bookmarks, no sharing.</p>
+  <p><strong>Client-side routing</strong> fixes that. JavaScript changes the URL <em>without</em> asking the server for a new page, and draws the screen that belongs to it. The browser gives you the tool:</p>
+
+  <div class="dothis">
+    <h4>Do this now — change the URL without leaving the page</h4>
+    <p>With the app open (<code>npm run dev</code>), in the DevTools console:</p>
+  </div>
+  <div class="cmd">location.pathname                      <span class="o">// "/"</span>
+history.<span class="at">pushState</span>(<span class="tg">null</span>, <span class="st">""</span>, <span class="st">"/courses/4"</span>)
+location.pathname                      <span class="o">// "/courses/4"   — and nothing reloaded</span>
+history.<span class="at">back</span>()                         <span class="cm">// the address bar goes back to "/"</span></div>
+  <p>The address bar changed, a new entry went on the Back stack, and the page didn't reload — the Network tab shows no new request. But the screen didn't change either: nothing in the app was listening. A <strong>router</strong> is the code that listens. It reads the URL, draws the matching screen, and redraws when the URL changes. React Router does exactly that, on top of <code>history.pushState</code>.</p>
+
+  <h3>Why a reload still works</h3>
+  <p>Type <code>localhost:5173/courses/4</code> in the address bar and press <kbd>Enter</kbd>. That <em>is</em> a request to the server, for a file called <code>/courses/4</code> — which doesn't exist. Vite's dev server knows it's serving a single-page app: for any path that isn't a real file or <code>/api/…</code>, it answers with <code>index.html</code>. The app starts, the router reads <code>/courses/4</code> from the address bar, and draws that screen.</p>
+  <div class="cmd"><span class="p">$</span> curl -s -o /dev/null -w "%{http_code} %{content_type}\n" http://localhost:5173/me
+<span class="o">200 text/html                  # index.html — the app, not a file called "me"</span></div>
+  <p>On Windows PowerShell, type <code>curl.exe</code> instead of <code>curl</code>, and <code>-o NUL</code> instead of <code>-o /dev/null</code>.</p>
+  <p>Whatever hosts the built app later has to do the same, or every reload on an inner page is a 404. Keep the distinction in your head: <strong>clicking a link inside the app never asks the server for a page; typing a URL or reloading always does</strong> — and a reload starts the JavaScript from scratch, which will matter a lot in section 09.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Which of these belong in the URL: the course being viewed; the password typed into the login form; who's logged in; the department filter on the list?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The course, yes — it's what a link to the page has to say. The filter usually yes, so a filtered list can be shared (this lab doesn't need one). The password, never: URLs end up in history, logs and screenshots. Who's logged in, no: two people opening the same link should see the same page, each as themselves. That's per-browser state, and it gets its own home in section 08.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 complete — I've moved the URL by hand</span></label>
+</section>
+
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>Routes, Route and Link</h2><span class="lvl core">Core</span><span class="tagline">src/App.jsx</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>A component is a function from props to JSX, and you build screens by putting components inside each other (<a href="react-lab1.html#s5">React Lab 1 · §05–06</a>). A router is just more components.</p></div>
+
+  <h3>The router: BrowserRouter</h3>
+  <p>Open <code>src/main.jsx</code> (given). The app is wrapped in a <code>&lt;BrowserRouter&gt;</code>:</p>
+  <div class="cmd"><span class="tg">import</span> { BrowserRouter } <span class="tg">from</span> <span class="st">"react-router"</span>;
+
+<span class="at">createRoot</span>(<span class="tg">document</span>.<span class="at">getElementById</span>(<span class="st">"root"</span>)).<span class="at">render</span>(
+  &lt;StrictMode&gt;
+    &lt;BrowserRouter&gt;
+      &lt;App /&gt;
+    &lt;/BrowserRouter&gt;
+  &lt;/StrictMode&gt;
+);</div>
+  <p><code>BrowserRouter</code> holds the current location in React state. It reads it from the address bar at start, listens for <kbd>Back</kbd> and <kbd>Forward</kbd>, and gives every component inside it a way to move to a new URL (with <code>history.pushState</code>, as you just did by hand). When the location changes, everything that depends on it re-renders. Every router component and hook in this lab only works <em>inside</em> it — section 16 has the error you get otherwise.</p>
+  <p>The tests use a <code>&lt;MemoryRouter initialEntries={["/courses/4"]}&gt;</code> instead (see <code>test/support/app.jsx</code>). Same thing, but the "address bar" is an array in memory, starting wherever the test wants. That's why the router is in <code>main.jsx</code>, not in <code>App</code>: the tests can wrap <code>App</code> in a different one.</p>
+
+  <h3>The route table: Routes and Route</h3>
+  <p><code>&lt;Routes&gt;</code> looks at the current URL and renders the <code>&lt;Route&gt;</code> that matches it — only that one:</p>
+  <div class="cmd"><span class="tg">import</span> { Routes, Route } <span class="tg">from</span> <span class="st">"react-router"</span>;
+
+&lt;Routes&gt;
+  &lt;Route path=<span class="st">"/"</span> element={&lt;CoursesPage /&gt;} /&gt;
+  &lt;Route path=<span class="st">"/login"</span> element={&lt;LoginPage /&gt;} /&gt;
+&lt;/Routes&gt;</div>
+  <p>Three things to notice. <code>element</code> takes an <em>element</em> — <code>&lt;CoursesPage /&gt;</code>, with the angle brackets — so if a page needed props, you'd write them right there in the table. The routes are <strong>ranked, not tried in order</strong>: the most specific match wins, wherever it is in the list. And a URL that matches nothing renders nothing — section 05 adds a catch-all for that.</p>
+
+  <h3>Link, not &lt;a&gt;</h3>
+  <p>To move between screens, use <code>&lt;Link to="/login"&gt;Log in&lt;/Link&gt;</code>. It renders a real <code>&lt;a href="/login"&gt;</code> — so hovering shows the URL, a screen reader announces a link, and right-click → <em>Open in new tab</em> works. But when it's clicked, it cancels the browser's normal page load and calls <code>pushState</code> instead. The difference is the whole point:</p>
+  <table class="grid long-key">
+    <tr><th>You write</th><th>What happens on click</th></tr>
+    <tr><td><code>&lt;Link to="/me"&gt;</code></td><td>The URL changes, the router draws the new screen. No request for a page. All React state — including who's logged in — is still there.</td></tr>
+    <tr><td><code>&lt;a href="/me"&gt;</code></td><td>A full page load: the browser asks the server for <code>/me</code>, gets <code>index.html</code>, and starts the app <strong>from scratch</strong>. Every piece of state is gone. After section 10, that includes your login.</td></tr>
+  </table>
+  <div class="dothis">
+    <h4>Do this now — see the difference in the Network tab</h4>
+    <p>When your routes work (end of section 05): Network tab, filter <strong>Doc</strong>. Click links in the header — no new rows. Then press <kbd>Enter</kbd> in the address bar — one row, a whole new page. A <code>&lt;Link&gt;</code> click should never add a <em>Doc</em> row.</p>
+  </div>
+
+  <h3>Exercise — the route table</h3>
+  <p>In <code>src/App.jsx</code>, replace the starter's lone <code>&lt;CoursesPage /&gt;</code> with <code>&lt;Routes&gt;</code>. Keep <code>&lt;AuthProvider&gt;</code> around the outside (it's a stub until section 10; every page will need it). These are the routes — all of them go <em>inside</em> a layout route, which is the first thing in section 05, so read that before you type:</p>
+  <table class="grid long-key">
+    <tr><th>Route</th><th>Element</th></tr>
+    <tr><td><code>index</code> (the layout's own URL, <code>/</code>)</td><td><code>&lt;CoursesPage /&gt;</code></td></tr>
+    <tr><td><code>path="courses/:id"</code></td><td><code>&lt;CourseDetail /&gt;</code> — section 06</td></tr>
+    <tr><td><code>path="login"</code></td><td><code>&lt;LoginPage /&gt;</code> — section 10</td></tr>
+    <tr><td><code>path="me"</code></td><td><code>&lt;RequireAuth&gt;&lt;MyCoursesPage /&gt;&lt;/RequireAuth&gt;</code> — sections 11–12</td></tr>
+    <tr><td><code>path="*"</code></td><td><code>&lt;NotFound /&gt;</code> — section 05</td></tr>
+  </table>
+  <p>Every component is already imported at the top of <code>App.jsx</code>, and each exists as a starter that renders <em>something</em>, so the routes work before the pages do. (<code>/admin/courses/new</code> is not in the table: you add it in the lab.)</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>You put <code>&lt;Route path="*" element={&lt;NotFound /&gt;} /&gt;</code> <em>first</em> in the list. Does <code>/login</code> still show the login page?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Yes. React Router ranks the routes by how specific they are — a fixed segment like <code>login</code> beats a <code>:param</code>, which beats <code>*</code> — and the order you wrote them in doesn't matter. (Older routers matched the first route that fitted, which is why you may see advice about ordering.)</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 complete — I know what a Link click does that an &lt;a&gt; doesn't</span></label>
+</section>
+
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>Layouts, Outlet and the 404 route</h2><span class="lvl core">Core</span><span class="tagline">src/pages/Layout.jsx · NotFound.jsx</span></div>
+
+  <p>Every screen has the same header. You could put <code>&lt;Header /&gt;</code> at the top of every page component — and then change six files whenever the header changes. Instead, routes nest: a <strong>layout route</strong> draws the frame once, and the matched child route's page appears inside it.</p>
+  <div class="cmd">&lt;Routes&gt;
+  &lt;Route element={&lt;Layout /&gt;}&gt;                         {<span class="cm">/* no path: it wraps its children */</span>}
+    &lt;Route index element={&lt;CoursesPage /&gt;} /&gt;          {<span class="cm">/* "/" */</span>}
+    &lt;Route path=<span class="st">"login"</span> element={&lt;LoginPage /&gt;} /&gt;     {<span class="cm">/* "/login" — relative, no leading slash */</span>}
+    {<span class="cm">/* … the rest of the table from section 04 … */</span>}
+  &lt;/Route&gt;
+&lt;/Routes&gt;</div>
+  <p>The outer <code>&lt;Route&gt;</code> has no <code>path</code>: it matches whenever one of its children does, and renders <code>&lt;Layout /&gt;</code>. Child paths are relative to the parent, so they have no leading slash. <code>index</code> means "the parent's own URL" — here, <code>/</code>.</p>
+
+  <h3>Outlet — where the child goes</h3>
+  <p>The layout decides <em>where</em> in itself the page appears, with <code>&lt;Outlet /&gt;</code>:</p>
+  <div class="cmd"><span class="tg">import</span> { Link, Outlet } <span class="tg">from</span> <span class="st">"react-router"</span>;
+
+<span class="tg">export</span> <span class="tg">function</span> <span class="at">Layout</span>() {
+  <span class="tg">return</span> (
+    &lt;&gt;
+      &lt;header className=<span class="st">"topbar"</span>&gt;
+        &lt;nav aria-label=<span class="st">"Main"</span>&gt;
+          &lt;Link to=<span class="st">"/"</span>&gt;Courses&lt;/Link&gt;
+          &lt;Link to=<span class="st">"/me"</span>&gt;My courses&lt;/Link&gt;
+        &lt;/nav&gt;
+        &lt;div className=<span class="st">"who"</span>&gt;{<span class="cm">/* TODO: a "Log in" link to /login */</span>}&lt;/div&gt;
+      &lt;/header&gt;
+      &lt;main&gt;
+        &lt;Outlet /&gt;          {<span class="cm">/* the matched child route's element renders here */</span>}
+      &lt;/main&gt;
+    &lt;/&gt;
+  );
+}</div>
+  <p>That's nearly all of the exercise — finish the <em>Log in</em> link and it's done. Use a real <code>&lt;header&gt;</code> and <code>&lt;main&gt;</code>: the tests find them by role (a top-level <code>&lt;header&gt;</code> is a <em>banner</em>), and so does a screen reader. There's a bonus you can't see: moving from <code>/</code> to <code>/login</code>, the <code>Layout</code> element stays mounted and only the <code>Outlet</code>'s content changes. Any state in the layout survives navigation — useful in section 10, where the header shows who's logged in.</p>
+
+  <h3>The 404 route</h3>
+  <p><code>path="*"</code> matches any URL, and ranks below everything else, so it only wins when nothing else does. Put it <em>inside</em> the layout route, so a wrong URL still gets the header and a way out. Write <code>NotFound</code>: a heading <strong>"Page not found"</strong>, the path that wasn't found, and a link <strong>"Back to the courses"</strong> to <code>/</code>. For the path, <code>useLocation()</code> gives you the current location — <code>{ pathname, search, state, … }</code>.</p>
+
+  <div class="dothis">
+    <h4>Do this now — run the tests, then click around</h4>
+    <div class="cmd"><span class="p">$</span> npx vitest run test/routes.test.jsx</div>
+    <p>Then in the browser: the header on every screen, <em>Log in</em> goes to the (still empty) login page, <code>/nope</code> shows Page not found, and the Network tab's Doc filter stays empty as you click.</p>
+  </div>
+
+  <div class="stretch-box">
+    <h3>Stretch — show which page you're on</h3>
+    <p>Swap the header's <code>Link</code>s for <code>NavLink</code>s. A <code>NavLink</code> is a <code>Link</code> that knows whether it points at the current page: when it does, it gets <code>class="active"</code> and <code>aria-current="page"</code>. <code>styles.css</code> already underlines <code>.topbar nav a.active</code>. One detail: a <code>NavLink</code> is also active on the pages <em>under</em> it (<code>/me/anything</code>) unless you add <code>end</code>; the root link <code>to="/"</code> is the exception, active only on <code>/</code> itself. <code>npx vitest run --mode stretch test/stretch/navlink.test.jsx</code>.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Your header appears, but every page below it is blank — no errors. What's missing?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The <code>&lt;Outlet /&gt;</code> in <code>Layout</code>. The router matched the child route fine, but the layout never said where to draw it.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Why put the <code>*</code> route inside the layout route rather than next to it?</div>
+    <details><summary>Show answer</summary><div class="a"><p>So the 404 page gets the header too. Someone who followed a broken link can still click <em>Courses</em> or <em>My courses</em>. Outside the layout, it would be a bare page with only the link you remembered to put on it.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 complete — routes.test.jsx passes</span></label>
+</section>
+
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>URL parameters — a page per course</h2><span class="lvl core">Core</span><span class="tagline">CoursesView · useCourse · CourseDetail</span></div>
+
+  <p>Twenty courses, one page component. The route <code>courses/:id</code> has a <strong>parameter</strong>: <code>:id</code> matches any single segment — <code>/courses/4</code>, <code>/courses/9999</code>, even <code>/courses/abc</code> — and the page reads it with <code>useParams()</code>:</p>
+  <div class="cmd"><span class="tg">import</span> { useParams } <span class="tg">from</span> <span class="st">"react-router"</span>;
+
+<span class="cm">// on /courses/4</span>
+<span class="tg">const</span> { id } = <span class="at">useParams</span>();
+id           <span class="o">// "4"     — always a string: it came out of a URL</span>
+id === <span class="st">4</span>     <span class="o">// false   — compare with Number(id) if you need to</span></div>
+  <p>Here the id goes straight back into another URL, <code>/api/courses/${id}</code>, so the string is fine as it is.</p>
+
+  <h3>Step 1 — link every course to its page</h3>
+  <p>In <code>src/courses/CoursesView.jsx</code> (Lab 2's View, otherwise unchanged), make <code>CourseName</code> return a <code>&lt;Link&gt;</code> to <code>/courses/&lt;the course's id&gt;</code>, with the same text, <code>CS402 · Enterprise Software Development</code>. A template literal builds the path.</p>
+
+  <h3>Step 2 — useCourse(id): fetch one course</h3>
+  <p>Same seam as Lab 2 (<a href="react-lab2.html#s7">React Lab 2 · §07</a>): the fetching lives in a hook, the page only renders. <code>src/courses/useCourse.js</code> has the state; write the effect that loads <code>GET /api/courses/{id}</code> — the Lab 2 pattern, <code>ignore</code> flag and all (<a href="react-lab2.html#s5">§05</a>). Two differences from <code>useCourses</code>:</p>
+  <ul>
+    <li><strong>Keep the whole error</strong>, not just its message: <code>setError(err)</code>. The page needs <code>err.status</code> to tell "no such course" (404) from everything else. (<code>useCourses</code> keeps only the message, because its page only shows it. Keep what the screen needs.)</li>
+    <li><strong>The dependency array is <code>[id]</code></strong>, and the effect starts with <code>setStatus("loading")</code>. Why both? Read on.</li>
+  </ul>
+
+  <h3>The same component, a different id</h3>
+  <p>Going from <code>/courses/4</code> to <code>/courses/5</code>, the same route matches, so React keeps the <em>same</em> <code>CourseDetail</code> — it re-renders it with a new <code>id</code>, it doesn't remount it. An effect with <code>[]</code> ran once, for course 4, and never runs again: the URL says 5, the page shows 4. With <code>[id]</code>, React re-runs the effect whenever <code>id</code> changes (and runs the old one's cleanup first, so a slow answer for 4 can't land on the page for 5). <code>setStatus("loading")</code> stops the old course showing while the new one loads.</p>
+  <div class="dothis">
+    <h4>Do this now — break it on purpose</h4>
+    <ol>
+      <li>When the page works, add <code>&lt;Link to={`/courses/${Number(id) + 1}`}&gt;Next →&lt;/Link&gt;</code> under the Enroll button in <code>CourseDetail</code>.</li>
+      <li>Change <code>[id]</code> to <code>[]</code> in <code>useCourse</code>. Click <em>Next →</em> a few times. The URL counts up; the heading doesn't.</li>
+      <li>Put <code>[id]</code> back; watch it work; delete the Next link.</li>
+    </ol>
+  </div>
+
+  <h3>Step 3 — CourseDetail: read the id, show each state</h3>
+  <p>In <code>src/courses/CourseDetail.jsx</code>, replace the starter's <code>const id = "1"</code> with <code>useParams()</code>, then fill in the TODO above the <code>return</code>: <strong>"Loading course…"</strong> while loading; on an error, a heading <strong>"Course not found"</strong> and a link <strong>"Back to the courses"</strong> if <code>error.status === 404</code>, and the error's message (with <code>role="alert"</code>) for anything else. The rest of the page — heading, seats, the Enroll button — is given.</p>
+  <p>Two kinds of "not found", at two different layers: <strong>Page not found</strong> is the router finding no route for the URL. <strong>Course not found</strong> is a route that matched, a request that went out, and an API that answered 404. Same words for the user; different code, different place.</p>
+
+  <div class="dothis">
+    <h4>Do this now</h4>
+    <div class="cmd"><span class="p">$</span> npx vitest run test/detail.test.jsx</div>
+    <p>In the browser: click a course; press <kbd>Back</kbd>; open <code>/courses/9999</code> and <code>/courses/abc</code> directly. Watch the Network tab for the one <code>GET /api/courses/…</code> each page makes.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>What does <code>/courses/abc</code> show — Page not found, Course not found, or something else? Why?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Something else: the error message "Couldn't load the course: Invalid id: abc". <code>:id</code> matches any segment, so the router is happy and <code>CourseDetail</code> renders. The API checks the id and answers <strong>400</strong> (the contract: a path id that isn't a positive integer is a 400), which isn't a 404 — so it's the "anything else" branch.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 complete — detail.test.jsx passes</span></label>
+</section>
+
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>Navigating from code</h2><span class="lvl core">Core</span><span class="tagline">useNavigate · &lt;Navigate&gt; · location.state</span></div>
+
+  <p>A <code>&lt;Link&gt;</code> is for a person clicking. Sometimes your code decides where to go: after logging in, go back where you came from; after creating a course, go to its page; when someone who isn't logged in opens <code>/me</code>, send them to log in. React Router has two tools, and which one you use depends on <em>when</em> you decide.</p>
+
+  <h3>useNavigate — in an event handler</h3>
+  <div class="cmd"><span class="tg">import</span> { useNavigate } <span class="tg">from</span> <span class="st">"react-router"</span>;
+
+<span class="tg">const</span> navigate = <span class="at">useNavigate</span>();         <span class="cm">// at the top of the component, like any hook</span>
+
+<span class="at">navigate</span>(<span class="st">"/me"</span>);                        <span class="cm">// push: a new entry on the Back stack</span>
+<span class="at">navigate</span>(<span class="st">"/"</span>, { replace: <span class="tg">true</span> });       <span class="cm">// replace: swap the current entry instead</span>
+<span class="at">navigate</span>(-<span class="st">1</span>);                           <span class="cm">// the same as pressing Back</span>
+<span class="at">navigate</span>(<span class="st">"/login"</span>, { state: { <span class="tg">from</span>: location } });   <span class="cm">// carry data along (below)</span></div>
+  <p><strong>Push or replace?</strong> Push when the user should be able to come back. Replace when the page you're leaving shouldn't be in the history at all — after logging in, pressing <kbd>Back</kbd> shouldn't show the login form again.</p>
+
+  <h3>&lt;Navigate&gt; — while rendering</h3>
+  <p>Calling <code>navigate()</code> while a component is rendering is a side effect in the middle of a render; React Router warns about it, and it misbehaves. When it's the <em>render</em> that discovers "this user shouldn't be here", return a <code>&lt;Navigate&gt;</code> element instead. It navigates as soon as it's on the screen:</p>
+  <div class="cmd"><span class="tg">if</span> (!user) <span class="tg">return</span> &lt;Navigate to=<span class="st">"/login"</span> replace /&gt;;   <span class="cm">// section 11 is built on this line</span></div>
+  <p>The rule: <strong>in a handler, call <code>navigate()</code>; in render, return <code>&lt;Navigate /&gt;</code>.</strong></p>
+
+  <h3>location.state — data that travels with a navigation</h3>
+  <p>Both tools take a <code>state</code>: any value, stored with that history entry, and read on the other side with <code>useLocation().state</code>. It isn't in the URL, so it doesn't show, can't be bookmarked, and is gone if the link is opened in a new tab — which is exactly right for "where was this person trying to go before we sent them to log in?". Sections 11 and 13 use it for that, and nothing else.</p>
+  <div class="cmd"><span class="tg">const</span> location = <span class="at">useLocation</span>();
+location        <span class="o">// { pathname: "/login", search: "", hash: "", state: { from: { pathname: "/me", … } }, key: "…" }</span></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>After a successful login, the login page calls <code>navigate(from)</code>. Push or replace — and what goes wrong with the other one?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Replace. With push, the history is <code>… /me → /login → /me</code>, so <kbd>Back</kbd> from <code>/me</code> shows the login form to someone who's already logged in. With replace, <code>/login</code> is swapped out and Back goes to wherever they were before.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 read — I know when to use navigate() and when &lt;Navigate&gt;</span></label>
+</section>
+
+<div class="part">Part 3 · Who's logged in</div>
+
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>Context — sharing without passing down</h2><span class="lvl core">Core</span><span class="tagline">createContext · useContext · off the "not yet" list</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>State lives in the closest common parent of everything that needs it, and goes down as props; events come up as callback props (<a href="react-lab1.html#s8">React Lab 1 · §08–09</a>). In <a href="react-lab2.html#s9">React Lab 2 · §09</a>, context was on the <em>not yet</em> list: "props are enough at this size". This section is about the size at which they stop being enough.</p></div>
+
+  <h3>The problem: one value, needed everywhere</h3>
+  <p>Once there's a login, many parts of the app need to know who's logged in, or need their token to call the API:</p>
+  <div class="cmd"><span class="o">App                            ← the session would have to live here: the common parent</span>
+<span class="o">├─ Layout                      needs user (name in the header), logout</span>
+<span class="o">│   └─ Outlet → whichever page the URL picks:</span>
+<span class="o">│       ├─ CoursesPage → useCourses        needs token (addCourse is ADMIN-only)</span>
+<span class="o">│       ├─ CourseDetail → useCourse        needs user (Enroll), token</span>
+<span class="o">│       ├─ LoginPage                       needs login</span>
+<span class="o">│       └─ RequireAuth                     needs user</span>
+<span class="o">│           └─ MyCoursesPage → useMyEnrollments   needs token</span></div>
+  <p>With props only, the session lives in <code>App</code>, and the route table turns into this:</p>
+  <div class="cmd">&lt;Route element={&lt;Layout user={user} onLogout={logout} /&gt;}&gt;
+  &lt;Route index element={&lt;CoursesPage token={token} /&gt;} /&gt;
+  &lt;Route path=<span class="st">"courses/:id"</span> element={&lt;CourseDetail user={user} token={token} /&gt;} /&gt;
+  &lt;Route path=<span class="st">"login"</span> element={&lt;LoginPage onLogin={login} /&gt;} /&gt;
+  &lt;Route path=<span class="st">"me"</span> element={&lt;RequireAuth user={user}&gt;&lt;MyCoursesPage token={token} /&gt;&lt;/RequireAuth&gt;} /&gt;
+&lt;/Route&gt;</div>
+  <p>…and inside each page, the token is handed on again to its hook: <code>useCourse(id, token)</code>, <code>useMyEnrollments(token)</code>, <code>useCourses(token)</code>. Most of these components don't <em>use</em> the token; they just pass it along. That's <strong>prop drilling</strong>. It works, but every new page has to remember to thread it through, and adding one more app-wide value (a language setting, say) means editing every one of them.</p>
+
+  <h3>Context: provide once, read anywhere below</h3>
+  <p>A <strong>context</strong> lets a component high up <em>provide</em> a value, and any component below it — at any depth, through any routes — <em>read</em> it directly, without the ones in between knowing:</p>
+  <div class="cmd"><span class="tg">import</span> { createContext, useContext } <span class="tg">from</span> <span class="st">"react"</span>;
+
+<span class="tg">const</span> AuthContext = <span class="at">createContext</span>(<span class="tg">null</span>);              <span class="cm">// 1. a channel, with a default value</span>
+
+&lt;AuthContext.Provider value={{ user, token, login, logout }}&gt;   <span class="cm">// 2. provide a value, high up</span>
+  &lt;Routes&gt;…every page…&lt;/Routes&gt;
+&lt;/AuthContext.Provider&gt;
+
+<span class="tg">const</span> { user, token } = <span class="at">useContext</span>(AuthContext);      <span class="cm">// 3. read it, in any component inside</span></div>
+  <p>Reactivity carries over: when the provider's <code>value</code> changes — someone logs in or out — every component that read it re-renders. The header switches from <em>Log in</em> to the user's name without anybody passing it a prop. And a component <em>outside</em> every provider gets the default you gave <code>createContext</code> — here <code>null</code> — which is why the lab's <code>useAuth()</code> checks for it and throws a clear error.</p>
+  <p>The lab wraps all of this in a tiny file, <code>src/auth/AuthContext.jsx</code>, that exports two things: <code>AuthProvider</code> (a component that holds the session state and renders the provider) and <code>useAuth()</code> (a custom hook: <code>useContext(AuthContext)</code> plus the check). Components never touch <code>AuthContext</code> itself. You write it in section 10.</p>
+
+  <h3>children — what goes between the tags</h3>
+  <p><code>AuthProvider</code> is used as a wrapper, <code>&lt;AuthProvider&gt;&lt;Routes&gt;…&lt;/Routes&gt;&lt;/AuthProvider&gt;</code>, and that needs one more fact about props. Whatever you put <strong>between</strong> a component's opening and closing tags arrives as a prop called <code>children</code>. It's an ordinary prop — JSX puts it in the props object for you, as in <a href="react-lab1.html#s4">React Lab 1 · §04</a>'s <code>jsx("h1", { …, children: […] })</code> — and the component decides where it goes:</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">Card</span>({ title, children }) {      <span class="cm">// props, as in React Lab 1 §05</span>
+  <span class="tg">return</span> (
+    &lt;section className=<span class="st">"card"</span>&gt;
+      &lt;h2&gt;{title}&lt;/h2&gt;
+      {children}
+    &lt;/section&gt;
+  );
+}
+
+&lt;Card title=<span class="st">"CS201"</span>&gt;&lt;p&gt;Data Structures&lt;/p&gt;&lt;/Card&gt;    <span class="cm">// children is the &lt;p&gt;</span></div>
+  <p>That's how <code>AuthProvider({ children })</code> wraps the whole app (section 10), how <code>&lt;RequireAuth&gt;&lt;MyCoursesPage /&gt;&lt;/RequireAuth&gt;</code> hands the page to the guard (section 11), and why <code>children ?? &lt;Outlet /&gt;</code> works there: with nothing between the tags, <code>children</code> is <code>undefined</code>. Refresher on props: <a href="react-lab1.html#s5">React Lab 1 · §05 Components and props</a>.</p>
+
+  <h3>Why context is earned now, and not in Lab 2</h3>
+  <p>In Lab 2, one page needed one list. Props were enough, and context would only have hidden where the data came from. Here, <strong>one value is needed by many components, at different depths, across routes</strong>; it <strong>changes rarely</strong> (on login and logout); and it's <strong>genuinely app-wide</strong> — there's one logged-in user per browser tab. That's the job context does. The rule hasn't changed, it's been met: name what earns it here.</p>
+  <p>What's still <em>not yet</em>: context for things one page owns (the course list, a form's fields — props stay the default), and <code>useMemo</code>, <code>useCallback</code>, <code>useReducer</code> and <code>useRef</code>. (<code>useRef</code> arrives in the OAuth lab, where it's earned.)</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Should the course list from <code>useCourses</code> move into a context too, so any page can read it?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No. One page shows it. A context would make the data flow invisible (where does this list come from?), fetch it whether or not any page needs it, and re-render every reader on every change. Context is for values that are app-wide <em>and</em> needed by many components; one page's data stays in that page's hook.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 read — I can say why the session earns a context</span></label>
+</section>
+
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>Authentication in a single-page app</h2><span class="lvl core">Core</span><span class="tagline">the token, the header, 401 vs 403</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>You read a JWT filter in the Spring Boot auth lab. This is the same mechanism from the other side: the browser holding the token and sending it. The rules are in the contract, <code>openapi.yaml</code> → <em>Authentication</em>.</p></div>
+
+  <h3>Three requests</h3>
+  <div class="cmd"><span class="o">POST /api/auth/login    { "email": …, "password": … }</span>
+<span class="o">     → 200 { "accessToken": "eyJhbGciOi…", "tokenType": "Bearer", "expiresIn": 3600 }</span>
+<span class="o">     → 401 { "message": "Invalid email or password", … }      (same message for both cases)</span>
+
+<span class="o">GET  /api/users/me      Authorization: Bearer eyJhbGciOi…</span>
+<span class="o">     → 200 { "id": 2, "email": "student@esd.local", "fullName": "Sam Student", "role": "STUDENT", … }</span>
+
+<span class="o">POST /api/auth/logout   Authorization: Bearer eyJhbGciOi…</span>
+<span class="o">     → 204   — the server revokes this token; from now on it gets 401 everywhere</span></div>
+  <p>The token is a JWT, signed by the server. Your app treats it as <strong>opaque</strong>: it doesn't decode it, doesn't check its expiry, doesn't read the role out of it. Who the user is and what role they have comes from <code>GET /api/users/me</code>. The server is the only judge: on every request it checks the signature, the expiry, whether the token was logged out, and the role.</p>
+
+  <h3>401 and 403 are different questions</h3>
+  <table class="grid long-key">
+    <tr><th>Status</th><th>What the server is saying</th></tr>
+    <tr><td>401 Unauthorized<br>"Authentication required"</td><td><strong>Who are you?</strong> No token, a malformed <code>Authorization</code> header, or a token that's invalid, expired or logged out. Fix: log in (again).</td></tr>
+    <tr><td>403 Forbidden<br>"Access denied"</td><td><strong>I know who you are, and no.</strong> A valid token, but the wrong role (a student creating a course) or not yours (dropping someone else's enrollment). Logging in again changes nothing.</td></tr>
+  </table>
+
+  <div class="dothis">
+    <h4>Do this now — be the client, by hand</h4>
+    <p>With <code>npm run dev</code> running, in the app's DevTools console, one line at a time:</p>
+  </div>
+  <div class="cmd">(<span class="tg">await</span> <span class="at">fetch</span>(<span class="st">"/api/users/me"</span>)).status                       <span class="o">// 401 — no token</span>
+<span class="tg">const</span> res = <span class="tg">await</span> <span class="at">fetch</span>(<span class="st">"/api/auth/login"</span>, { method: <span class="st">"POST"</span>, headers: { <span class="st">"Content-Type"</span>: <span class="st">"application/json"</span> },
+  body: <span class="tg">JSON</span>.<span class="at">stringify</span>({ email: <span class="st">"student@esd.local"</span>, password: <span class="st">"student12345"</span> }) });
+<span class="tg">const</span> { accessToken } = <span class="tg">await</span> res.<span class="at">json</span>();
+<span class="tg">const</span> auth = { Authorization: <span class="st">`Bearer ${accessToken}`</span> };
+<span class="tg">await</span> (<span class="tg">await</span> <span class="at">fetch</span>(<span class="st">"/api/users/me"</span>, { headers: auth })).<span class="at">json</span>()
+<span class="o">// { id: 2, email: "student@esd.local", fullName: "Sam Student", role: "STUDENT", … }</span>
+(<span class="tg">await</span> <span class="at">fetch</span>(<span class="st">"/api/courses"</span>, { method: <span class="st">"POST"</span>, headers: auth, body: <span class="st">"{}"</span> })).status
+<span class="o">// 403 — a valid token, the wrong role (checked before the body is even read)</span>
+(<span class="tg">await</span> <span class="at">fetch</span>(<span class="st">"/api/auth/logout"</span>, { method: <span class="st">"POST"</span>, headers: auth })).status      <span class="o">// 204</span>
+(<span class="tg">await</span> <span class="at">fetch</span>(<span class="st">"/api/users/me"</span>, { headers: auth })).status                          <span class="o">// 401 — the same token, revoked</span></div>
+  <p>Find each request in the Network tab and look at its <em>Request Headers</em>. Everything the app does in sections 10–13 is these calls, made by components.</p>
+
+  <h3>Where the token lives: in memory</h3>
+  <p>The app keeps the token in <strong>React state</strong>, inside <code>AuthProvider</code>, and nowhere else. That has a consequence you'll see at once: a <strong>reload</strong>, a typed-in URL, a new tab or an <code>&lt;a href&gt;</code> click restarts the JavaScript, and the token is gone — you're logged out. That's the honest default, and the core of this lab. (Section 10's stretch keeps it in <code>sessionStorage</code> instead, and spells out what that costs.)</p>
+
+  <h3>The two changes to Lab 2's code</h3>
+  <p><strong>1. <code>src/api/client.js</code> takes a token.</strong> In Lab 2, <code>apiFetch</code> logged in as the admin behind your back, so the add form worked before there was a login screen. That stand-in is gone. Now <code>apiFetch</code> takes a <code>token</code> option, and sends it as the header when it's given:</p>
+  <div class="cmd"><span class="tg">export</span> <span class="tg">async</span> <span class="tg">function</span> <span class="at">apiFetch</span>(path, { method = <span class="st">"GET"</span>, body, token } = {}) {
+  <span class="tg">const</span> headers = {};
+  <span class="tg">if</span> (body !== <span class="tg">undefined</span>) headers[<span class="st">"Content-Type"</span>] = <span class="st">"application/json"</span>;
+  <span class="tg">if</span> (token) headers.Authorization = <span class="st">`Bearer ${token}`</span>;      <span class="cm">// ← the change</span>
+  <span class="cm">// … fetch, then 204 → null, !res.ok → throw ApiError, else the JSON — as in Lab 2</span>
+}
+
+<span class="at">apiFetch</span>(<span class="st">"/api/users/me/enrollments"</span>, { token })              <span class="cm">// a logged-in call</span>
+<span class="at">apiFetch</span>(<span class="st">"/api/courses"</span>)                                       <span class="cm">// public: no token, no header</span></div>
+  <p>Why pass it in, rather than have <code>apiFetch</code> find the token itself? For the same reason <code>getJSON</code> took <code>fetchFn</code> in <a href="js-app.html#s4">JS Lab 2 · §04</a>: a function that gets what it needs from its arguments is easy to read, test and trust. The token lives in React state; the components that have it hand it over.</p>
+  <p><strong>2. <code>src/courses/useCourses.js</code> reads the token from context</strong> — one line, <code>const { token } = useAuth();</code> — and <code>addCourse</code> passes it on. Nothing else in Lab 2's files changed, except that the list's course names become links (section 06) and the form moves to the admin page (section 15).</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Logging out could just forget the token in the browser. Why does the contract make you call <code>POST /api/auth/logout</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Because forgetting it here doesn't stop it working anywhere else. Anyone who copied it — from a shared computer, a log, an extension — could keep using it until it expires. The server writes the token's id on a deny-list, so after logout it's rejected everywhere. The contract says it plainly: "Discarding the token on the client alone is not logout."</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Why fetch <code>/api/users/me</code> after logging in, instead of decoding the JWT to get the role?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The contract says clients treat the token as opaque: its inside is the server's business, and may change. <code>/api/users/me</code> is the documented answer to "who is this?", and it has things the token doesn't, like <code>fullName</code>. It also proves the token works before the app says "logged in".</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 09 complete — I've made the 401, 403 and revoked-token calls by hand</span></label>
+</section>
+
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>AuthContext and the login page</h2><span class="lvl core">Core</span><span class="tagline">AuthContext.jsx · LoginPage.jsx · Layout.jsx</span></div>
+
+  <h3>Step 1 — AuthProvider: one piece of state</h3>
+  <p>In <code>src/auth/AuthContext.jsx</code>, the session is <strong>one</strong> state value: <code>null</code> when nobody's logged in, otherwise <code>{ token, user }</code>. Not two <code>useState</code>s — the token and the user change together, and one object can never be half-updated (the one-state-object rule from <a href="js-app.html#s5">JS Lab 2 · §05</a>).</p>
+  <div class="cmd"><span class="tg">export</span> <span class="tg">function</span> <span class="at">AuthProvider</span>({ children }) {
+  <span class="tg">const</span> [session, setSession] = <span class="at">useState</span>(<span class="tg">null</span>);       <span class="cm">// { token, user } or null</span>
+
+  <span class="tg">async</span> <span class="tg">function</span> <span class="at">login</span>(email, password) {
+    <span class="tg">const</span> { accessToken } = <span class="tg">await</span> <span class="at">apiFetch</span>(<span class="st">"/api/auth/login"</span>, { method: <span class="st">"POST"</span>, body: { email, password } });
+    <span class="tg">const</span> user = <span class="tg">await</span> <span class="at">apiFetch</span>(<span class="st">"/api/users/me"</span>, { token: accessToken });
+    <span class="at">setSession</span>({ token: accessToken, user });
+  }
+
+  <span class="tg">async</span> <span class="tg">function</span> <span class="at">logout</span>() {
+    <span class="cm">// TODO: POST /api/auth/logout with the token — then forget the session,</span>
+    <span class="cm">// even if that request fails (try/catch): the user asked to leave.</span>
+  }
+
+  <span class="tg">const</span> value = { user: session?.user ?? <span class="tg">null</span>, token: session?.token ?? <span class="tg">null</span>, login, logout };
+  <span class="tg">return</span> &lt;AuthContext.Provider value={value}&gt;{children}&lt;/AuthContext.Provider&gt;;
+}</div>
+  <p>Read <code>login</code> slowly. If the first request fails, <code>apiFetch</code> throws the <code>ApiError</code> — 401, <em>"Invalid email or password"</em> — and the function stops: nothing is set, nobody is logged in. <code>login</code> doesn't catch it, on purpose. It's not <code>AuthContext</code>'s job to show messages; the login page catches it and shows <code>err.message</code>. And notice what the page will show: the server's own words. The contract gives the same message for an unknown email and a wrong password, so the page can't (and mustn't) say which.</p>
+  <p>Then <code>useAuth()</code>: return <code>useContext(AuthContext)</code>, but if it's <code>null</code> — no provider above — throw <code>new Error("useAuth() must be used inside &lt;AuthProvider&gt;")</code>. One test checks that the message names <code>AuthProvider</code>; section 16 shows the confusing error you get without the check.</p>
+
+  <h3>Step 2 — LoginPage: a controlled form</h3>
+  <p><code>src/pages/LoginPage.jsx</code>: a heading <strong>"Log in"</strong>; inputs labelled <strong>Email</strong> and <strong>Password</strong> (a <code>&lt;label htmlFor&gt;</code> for each, <code>type="password"</code> for the second), controlled with <code>useState</code> exactly like Lab 2's form (<a href="react-lab2.html#s6">React Lab 2 · §06</a>); a <strong>"Log in"</strong> submit button; and when login fails, the error's message in a <code>&lt;p role="alert"&gt;</code>. On submit: <code>preventDefault()</code>, <code>await login(email, password)</code>, then go back to where the user came from:</p>
+  <div class="cmd"><span class="tg">const</span> <span class="tg">from</span> = location.state?.<span class="tg">from</span>?.pathname ?? <span class="st">"/"</span>;     <span class="cm">// section 11 puts `from` there</span>
+<span class="cm">// … after a successful login:</span>
+<span class="at">navigate</span>(<span class="tg">from</span>, { replace: <span class="tg">true</span> });</div>
+  <p>For now <code>from</code> is always <code>"/"</code>; in section 11 a protected route starts filling it in. <code>?.</code> and <code>??</code> handle "nobody sent me here": no state, no <code>from</code>, so <code>"/"</code>.</p>
+
+  <h3>Step 3 — the header knows who's logged in</h3>
+  <p>In <code>Layout</code>, read <code>const { user, logout } = useAuth();</code>. Logged out: the <em>Log in</em> link. Logged in: <code>Logged in as &lt;strong&gt;{user.fullName}&lt;/strong&gt;</code> and a <strong>Log out</strong> button. The button's handler goes home and logs out — in that order:</p>
+  <div class="cmd"><span class="tg">async</span> <span class="tg">function</span> <span class="at">handleLogout</span>() {
+  <span class="at">navigate</span>(<span class="st">"/"</span>);      <span class="cm">// first: leave whatever page we're on…</span>
+  <span class="tg">await</span> <span class="at">logout</span>();     <span class="cm">// …then forget the user. (The other order is a bug — section 11.)</span>
+}</div>
+
+  <div class="dothis">
+    <h4>Do this now — log in, watch, reload</h4>
+    <div class="cmd"><span class="p">$</span> npx vitest run test/auth.test.jsx</div>
+    <ol>
+      <li>In the browser, log in with a wrong password: the server's message appears. Then log in properly: the header changes. In the Network tab: <code>login</code>, then <code>me</code> with an <code>Authorization</code> header.</li>
+      <li>Click around with the header links: still logged in. Now press reload: logged out. The token lived in memory, and a reload starts the app from scratch.</li>
+      <li>Log in, log out, and find the <code>logout</code> request and its header.</li>
+    </ol>
+  </div>
+
+  <div class="stretch-box">
+    <h3>Stretch 1 — survive a reload, and know what it costs</h3>
+    <p>Keep the session in <code>sessionStorage</code> as well, so a reload doesn't log you out. Two pieces, both in <code>AuthProvider</code>:</p>
+    <div class="cmd"><span class="tg">const</span> [session, setSession] = <span class="at">useState</span>(loadSession);   <span class="cm">// a function: React calls it once, at the start</span>
+
+<span class="at">useEffect</span>(() =&gt; {                                      <span class="cm">// copy every change out of React</span>
+  <span class="tg">if</span> (session) sessionStorage.<span class="at">setItem</span>(<span class="st">"esd-session"</span>, <span class="tg">JSON</span>.<span class="at">stringify</span>(session));
+  <span class="tg">else</span> sessionStorage.<span class="at">removeItem</span>(<span class="st">"esd-session"</span>);
+}, [session]);</div>
+    <p>Write <code>loadSession()</code> to read it back (and return <code>null</code> if there's nothing, or it isn't valid JSON). The effect is effects doing their real job: keeping something <em>outside</em> React in step with state inside it.</p>
+    <p>The trade-off is real. <strong>Memory:</strong> a reload or a new tab logs you out. <strong><code>sessionStorage</code>:</strong> a reload keeps you logged in (in that tab, until it closes) — and any script running on the page can read the token with one line and send it somewhere. If an attacker ever gets their JavaScript onto your page (that's <strong>XSS</strong>, cross-site scripting), the storage is the first place they look. <strong><code>localStorage</code>:</strong> every tab, even after the browser closes; the most convenient, and the longest-lived target. Many real apps use a cookie the server sets as <code>httpOnly</code>, which JavaScript can't read at all — with its own rules to learn. This contract uses Bearer tokens, so here it's memory or storage. <code>npx vitest run --mode stretch test/stretch/session.test.jsx</code>.</p>
+    <h3>Stretch 2 — a role badge</h3>
+    <p>Show the role next to the name — <em>Logged in as <strong>Course Admin</strong> ADMIN</em> — with the role in a <code>&lt;span className="badge"&gt;{user.role}&lt;/span&gt;</code> (<code>.badge</code> is in <code>styles.css</code>). <code>test/stretch/badge.test.jsx</code>.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b><code>login()</code> throws on a wrong password. Where should it be caught, and why there?</div>
+    <details><summary>Show answer</summary><div class="a"><p>In <code>LoginPage</code>'s submit handler. The page owns the error message (it's the page's state, shown on the page). <code>AuthContext</code> stays free of UI: it says what happened, by returning or throwing, and lets whoever called it decide what to show — the same split as <code>AddCourseForm</code> and <code>addCourse</code> in Lab 2.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 complete — auth.test.jsx passes</span></label>
+</section>
+
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>Protected routes</h2><span class="lvl core">Core</span><span class="tagline">src/auth/RequireAuth.jsx</span></div>
+
+  <p><code>/me</code> means nothing without a logged-in user. Open it logged out and the page would send a request with no token and show "Authentication required". Better: send the person to log in, and bring them back afterwards. That's a <strong>protected route</strong> — a component that wraps a page and decides, while rendering, whether it may show:</p>
+  <div class="cmd"><span class="tg">export</span> <span class="tg">function</span> <span class="at">RequireAuth</span>({ children }) {
+  <span class="tg">const</span> { user } = <span class="at">useAuth</span>();
+  <span class="tg">const</span> location = <span class="at">useLocation</span>();
+  <span class="tg">if</span> (!user) <span class="tg">return</span> &lt;Navigate to=<span class="st">"/login"</span> replace state={{ <span class="tg">from</span>: location }} /&gt;;
+  <span class="tg">return</span> children ?? &lt;Outlet /&gt;;
+}
+
+<span class="cm">// in App.jsx (you wrote this in section 04):</span>
+&lt;Route path=<span class="st">"me"</span> element={&lt;RequireAuth&gt;&lt;MyCoursesPage /&gt;&lt;/RequireAuth&gt;} /&gt;</div>
+  <p>Every piece is from section 07. It's a decision made during render, so it's <code>&lt;Navigate&gt;</code>, not <code>navigate()</code>. It's <code>replace</code>, so the history doesn't keep a <code>/me</code> that bounces you to the login page every time you press Back. And it carries the current <code>location</code> as <code>from</code>. <code>children ?? &lt;Outlet /&gt;</code> lets it work both ways: wrapped round one page, as above, or as a layout route with the protected pages as its children.</p>
+
+  <h3>Redirect-back, step by step</h3>
+  <ol>
+    <li>Logged out, you open <code>/me</code>. <code>RequireAuth</code> renders <code>&lt;Navigate to="/login" replace state={{ from: location }} /&gt;</code> — <code>location.pathname</code> is <code>"/me"</code>.</li>
+    <li>The URL is now <code>/login</code>, and that history entry carries <code>{ from: { pathname: "/me", … } }</code>.</li>
+    <li>You log in. <code>LoginPage</code> reads <code>location.state?.from?.pathname</code> → <code>"/me"</code>, and calls <code>navigate("/me", { replace: true })</code>.</li>
+    <li><code>RequireAuth</code> renders again; now there's a user, so it renders <code>MyCoursesPage</code>.</li>
+  </ol>
+  <p>Write <code>RequireAuth</code>, and <code>npx vitest run test/protected.test.jsx</code>.</p>
+
+  <h3>A protected route is for the user, not for security</h3>
+  <p>Everything in <code>src/</code> is sent to the browser. Anyone can open DevTools, change it, or skip the app entirely and call the API — you did, in section 09. Hiding a page protects nothing. What protects the data is the <strong>server</strong>, answering 401 or 403 on every request. <code>RequireAuth</code> is there so a person isn't shown a broken page.</p>
+  <div class="dothis">
+    <h4>Do this now — take the guard away</h4>
+    <ol>
+      <li>In <code>App.jsx</code>, change the <code>me</code> route's element to just <code>&lt;MyCoursesPage /&gt;</code>. Log out, open <code>/me</code>.</li>
+      <li>The page renders — and its request goes out without a token and gets <strong>401</strong>: "Couldn't load your courses: Authentication required". Nothing leaked; the guard was never what kept it safe.</li>
+      <li>Put <code>RequireAuth</code> back.</li>
+    </ol>
+  </div>
+
+  <h3>Why Log out navigates first</h3>
+  <p>Section 10 had you write <code>navigate("/")</code> <em>before</em> <code>await logout()</code>. Swap them and log out while you're on <code>/me</code>: you land on the login page, not the course list. Here's why. React Router applies every navigation as a <strong>transition</strong> — a low-priority update that waits behind ordinary ones. <code>logout()</code>'s <code>setSession(null)</code> is ordinary, so React draws it first, while the URL is still <code>/me</code>. <code>RequireAuth</code> sees no user and renders <code>&lt;Navigate to="/login" replace&gt;</code>, which replaces the <code>/</code> you asked for. Navigating first means the guarded page is already gone when the user disappears. A test checks it.</p>
+
+  <div class="stretch-box">
+    <h3>Stretch — log in from anywhere, land back there</h3>
+    <p>Open <code>/courses/4</code> logged out and click <em>Log in</em> in the header: after logging in you're on <code>/</code>, not the course. Make the header's link carry the same state: <code>&lt;Link to="/login" state={{ from: location }}&gt;</code>. One catch: on the login page itself, that would overwrite the <code>from</code> a redirect put there — so on <code>/login</code>, pass the current <code>location.state</code> along instead. <code>test/stretch/from-anywhere.test.jsx</code>.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>A student deletes <code>RequireAuth</code> from their copy of the app. Can they now see someone else's enrollments?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No. <code>GET /api/users/me/enrollments</code> returns the enrollments of <em>whoever owns the token</em> — with no token, a 401. There's no way to ask for someone else's. The data is protected by the API's rules, not by which pages the app shows.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 complete — protected.test.jsx passes</span></label>
+</section>
+
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>My courses — and dropping one</h2><span class="lvl core">Core</span><span class="tagline">useMyEnrollments.js · MyCoursesPage.jsx</span></div>
+
+  <p>The page is given (<code>src/me/MyCoursesPage.jsx</code>): loading, error, an empty message, and a list with a <em>Drop</em> button per course, plus a credit total worked out during render — derived, never stored (<a href="react-lab1.html#s9">React Lab 1 · §09</a>). You write the hook it uses, and the click handler.</p>
+  <div class="cmd"><span class="o">GET    /api/users/me/enrollments    Authorization: Bearer …</span>
+<span class="o">       → 200 [ { "id": 31, "course": { "id": 4, "code": "CS402", … }, "enrolledAt": "…" }, … ]   oldest first</span>
+<span class="o">DELETE /api/enrollments/{id}        Authorization: Bearer …      ← the ENROLLMENT's id</span>
+<span class="o">       → 204</span></div>
+
+  <h3>Step 1 — useMyEnrollments</h3>
+  <p>In <code>src/me/useMyEnrollments.js</code>: the effect loads the list — with <code>{ token }</code> this time — using the same pattern as <code>useCourse</code>. Keep only the message on an error (the page just shows it). The dependency array is <code>[token]</code>: the effect reads the token, so it re-runs if a different user logs in. That's Lab 2's rule, unchanged (<a href="react-lab2.html#s5">React Lab 2 · §05</a>): <em>everything the effect reads that can change goes in the array</em>.</p>
+  <p>Then <code>drop(enrollmentId)</code>: <code>DELETE /api/enrollments/${enrollmentId}</code> with the token, and then remove it from the list — <code>setEnrollments((list) =&gt; list.filter(…))</code>, a new array, never a <code>splice</code>. If the request throws, don't touch the list.</p>
+  <h3>Step 2 — handleDrop</h3>
+  <p>In <code>MyCoursesPage</code>, <code>handleDrop</code> calls <code>drop(id)</code> and, if that throws, puts the error's message in <code>dropError</code> (already rendered). Notice which id the button passes: <code>e.id</code>, the enrollment — not <code>e.course.id</code>.</p>
+
+  <div class="dothis">
+    <h4>Do this now</h4>
+    <div class="cmd"><span class="p">$</span> npx vitest run test/my-courses.test.jsx</div>
+    <p>In the browser, log in as <code>riya@esd.local</code> / <code>riya12345</code> — the seeded student who fills the five full courses. Drop CS201. Log out, log in as Sam, open CS201: it has a seat now.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>You pass <code>e.course.id</code> to <code>drop</code> by mistake. What can happen?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The server looks up an <em>enrollment</em> with that number. Usually there isn't one: 404 "No enrollment with id 4". If it belongs to someone else: 403 "Access denied". And if it happens to be another of <em>your</em> enrollments, it's dropped — the wrong course, silently. Ids of different things are all just numbers; read the contract for which one each endpoint wants.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 12 complete — my-courses.test.jsx passes</span></label>
+</section>
+
+<section id="s13">
+  <div class="shead"><span class="chip">13</span><h2>Enrolling — the whole flow</h2><span class="lvl core">Core</span><span class="tagline">useCourse.enroll · CourseDetail's Enroll button</span></div>
+
+  <p>The last exercise joins everything: a public page, an action that needs a login, a detour through the login page, and back.</p>
+  <div class="cmd"><span class="o">POST /api/enrollments   Authorization: Bearer …   { "courseId": 4 }</span>
+<span class="o">     → 201 { "id": 32, "course": { "id": 4, …, "seatsLeft": 2 }, "enrolledAt": "…" }</span>
+<span class="o">     → 409 "Already enrolled in this course" | "Course is full" | "Credit limit of 24 exceeded"</span></div>
+
+  <h3>Step 1 — enroll() in useCourse</h3>
+  <p>POST the course's id, with the token. The 201's body is the new enrollment, and its <code>course</code> is this course <em>as the server now sees it</em> — with the new <code>seatsLeft</code>. So <code>setCourse(enrollment.course)</code>. Don't subtract one yourself: someone else may have enrolled a moment ago, and the server's answer already has the true number. Don't catch errors here; let the page show them.</p>
+
+  <h3>Step 2 — the Enroll button</h3>
+  <p>In <code>CourseDetail</code>'s <code>handleEnroll</code>:</p>
+  <ul>
+    <li><strong>Nobody logged in?</strong> <code>navigate("/login", { state: { from: location } })</code> and stop. A <em>push</em> this time, not replace: <kbd>Back</kbd> from the login page should return to the course. Your login page already sends people back to <code>from</code>.</li>
+    <li><strong>Logged in:</strong> <code>await enroll()</code>, then <code>setNotice({ ok: true, text: "You're enrolled." })</code>. If it throws, <code>setNotice({ ok: false, text: err.message })</code> — the server's 409 message, word for word. The page renders the notice with <code>role="status"</code> or <code>role="alert"</code>.</li>
+  </ul>
+  <p>Two things it deliberately doesn't do. It doesn't enroll automatically when you come back from logging in — a page that acts just because you arrived on it is surprising, and a reload would do it again. And it doesn't disable the button on a full course, so you can see the server say "Course is full" itself: the server is the one that decides. Polishing that experience is React Lab 4's job.</p>
+
+  <div class="dothis">
+    <h4>Do this now — tests, then the whole app by hand</h4>
+    <div class="cmd"><span class="p">$</span> npx vitest run test/enroll.test.jsx
+<span class="p">$</span> npm test                    # everything core: 40 passed</div>
+    <p>Restart <code>npm run dev</code> (fresh data) and walk it, Network tab open:</p>
+    <ol>
+      <li><code>/</code> → click CS402 → its page, 3 seats left.</li>
+      <li>Enroll (logged out) → the login page. A wrong password → the server's message. The right one → back on CS402.</li>
+      <li>Enroll → "You're enrolled.", 2 seats left. Enroll again → "Already enrolled in this course".</li>
+      <li>CS201 (full) → Enroll → "Course is full".</li>
+      <li>My courses → CS402, 4 of 24 credits. Drop → gone.</li>
+      <li>Log out while on My courses → the course list. Click My courses → the login page.</li>
+      <li><code>/courses/9999</code> → Course not found. <code>/nope</code> → Page not found.</li>
+      <li>Press <kbd>Back</kbd> through the whole history: every step makes sense, nothing bounces you.</li>
+    </ol>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 13 complete — npm test green, the walk-through works</span></label>
+</section>
+
+<div class="part">Part 4 · The lab</div>
+
+<section id="s14">
+  <div class="shead"><span class="chip">14</span><h2>In the lab</h2><span class="lvl core">Core</span><span class="tagline">doubts, deeper, a quiz, one AI task</span></div>
+
+  <p>The lab assumes you've finished the core sections. It runs like this:</p>
+  <ol>
+    <li>We <strong>scroll through the core sections</strong> together at the projector — stop us anywhere with a question (raise a hand). Stretch questions are welcome too.</li>
+    <li><strong>One level deeper</strong>: how routes are ranked, and nested layouts; memory vs <code>sessionStorage</code> vs <code>httpOnly</code> cookies for the token; what happens when a token expires in the middle of using the app; transitions, and the logout ordering bug.</li>
+    <li><strong>A short quiz</strong> — multiple choice, on React Labs 1 to 3: components, props, keys, state, effects and their cleanup, custom hooks, routing, context, protected routes, 401 and 403. Closed book, no AI. Your TAs will tell you how it counts. Section 17 has practice questions (different ones).</li>
+    <li><strong>The in-lab task, with AI</strong>: an admin-only page — section 15.</li>
+    <li><strong>What's next.</strong> React Lab 4 points this same app at <em>your own</em> Spring Boot backend instead of the mock, which brings CORS into play, and hardens the client: a 401 in the middle of a session sends you back to log in, <code>fieldErrors</code> land in every form, and conflicts get a proper experience. The OAuth lab then adds "Sign in with Google" — and it ends in the same place this lab does: a token in <code>AuthContext</code>. Everything you built here is reused.</li>
+  </ol>
+  <div class="cue work"><p class="cue-k">Bring</p><p>Your laptop with <code>esd-labs/react-lab3</code>, <code>npm test</code> as green as you could get it, <code>npm run dev</code> working, and access to an AI assistant (a free account is enough) for section 15.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 14 read</span></label>
+</section>
+
+<section id="s15">
+  <div class="shead"><span class="chip">15</span><h2>The in-lab task — an admin-only page, with AI</h2><span class="lvl core">Core</span><span class="tagline">inlab/ · npm run inlab</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>React Lab 2's method: give the AI a precise contract and a constraint prompt, then <em>judge</em> what it hands back — nothing missing, nothing extra, nothing from the "not yet" list — and keep a prompt log (<a href="react-lab2.html#s11">React Lab 2 · §11–14</a>). Same method here, on a smaller slice. Start only when <code>npm test</code> is green.</p></div>
+
+  <h3>The task</h3>
+  <p>Lab 2's add form becomes an admin page, <code>/admin/courses/new</code>, and only admins get in. The full spec is <code>inlab/CONTRACT.md</code>; in short:</p>
+  <ul>
+    <li><strong><code>RequireRole</code></strong> (<code>src/auth/RequireRole.jsx</code>) — <code>&lt;RequireRole role="ADMIN"&gt;…&lt;/RequireRole&gt;</code>. Not logged in: off to log in, like <code>RequireAuth</code>. Logged in with the wrong role: a <strong>"You don't have access"</strong> page, right there. Otherwise: the page.</li>
+    <li><strong><code>NewCoursePage</code></strong> (<code>src/admin/NewCoursePage.jsx</code>) — a "New course" heading and Lab 2's <code>AddCourseForm</code>, unchanged, saving through <code>useCourses().addCourse</code> (which sends the token); on success, go to the new course's page.</li>
+    <li>The route in <code>App.jsx</code>, and a <strong>"New course"</strong> link in the header that only admins see.</li>
+  </ul>
+  <p>Before you prompt anything, write one line in <code>inlab/PROMPTS.md</code>: what should a <em>student</em> see at <code>/admin/courses/new</code> — and why isn't it a redirect to <code>/login</code>? (They're already logged in. Sending them to the login page means logging in again as the same student, and being sent straight back. A guard for a <em>role</em> answers a different question than a guard for a <em>login</em>.)</p>
+
+  <h3>The prompt</h3>
+  <p>Paste this constraint first, unchanged, then your request, <code>inlab/CONTRACT.md</code>, and the files it lists (<code>AuthContext.jsx</code>, <code>RequireAuth.jsx</code>, <code>useCourses.js</code>, <code>AddCourseForm.jsx</code>, <code>App.jsx</code>, <code>Layout.jsx</code>):</p>
+  <blockquote class="prompt">You are helping a student in a React lab. Use only what the lab has taught: React's useState, useEffect, custom hooks, context (createContext/useContext), and React Router 7 (react-router package, library mode: Routes, Route, Link, NavLink, Outlet, Navigate, useParams, useNavigate, useLocation). Do not use useMemo, useCallback, useReducer or useRef. Do not add any library or package. JavaScript with JSX, no TypeScript. Do not call fetch directly — reuse the hook and the form you are given, unchanged. Do not decode the JWT; the role comes from user.role. Change only the four files named in the contract, and show each one in full.</blockquote>
+
+  <h3>Judge it — before you run it</h3>
+  <p>Read every line the AI wrote against this list. Each row is something AI commonly does with this kind of task; each one is a reason to change or reject the answer. Note what you found in <code>PROMPTS.md</code>.</p>
+  <table class="grid long-key">
+    <tr><th>Look for</th><th>Why it's wrong here</th></tr>
+    <tr><td>A wrong-role user is sent to <code>/login</code> (or to <code>/</code> with no explanation)</td><td>They're logged in; the login page can't help. At best a confusing bounce, at worst a loop between two guards. Show the no-access page.</td></tr>
+    <tr><td>The role is read by decoding the token (<code>atob</code>, <code>jwt-decode</code>, <code>token.split(".")</code>)</td><td>The contract makes the token opaque to clients. <code>user.role</code> from <code>/api/users/me</code> is already in <code>useAuth()</code>.</td></tr>
+    <tr><td>A new <code>fetch</code> or <code>apiFetch</code> call for creating the course</td><td>Duplicates <code>useCourses().addCourse</code>, which already sends the token and keeps the list in order. Reuse.</td></tr>
+    <tr><td>A new form instead of <code>AddCourseForm</code></td><td>Throws away Lab 2's work, its <code>fieldErrors</code> handling with it. Reuse it, unchanged.</td></tr>
+    <tr><td>A <code>try/catch</code> in <code>NewCoursePage</code> around <code>addCourse</code></td><td>The form shows errors <em>it</em> catches. Catch it in the page and the 409 "Course code already exists" silently disappears.</td></tr>
+    <tr><td><code>useMemo</code>, <code>useCallback</code>, <code>useReducer</code>, <code>useRef</code>, a new <code>RoleContext</code>, an "RBAC" package</td><td>Not yet, or unearned. The role is one field on a user you already have. Strip it, and confirm nothing breaks.</td></tr>
+    <tr><td>A comment like "this secures the admin page"</td><td>It doesn't. The API's 403 does — you saw it in section 09. The guard and the hidden link are for the user's benefit.</td></tr>
+  </table>
+
+  <h3>Check it — run it, then use it</h3>
+  <div class="cmd"><span class="p">$</span> npm run inlab          # the in-lab tests: inlab/admin.test.jsx
+<span class="p">$</span> npm test               # still green?</div>
+  <p>Then by hand: as the student, type <code>/admin/courses/new</code> — "You don't have access", no flicker, no login page, and no "New course" link in the header. As the admin: create a course, land on its page. Try a code that exists (<code>CS101</code>): the form shows the server's 409. Write one line in <code>PROMPTS.md</code> about what you checked and saw.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b><code>NewCoursePage</code> calls <code>useCourses()</code>, which also loads the whole course list — a list this page never shows. Fix it, or leave it?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Leave it, and know that it's there. It's one extra GET on a page admins visit rarely, and reusing the hook beats writing a second one that has to stay in step with the first. If it ever mattered, the fix would be to split the hook — not to copy <code>addCourse</code> into the page. Being able to say "this is a cost, and here's why it's acceptable" is the judgement this task is about.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 15 complete — npm run inlab green, PROMPTS.md filled in</span></label>
+</section>
+
+<section id="s16">
+  <div class="shead"><span class="chip">16</span><h2>When it goes wrong</h2><span class="lvl ref">Reference</span><span class="tagline">the error, and what it means</span></div>
+
+  <table class="grid long-key">
+    <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>useNavigate() may be used only in the context of a &lt;Router&gt; component</td><td>A component using a router hook was rendered outside any router. In the app: <code>main.jsx</code> lost its <code>&lt;BrowserRouter&gt;</code>. In a test of your own: wrap what you render in a <code>&lt;MemoryRouter&gt;</code>. Same for <code>useLocation()</code>, <code>&lt;Link&gt;</code> and <code>&lt;Routes&gt;</code> (04).</td></tr>
+    <tr><td>No routes matched location "/courses/4" (a console warning)</td><td>No <code>&lt;Route&gt;</code> fits that URL: a typo in a path, a leading <code>/</code> on a child path that doesn't start with the parent's path, or a page missing from the table. A <code>path="*"</code> route turns it into your 404 page (05).</td></tr>
+    <tr><td>The same screen at every URL</td><td><code>App</code> renders a page directly instead of through <code>&lt;Routes&gt;</code> — the starter's state (04).</td></tr>
+    <tr><td>The header shows, the page under it is blank</td><td><code>Layout</code> has no <code>&lt;Outlet /&gt;</code> (05).</td></tr>
+    <tr><td>Clicking a link reloads the page — a <em>Doc</em> request in the Network tab — and you're logged out</td><td>An <code>&lt;a href&gt;</code> where a <code>&lt;Link to&gt;</code> belongs. A full page load starts the app from scratch, and the in-memory token goes with it (04, 09).</td></tr>
+    <tr><td>Logged out after a reload, a typed URL or a new tab</td><td>Expected: the token lives in memory. Log in again — or do section 10's stretch, and know its cost.</td></tr>
+    <tr><td>Cannot destructure property 'user' of 'useAuth(...)' as it is null (or undefined)</td><td>The component is outside <code>&lt;AuthProvider&gt;</code>, and <code>useAuth</code> doesn't check — <code>useContext</code> returned the context's default. With the check from section 10 you get the clearer "useAuth() must be used inside &lt;AuthProvider&gt;". Is <code>AuthProvider</code> around <code>&lt;Routes&gt;</code> in <code>App.jsx</code>?</td></tr>
+    <tr><td>Maximum update depth exceeded, or the URL flickers between two pages</td><td>A redirect loop: a guard sends you to a page whose own guard sends you back — for example a role guard that redirects a logged-in student to <code>/login</code>, and a login page that redirects logged-in users onwards. Show a no-access page instead of redirecting (15).</td></tr>
+    <tr><td>You should call navigate() in a React.useEffect(), not when your component is first rendered</td><td><code>navigate()</code> was called during render. In render, return <code>&lt;Navigate to=… /&gt;</code>; call <code>navigate()</code> in event handlers (07).</td></tr>
+    <tr><td>After logging in you land on <code>/</code>, not where you were going</td><td>The login page ignores <code>location.state?.from?.pathname</code>, or the guard didn't pass <code>state={{ from: location }}</code>, or you navigated to <code>from</code> (an object) instead of <code>from.pathname</code> (11).</td></tr>
+    <tr><td><kbd>Back</kbd> after logging in shows the login form again</td><td><code>navigate(from)</code> without <code>{ replace: true }</code> (07).</td></tr>
+    <tr><td>Logging out on My courses lands on the login page</td><td><code>await logout()</code> before <code>navigate("/")</code>. Navigate first — the reason is in section 11.</td></tr>
+    <tr><td>Couldn't load your courses: Authentication required — while logged in</td><td>The request went without a token: a missing <code>{ token }</code> in an <code>apiFetch</code> call. Check the request's headers in the Network tab (09, 12).</td></tr>
+    <tr><td>401 Authentication required, with a token, after logging out or a while after logging in</td><td>The server no longer accepts that token: it was logged out (revoked), or it expired (3600 seconds). Something kept an old copy, or the session simply ran out. Log in again; handling this everywhere at once is React Lab 4.</td></tr>
+    <tr><td>403 Access denied</td><td>Logged in, but not allowed: the wrong role, or not your enrollment. Often an enrollment's id mixed up with a course's id (12).</td></tr>
+    <tr><td>The course page shows the previous course after following a link to another one</td><td><code>useCourse</code>'s effect doesn't have <code>id</code> in its dependency array (06).</td></tr>
+    <tr><td>Couldn't load the course: Invalid id: abc</td><td>Working as intended: the route matched, the API rejected the id with a 400 (06).</td></tr>
+    <tr><td>Test: Unable to find role="banner"</td><td>The header isn't a <code>&lt;header&gt;</code> element, or it's inside <code>&lt;main&gt;</code> (05).</td></tr>
+    <tr><td>Test: Found multiple elements with the role "link" and name "Log in"</td><td>Two "Log in" links on the screen — say, one in the header and one you added to a page. The tests expect one, in the header.</td></tr>
+    <tr><td>Error: Port 5173 is already in use</td><td>Another <code>npm run dev</code> — probably Lab 2's — is still running. Stop it with <kbd>Ctrl</kbd>+<kbd>C</kbd> in its terminal.</td></tr>
+  </table>
+
+  <div class="cue"><p class="cue-k">How to debug a routing or auth problem</p><p>Two questions, in this order. <strong>Where am I?</strong> Put <code>console.log(useLocation())</code> at the top of <code>Layout</code>: every render prints the path and the state, so redirects show up as a sequence. <strong>Who am I?</strong> Add <code>console.log(useAuth().user)</code> next to it. Then the Network tab answers the third: <strong>what did the server get?</strong> — the request, its <code>Authorization</code> header, and the status.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 16 read</span></label>
+</section>
+
+<section id="s17">
+  <div class="shead"><span class="chip">17</span><h2>Practice run, unaided</h2><span class="lvl stretch">Stretch</span><span class="tagline">not graded · different from the lab quiz</span></div>
+
+  <p>A practice quiz in the style of the one in the lab, with different questions — plus two to write from a blank file. Answer each before you open it. A wrong answer is information: go back to the section it came from.</p>
+
+  <div class="quiz">
+    <div class="q"><b>P1</b>On <code>/courses/7</code>, a component runs <code>const { id } = useParams();</code>. Which is true?
+      <ol type="a"><li><code>id === 7</code></li><li><code>id === "7"</code></li><li><code>id</code> is <code>undefined</code> unless you parse <code>location.pathname</code></li><li><code>id === ":id"</code></li></ol></div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>b.</strong> Parameters come out of the URL, so they're strings. <code>Number(id)</code> when you need a number.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P2</b>Inside <code>&lt;Route element={&lt;Layout /&gt;}&gt;</code>, which child route shows at <code>/</code>?
+      <ol type="a"><li><code>&lt;Route path="*" …&gt;</code></li><li><code>&lt;Route index …&gt;</code></li><li><code>&lt;Route path="home" …&gt;</code></li><li>None — a layout route can't match <code>/</code></li></ol></div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>b.</strong> <code>index</code> is the parent's own URL. <code>*</code> would match <code>/</code> too, but an index route ranks above it.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P3</b>Core lab, no stretch. You log in, then type <code>localhost:5173/me</code> in the address bar and press <kbd>Enter</kbd>. What do you see?
+      <ol type="a"><li>My courses</li><li>The login page</li><li>"Authentication required"</li><li>Page not found</li></ol></div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>b.</strong> Typing a URL is a full page load: the app starts from scratch, the in-memory token is gone, and <code>RequireAuth</code> sends you to log in — with <code>/me</code> as <code>from</code>, so you land back there afterwards.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P4</b>Sam, with a valid token, sends <code>DELETE /api/enrollments/1</code> — enrollment 1 is Riya's. The answer?
+      <ol type="a"><li>401</li><li>403</li><li>404</li><li>204</li></ol></div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>b.</strong> Sam is authenticated (so not 401), the enrollment exists (so not 404), but it belongs to another user: 403 "Access denied". The contract lists exactly this case.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P5</b>Where does <code>RequireAuth</code> keep "where this person was going"?
+      <ol type="a"><li>In the URL, as <code>?from=/me</code></li><li>In <code>sessionStorage</code></li><li>In the navigation state of the <code>/login</code> history entry</li><li>In <code>AuthContext</code></li></ol></div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>c.</strong> <code>&lt;Navigate … state={{ from: location }}&gt;</code> stores it with that history entry; the login page reads <code>useLocation().state</code>. (A <code>?from=</code> query works too and survives a reload, but it's visible, and you'd have to check it isn't sending people to another site.)</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P6</b>Which of these should use <code>useNavigate</code> rather than a <code>&lt;Link&gt;</code>?
+      <ol type="a"><li>The header's "My courses"</li><li>"Back to the courses" on the 404 page</li><li>Going to a new course's page after the form saves it</li><li>The course names in the list</li></ol></div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>c.</strong> It happens because some code finished, not because someone clicked a link. The others are things a person clicks — and want to open in a new tab sometimes — so they're links.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P7</b>A link on <code>/courses/4</code> goes to <code>/courses/5</code>. Is <code>CourseDetail</code> unmounted and mounted again?
+      <ol type="a"><li>Yes — a new URL is a new page</li><li>No — the same route matches, so it re-renders with a new <code>id</code></li><li>Only in StrictMode</li><li>Only if the <code>Link</code> has <code>replace</code></li></ol></div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>b.</strong> Which is exactly why <code>useCourse</code>'s effect must list <code>id</code> as a dependency.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P8</b>A context's provider value changes from <code>{ user: null, … }</code> to <code>{ user: sam, … }</code>. Which components re-render?
+      <ol type="a"><li>Only the provider</li><li>Every component in the app</li><li>The components that read that context (and their children)</li><li>None until the page reloads</li></ol></div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>c.</strong> The readers — <code>useContext</code> subscribes them — and, as always, whatever they render. Components that never call <code>useAuth()</code> aren't touched because of it.</p></div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>W1</b>Write <code>RequireGuest</code>, for <code>/login</code>: if someone is already logged in, send them to <code>/</code> instead of showing the form. Then: what would happen if you also had a role guard that sends wrong-role users to <code>/login</code>?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd"><span class="tg">export</span> <span class="tg">function</span> <span class="at">RequireGuest</span>({ children }) {
+  <span class="tg">const</span> { user } = <span class="at">useAuth</span>();
+  <span class="tg">if</span> (user) <span class="tg">return</span> &lt;Navigate to=<span class="st">"/"</span> replace /&gt;;
+  <span class="tg">return</span> children;
+}</div>
+      <p>Together with a redirecting role guard: a student opens the admin page → <code>/login</code> → already logged in, so <code>/</code> — at best a confusing bounce. If <code>RequireGuest</code> sent people to <code>from</code> instead of <code>/</code>, it would be a loop. That's why the role guard shows a page.</p>
+    </div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>W2</b>Make the Enroll button say <strong>Log in to enroll</strong> when nobody is logged in. One line.</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd">&lt;button type=<span class="st">"button"</span> onClick={handleEnroll}&gt;{user ? <span class="st">"Enroll"</span> : <span class="st">"Log in to enroll"</span>}&lt;/button&gt;</div>
+      <p>Derived from state during render, nothing stored. (The lab's tests look for a button named "Enroll", so keep this one in a scratch copy.)</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 17 complete (stretch)</span></label>
+</section>
+
+<section id="s18">
+  <div class="shead"><span class="chip">18</span><h2>Submitting the assignment</h2><span class="lvl core">Core</span><span class="tagline">by the end of the day of the lab</span></div>
+
+  <div class="cue watch"><p class="cue-k">Complete means complete</p><p>This lab is graded. Submit <strong>once</strong>, by the end of the day of the lab, and only when <code>npm test</code> <em>and</em> <code>npm run inlab</code> are entirely green and <code>inlab/PROMPTS.md</code> is filled in. Incomplete work is not accepted, and there is no partial credit for a partial submission. Stuck? Ask a TA before the day ends.</p></div>
+
+  <h3>1. Get both test commands fully green</h3>
+  <div class="cmd"><span class="p">$</span> cd esd-labs/react-lab3
+<span class="p">$</span> npm test
+<span class="o">      Tests  40 passed (40)</span>
+<span class="p">$</span> npm run inlab
+<span class="o">      Tests  6 passed (6)</span></div>
+  <p>Nothing failed is the only acceptable result. When we grade, we <strong>put our own copy of the tests back in</strong> — <code>test/</code>, <code>test/support/</code> and <code>inlab/admin.test.jsx</code> — before running them, so editing a test can only cost you marks. Stretch is never required; your zip carries it anyway.</p>
+
+  <h3>2. Check the app, and the prompt log</h3>
+  <p><code>npm run dev</code>, and walk section 13's checklist once more, plus the admin page as both users (section 15). Open <code>inlab/PROMPTS.md</code>: your prompts, what you changed or rejected and why, and the one check you did by hand.</p>
+
+  <h3>3. Zip the react-lab3 folder — without node_modules</h3>
+  <p>Zip <code>react-lab3</code> itself, not the whole <code>esd-labs</code> folder, and leave out <code>node_modules</code> and <code>dist</code>: they're large, and we install our own. From inside <code>esd-labs</code>:</p>
+  <div class="cmd"><span class="cm"># macOS / Linux</span>
+<span class="p">$</span> zip -r react-lab3.zip react-lab3 -x "react-lab3/node_modules/*" "react-lab3/dist/*"
+
+<span class="cm"># Windows (PowerShell) — first delete react-lab3\node_modules and react-lab3\dist</span>
+<span class="p">$</span> Compress-Archive -Path react-lab3 -DestinationPath react-lab3.zip</div>
+  <p>Open the zip once to check it has the <code>react-lab3</code> folder with your <code>src/</code> and <code>inlab/PROMPTS.md</code> inside, and no <code>node_modules</code>. (On Windows, run <code>npm install</code> again afterwards to keep working.)</p>
+
+  <h3>4. Submit the zip</h3>
+  <p>Upload <code>react-lab3.zip</code> on the submission platform, by the end of the day of the lab. The next lab's starter — which contains this lab's finished code — is released that night, so late submissions can't be accepted. Run both test commands right before you zip, so what you submit is what you tested.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Submitted — both test commands green, PROMPTS.md filled, react-lab3.zip uploaded</span></label>
+</section>
+
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+  <div class="gloss">
+    <div class="grow"><b>401 Unauthorized</b><span>"Who are you?" No token, or one that's invalid, expired or logged out. Log in (again).</span></div>
+    <div class="grow"><b>403 Forbidden</b><span>"I know who you are, and no." A valid token without the right role or ownership.</span></div>
+    <div class="grow"><b>Authorization header</b><span><code>Authorization: Bearer &lt;token&gt;</code> — how each request says who it's from.</span></div>
+    <div class="grow"><b>BrowserRouter</b><span>The router for the real browser: keeps the location in state, in step with the address bar and Back/Forward.</span></div>
+    <div class="grow"><b>catch-all route</b><span><code>path="*"</code>: matches anything, ranks last. Your 404 page.</span></div>
+    <div class="grow"><b>client-side routing</b><span>Changing the URL and the screen with JavaScript, without asking the server for a new page.</span></div>
+    <div class="grow"><b>context</b><span>A value provided high in the tree that any component below can read with <code>useContext</code>, without props in between.</span></div>
+    <div class="grow"><b>index route</b><span>A child route with no path of its own: it shows at the parent's URL.</span></div>
+    <div class="grow"><b>JWT</b><span>JSON Web Token: a signed string the server issues at login. Opaque to the client; only the server judges it.</span></div>
+    <div class="grow"><b>layout route</b><span>A route without a path that renders a frame (header, nav) and an <code>&lt;Outlet /&gt;</code> for its children.</span></div>
+    <div class="grow"><b>Link</b><span>A real <code>&lt;a href&gt;</code> whose click changes the URL with <code>pushState</code> instead of loading a page.</span></div>
+    <div class="grow"><b>location.state</b><span>Data stored with one history entry, not in the URL. Read with <code>useLocation().state</code>.</span></div>
+    <div class="grow"><b>MemoryRouter</b><span>A router whose "address bar" is an array in memory. For tests.</span></div>
+    <div class="grow"><b>Navigate</b><span>An element that navigates when rendered. For decisions made during render, like a guard's.</span></div>
+    <div class="grow"><b>NavLink</b><span>A <code>Link</code> that marks itself <code>active</code> / <code>aria-current="page"</code> when it points at the current page.</span></div>
+    <div class="grow"><b>Outlet</b><span>Where a layout route draws the matched child route's element.</span></div>
+    <div class="grow"><b>prop drilling</b><span>Passing a value through components that don't use it, just so one deeper down can.</span></div>
+    <div class="grow"><b>protected route</b><span>A wrapper that shows a page only to logged-in users and sends everyone else to log in. A convenience, not security.</span></div>
+    <div class="grow"><b>Provider</b><span><code>&lt;SomeContext.Provider value={…}&gt;</code>: makes a value available to everything inside it.</span></div>
+    <div class="grow"><b>push / replace</b><span>Add a new history entry, or swap the current one. Replace when Back shouldn't return here.</span></div>
+    <div class="grow"><b>redirect-back</b><span>Remembering where someone was going (<code>from</code>), sending them to log in, then on to <code>from</code>.</span></div>
+    <div class="grow"><b>sessionStorage</b><span>Per-tab browser storage that survives a reload, cleared when the tab closes. Readable by any script on the page.</span></div>
+    <div class="grow"><b>transition</b><span>A low-priority React update that waits behind ordinary ones. React Router applies navigations as transitions.</span></div>
+    <div class="grow"><b>URL parameter</b><span>A <code>:name</code> segment in a route path, read with <code>useParams()</code>. Always a string.</span></div>
+    <div class="grow"><b>useNavigate</b><span>A hook returning <code>navigate(to, { replace, state })</code>, for moving from an event handler.</span></div>
+    <div class="grow"><b>XSS</b><span>Cross-site scripting: an attacker's JavaScript running on your page, able to do anything your code can — including read storage.</span></div>
+  </div>
+</section>
+
+<div class="finish">
+  <h2>How to know you're ready</h2>
+  <p>You're ready for the lab if you can do all of these <em>without looking anything up</em>:</p>
+  <ol>
+    <li>Say what clicking a <code>&lt;Link&gt;</code> does that clicking an <code>&lt;a href&gt;</code> doesn't — and what that means for a token kept in memory.</li>
+    <li>Write a route table with a layout route, an index route, a <code>:param</code> route and a 404, and say where <code>&lt;Outlet /&gt;</code> goes.</li>
+    <li>Explain why <code>useCourse</code>'s effect depends on <code>[id]</code>, and what you'd see with <code>[]</code>.</li>
+    <li>Say when to call <code>navigate()</code> and when to return <code>&lt;Navigate /&gt;</code>, and when to use <code>replace</code>.</li>
+    <li>Name the value in this app that earns a context, and one that doesn't — and why.</li>
+    <li>Walk through the login: the two requests, where the token goes, and what a reload does to it.</li>
+    <li>Tell 401 from 403, with an example of each from this API.</li>
+    <li>Explain redirect-back with <code>location.state</code>, step by step.</li>
+    <li>Explain why a protected route is not security, and what is.</li>
+    <li>Explain why Log out navigates first.</li>
+  </ol>
+
+  <h2 style="margin-top:30px;font-size:20px">Router card</h2>
+  <div class="cmd"><span class="tg">import</span> { BrowserRouter, Routes, Route, Link, NavLink, Outlet, Navigate,
+         useParams, useNavigate, useLocation } <span class="tg">from</span> <span class="st">"react-router"</span>;
+
+&lt;BrowserRouter&gt;&lt;App /&gt;&lt;/BrowserRouter&gt;                 <span class="cm">// main.jsx — once, around everything</span>
+
+&lt;Routes&gt;
+  &lt;Route element={&lt;Layout /&gt;}&gt;                         <span class="cm">// layout route: no path</span>
+    &lt;Route index element={&lt;Home /&gt;} /&gt;                 <span class="cm">// "/"</span>
+    &lt;Route path=<span class="st">"courses/:id"</span> element={&lt;Course /&gt;} /&gt;  <span class="cm">// a parameter</span>
+    &lt;Route path=<span class="st">"me"</span> element={&lt;RequireAuth&gt;&lt;Mine /&gt;&lt;/RequireAuth&gt;} /&gt;
+    &lt;Route path=<span class="st">"*"</span> element={&lt;NotFound /&gt;} /&gt;          <span class="cm">// anything else</span>
+  &lt;/Route&gt;
+&lt;/Routes&gt;
+
+&lt;Link to=<span class="st">"/me"</span>&gt;My courses&lt;/Link&gt;                       <span class="cm">// a click: new URL, same page</span>
+&lt;Outlet /&gt;                                             <span class="cm">// in the layout: the child goes here</span>
+
+<span class="tg">const</span> { id } = <span class="at">useParams</span>();                            <span class="cm">// always a string</span>
+<span class="tg">const</span> location = <span class="at">useLocation</span>();                        <span class="cm">// { pathname, state, … }</span>
+<span class="tg">const</span> navigate = <span class="at">useNavigate</span>();                        <span class="cm">// in handlers:</span>
+<span class="at">navigate</span>(<span class="st">"/me"</span>);  <span class="at">navigate</span>(<span class="tg">from</span>, { replace: <span class="tg">true</span> });  <span class="at">navigate</span>(<span class="st">"/login"</span>, { state: { <span class="tg">from</span>: location } });
+<span class="tg">return</span> &lt;Navigate to=<span class="st">"/login"</span> replace /&gt;;               <span class="cm">// in render</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Auth card</h2>
+  <div class="cmd"><span class="tg">const</span> AuthContext = <span class="at">createContext</span>(<span class="tg">null</span>);
+
+<span class="tg">export</span> <span class="tg">function</span> <span class="at">AuthProvider</span>({ children }) {
+  <span class="tg">const</span> [session, setSession] = <span class="at">useState</span>(<span class="tg">null</span>);                 <span class="cm">// { token, user } — in memory</span>
+  <span class="tg">async</span> <span class="tg">function</span> <span class="at">login</span>(email, password) {
+    <span class="tg">const</span> { accessToken } = <span class="tg">await</span> <span class="at">apiFetch</span>(<span class="st">"/api/auth/login"</span>, { method: <span class="st">"POST"</span>, body: { email, password } });
+    <span class="tg">const</span> user = <span class="tg">await</span> <span class="at">apiFetch</span>(<span class="st">"/api/users/me"</span>, { token: accessToken });
+    <span class="at">setSession</span>({ token: accessToken, user });
+  }
+  <span class="tg">async</span> <span class="tg">function</span> <span class="at">logout</span>() { … }       <span class="cm">// tell the server (POST /api/auth/logout, with the token),</span>
+                                      <span class="cm">// then forget the session — even if that call failed</span>
+  <span class="tg">const</span> value = { user: session?.user ?? <span class="tg">null</span>, token: session?.token ?? <span class="tg">null</span>, login, logout };
+  <span class="tg">return</span> &lt;AuthContext.Provider value={value}&gt;{children}&lt;/AuthContext.Provider&gt;;
+}
+<span class="tg">export</span> <span class="tg">function</span> <span class="at">useAuth</span>() { … <span class="at">useContext</span>(AuthContext), <span class="tg">throw</span> <span class="tg">if</span> <span class="tg">null</span> … }
+
+<span class="tg">if</span> (!user) <span class="tg">return</span> &lt;Navigate to=<span class="st">"/login"</span> replace state={{ <span class="tg">from</span>: location }} /&gt;;   <span class="cm">// the guard</span>
+<span class="at">navigate</span>(location.state?.<span class="tg">from</span>?.pathname ?? <span class="st">"/"</span>, { replace: <span class="tg">true</span> });           <span class="cm">// after login</span>
+<span class="at">navigate</span>(<span class="st">"/"</span>); <span class="tg">await</span> <span class="at">logout</span>();                                                <span class="cm">// log out: in that order</span>
+
+<span class="at">apiFetch</span>(path, { method, body, token })     <span class="cm">// token → Authorization: Bearer &lt;token&gt;</span>
+<span class="cm">// 401: who are you?  (no / bad / expired / logged-out token)   403: known, not allowed</span></div>
+</div>
+
+<footer>M.Tech CSE · ESD · React Lab 3<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+</div>
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ---- */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  /* ---- progress: CORE sections drive the bar; stretch boxes are tracked separately.
+         Both are remembered in this browser, so they survive a reload. ---- */
+  function load(key){ try{ return JSON.parse(localStorage.getItem(key)||'[]'); }catch(err){ return []; } }
+  function save(key,list){ try{ localStorage.setItem(key,JSON.stringify(list.map(function(c){return c.checked}))); }catch(err){} }
+  var KEY='esd-react-lab3-progress', SKEY='esd-react-lab3-stretch';
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var extras=[].slice.call(document.querySelectorAll('.chk-s'));
+  var saved=load(KEY), savedS=load(SKEY);
+  checks.forEach(function(c,i){ if(saved[i]) c.checked=true; });
+  extras.forEach(function(c,i){ if(savedS[i]) c.checked=true; });
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=['Core first, in order — each screen builds on the last.',
+             'Good start. Routes and the layout carry everything else.',
+             'Past halfway. Context and the token are the two ideas the rest of the course reuses.',
+             'Nearly there. Section 13 walks the whole app, end to end.',
+             'Core done. npm test green? The in-lab task is next (section 15), then submit (section 18).'];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    var s=extras.filter(function(c){return c.checked}).length;
+    msg.textContent=(n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))])+(s?'  ·  stretch: '+s+' / '+extras.length:'');
+    save(KEY,checks); save(SKEY,extras);
+  }
+  checks.concat(extras).forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^[$>]\s?/,'').trimEnd()}).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>

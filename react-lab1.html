@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your first React app, by hand — React Lab 1</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#101614">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Condensed:wght@600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+.cue.work{border-left-color:var(--ink);background:var(--surface)}
+.cue.work .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.tg{color:var(--term-green)}
+.at{color:var(--signal)}
+.st{color:#B7C4C0}
+.tx{color:#FFFFFF}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 182px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+.quiz .a .cmd{margin-top:4px}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 168px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+/* ---- additions for the lab docs ---- */
+.cue.react{border-left-color:var(--term-green);background:var(--dark);color:#DDE3E0}
+.cue.react .cue-k{color:var(--term-green)}
+.cue.react code{background:#22302D;color:var(--term-green)}
+.cue.react strong{color:#FFF}
+.cue.react a{color:var(--term-green);font-weight:600}
+.refs{font-family:var(--mono);font-size:12px;color:var(--muted);margin:-6px 0 16px;max-width:70ch}
+.refs a{color:var(--teal);font-weight:600}
+.part{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper);background:var(--ink);display:inline-block;padding:5px 10px;margin:64px 0 -28px}
+.toc .rpart{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);padding:10px 16px 6px;border-bottom:1px solid var(--line);background:var(--teal-soft);font-weight:600}
+table.grid{border-collapse:collapse;width:100%;max-width:70ch;background:var(--surface);border:1px solid var(--ink);margin:0 0 16px;font-size:14.5px}
+table.grid th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;text-align:left;color:var(--muted);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--ink)}
+table.grid td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.grid tr:last-child td{border-bottom:0}
+table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--teal);font-weight:600;white-space:nowrap}
+
+/* ---- core / stretch ---- */
+.lvl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:3px 7px;align-self:center;white-space:nowrap}
+.lvl.core{background:var(--ink);color:var(--signal)}
+.lvl.stretch{border:1px dashed var(--teal);color:var(--teal)}
+.lvl.ref{border:1px solid var(--muted);color:var(--muted)}
+.rrow .rl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:600;flex:0 0 auto;border:1px dashed var(--teal);padding:1px 6px;align-self:center}
+.rrow .rl.ref{color:var(--muted);border:1px solid var(--muted)}
+.rrow.is-extra .rw{color:var(--muted)}
+.stretch-box{border:1px dashed var(--teal);background:rgba(255,255,255,.55);padding:14px 16px 4px;margin:8px 0 18px}
+.stretch-box::before{content:"Stretch — optional. Do it if you can, and ask about it any time.";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600;margin-bottom:10px}
+.stretch-box h3:first-of-type{margin-top:0}
+/* tables whose first column holds long text (error messages): even, wrapping columns */
+table.grid.long-key{table-layout:fixed}
+table.grid.long-key td:first-child{white-space:normal;width:42%;overflow-wrap:anywhere}
+table.grid.long-key th:first-child{width:42%}
+.legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 0;font-size:14px;color:#2B3936}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+  table.grid td:first-child{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> React Lab 1 · No AI</p>
+  <h1>Your first React app,<br><em>by hand</em></h1>
+  <p class="lede">In JS Lab 1 you built <code>useState</code> for one counter. In JS Lab 2 you drew five regions of a page by hand and compared references to redraw only what changed. This lab hands both jobs to React. You build a tiny app — a grid of numbers you click to increase, with live stats next to it — and feel the three ideas React is built on: <strong>components</strong> composed into a tree, <strong>props</strong> flowing down, and <strong>events</strong> flowing up. Then the numbers start coming from a server, and only one place in your code has to change.</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">13</span> core</div>
+      <div class="tracker-msg" id="msg">Core first, in order — every section builds on the last.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill" style="width: 0%;"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p><strong>This is a pre-lab.</strong> You work through it at home, before the lab. The lab session is for your doubts and for going one level deeper. It assumes you've done the core sections.</p>
+  <p><strong>It continues the JS labs.</strong> <a href="js-react.html">JS Lab 1 · JavaScript for React</a> and <a href="js-app.html">JS Lab 2 · A JavaScript app, without React</a> are the foundation of everything here, and this doc links back to them constantly. When a section starts with a <em>Refresher</em>, and the refresher feels unfamiliar, open the link before going on.</p>
+  <p><strong>The thread is still reactivity:</strong> <em>change the state, and the screen follows</em>. You built that by hand. Here React does it for you — and every section shows the two side by side, <em>by hand</em> and <em>React</em>, so nothing React does feels like magic.</p>
+  <p><strong>Core and stretch.</strong> <span class="lvl core">Core</span> is mandatory — what we go through together, and what <code>npm test</code> checks. <span class="lvl stretch">Stretch</span> is extra, checked by <code>npm run test:stretch</code> where there are tests. Ask about either any time.</p>
+  <p><strong>No AI for this lab.</strong> Not for the exercises, not for explanations. The app is deliberately tiny: the point is that <em>you</em> type every line and see what each one does. Keep a terminal, the browser and its DevTools (<em>Console</em> and <em>Elements</em>) open the whole time.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — the screen first, then making it react. Do every core section, in order; stretch is extra</div>
+  <div class="rpart">Part 1 · Getting set up</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">How this lab works</span></a>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">What you're building</span></a>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">Vite — the dev server, and the path to your component</span></a>
+  <div class="rpart">Part 2 · Describing the screen</div>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">JSX is JavaScript</span></a>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">Components and props — the Cell</span></a>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">Composition, lists and keys — the Matrix</span></a>
+  <div class="rpart">Part 3 · Making it react</div>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">State lives in App — React's useState</span></a>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">Events up, and an immutable 2-D update</span></a>
+  <a class="rrow" href="#s9"><span class="rt">09</span><span class="rw">Derived values — the stats, and why the state lives in App</span></a>
+  <a class="rrow" href="#s10"><span class="rt">10</span><span class="rw">The re-render payoff</span></a>
+  <a class="rrow" href="#s11"><span class="rt">11</span><span class="rw">Same app, data from the server</span></a>
+  <div class="rpart">Part 4 · Further, and the lab</div>
+  <a class="rrow is-extra" href="#s12"><span class="rt">12</span><span class="rw">Step, Reset, and the biggest number</span><span class="rl">stretch</span></a>
+  <a class="rrow is-extra" href="#s13"><span class="rt">13</span><span class="rw">Predict the render</span><span class="rl">stretch</span></a>
+  <a class="rrow" href="#s14"><span class="rt">14</span><span class="rw">In the lab</span></a>
+  <a class="rrow is-extra" href="#s15"><span class="rt">15</span><span class="rw">When it goes wrong</span><span class="rl ref">reference</span></a>
+  <a class="rrow is-extra" href="#s16"><span class="rt">16</span><span class="rw">Practice run, unaided</span><span class="rl">stretch</span></a>
+  <a class="rrow" href="#s17"><span class="rt">17</span><span class="rw">Submitting the assignment</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; reference cards</span></a>
+</nav>
+
+<div class="part">Part 1 · Getting set up</div>
+
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>How this lab works</h2><span class="lvl core">Core</span><span class="tagline">pull, install, test</span></div>
+
+  <p>Same rhythm as the JS labs: one folder, exercises in <code>src/</code>, tests you run with one command. One step is new. A React project needs <strong>packages</strong> — React itself, the Vite dev server, the Vitest test runner — and <code>npm install</code> downloads them into a folder called <code>node_modules/</code>.</p>
+
+  <h3>Getting the starter</h3>
+  <div class="dothis">
+    <h4>Do this now — pull, install, run the tests</h4>
+    <ol>
+      <li>In your <code>esd-labs</code> folder, pull. A new <code>react-lab1</code> folder appears next to <code>js-lab2</code>; your earlier work isn't touched.</li>
+      <li>Open the <strong><code>react-lab1</code> folder</strong> in VS Code and open its terminal.</li>
+      <li>Check <code>node -v</code>: this lab needs <strong>20.19 or newer</strong> (22 is fine). Vite, the dev server, won't run on older versions.</li>
+    </ol>
+  </div>
+  <div class="cmd"><span class="p">$</span> cd esd-labs
+<span class="p">$</span> git pull
+<span class="p">$</span> cd react-lab1
+<span class="p">$</span> npm install
+<span class="o">added 159 packages, and audited 160 packages in 3s</span>
+<span class="p">$</span> npm test
+<span class="o"> Test Files  7 failed (7)</span>
+<span class="o">      Tests  36 failed (36)</span></div>
+  <p>Everything fails, and that's correct: every exercise starts as <code>throw new Error("TODO")</code>. Your job is to turn the 36 into 0. Don't have the repo yet? Section 01 of <a href="js-react.html#s1">JS Lab 1</a> has the clone command.</p>
+
+  <div class="cue watch"><p class="cue-k">About node_modules</p><p>It's about 80 MB of other people's code. Never edit it, never zip it, never commit it (the <code>.gitignore</code> already keeps it out of git). If anything ever looks strangely broken after a pull, delete <code>node_modules</code> and run <code>npm install</code> again. npm may also print a line like <em>"3 vulnerabilities"</em>: they're in the test tools, not in your app. Ignore it for this lab, and <strong>don't</strong> run <code>npm audit fix --force</code> — it upgrades packages past the versions the tests were written for.</p></div>
+
+  <h3>The folder</h3>
+  <div class="mention">
+    <div class="mrow"><b>src/Header.jsx … App.jsx</b><span>Your components, one per file: <code>Header</code>, <code>Cell</code>, <code>Matrix</code>, <code>Stats</code>, <code>App</code>. The comment at the top of each file says what it must do.</span></div>
+    <div class="mrow"><b>src/matrix.js</b><span>Plain functions on the numbers — <code>incrementAt</code>, <code>stats</code>. No React in it, so the tests can check each one in a line.</span></div>
+    <div class="mrow"><b>src/main.jsx, styles.css</b><span>Given. <code>main.jsx</code> starts React (section 03); the CSS makes it look like a grid.</span></div>
+    <div class="mrow"><b>index.html</b><span>The one HTML page. Given.</span></div>
+    <div class="mrow"><b>public/matrix.json</b><span>The "server's" numbers, for section 11.</span></div>
+    <div class="mrow"><b>test/</b><span>The specification, one file per section. Read the tests; don't edit them. Stretch tests are in <code>test/stretch/</code>.</span></div>
+    <div class="mrow"><b>inlab/</b><span>For the lab session. Leave it alone until then.</span></div>
+    <div class="mrow"><b>package.json</b><span>The packages this project needs, and the <code>npm run …</code> scripts.</span></div>
+  </div>
+
+  <h3>The commands</h3>
+  <div class="cmd"><span class="p">$</span> npm run dev                        # the app at http://localhost:5173 (section 03)
+<span class="p">$</span> npm test                           # every core test, once
+<span class="p">$</span> npx vitest run test/s05.test.jsx   # one section's tests
+<span class="p">$</span> npm run test:watch                 # re-runs the tests every time you save
+<span class="p">$</span> npm run test:stretch               # the stretch tests</div>
+
+  <h3>Reading a failing test</h3>
+  <p>Vitest prints the test's name, what it expected, what it got, and the line in the test file. When a test can't find something on the page, Testing Library prints the whole page your component drew, as HTML:</p>
+  <div class="cmd"><span class="o">TestingLibraryElementError: Unable to find an accessible element with the role</span>
+<span class="o">"button" and name "Row 1, column 2: 5"</span>
+<span class="o">...</span>
+<span class="o">&lt;body&gt;</span>
+<span class="o">  &lt;div&gt;</span>
+<span class="o">    &lt;button class="cell" aria-label="Row 0, column 1: 5"&gt;5&lt;/button&gt;</span>
+<span class="o">  &lt;/div&gt;</span>
+<span class="o">&lt;/body&gt;</span></div>
+  <p>Read that HTML: it's what your code actually produced. Here the label counts from 0 where the test wanted 1.</p>
+
+  <div class="cue"><p class="cue-k">Why the tests ask for "the button named…"</p><p>The tests find things the way a person does: <em>the button named "Row 1, column 2: 5"</em>, <em>the heading "Stats"</em> — not "the third <code>div</code>" or "the element with class <code>x</code>". That's why your markup must use real elements (<code>&lt;button&gt;</code>, <code>&lt;h2&gt;</code>, <code>&lt;table&gt;</code>) and give each cell a name. A page these tests can use is a page a screen reader can use.</p></div>
+
+  <h3>Submitting</h3>
+  <p>A <strong>graded assignment</strong>, like the JS labs. Get <code>npm test</code> fully green and the app working, then zip the <code>react-lab1</code> folder — without <code>node_modules</code> — and submit it, once, before the deadline announced for this lab. Section 17 has the steps.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — npm install done, npm test runs</span></label>
+</section>
+
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>What you're building</h2><span class="lvl core">Core</span><span class="tagline">three components, one state</span></div>
+
+  <p>A grid of numbers. Click a cell, and its number goes up by one. Next to the grid — <strong>outside</strong> it — a small panel shows the sum, the average, the biggest number and how many cells aren't zero, and they change as you click. That's the whole app. It's small on purpose: the mental model is the point, and every later React lab builds on it.</p>
+  <p>At the end (section 11), the numbers stop being written in your code and come from a server instead — and you'll see how little has to change.</p>
+
+  <h3>The component tree</h3>
+  <figure class="board">
+    <svg viewBox="0 0 780 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="App holds the matrix in state. It passes the matrix down to Matrix and to Stats; Matrix passes a value and an onClick to each Cell. A click in a Cell travels up as calls to functions that were passed down, ending in setMatrix inside App.">
+      <text x="0" y="16" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">ONE STATE, IN APP — PROPS GO DOWN, EVENTS COME UP</text>
+      <rect x="270" y="32" width="240" height="62" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="390" y="54" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="#0B5D51">&lt;App&gt;</text>
+      <rect x="300" y="64" width="180" height="22" fill="#101614"/>
+      <text x="390" y="80" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#F5C518">matrix ← useState(…)</text>
+      <line x1="300" y1="94" x2="100" y2="140" stroke="#0B5D51" stroke-width="2"/>
+      <line x1="390" y1="94" x2="390" y2="140" stroke="#0B5D51" stroke-width="2"/>
+      <line x1="480" y1="94" x2="680" y2="140" stroke="#0B5D51" stroke-width="2"/>
+      <text x="398" y="122" font-family="IBM Plex Mono, monospace" font-size="11" fill="#0B5D51">matrix, onIncrement</text>
+      <text x="600" y="106" font-family="IBM Plex Mono, monospace" font-size="11" fill="#0B5D51">matrix</text>
+      <rect x="20" y="140" width="160" height="46" fill="#E4EEEB" stroke="#0B5D51" stroke-width="1.5"/>
+      <text x="100" y="160" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12.5" font-weight="600" fill="#0F1A18">&lt;Header&gt;</text>
+      <text x="100" y="178" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="#5A6B67">no props</text>
+      <rect x="310" y="140" width="160" height="46" fill="#E4EEEB" stroke="#0B5D51" stroke-width="1.5"/>
+      <text x="390" y="160" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12.5" font-weight="600" fill="#0F1A18">&lt;Matrix&gt;</text>
+      <text x="390" y="178" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="#5A6B67">maps rows → Cells</text>
+      <rect x="600" y="140" width="160" height="46" fill="#E4EEEB" stroke="#0B5D51" stroke-width="1.5"/>
+      <text x="680" y="160" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12.5" font-weight="600" fill="#0F1A18">&lt;Stats&gt;</text>
+      <text x="680" y="178" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="#5A6B67">computes sum, average…</text>
+      <line x1="390" y1="186" x2="330" y2="232" stroke="#0B5D51" stroke-width="2"/>
+      <line x1="390" y1="186" x2="390" y2="232" stroke="#0B5D51" stroke-width="2"/>
+      <line x1="390" y1="186" x2="450" y2="232" stroke="#0B5D51" stroke-width="2"/>
+      <text x="458" y="212" font-family="IBM Plex Mono, monospace" font-size="11" fill="#0B5D51">value, onClick</text>
+      <rect x="304" y="232" width="52" height="44" fill="#101614"/>
+      <text x="330" y="258" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">Cell</text>
+      <rect x="364" y="232" width="52" height="44" fill="#101614"/>
+      <text x="390" y="258" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">Cell</text>
+      <rect x="424" y="232" width="52" height="44" fill="#101614"/>
+      <text x="450" y="258" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#F5C518">Cell</text>
+      <text x="488" y="258" font-family="IBM Plex Mono, monospace" font-size="12" fill="#5A6B67">× 9</text>
+      <path d="M300 254 C 240 254, 236 63, 262 63" fill="none" stroke="#C2352B" stroke-width="2.5" stroke-dasharray="6 4"/>
+      <path d="M256 56 L268 63 L256 70" fill="none" stroke="#C2352B" stroke-width="2.5"/>
+      <text x="20" y="222" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#C2352B">a click in a Cell calls onClick()</text>
+      <text x="20" y="240" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#C2352B">→ Matrix's onIncrement(r, c)</text>
+      <text x="20" y="258" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#C2352B">→ setMatrix(…) in App</text>
+      <line x1="20" y1="290" x2="50" y2="290" stroke="#0B5D51" stroke-width="2"/>
+      <text x="58" y="294" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#0F1A18">props flow down</text>
+      <line x1="190" y1="290" x2="220" y2="290" stroke="#C2352B" stroke-width="2.5" stroke-dasharray="6 4"/>
+      <text x="228" y="294" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#0F1A18">events flow up, as calls to functions that were passed down</text>
+    </svg>
+    <figcaption>App owns the numbers. They flow down as props. A click flows up as a call to a function App handed down.</figcaption>
+  </figure>
+
+  <h3>What each part teaches</h3>
+  <div class="mention">
+    <div class="mrow"><b>Matrix made of Cells</b><span><strong>Composition</strong>: small components inside bigger ones, each with one job (05, 06).</span></div>
+    <div class="mrow"><b>a number reaches a Cell</b><span><strong>Props flow down</strong>: the parent decides, the child shows (05).</span></div>
+    <div class="mrow"><b>a click changes the numbers</b><span><strong>Events flow up</strong>: the Cell calls a function its parent gave it (08).</span></div>
+    <div class="mrow"><b>stats outside the matrix</b><span><strong>Lifted state</strong>: two siblings need the same numbers, so they live in the parent (09).</span></div>
+    <div class="mrow"><b>one click, two places change</b><span><strong>Re-render</strong>: you change the state; React redraws the screen (10).</span></div>
+  </div>
+
+  <h3>Why the numbers can't live in a Cell</h3>
+  <p>The obvious first idea is that each Cell keeps its own number. It would even work — click, number goes up — until you build the stats panel. Stats needs all nine numbers, and in React, data only flows <em>down</em>: a component can't reach into a sibling, or up into its parent. So the numbers have to live in the closest component that is above <em>both</em> the cells and the stats: <code>App</code>. That's called <strong>lifting state up</strong>, and this problem was chosen because it forces it. Keep the picture above in mind; section 09 comes back to it.</p>
+
+  <div class="cue react"><p class="cue-k">By hand (JS Lab 2) → React</p><p>JS Lab 2's loop was: an <strong>event</strong> → <code>transition</code> makes the next state → <code>setState</code> stores it and calls <code>render()</code>, which redraws the regions that changed (<a href="js-app.html#s2">JS Lab 2 · §02</a>). React's loop is the same, with two steps taken off your hands: an event → you call <code>setMatrix(next)</code> → <strong>React</strong> runs your components again → <strong>React</strong> changes only the parts of the page that differ.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 read — I can draw the tree and say where the numbers live</span></label>
+</section>
+
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>Vite — the dev server, and the path to your component</h2><span class="lvl core">Core</span><span class="tagline">npm run dev, index.html, main.jsx</span></div>
+
+  <p>A browser can't run your React code as written. It doesn't understand JSX (the HTML-looking parts), and it doesn't know where <code>import … from "react"</code> lives — that's a package name, not a file path. <strong>Vite</strong> is a dev server that fixes both: when the browser asks for <code>src/App.jsx</code>, Vite translates it into plain JavaScript on the spot and sends that. JS Lab 2's <code>tools/serve.js</code> just handed files over; Vite translates them first. It also watches your files: save, and the page updates.</p>
+
+  <div class="dothis">
+    <h4>Do this now — start it, and leave it running</h4>
+    <ol>
+      <li>In the <code>react-lab1</code> terminal: <code>npm run dev</code>.</li>
+      <li>Open <a href="http://localhost:5173" target="_blank" rel="noopener">localhost:5173</a>. It says <strong>TODO: section 04</strong> — that's the placeholder in <code>src/Header.jsx</code>, your first exercise.</li>
+      <li>Open <code>src/Header.jsx</code>, change the text inside the <code>&lt;h1&gt;</code>, and save. The page changes without a reload. Change it back.</li>
+      <li>Leave <code>npm run dev</code> running for the whole lab, and use a second terminal (the <kbd>+</kbd> in VS Code's terminal panel) for <code>npm test</code>. <kbd>Ctrl</kbd>+<kbd>C</kbd> stops the server.</li>
+    </ol>
+  </div>
+  <div class="cmd"><span class="p">$</span> npm run dev
+
+<span class="o">  VITE v7.3.7  ready in 220 ms</span>
+
+<span class="o">  ➜  Local:   http://localhost:5173/</span></div>
+
+  <h3>From index.html to your component</h3>
+  <p>Follow the chain once, so nothing about it is mysterious. <code>index.html</code> is almost empty: one <code>&lt;div id="root"&gt;</code>, and one script tag that loads <code>src/main.jsx</code>. That file is given:</p>
+  <div class="cmd"><span class="tg">import</span> { StrictMode } <span class="tg">from</span> <span class="st">"react"</span>;
+<span class="tg">import</span> { createRoot } <span class="tg">from</span> <span class="st">"react-dom/client"</span>;
+<span class="tg">import</span> App <span class="tg">from</span> <span class="st">"./App.jsx"</span>;
+<span class="tg">import</span> <span class="st">"./styles.css"</span>;
+
+<span class="at">createRoot</span>(<span class="tg">document</span>.<span class="at">getElementById</span>(<span class="st">"root"</span>)).<span class="at">render</span>(
+  &lt;StrictMode&gt;
+    &lt;App /&gt;
+  &lt;/StrictMode&gt;
+);</div>
+  <p>That's the <strong>only</strong> line in the whole app that touches the DOM. It finds the empty <code>div</code>, hands it to React, and says: draw <code>&lt;App /&gt;</code> in here. <code>App</code> draws everything else. From now on you never call <code>querySelector</code>, <code>createElement</code> or <code>textContent</code> — you describe what the page should look like, and React makes it so.</p>
+
+  <div class="cue react"><p class="cue-k">By hand (JS Lab 2) → React</p><p>JS Lab 2's <code>app.js</code> started by grabbing every region with <code>querySelector</code> and kept those elements in an <code>els</code> object, so the render functions could write into them (<a href="js-app.html#s7">JS Lab 2 · §07</a>). Here, one <code>createRoot</code> call takes one empty element, and React owns everything inside it.</p></div>
+
+  <h3>StrictMode, in one paragraph</h3>
+  <p><code>&lt;StrictMode&gt;</code> is a development-only checker. To catch components that aren't <strong>pure</strong> (same input, same output, no side effects — <a href="js-react.html#s10">JS Lab 1 · §10</a>), React calls your component functions <strong>twice</strong> in development, and on start-up runs your effects twice too. A pure function doesn't care; an impure one shows its bug. So if you put a <code>console.log</code> in a component and see it twice, that's StrictMode, not a bug. Section 10 uses it on purpose. A production build doesn't do it.</p>
+
+  <h3>Building for real</h3>
+  <p><code>npm run build</code> writes a <code>dist/</code> folder: plain HTML, JavaScript and CSS, with no JSX left, that any web server can host. <code>npm run preview</code> serves it on port 4173. You don't need either for this lab; it's good to have seen it once.</p>
+
+  <div class="cue watch"><p class="cue-k">Error: Port 5173 is already in use</p><p>Another <code>npm run dev</code> is still running — in another terminal, or in another lab's folder. Each lab folder has its own server, and only one can have port 5173. Find it and stop it with <kbd>Ctrl</kbd>+<kbd>C</kbd>, then start yours again.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 complete — the dev server runs, and saving updates the page</span></label>
+</section>
+
+<div class="part">Part 2 · Describing the screen</div>
+
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>JSX is JavaScript</h2><span class="lvl core">Core</span><span class="tagline">src/Header.jsx</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>An <strong>expression</strong> is code that produces a value; a statement does something and has none. JSX braces <code>{ }</code> take exactly one expression — which is why React code uses <code>? :</code>, <code>&amp;&amp;</code> and <code>map</code>, never <code>if</code> or <code>for</code>, inside the markup.</p></div>
+  <p class="refs">Full version → <a href="js-react.html#s3">JS Lab 1 · §03 Values, truthiness and expressions</a> · <a href="js-react.html#s16">§16 Reading React</a></p>
+
+  <h3>It's a function call, not HTML</h3>
+  <p>JSX looks like HTML, but Vite turns every tag into an ordinary function call. This:</p>
+  <div class="cmd"><span class="tg">const</span> name = <span class="st">"Asha"</span>;
+<span class="tg">const</span> heading = &lt;h1 className=<span class="st">"title"</span>&gt;Hello, {name}&lt;/h1&gt;;</div>
+  <p>becomes, roughly:</p>
+  <div class="cmd"><span class="tg">const</span> heading = <span class="at">jsx</span>(<span class="st">"h1"</span>, { className: <span class="st">"title"</span>, children: [<span class="st">"Hello, "</span>, name] });
+heading
+<span class="o">// { type: "h1", props: { className: "title", children: ["Hello, ", "Asha"] }, … }</span></div>
+  <p>So a JSX tag is an <strong>expression</strong> that produces a plain object — a <em>description</em> of an element, not the element itself. You can store it in a variable, return it from a function, put it in an array. React reads these descriptions and creates the real DOM elements. That's the <code>createElement</code> work from <a href="js-react.html#s12">JS Lab 1 · §12</a>, done for you.</p>
+
+  <h3>The rules that follow from that</h3>
+  <table class="grid long-key">
+    <tr><th>Write</th><th>Because</th></tr>
+    <tr><td>className="cell"</td><td><code>class</code> is a JavaScript keyword. (<code>for</code> on a label is <code>htmlFor</code>, for the same reason.) React warns: <em>Invalid DOM property `class`. Did you mean `className`?</em></td></tr>
+    <tr><td>{value}   {row + 1}   {ok ? "yes" : "no"}</td><td>Braces hold one expression: a variable, arithmetic, a call, a ternary, <code>&amp;&amp;</code>, a <code>map</code>. Never an <code>if</code> or a <code>for</code>.</td></tr>
+    <tr><td>&lt;br /&gt;   &lt;input /&gt;   &lt;Cell … /&gt;</td><td>Every tag must be closed. A tag with no children closes itself with <code>/&gt;</code>.</td></tr>
+    <tr><td>return ( &lt;&gt; … &lt;/&gt; );</td><td>A function returns <strong>one</strong> value, so a component returns one element. Two side by side need a wrapper. A <strong>fragment</strong>, <code>&lt;&gt; … &lt;/&gt;</code>, wraps them without adding an element to the page.</td></tr>
+    <tr><td>return ( … );</td><td>The parentheses let JSX span several lines after <code>return</code> — the arrow-function rules from <a href="js-react.html#s4">JS Lab 1 · §04</a>.</td></tr>
+    <tr><td>onClick   onContextMenu</td><td>Event props are camelCase, and take a function (section 05).</td></tr>
+    <tr><td>style={{ color: "red" }}</td><td>Not a string: an object. The outer braces say "expression"; the inner ones are the object literal.</td></tr>
+    <tr><td>{/* a comment */}</td><td>Inside JSX, a comment is an expression slot holding only a comment. <code>//</code> doesn't work between tags.</td></tr>
+  </table>
+
+  <h3>What braces can show</h3>
+  <div class="cmd">&lt;p&gt;{<span class="st">"text"</span>}&lt;/p&gt;          <span class="cm">// text</span>
+&lt;p&gt;{<span class="st">42</span>}&lt;/p&gt;              <span class="cm">// 42</span>
+&lt;p&gt;{[<span class="st">1</span>, <span class="st">2</span>, <span class="st">3</span>]}&lt;/p&gt;       <span class="cm">// 123      — an array shows each item</span>
+&lt;p&gt;{<span class="tg">true</span>}&lt;/p&gt;            <span class="cm">// nothing  — so do false, null and undefined</span>
+&lt;p&gt;{<span class="st">0</span> &amp;&amp; <span class="st">"items"</span>}&lt;/p&gt;    <span class="cm">// 0        — the trap from JS Lab 1 §03: &amp;&amp; returns the 0</span>
+&lt;p&gt;{{ sum: <span class="st">45</span> }}&lt;/p&gt;     <span class="cm">// Error: Objects are not valid as a React child</span></div>
+  <p>That last one is worth remembering: in section 09 you'll compute <code>stats(matrix)</code>, an object, and putting it straight in braces gives exactly that error. Show its fields — <code>{sum}</code> — not the object.</p>
+
+  <div class="dothis">
+    <h4>Do this now — src/Header.jsx</h4>
+    <p>Return two elements side by side, with no element around them: an <code>&lt;h1&gt;</code> saying <em>Number matrix</em>, and a <code>&lt;p className="hint"&gt;</code> saying <em>Click a cell to add one.</em> First try returning the two without any wrapper and read the error in the browser. Then use a fragment. The page at <code>localhost:5173</code> shows your header as soon as you save — <code>App</code> already renders it.</p>
+  </div>
+  <div class="cmd"><span class="p">$</span> npx vitest run test/s04.test.jsx</div>
+  <p>The third test checks there's <strong>no</strong> wrapper: wrapping the two in a <code>&lt;div&gt;</code> would work on screen but adds an element nobody asked for. That's what fragments are for.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>What's wrong with <code>return &lt;h1&gt;A&lt;/h1&gt; &lt;p&gt;B&lt;/p&gt;;</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>It tries to return two values. In the browser, Vite shows <em>Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment &lt;&gt;...&lt;/&gt;?</em> (In <code>npm test</code> the same mistake shows up as a confusing <em>Unterminated regular expression</em>.) Wrap them: <code>return (&lt;&gt;&lt;h1&gt;A&lt;/h1&gt;&lt;p&gt;B&lt;/p&gt;&lt;/&gt;);</code>.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Which of these can go inside JSX braces? <ol><li><code>count &gt; 0 ? "some" : "none"</code></li><li><code>if (count &gt; 0) "some"</code></li><li><code>list.map((x) =&gt; &lt;li&gt;{x}&lt;/li&gt;)</code></li></ol></div>
+    <details><summary>Show answer</summary><div class="a"><p>1 and 3 — both are expressions. 2 is a statement and is a syntax error there, exactly as inside <code>${ }</code> in JS Lab 1 §03.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 complete — s04 tests pass, the header shows in the browser</span></label>
+</section>
+
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>Components and props — the Cell</h2><span class="lvl core">Core</span><span class="tagline">src/Cell.jsx</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>A function is a value: you can pass it, store it, and call it later. <code>save</code> is the function; <code>save()</code> runs it now. And an object parameter can be destructured right in the parameter list: <code>function f({ code, title }) { … }</code>.</p></div>
+  <p class="refs">Full version → <a href="js-react.html#s4">JS Lab 1 · §04 Functions are values</a> · <a href="js-react.html#s8">§08 Destructuring</a></p>
+
+  <h3>A component is a function</h3>
+  <p>A <strong>component</strong> is a function that takes one object — its <strong>props</strong> — and returns JSX. Its name starts with a capital letter: <code>&lt;cell&gt;</code> is an HTML tag React doesn't know; <code>&lt;Cell&gt;</code> is your function. When you write</p>
+  <div class="cmd">&lt;Cell row={<span class="st">0</span>} col={<span class="st">1</span>} value={<span class="st">5</span>} onClick={handleClick} /&gt;</div>
+  <p>React calls your function with the attributes collected into one object:</p>
+  <div class="cmd"><span class="at">Cell</span>({ row: <span class="st">0</span>, col: <span class="st">1</span>, value: <span class="st">5</span>, onClick: handleClick })</div>
+  <p>so you destructure them in the parameter list, exactly like any other object parameter:</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">Cell</span>({ row, col, value, onClick }) {
+  <span class="tg">return</span> &lt;button …&gt;{value}&lt;/button&gt;;
+}</div>
+
+  <h3>Props flow down, and are read-only</h3>
+  <p>The parent decides what a child shows; the child shows it. A Cell never changes its own <code>value</code> — it doesn't own it, and assigning to a prop changes nothing anyone else can see. When the value needs to change, the Cell <em>asks</em>, by calling a function the parent gave it (section 08).</p>
+  <div class="cue watch"><p class="cue-k">"5" or {5}?</p><p><code>value="5"</code> passes the <strong>string</strong> <code>"5"</code>. <code>value={5}</code> passes the <strong>number</strong> 5. Quotes only for plain strings; braces for everything else — numbers, booleans, arrays, objects and functions. With the string, <code>value + 1</code> is <code>"51"</code>.</p></div>
+
+  <h3>A real button, with a name</h3>
+  <p>A Cell is a <code>&lt;button&gt;</code>, not a <code>&lt;div&gt;</code> with a click handler. A button can be reached with <kbd>Tab</kbd>, pressed with <kbd>Enter</kbd> or <kbd>Space</kbd>, and announced by a screen reader — for free. A <code>div</code> gets none of that.</p>
+  <p>Nine buttons that say "1", "2", "3"… aren't enough for someone who can't see the grid, so each one gets an <strong>accessible name</strong> with <code>aria-label</code>: where it is, and what it holds. People count from 1, so row 0, column 1 is "Row 1, column 2":</p>
+  <div class="cmd">aria-label={<span class="st">`Row ${row + 1}, column ${col + 1}: ${value}`</span>}
+<span class="o">// "Row 1, column 2: 5"</span></div>
+  <p>A template literal in braces — an expression, like everything in JSX. The tests find each cell by this name.</p>
+
+  <h3>Events are props too</h3>
+  <p><code>onClick</code> takes a function, and React calls it on each click. Pass the function; don't call it:</p>
+  <div class="cmd">&lt;button onClick={onClick}&gt;    <span class="cm">// React calls onClick later, on each click</span>
+&lt;button onClick={<span class="at">onClick</span>()}&gt;  <span class="cm">// YOU call it now, during the render — every render</span></div>
+  <p>That's <a href="js-react.html#s4">JS Lab 1 · §04</a>'s <code>addEventListener("click", save())</code> bug, in JSX. In this app it's worse than "the click does nothing": once the Cell's <code>onClick</code> changes the numbers (section 08), calling it while rendering changes the numbers, which renders again, which calls it again — the numbers count up on their own. The last test in s05 checks that rendering doesn't call <code>onClick</code>.</p>
+
+  <div class="cue react"><p class="cue-k">By hand (JS Labs 1–2) → React</p><p>In JS Lab 2 a course card was two things: a view function that turned data into plain values (<code>cardView</code>, <a href="js-app.html#s6">§06</a>), and a render function that turned those values into DOM nodes. A component is both, in one function: data in, a description of the elements out. And there's no <code>addEventListener</code> — the handler is a prop on the element it belongs to (<a href="js-react.html#s13">JS Lab 1 · §13</a>).</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — src/Cell.jsx</h4>
+    <p>One <code>&lt;button className="cell"&gt;</code> showing the value, with the <code>aria-label</code> above and <code>onClick</code> passed through. Then see it: in <code>src/App.jsx</code>, add <code>import Cell from "./Cell.jsx";</code> and, under <code>&lt;Header /&gt;</code>, <code>&lt;Cell row={0} col={1} value={5} onClick={() =&gt; console.log("clicked")} /&gt;</code>. Click it and watch the console. (Section 07 replaces this line; it's only for looking.)</p>
+  </div>
+  <div class="cmd"><span class="p">$</span> npx vitest run test/s05.test.jsx</div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Someone writes <code>function Cell(row, col, value) { … }</code>. What is <code>row</code> inside it?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The whole props object — React passes <strong>one</strong> argument. <code>col</code> and <code>value</code> are <code>undefined</code>. Destructure it: <code>function Cell({ row, col, value })</code>.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Why must a component's name start with a capital letter?</div>
+    <details><summary>Show answer</summary><div class="a"><p>That's how JSX tells them apart. Lowercase (<code>&lt;button&gt;</code>) means an HTML tag, passed as the string <code>"button"</code>. Capitalised (<code>&lt;Cell&gt;</code>) means a variable in scope — your function. Write <code>&lt;cell /&gt;</code> and React warns: <em>The tag &lt;cell&gt; is unrecognized in this browser.</em></p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 complete — s05 tests pass, a Cell shows in the browser</span></label>
+</section>
+
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>Composition, lists and keys — the Matrix</h2><span class="lvl core">Core</span><span class="tagline">src/Matrix.jsx</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p><code>map</code> turns every item of an array into something else and returns a new array of the same length. On screen, that's "one card per course". And a thing is found by its <strong>id</strong>, never by its position — positions change when a list is sorted or filtered.</p></div>
+  <p class="refs">Full version → <a href="js-react.html#s11">JS Lab 1 · §11 The array toolkit for UIs</a> · <a href="js-app.html#s8">JS Lab 2 · §08 Redraw only what changed</a></p>
+
+  <h3>Components inside components</h3>
+  <p><strong>Composition</strong> is building a component out of other components. <code>Matrix</code> renders <code>Cell</code>s; <code>App</code> renders <code>Matrix</code>. Each one is small and has one job: a Cell knows how to show one number, and nothing about grids. The Matrix knows about rows and columns, and nothing about how a cell looks.</p>
+
+  <h3>A list is a map</h3>
+  <p>A matrix is an array of rows, and a row is an array of numbers. So drawing it is two <code>map</code>s, one inside the other: rows become <code>&lt;tr&gt;</code>s, numbers become <code>&lt;td&gt;</code>s with a <code>&lt;Cell&gt;</code> inside. The outer one:</p>
+  <div class="cmd">&lt;table className=<span class="st">"matrix"</span>&gt;
+  &lt;tbody&gt;
+    {matrix.<span class="at">map</span>((values, r) =&gt; (
+      &lt;tr key={r}&gt;
+        {<span class="cm">/* one &lt;td&gt; per number in values, each with a &lt;Cell&gt; inside */</span>}
+      &lt;/tr&gt;
+    ))}
+  &lt;/tbody&gt;
+&lt;/table&gt;</div>
+  <p>The inner one has the same shape, with <code>(value, c)</code>. <code>map</code> returns an array of JSX objects, and an array in braces shows each item — that's all a list is. Note the parentheses after <code>=&gt;</code>: the arrow returns the JSX without a <code>return</code> (rule 1 in JS Lab 1 §04). With braces instead, you'd need <code>return</code>, and forgetting it gives an empty table.</p>
+  <p>Write the <code>&lt;tbody&gt;</code>. Browsers insert one between a <code>&lt;table&gt;</code> and its rows anyway, so React warns if you leave it out: <em>In HTML, &lt;tr&gt; cannot be a child of &lt;table&gt;.</em></p>
+
+  <h3>Why lists need keys</h3>
+  <p>When the matrix changes, React gets a new list of rows and has to match each new one with an old one: which stayed, which moved, which are new, which are gone. Only then can it touch just what changed. A <strong>key</strong> is how you tell it which is which. Without keys, React falls back to matching by position and warns:</p>
+  <div class="cmd"><span class="o">Each child in a list should have a unique "key" prop.</span>
+<span class="o">Check the render method of `Matrix`.</span></div>
+  <p>The rule: a key says <strong>which thing this is</strong>, and stays the same for the same thing on every render. For a list of courses, that's <code>course.id</code> — never the position, because sorting or filtering moves a course to a different position (<a href="js-react.html#s11">JS Lab 1 · §11</a>).</p>
+  <p>In this grid, though, nothing is ever added, removed or moved. The cell at row 1, column 2 is always that cell — its position <em>is</em> its identity. So here the index is the right key: <code>key={r}</code> on each row, <code>key={c}</code> on each cell. "Never use the index" isn't the rule; "the key must name the thing" is. The index is wrong as soon as items can be inserted, deleted or reordered — the React Bug Lab shows you exactly what breaks.</p>
+
+  <div class="cue watch"><p class="cue-k">Keys that look clever and aren't</p><p><code>key={value}</code>: two cells can hold the same number, and the number changes on every click — so after a click, React thinks the cell is a <em>different</em> cell, throws the button away and builds a new one. The button you clicked is gone, and so is the keyboard focus. That's the focus bug from <a href="js-app.html#s8">JS Lab 2 · §08</a>, which you fixed by hand with reference checks. <code>key={Math.random()}</code> does the same on every render. A test in section 08 catches both.</p></div>
+  <p>The key goes on the element you return from <code>map</code> — the <code>&lt;tr&gt;</code>, the <code>&lt;td&gt;</code> — not on something inside it. And a key isn't a prop: React uses it and doesn't pass it on, so a component can't read <code>props.key</code>.</p>
+
+  <div class="cue react"><p class="cue-k">By hand (JS Lab 2) → React</p><p>In JS Lab 2 you kept the previous state and asked, per region, <code>previous.planner !== state.planner</code> to decide what to redraw. React asks the same question per <em>element</em>, and keys are how it knows which old element a new one corresponds to. You decided by reference; React decides by type and key.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — src/Matrix.jsx</h4>
+    <p>The table, the two <code>map</code>s, the keys, and a <code>&lt;Cell&gt;</code> in each <code>&lt;td&gt;</code> with its <code>row</code>, <code>col</code> and <code>value</code>. Leave <code>onClick</code> out for now — section 08 adds it. To see it, in <code>App.jsx</code> replace the test Cell with <code>&lt;Matrix matrix={[[1, 2, 3], [4, 5, 6]]} /&gt;</code> (Matrix is already imported). Then delete one <code>key</code>, save, and find the warning in the console. Put it back.</p>
+  </div>
+  <div class="cmd"><span class="p">$</span> npx vitest run test/s06.test.jsx</div>
+  <p>The tests also draw a 4×4 and a 1×1: nothing in Matrix may assume 3. That pays off in section 11.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Why is <code>key={r}</code> fine for these rows, but <code>key={index}</code> wrong for a list of courses you can sort?</div>
+    <details><summary>Show answer</summary><div class="a"><p>A key must name the thing. Grid rows never move, so a row's index always names the same row. Sort the courses and the course at index 0 is a different course, so index 0 no longer names the same thing — React would reuse the wrong element for it. Use <code>course.id</code>.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Where does the key go in <code>values.map((value, c) =&gt; &lt;td&gt;&lt;Cell key={c} … /&gt;&lt;/td&gt;)</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>On the <code>&lt;td&gt;</code> — the element <code>map</code> returns. A key inside it is on the wrong level: the <code>td</code>s are the list items, and they have none, so React still warns.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 complete — s06 tests pass, no key warning in the console</span></label>
+</section>
+
+<div class="part">Part 3 · Making it react</div>
+
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>State lives in App — React's useState</h2><span class="lvl core">Core</span><span class="tagline">src/App.jsx</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>In JS Lab 1 you wrote <code>useState(initial, onChange)</code>. It locks the value in a closure and returns <code>[getState, setState]</code>; <code>setState</code> stores the new value and calls <code>render()</code>, so changing the data and redrawing the page become one action. <em>The view is a function of the state.</em></p></div>
+  <p class="refs">Full version → <a href="js-react.html#s15">JS Lab 1 · §15 Reactivity — build your own useState</a> · <a href="js-react.html#s6">§06 Closures</a></p>
+
+  <h3>React's useState</h3>
+  <p>Here is React's. Put it at the top of <code>App</code>:</p>
+  <div class="cmd"><span class="tg">import</span> { useState } <span class="tg">from</span> <span class="st">"react"</span>;
+<span class="tg">import</span> { START } <span class="tg">from</span> <span class="st">"./matrix.js"</span>;
+
+<span class="tg">export</span> <span class="tg">default</span> <span class="tg">function</span> <span class="at">App</span>() {
+  <span class="tg">const</span> [matrix, setMatrix] = <span class="at">useState</span>(START);
+  <span class="tg">return</span> (
+    &lt;main className=<span class="st">"app"</span>&gt;
+      &lt;Header /&gt;
+      &lt;Matrix matrix={matrix} /&gt;
+    &lt;/main&gt;
+  );
+}</div>
+  <p>Same shape as yours: a pair, destructured, a value and the only function that changes it. Three differences, and each one is worth understanding:</p>
+  <table class="grid long-key">
+    <tr><th>Yours (JS Lab 1 §15)</th><th>React's</th></tr>
+    <tr><td>useState(initial, render)</td><td><code>useState(initial)</code>. No render argument: React knows which component called it, so it knows what to redraw.</td></tr>
+    <tr><td>[getState, setState] — read with getState()</td><td><code>[matrix, setMatrix]</code> — the value itself, in a plain <code>const</code>.</td></tr>
+    <tr><td>Your script ran once; getState() fetched the latest value</td><td>React <strong>calls <code>App()</code> again</strong> after every change. Each call gets the latest value in a fresh <code>const</code>, so a getter isn't needed.</td></tr>
+    <tr><td>setState(next): store, then render()</td><td><code>setMatrix(next)</code>: store, then React schedules a new render of <code>App</code> and everything below it.</td></tr>
+    <tr><td>Stretch: accept an updater; skip if Object.is(next, value)</td><td>Built in. <code>setMatrix((prev) =&gt; …)</code> works, and setting the same object skips the re-render.</td></tr>
+  </table>
+
+  <h3>App runs again — and START isn't put back</h3>
+  <p>The third row is the one to sit with. <code>App</code> is an ordinary function, and React calls it on the first render and again after every change. So the line <code>useState(START)</code> runs every time. But <code>START</code> is only used the <strong>first</strong> time; on every later call, <code>useState</code> hands back whatever you last set:</p>
+  <div class="cmd"><span class="cm">// first render:   App()  →  useState(START)  →  [START, setMatrix]</span>
+<span class="cm">// a click:        setMatrix(next)</span>
+<span class="cm">// next render:    App()  →  useState(START)  →  [next,  setMatrix]    START ignored now</span></div>
+  <p>React remembers the value for you, outside your function, and gives it back on each call. Each call's <code>matrix</code> is a fresh constant belonging to that render — one call, one set of variables, exactly as in the stretch part of <a href="js-react.html#s6">JS Lab 1 · §06</a>.</p>
+
+  <div class="cue watch"><p class="cue-k">Hooks go at the top, every time</p><p><code>useState</code> is a <strong>hook</strong> — a function, starting with <code>use</code>, that only works while React is rendering a component. React matches hooks by the <em>order</em> they're called in, so call them at the top level of the component: not inside an <code>if</code>, a loop, or an event handler. Called from a handler, you get <em>Invalid hook call. Hooks can only be called inside of the body of a function component.</em></p></div>
+
+  <div class="dothis">
+    <h4>Do this now — src/App.jsx, step 1</h4>
+    <p>Remove the test lines from sections 05 and 06. Hold the matrix in state, starting from <code>START</code>, and render <code>&lt;Matrix matrix={matrix} /&gt;</code> under the header — as above. (The imports you need are already at the top of the file.) The browser shows 1 to 9. Clicking does nothing yet.</p>
+  </div>
+  <div class="cmd"><span class="p">$</span> npx vitest run test/s07.test.jsx</div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Why not just <code>let matrix = START;</code> in App, and assign a new matrix on a click?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Two reasons. Changing a variable tells nobody anything — the screen doesn't move (stage 1 of JS Lab 1 §15). And even if React did re-run <code>App</code>, the <code>let</code> would start from <code>START</code> again: a function's local variables don't survive between calls. <code>useState</code> keeps the value outside your function, and its setter is the door that also triggers the redraw.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 complete — s07 tests pass, the 3×3 shows in the browser</span></label>
+</section>
+
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>Events up, and an immutable 2-D update</h2><span class="lvl core">Core</span><span class="tagline">src/matrix.js · Matrix.jsx · App.jsx</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>When you pass a callback, the receiver decides when to call it, and with what. And an immutable update never changes what it was given: it builds something new, with only the path to the change being new — <code>takeSeat</code> returned a new list in which one course was new and the other nineteen were the <em>same</em> objects.</p></div>
+  <p class="refs">Full version → <a href="js-react.html#s5">JS Lab 1 · §05 Callbacks</a> · <a href="js-react.html#s10">§10 Immutable updates</a></p>
+
+  <h3>The click is in the Cell; the numbers are in App</h3>
+  <p>A Cell can't change the matrix: it doesn't have <code>setMatrix</code>, and it shouldn't — it only knows its own number. So App hands a function down, and the Cell calls it. The function runs in App, where the state is. That's what "events flow up" means: <strong>not</strong> an event bubbling through the DOM, but a call to a function that was passed down as a prop.</p>
+  <p>Three hops, one per component:</p>
+  <div class="cmd"><span class="cm">// App — owns the state, so it owns the change</span>
+<span class="tg">function</span> <span class="at">increment</span>(row, col) {
+  <span class="at">setMatrix</span>((prev) =&gt; <span class="at">incrementAt</span>(prev, row, col));
+}
+&lt;Matrix matrix={matrix} onIncrement={increment} /&gt;
+
+<span class="cm">// Matrix — knows each cell's position, so it fills it in</span>
+&lt;Cell row={r} col={c} value={value} onClick={() =&gt; <span class="at">onIncrement</span>(r, c)} /&gt;
+
+<span class="cm">// Cell — knows only that it was clicked</span>
+&lt;button onClick={onClick}&gt;{value}&lt;/button&gt;</div>
+  <p>Look at the middle line. Matrix makes a <strong>new arrow function for each cell</strong>, and each one closes over <em>that</em> cell's <code>r</code> and <code>c</code> — <code>buildButtons</code> from <a href="js-react.html#s4">JS Lab 1 · §04</a>, and a closure from §06. The Cell doesn't need to know about rows and columns to report a click; Matrix answers "which one?" for it.</p>
+
+  <div class="cue react"><p class="cue-k">By hand (JS Labs 1–2) → React</p><p>By hand, you put <strong>one</strong> listener on the whole list and worked out what was hit: <code>event.target.closest("button[data-id]")</code>, then <code>Number(button.dataset.id)</code> because <code>dataset</code> values are strings (<a href="js-react.html#s13">JS Lab 1 · §13</a>, <a href="js-app.html#s7">JS Lab 2 · §07</a>). In React, each element gets its own handler, written right where the data is in scope — no <code>data-</code> attributes, no string-to-number, no <code>closest</code>. React still does delegation, internally: one listener at the root, for the whole app.</p></div>
+
+  <h3>The update: a new matrix, sharing what didn't change</h3>
+  <p><code>incrementAt(matrix, row, col)</code> returns a <strong>new</strong> matrix with one cell one higher. It's <code>takeSeat</code> from JS Lab 1 §10 — a <code>map</code> with a ternary — applied at two levels: the outer <code>map</code> picks the row, and only the row that changes gets an inner <code>map</code>.</p>
+  <div class="cmd">matrix.<span class="at">map</span>((values, r) =&gt;
+  r === row ? <span class="cm">/* a new array: values, with one number changed */</span> : values
+)</div>
+  <figure class="board">
+    <svg viewBox="0 0 780 214" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="incrementAt(matrix, 1, 0): the new matrix is a new outer array. Its row 1 is a new array [5, 5, 6]. Its rows 0 and 2 are the very same arrays as in the old matrix.">
+      <text x="0" y="16" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">incrementAt(matrix, 1, 0) — ONLY THE PATH TO THE CHANGE IS NEW</text>
+      <rect x="20" y="40" width="110" height="156" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="75" y="60" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="#0B5D51">matrix</text>
+      <rect x="35" y="72" width="80" height="28" fill="#E4EEEB" stroke="#0B5D51" stroke-width="1.5"/>
+      <text x="75" y="91" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0F1A18">[0]</text>
+      <rect x="35" y="112" width="80" height="28" fill="#E4EEEB" stroke="#0B5D51" stroke-width="1.5"/>
+      <text x="75" y="131" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0F1A18">[1]</text>
+      <rect x="35" y="152" width="80" height="28" fill="#E4EEEB" stroke="#0B5D51" stroke-width="1.5"/>
+      <text x="75" y="171" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0F1A18">[2]</text>
+      <rect x="650" y="40" width="110" height="156" fill="#F7E9B8" stroke="#8A6D08" stroke-width="2"/>
+      <text x="705" y="60" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="#0F1A18">next (new)</text>
+      <rect x="665" y="72" width="80" height="28" fill="#FFFFFF" stroke="#8A6D08" stroke-width="1.5"/>
+      <text x="705" y="91" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0F1A18">[0]</text>
+      <rect x="665" y="112" width="80" height="28" fill="#FFFFFF" stroke="#8A6D08" stroke-width="1.5"/>
+      <text x="705" y="131" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0F1A18">[1]</text>
+      <rect x="665" y="152" width="80" height="28" fill="#FFFFFF" stroke="#8A6D08" stroke-width="1.5"/>
+      <text x="705" y="171" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0F1A18">[2]</text>
+      <rect x="300" y="62" width="180" height="32" fill="#FFFFFF" stroke="#0B5D51" stroke-width="1.5"/>
+      <text x="390" y="83" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#0F1A18">[1, 2, 3]</text>
+      <text x="390" y="54" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="#5A6B67">shared — the same array in both</text>
+      <rect x="300" y="152" width="180" height="32" fill="#FFFFFF" stroke="#0B5D51" stroke-width="1.5"/>
+      <text x="390" y="173" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#0F1A18">[7, 8, 9]</text>
+      <text x="390" y="202" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="#5A6B67">shared — the same array in both</text>
+      <rect x="180" y="106" width="150" height="32" fill="#FFFFFF" stroke="#0B5D51" stroke-width="1.5"/>
+      <text x="255" y="127" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#0F1A18">[4, 5, 6]</text>
+      <text x="255" y="150" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="#5A6B67">old row 1</text>
+      <rect x="450" y="106" width="150" height="32" fill="#F7E9B8" stroke="#8A6D08" stroke-width="1.5"/>
+      <text x="525" y="127" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#0F1A18">[5, 5, 6]</text>
+      <text x="525" y="150" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="#8A6D08">new row 1</text>
+      <line x1="115" y1="86" x2="300" y2="78" stroke="#0B5D51" stroke-width="2"/>
+      <line x1="115" y1="126" x2="180" y2="122" stroke="#0B5D51" stroke-width="2"/>
+      <line x1="115" y1="166" x2="300" y2="168" stroke="#0B5D51" stroke-width="2"/>
+      <line x1="665" y1="86" x2="480" y2="78" stroke="#8A6D08" stroke-width="2"/>
+      <line x1="665" y1="126" x2="600" y2="122" stroke="#8A6D08" stroke-width="2"/>
+      <line x1="665" y1="166" x2="480" y2="168" stroke="#8A6D08" stroke-width="2"/>
+    </svg>
+    <figcaption>next !== matrix and next[1] !== matrix[1], but next[0] === matrix[0] and next[2] === matrix[2]. The tests check all four.</figcaption>
+  </figure>
+  <p>You'll often see it written as <code>prev.map((row, i) =&gt; row.map((val, j) =&gt; …))</code>. That works on screen, but it copies every row, including the ones that didn't change. The test wants the rule you've followed since JS Lab 1: <strong>untouched things stay the same objects</strong>. It's what lets a cheap <code>===</code> answer "did this change?" — for your reference checks in JS Lab 2 §08, and for React.</p>
+
+  <h3>Why the setter gets a function</h3>
+  <p><code>setMatrix((prev) =&gt; incrementAt(prev, row, col))</code> hands React an <strong>updater</strong>: "whatever the matrix is when you get to this, here's how to make the next one". That's <code>applyUpdate</code> from <a href="js-react.html#s5">JS Lab 1 · §05</a>. <code>setMatrix(incrementAt(matrix, row, col))</code> also works for a single click, but it uses this render's <code>matrix</code>; two updates before the next render would both start from the same old value, and one would be lost. The updater never is.</p>
+
+  <div class="cue watch"><p class="cue-k">Why not matrix[row][col] += 1?</p><p>Because then you hand React the <strong>same</strong> array it already has. React compares old and new with <code>Object.is</code> — the check you wrote in JS Lab 1 §15's stretch — sees the same object, and concludes nothing changed: no re-render, nothing on screen moves. The data is changed and the page doesn't know. Section 10 has you do it on purpose and watch.</p></div>
+
+  <div class="dothis">
+    <h4>Do this now — three files</h4>
+    <ol>
+      <li><code>incrementAt</code> in <code>src/matrix.js</code>. The tests freeze the matrix: <em>Cannot assign to read only property</em> means you changed it.</li>
+      <li>In <code>Matrix.jsx</code>, give each Cell <code>onClick={() =&gt; onIncrement(r, c)}</code>.</li>
+      <li>In <code>App.jsx</code>, write <code>increment(row, col)</code> and pass it as <code>onIncrement</code>.</li>
+    </ol>
+    <p>Click a cell in the browser: its number goes up, and only its number.</p>
+  </div>
+  <div class="cmd"><span class="p">$</span> npx vitest run test/s08.test.jsx</div>
+  <p>The last test clicks a cell and checks it's still <strong>the same button</strong>, with the keyboard focus still on it. If that one fails while the others pass, look at your keys (section 06).</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>You click the cell at row 2, column 3. Name every function that runs, in order, until the state changes.</div>
+    <details><summary>Show answer</summary><div class="a"><p>React calls the button's <code>onClick</code> — the arrow Matrix made for that cell, <code>() =&gt; onIncrement(1, 2)</code>. That calls <code>onIncrement</code>, which is App's <code>increment</code>, with <code>(1, 2)</code>. That calls <code>setMatrix</code> with an updater; React runs the updater, which calls <code>incrementAt(prev, 1, 2)</code>. The new matrix is the new state.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>A click gives <em>TypeError: onIncrement is not a function</em>. What's missing?</div>
+    <details><summary>Show answer</summary><div class="a"><p>App renders <code>&lt;Matrix matrix={matrix} /&gt;</code> without <code>onIncrement={increment}</code> — or with a different name, like <code>onClick=</code>. A prop that isn't passed is <code>undefined</code> inside the child, and calling <code>undefined</code> throws.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 complete — s08 tests pass, clicking adds one</span></label>
+</section>
+
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>Derived values — the stats, and why the state lives in App</h2><span class="lvl core">Core</span><span class="tagline">src/matrix.js · Stats.jsx · App.jsx</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>Anything you can work out from the state is <strong>derived</strong>, and derived data is computed on every render, never stored. Store the total too, and every change has to update both — and the first one that forgets makes the screen lie.</p></div>
+  <p class="refs">Full version → <a href="js-app.html#s6">JS Lab 2 · §06 Views — derived data is computed, never stored</a> · <a href="js-react.html#s11">JS Lab 1 · §11 reduce</a></p>
+
+  <h3>stats(matrix)</h3>
+  <p>One pure function, four numbers:</p>
+  <div class="cmd"><span class="at">stats</span>([[<span class="st">1</span>, <span class="st">0</span>], [<span class="st">3</span>, <span class="st">4</span>]])
+<span class="o">// { sum: 8, average: 2, max: 4, nonZero: 3 }</span></div>
+  <p>Make the rows one list first: <code>[[1, 0], [3, 4]].flat()</code> is <code>[1, 0, 3, 4]</code>. Then it's JS Lab 1 §11: a <code>reduce</code> for the sum, <code>Math.max(...values)</code> for the biggest, a <code>filter</code> and a <code>length</code> for the non-zero count. The average is the sum divided by the number of <em>cells</em>, zeros included.</p>
+  <div class="cue watch"><p class="cue-k">The empty matrix</p><p>For <code>[]</code>, <code>Math.max()</code> of nothing is <code>-Infinity</code>, and <code>0 / 0</code> is <code>NaN</code>. Neither should ever reach the screen. The test wants all four to be 0 — check for an empty list first.</p></div>
+
+  <h3>The Stats component computes; it doesn't store</h3>
+  <div class="cmd"><span class="tg">export</span> <span class="tg">default</span> <span class="tg">function</span> <span class="at">Stats</span>({ matrix }) {
+  <span class="tg">const</span> { sum, average, max, nonZero } = <span class="at">stats</span>(matrix);   <span class="cm">// every render, from the props</span>
+  <span class="tg">return</span> (
+    &lt;section className=<span class="st">"stats"</span>&gt;
+      &lt;h2&gt;Stats&lt;/h2&gt;
+      &lt;dl&gt;
+        &lt;dt&gt;Sum&lt;/dt&gt;
+        &lt;dd&gt;{sum}&lt;/dd&gt;
+        {<span class="cm">/* Average (2 decimals: average.toFixed(2)), Max, Non-zero */</span>}
+      &lt;/dl&gt;
+    &lt;/section&gt;
+  );
+}</div>
+  <p>No <code>useState</code> anywhere in it. The numbers are worked out from the matrix every time Stats renders — for nine numbers that takes microseconds. A <code>&lt;dl&gt;</code> is a description list: pairs of a term (<code>&lt;dt&gt;</code>) and its value (<code>&lt;dd&gt;</code>), which a screen reader announces as pairs.</p>
+  <div class="cue watch"><p class="cue-k">const [sum, setSum] = useState(45)</p><p>Don't. Now there are two copies of the truth — the matrix, and a sum that is supposed to match it — and <code>increment</code> must remember to update both. Every new feature (a Reset, a decrement) must remember too. It's stage 2 of <a href="js-react.html#s15">JS Lab 1 · §15</a> again: the same value in two places, kept in step by hand. Only the matrix is state; everything about it is computed.</p></div>
+
+  <h3>Now you can see why the state is in App</h3>
+  <p><code>Stats</code> is a <strong>sibling</strong> of <code>Matrix</code> — both are children of App. Both need the numbers. Props only go down, from a parent to its children, so the numbers have to live in a component above both of them: App. If the numbers lived in the Cells, Stats couldn't reach them; if they lived in Matrix, Stats still couldn't. That's <strong>lifting state up</strong>: put state in the closest common parent of everything that needs it, and pass it down.</p>
+  <p>So App renders the two side by side, with the same <code>matrix</code>:</p>
+  <div class="cmd">&lt;div className=<span class="st">"board"</span>&gt;
+  &lt;Matrix matrix={matrix} onIncrement={increment} /&gt;
+  &lt;Stats matrix={matrix} /&gt;
+&lt;/div&gt;</div>
+
+  <div class="dothis">
+    <h4>Do this now — three files again</h4>
+    <ol>
+      <li><code>stats</code> in <code>src/matrix.js</code>.</li>
+      <li><code>Stats.jsx</code>: the heading and the four pairs. Average with 2 decimals: <code>(5).toFixed(2)</code> is <code>"5.00"</code>.</li>
+      <li>In <code>App.jsx</code>, wrap Matrix in the <code>board</code> div and render Stats <strong>next to</strong> it — not inside the table.</li>
+    </ol>
+    <p>Click a cell. The cell and the stats change together.</p>
+  </div>
+  <div class="cmd"><span class="p">$</span> npx vitest run test/s09.test.jsx</div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>The header should also say "Sum: 45". What do you pass to Header, and where is the sum computed?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Pass the matrix (<code>&lt;Header matrix={matrix} /&gt;</code>) and compute <code>stats(matrix).sum</code> inside Header — or compute it in App and pass <code>sum={…}</code>. Either way it's computed during render from the one state. What you never do is give Header, or App, a second piece of state holding the sum.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Your teammate moves <code>useState(START)</code> into Matrix. What still works, and what breaks?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The grid still increments — Matrix owns the numbers and can change them. But Stats, a sibling, can't get them: there's no way to pass props sideways or up. The stats would be stuck. The fix is to lift the state back up to App.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 09 complete — s09 tests pass, the stats follow the clicks</span></label>
+</section>
+
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>The re-render payoff</h2><span class="lvl core">Core</span><span class="tagline">no new code — watch it work</span></div>
+
+  <p>Click one cell. Two places on the page change: the cell, and the stats panel. Now look at what you <em>didn't</em> write. No <code>querySelector</code>. No <code>textContent</code>. No <code>render()</code> function, no regions, no "which ones changed?" checks. Your click handler says what the new state is, and that's all it says. In JS Lab 2 you did this DOM work by hand; React does it now. This is the moment the whole manual-first arc was for.</p>
+
+  <div class="dothis">
+    <h4>Do this now — count the renders</h4>
+    <ol>
+      <li>Add a <code>console.log</code> as the first line of each component: <code>console.log("App render")</code>, <code>console.log("Matrix render")</code>, <code>console.log("Stats render")</code>, and in Cell <code>console.log("Cell render", row, col)</code>.</li>
+      <li>Reload. Every line appears twice — that's StrictMode (section 03).</li>
+      <li><strong>Before you click</strong>, write down which lines you expect after one click on one cell. Then clear the console and click.</li>
+    </ol>
+  </div>
+  <p>You get App, Matrix, all nine Cells and Stats — each twice. Not just the cell you clicked. When <code>setMatrix</code> changes App's state, React calls <code>App()</code> again, and then every component App renders, all the way down. <strong>Re-rendering means calling your component functions again</strong>, and it's cheap: they're small functions that return descriptions.</p>
+
+  <div class="dothis">
+    <h4>Do this now — watch the DOM</h4>
+    <p>Open DevTools → <strong>Elements</strong> and expand the table until you see the buttons. Click a cell. The browser briefly highlights whatever changed in the page: that one button's text and its <code>aria-label</code>, and the numbers in the stats. Nothing else. Thirteen component functions ran — Header too, though it has no console.log — and a handful of tiny things in the DOM changed.</p>
+  </div>
+  <p>Between the two is <strong>reconciliation</strong>: React compares the description your components returned this time with the one from last time, element by element, and changes only the real DOM nodes that differ. The button you clicked is the same element as before — the s08 test checked that it kept the keyboard focus. The keys from section 06 are how it lines up the old and new lists.</p>
+
+  <table class="grid long-key">
+    <tr><th>By hand (JS Lab 2 §07–08)</th><th>React</th></tr>
+    <tr><td>render() called five region functions</td><td>React calls your components — App and everything below it.</td></tr>
+    <tr><td>You kept previous and skipped regions with !==</td><td>React compares old and new output for you, per element.</td></tr>
+    <tr><td>Rebuilding a region threw its elements away, and focus with them</td><td>An element whose type and key didn't change is kept and updated in place.</td></tr>
+    <tr><td>A region's elements found by id in data- attributes</td><td>A list's elements matched by <code>key</code>.</td></tr>
+    <tr><td>!== was enough because nothing was changed in place</td><td>Exactly the same rule — React's check is <code>Object.is</code>.</td></tr>
+  </table>
+
+  <h3>Break it on purpose</h3>
+  <div class="dothis">
+    <h4>Do this now — mutate, and watch nothing happen</h4>
+    <ol>
+      <li>Change <code>increment</code> to change the matrix in place: <code>setMatrix((prev) =&gt; { prev[row][col] += 1; return prev; });</code></li>
+      <li>Click a cell three times. Nothing changes on screen. No error, either.</li>
+      <li>Now put the correct line back and save. Vite updates the page, keeping the state, and React redraws it — and the cell <strong>jumps</strong>, by three.</li>
+    </ol>
+  </div>
+  <p>What happened: each click changed the array, then handed React the <strong>same</strong> array. <code>Object.is(prev, next)</code> said "same object", so React skipped the re-render — the data changed and the screen didn't know. That's the most common React bug there is, and you met it in JS Lab 2 §08's warning box, by hand. The jump is the proof: all three changes were in the array; none was ever drawn, until something else made React redraw. Run <code>npm test</code> while it's broken, too: s08 and s09 fail.</p>
+
+  <div class="cue calm"><p class="cue-k">"Not yet": skipping re-renders</p><p>You may read about <code>React.memo</code>, <code>useMemo</code> and <code>useCallback</code>, which let React skip calling some components. They're on the "not yet" list for every lab in this course: they solve a speed problem this app doesn't have, and they only work if your updates are already immutable. Get that right first.</p></div>
+
+  <p>Remove the <code>console.log</code>s when you're done — or keep them for section 13.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Header has no props and no state. Does it re-render when you click a cell?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Yes — it's a child of App, and App re-rendered. But its output is identical to last time, so reconciliation changes nothing in the DOM. Calling the function cost almost nothing.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 complete — I counted the renders, watched the DOM, and broke it on purpose</span></label>
+</section>
+
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>Same app, data from the server</h2><span class="lvl core">Core</span><span class="tagline">src/App.jsx — useEffect + fetch</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p><code>fetch(url)</code> returns a promise of a <strong>Response</strong>; the body is a second promise, <code>res.json()</code>. And <code>fetch</code> only rejects when there's no response at all — a 404 still resolves, so real code checks <code>res.ok</code>.</p></div>
+  <p class="refs">Full version → <a href="js-app.html#s4">JS Lab 2 · §04 fetch, URLs and failures</a> · <a href="js-app.html#s3">§03 Promises</a></p>
+
+  <p>The last step: the numbers stop being written in your code and come from a server instead. Same app — only where the data comes from changes. And because the data already lives in exactly one place, App, the change touches exactly one place. Matrix, Cell and Stats don't change at all.</p>
+
+  <h3>The "server"</h3>
+  <p>Vite serves anything in the <code>public/</code> folder as it is. Open <a href="http://localhost:5173/matrix.json" target="_blank" rel="noopener">localhost:5173/matrix.json</a>: it's a 4×4, as JSON. A real server would compute that answer; for this lab a file is enough, and later labs fetch from a real API.</p>
+
+  <h3>Where can the fetch go?</h3>
+  <p>Not in the body of App. App runs on every render; a fetch there would start a request on every render, its answer would call <code>setMatrix</code>, which renders again, which fetches again — forever. And not in an event handler: there is no event. You want it to happen once, when App first appears on the screen. That's what an <strong>effect</strong> is for: code React runs <em>after</em> it has put a render on the screen.</p>
+  <div class="cmd"><span class="tg">import</span> { useEffect, useState } <span class="tg">from</span> <span class="st">"react"</span>;
+
+<span class="tg">export</span> <span class="tg">default</span> <span class="tg">function</span> <span class="at">App</span>() {
+  <span class="tg">const</span> [matrix, setMatrix] = <span class="at">useState</span>(START);
+
+  <span class="at">useEffect</span>(() =&gt; {
+    <span class="at">fetch</span>(<span class="st">"/matrix.json"</span>)
+      .<span class="at">then</span>((res) =&gt; res.<span class="at">json</span>())
+      .<span class="at">then</span>((data) =&gt; <span class="at">setMatrix</span>(data));
+  }, []);
+
+  <span class="cm">// … increment, and the return, unchanged</span>
+}</div>
+  <p>The <code>[]</code> at the end is the <strong>dependency array</strong>. Empty means: run this once, after the first render, and never again. Leave it out and the effect runs after <em>every</em> render — and since this one sets state, that's the forever-loop again, visible as a Network tab filling up with <code>matrix.json</code>. React Lab 2 explains the dependency array properly, with values in it, and what an effect's clean-up is for; here, <code>[]</code> is all you need.</p>
+
+  <h3>What the user sees, in order</h3>
+  <div class="cmd"><span class="cm">// render 1      the 3×3 from START is on screen</span>
+<span class="cm">// effect        fetch("/matrix.json") starts — React doesn't wait for it</span>
+<span class="cm">// (a moment)    the answer arrives → setMatrix(data)</span>
+<span class="cm">// render 2      the 4×4 is on screen; the stats follow</span></div>
+  <p>So for a moment you see the old 3×3. That moment is where a real app shows "Loading…", and where it would show an error if the request failed. You're skipping both on purpose: they're React Lab 2's job. Notice too that Matrix drew a 4×4 without a single change — because it <code>map</code>s over whatever it's given, and the s06 tests made sure nothing assumed 3.</p>
+
+  <div class="cue watch"><p class="cue-k">useEffect(async () =&gt; …) doesn't work</p><p>An <code>async</code> function always returns a promise, and React expects an effect to return nothing (or a clean-up function). It warns: <em>useEffect must not return anything besides a function, which is used for clean-up.</em> Use <code>.then</code> as above, or write an async function <em>inside</em> the effect and call it:</p></div>
+  <div class="cmd"><span class="at">useEffect</span>(() =&gt; {
+  <span class="tg">async</span> <span class="tg">function</span> <span class="at">load</span>() {
+    <span class="tg">const</span> res = <span class="tg">await</span> <span class="at">fetch</span>(<span class="st">"/matrix.json"</span>);
+    <span class="at">setMatrix</span>(<span class="tg">await</span> res.<span class="at">json</span>());
+  }
+  <span class="at">load</span>();
+}, []);</div>
+
+  <div class="dothis">
+    <h4>Do this now — src/App.jsx, the last step</h4>
+    <ol>
+      <li>Add the effect. The browser shows the 4×4, and the stats change to match it.</li>
+      <li>Open DevTools → <strong>Network</strong>, reload, and find <code>matrix.json</code>. It's there <strong>twice</strong>: StrictMode runs effects twice on start-up, in development only. Harmless here; React Lab 2 shows why it does it.</li>
+      <li>Click a few cells — the loaded numbers go up, and the stats follow. Same state, same code.</li>
+      <li>Change the URL to <code>/matrx.json</code> and look at the console: <em>Unexpected token '&lt;', "&lt;!doctype "… is not valid JSON</em>. Vite answered the missing file with its <code>index.html</code>, and <code>res.json()</code> choked on the HTML — JS Lab 2 §04's Q2, live. Change it back.</li>
+    </ol>
+  </div>
+  <div class="cmd"><span class="p">$</span> npx vitest run test/s11.test.jsx
+<span class="p">$</span> npm test
+<span class="o"> Test Files  7 passed (7)</span>
+<span class="o">      Tests  36 passed (36)</span></div>
+  <p>The tests don't use a real server: they replace <code>fetch</code> with a fake that answers at once (see <code>test/setup.js</code> and <code>test/s11.test.jsx</code>). One test clicks after the data arrived and checks <code>fetch</code> was called exactly once — that's the <code>[]</code>.</p>
+
+  <div class="cue react"><p class="cue-k">By hand (JS Lab 2) → React</p><p>In JS Lab 2 you called <code>load()</code> yourself — once at start-up, and again after every filter change (<a href="js-app.html#s7">§07</a>). An effect is React's way of saying "run this after rendering, when these values have changed": with <code>[]</code>, only after the first render. JS Lab 2 §11 listed it as <code>useEffect(() =&gt; { … }, [department, query])</code>; React Lab 2 builds effects like that one.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Why didn't Matrix, Cell or Stats need any change for the data to come from a server?</div>
+    <details><summary>Show answer</summary><div class="a"><p>They never knew where the numbers came from: they receive them as props from App. The data lived in one place, so swapping its source touched one place. That's lifted state paying off a second time.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>You delete the <code>, []</code>. What happens, and where do you see it?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The effect runs after every render. Each answer calls <code>setMatrix</code> with a new array (JSON parsing always makes a new one), which renders, which runs the effect, which fetches again. The Network tab fills with <code>matrix.json</code> requests, and any click is overwritten by the next answer. The s11 test fails with "fetch ran again after a click".</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 complete — npm test fully green, the 4×4 loads from matrix.json</span></label>
+</section>
+
+<div class="part">Part 4 · Further, and the lab</div>
+
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>Step, Reset, and the biggest number</h2><span class="lvl stretch">Stretch</span><span class="tagline">npm run test:stretch</span></div>
+
+  <p>Three small additions. Each one is the same idea again — state in App, passed down, computed where possible — so they're good practice. The tests are in <code>test/stretch/</code>.</p>
+
+  <div class="stretch-box">
+    <h3>A step input</h3>
+    <p>A number input labelled <strong>Step</strong>, starting at 1: a click adds the step instead of one. The step is a second piece of state in App, and <code>incrementAt</code> gets a fourth parameter, <code>step = 1</code> (a default, so the core tests still pass).</p>
+    <div class="cmd"><span class="tg">const</span> [step, setStep] = <span class="at">useState</span>(<span class="st">1</span>);
+
+&lt;label&gt;
+  Step{<span class="st">" "</span>}
+  &lt;input type=<span class="st">"number"</span> min=<span class="st">"1"</span> value={step}
+         onChange={(event) =&gt; <span class="at">setStep</span>(<span class="tg">Number</span>(event.target.value))} /&gt;
+&lt;/label&gt;</div>
+    <p>This is a <strong>controlled input</strong>: React owns its value. The input shows <code>step</code>; typing fires <code>onChange</code>; you set the state; React draws the new value. Leave out <code>onChange</code> and you can't type in it at all — React warns that you gave a <code>value</code> with no way to change it. Input values are strings, so <code>Number(…)</code> (JS Lab 1 §13), and <code>{" "}</code> is a space — JSX drops line breaks between tags. Forms are React Lab 2's subject; this is only a first taste. Notice <code>increment</code> just uses <code>step</code> — the closure from the current render.</p>
+  </div>
+
+  <div class="stretch-box">
+    <h3>Reset</h3>
+    <p>A <strong>Reset</strong> button, outside the matrix, that sets every cell to 0. Write <code>zeros(matrix)</code> in <code>matrix.js</code> (same shape, all zeros — one line with two <code>map</code>s) and call <code>setMatrix((prev) =&gt; zeros(prev))</code>. Notice what made this easy: a component that is neither Matrix nor Stats changes the same numbers. Two different places, one state — only possible because it's lifted.</p>
+  </div>
+
+  <div class="stretch-box">
+    <h3>Highlight the biggest number</h3>
+    <p>Every cell holding the maximum gets <code>className="cell max"</code> (the CSS is there). Give Cell an <code>isMax</code> prop and pick the class with a ternary. In Matrix, work out the maximum from its <code>matrix</code> prop — <code>stats(matrix).max</code> — and pass <code>isMax={max &gt; 0 &amp;&amp; value === max}</code>. Derived again, during render: no new state. When everything is 0, nothing is highlighted.</p>
+  </div>
+
+  <div class="cmd"><span class="p">$</span> npm run test:stretch
+<span class="o"> Test Files  1 passed (1)</span>
+<span class="o">      Tests  8 passed (8)</span></div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 12 complete — stretch tests pass (stretch)</span></label>
+</section>
+
+<section id="s13">
+  <div class="shead"><span class="chip">13</span><h2>Predict the render</h2><span class="lvl stretch">Stretch</span><span class="tagline">write it down, then check with console.log</span></div>
+
+  <p>For each one, write your prediction first. Then check it with the <code>console.log</code>s from section 10, and only then open the answer.</p>
+
+  <div class="quiz">
+    <div class="q"><b>P1</b>You open the app in development. Before <code>matrix.json</code> arrives, how many times does <code>"App render"</code> print? And in a production build (<code>npm run build</code>, then <code>npm run preview</code>)?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Twice in development — StrictMode calls every component function twice. Once in production. Then more lines when the data arrives: in development the effect also ran twice, so two answers come back, and each can cause a render.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P2</b>You click one cell. Which component functions run? Which DOM nodes change?</div>
+    <details><summary>Show answer</summary><div class="a"><p>App, Header, Matrix, every Cell and Stats — everything below the state that changed. In the DOM: the clicked button's text and <code>aria-label</code>, and the stats values that changed. Functions are cheap; the DOM is what React protects.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P3</b>A button calls <code>setMatrix((prev) =&gt; prev)</code>. What re-renders?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Nothing that matters. The updater returns the same object, <code>Object.is</code> says "no change", and React bails out. (It may call <code>App</code> once more to be sure, but nothing below it runs and the screen doesn't change.) It's how JS Lab 1 §10's "return the same thing when nothing changes" saves work.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P4</b>One click handler runs <code>setMatrix(incrementAt(matrix, 0, 0))</code> twice in a row. By how much does the cell go up, and how many times does App render?</div>
+    <details><summary>Show answer</summary><div class="a"><p>By one. Both calls use this render's <code>matrix</code>, so both compute the same "plus one" — <code>applyAll</code> with values, JS Lab 1 §05. With updaters, <code>setMatrix((prev) =&gt; incrementAt(prev, 0, 0))</code> twice, it goes up by two. Either way App renders <strong>once</strong>: React batches the updates from one event into one render.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P5</b>(If you did the step input.) You type a new step. Does Stats re-render? Does anything in the stats panel change?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Stats re-renders — App's state changed, so everything below App runs again, even though the matrix didn't change. Nothing in the panel changes in the DOM: the numbers are the same, so reconciliation has nothing to do.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P6</b>Inside Cell, right after a click, does <code>console.log("Cell render", row, col, value)</code> show the old value or the new one?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The new one. The re-render is a new call of <code>Cell</code> with new props; the old call, with the old value, is finished. Every render sees its own values.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 13 complete — predicted, then checked (stretch)</span></label>
+</section>
+
+<section id="s14">
+  <div class="shead"><span class="chip">14</span><h2>In the lab</h2><span class="lvl core">Core</span><span class="tagline">doubts first, then deeper</span></div>
+
+  <p>The lab assumes you've finished the core sections. It answers your questions, then goes one level deeper.</p>
+  <ol>
+    <li>We scroll through the <strong>core</strong> sections together at the projector — stop me anywhere with a question (raise a hand). Questions on stretch parts are welcome too.</li>
+    <li><strong>Where state lives, in depth.</strong> The tree on the board: what each component owns and receives, what breaks when state is in the wrong place, and how you decide where a new piece of state goes.</li>
+    <li><strong>Rendering, in depth.</strong> Reconciliation and keys live — what <code>key={value}</code> does to focus — and StrictMode catching an impure updater.</li>
+    <li><strong>In-lab task, AI closed:</strong> right-click a cell to take one off it, never below 0. It sends a second event up through all three components, with its own immutable update. The task is described at the top of <code>inlab/decrement.check.jsx</code>; check it with <code>npm run inlab</code>. (Its last test, marked <em>stretch</em>, is extra.)</li>
+    <li>What React Lab 2 builds on this: forms, your own hooks, loading and error states, and effects properly — with AI.</li>
+  </ol>
+  <div class="cue work"><p class="cue-k">Bring</p><p>Your laptop with <code>esd-labs/react-lab1</code>, <code>npm install</code> already done at home (the lab network is slow with everyone installing at once), as far through the core as you got, and your questions.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 14 read</span></label>
+</section>
+
+<section id="s15">
+  <div class="shead"><span class="chip">15</span><h2>When it goes wrong</h2><span class="lvl ref">Reference</span><span class="tagline">the error, and what it means</span></div>
+
+  <table class="grid long-key">
+    <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>'vite' is not recognized / vite: command not found</td><td>You haven't run <code>npm install</code> in this folder (01).</td></tr>
+    <tr><td>npm error Missing script: "dev" / Could not read package.json</td><td>You're in the wrong folder. <code>cd react-lab1</code> first.</td></tr>
+    <tr><td>Vite requires Node.js version 20.19+ or 22.12+</td><td>Your Node is too old. Install the current LTS from nodejs.org.</td></tr>
+    <tr><td>Error: Port 5173 is already in use</td><td>Another <code>npm run dev</code> is still running. Stop it with <kbd>Ctrl</kbd>+<kbd>C</kbd> (03).</td></tr>
+    <tr><td>npm : running scripts is disabled on this system</td><td>PowerShell's execution policy: <a href="js-react.html#s1">JS Lab 1 · §01</a>. Use Command Prompt.</td></tr>
+    <tr><td>Blank page; Error: TODO in the console</td><td>A component you haven't written yet is being rendered. Write it, or don't render it yet.</td></tr>
+    <tr><td>Adjacent JSX elements must be wrapped in an enclosing tag (in npm test: Unterminated regular expression)</td><td>A component returns two elements side by side. Wrap them in a fragment <code>&lt;&gt;…&lt;/&gt;</code> (04).</td></tr>
+    <tr><td>Invalid DOM property `class`. Did you mean `className`?</td><td><code>className</code> in JSX (04).</td></tr>
+    <tr><td>Objects are not valid as a React child (found: object with keys {sum, average, max, nonZero})</td><td>You put an object in braces, like <code>{stats(matrix)}</code>. Show its fields (04, 09).</td></tr>
+    <tr><td>The tag &lt;cell&gt; is unrecognized in this browser</td><td>Component names start with a capital: <code>&lt;Cell /&gt;</code> (05).</td></tr>
+    <tr><td>Element type is invalid: expected a string … but got: undefined</td><td>An import doesn't match its export: <code>import Cell from</code> needs <code>export default</code> in Cell.jsx, or the path is wrong.</td></tr>
+    <tr><td>useState is not defined / useEffect is not defined</td><td>Missing <code>import { useState, useEffect } from "react";</code>.</td></tr>
+    <tr><td>Each child in a list should have a unique "key" prop</td><td>The element returned from a <code>map</code> has no key — on the <code>&lt;tr&gt;</code> and the <code>&lt;td&gt;</code>, not inside (06).</td></tr>
+    <tr><td>In HTML, &lt;tr&gt; cannot be a child of &lt;table&gt;</td><td>Add the <code>&lt;tbody&gt;</code> (06).</td></tr>
+    <tr><td>Cannot read properties of undefined (reading 'map')</td><td>A prop wasn't passed: <code>&lt;Matrix /&gt;</code> without <code>matrix={…}</code>, or a name mismatch.</td></tr>
+    <tr><td>TypeError: onIncrement is not a function</td><td>App didn't pass <code>onIncrement={increment}</code> to Matrix, or passed it under another name (08).</td></tr>
+    <tr><td>Numbers count up by themselves; console full of "Cannot update a component (`App`) while rendering a different component (`Cell`)"</td><td><code>onClick={onClick()}</code> — the handler is called during the render. Pass the function (05).</td></tr>
+    <tr><td>Too many re-renders. React limits the number of renders to prevent an infinite loop.</td><td>A setter is called during the render of its own component — <code>onClick={setMatrix(…)}</code> or <code>onIncrement={increment()}</code>. Wrap it in an arrow (05).</td></tr>
+    <tr><td>npm test starts but never finishes</td><td>Usually the same render loop, inside a test. <kbd>Ctrl</kbd>+<kbd>C</kbd>, then run the files one by one: <code>npx vitest run test/s05.test.jsx</code> names the bug.</td></tr>
+    <tr><td>Invalid hook call. Hooks can only be called inside of the body of a function component.</td><td><code>useState</code> or <code>useEffect</code> called in a handler, a loop, an <code>if</code>, or outside a component. Top level only (07).</td></tr>
+    <tr><td>The data changes but the screen doesn't</td><td>State was changed in place, so React got the same object back and skipped the render. Return a new matrix (08, 10).</td></tr>
+    <tr><td>Cannot assign to read only property '0' of object '[object Array]'</td><td>In a test: your function changed the frozen matrix it was given (08).</td></tr>
+    <tr><td>expected the same / a new array (rows you didn't touch)</td><td><code>incrementAt</code> copies every row, or none. Only the changed row is new (08).</td></tr>
+    <tr><td>Average shows NaN, Max shows -Infinity</td><td><code>stats</code> of an empty matrix. Return zeros for <code>[]</code> first (09).</td></tr>
+    <tr><td>useEffect must not return anything besides a function</td><td><code>useEffect(async () =&gt; …)</code>. Use <code>.then</code>, or an async function inside the effect (11).</td></tr>
+    <tr><td>matrix.json requested over and over in the Network tab</td><td>The effect has no <code>[]</code>, so it runs after every render (11).</td></tr>
+    <tr><td>matrix.json requested twice</td><td>StrictMode, in development. Expected (11).</td></tr>
+    <tr><td>Unexpected token '&lt;', "&lt;!doctype "… is not valid JSON</td><td>The URL is wrong: Vite answered with <code>index.html</code>. Check the path — <code>/matrix.json</code> (11).</td></tr>
+    <tr><td>Unable to find an accessible element with the role "button" and name "…"</td><td>In a test: your <code>aria-label</code> isn't exactly what's asked — often counting from 0. Read the HTML the test printed (01, 05).</td></tr>
+    <tr><td>expected [ Array(1) ] to deeply equal [] (first test in s06)</td><td>React printed a warning while rendering Matrix; the received array shows which one (06).</td></tr>
+  </table>
+
+  <div class="cue"><p class="cue-k">How to debug a component</p><p>React's messages usually name the component: <em>Check the render method of `Matrix`</em>. Put <code>console.log(props)</code> — or the destructured names — as the first line of that component, and see what actually arrived. Nine times in ten a prop is missing, misspelled, or a string where you wanted a number. The <em>React Developer Tools</em> browser extension shows the component tree with every component's props and state; it's optional, and worth installing.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 15 read</span></label>
+</section>
+
+<section id="s16">
+  <div class="shead"><span class="chip">16</span><h2>Practice run, unaided</h2><span class="lvl stretch">Stretch</span><span class="tagline">no tests, no hints, no looking back</span></div>
+
+  <p>Write each of these from a blank file, without scrolling up. Try them in the app (render them in App for a moment). Then open the answer.</p>
+
+  <div class="quiz">
+    <div class="q"><b>P1</b>A <code>Counter</code> component with its own count, a <strong>−</strong> and a <strong>+</strong> button, and the count between them.</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd"><span class="tg">function</span> <span class="at">Counter</span>() {
+  <span class="tg">const</span> [count, setCount] = <span class="at">useState</span>(<span class="st">0</span>);
+  <span class="tg">return</span> (
+    &lt;p&gt;
+      &lt;button onClick={() =&gt; <span class="at">setCount</span>((c) =&gt; c - <span class="st">1</span>)}&gt;−&lt;/button&gt;
+      {count}
+      &lt;button onClick={() =&gt; <span class="at">setCount</span>((c) =&gt; c + <span class="st">1</span>)}&gt;+&lt;/button&gt;
+    &lt;/p&gt;
+  );
+}</div>
+      <p>Compare it with your JS Lab 1 §15 counter. No <code>render()</code>, no <code>getCount()</code>.</p>
+    </div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>P2</b><code>columnTotals(matrix)</code> → one total per column: <code>[[1, 2], [3, 4]]</code> → <code>[4, 6]</code>. Never changes its input.</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd"><span class="tg">const</span> columnTotals = (matrix) =&gt;
+  matrix.length === <span class="st">0</span> ? [] : matrix[<span class="st">0</span>].<span class="at">map</span>((_, c) =&gt; matrix.<span class="at">reduce</span>((sum, row) =&gt; sum + row[c], <span class="st">0</span>));</div>
+      <p>Map over the first row only to get the column indexes, then <code>reduce</code> down each column.</p>
+    </div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>P3</b>Two <code>LightSwitch</code> buttons that toggle on and off, and a line under them: <em>"1 of 2 lights on"</em>. Where does the state live? Write it.</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd"><span class="tg">function</span> <span class="at">LightSwitch</span>({ on, onToggle }) {
+  <span class="tg">return</span> &lt;button onClick={onToggle}&gt;{on ? <span class="st">"On"</span> : <span class="st">"Off"</span>}&lt;/button&gt;;
+}
+
+<span class="tg">function</span> <span class="at">Room</span>() {
+  <span class="tg">const</span> [lights, setLights] = <span class="at">useState</span>([<span class="tg">false</span>, <span class="tg">false</span>]);
+  <span class="tg">const</span> toggle = (i) =&gt; <span class="at">setLights</span>((prev) =&gt; prev.<span class="at">map</span>((on, j) =&gt; (j === i ? !on : on)));
+  <span class="tg">const</span> count = lights.<span class="at">filter</span>(<span class="tg">Boolean</span>).length;          <span class="cm">// derived</span>
+  <span class="tg">return</span> (
+    &lt;&gt;
+      {lights.<span class="at">map</span>((on, i) =&gt; &lt;LightSwitch key={i} on={on} onToggle={() =&gt; <span class="at">toggle</span>(i)} /&gt;)}
+      &lt;p&gt;{count} <span class="tg">of</span> {lights.length} lights on&lt;/p&gt;
+    &lt;/&gt;
+  );
+}</div>
+      <p>The line needs both switches' state, so the state lives in their parent — this lab's whole problem, in miniature.</p>
+    </div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>P4</b>Pull a <code>Row</code> component out of Matrix: it gets one row's numbers and its index, and returns the <code>&lt;tr&gt;</code>. Where does the key go now?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd"><span class="tg">function</span> <span class="at">Row</span>({ values, r, onIncrement }) {
+  <span class="tg">return</span> (
+    &lt;tr&gt;
+      {values.<span class="at">map</span>((value, c) =&gt; (
+        &lt;td key={c}&gt;
+          &lt;Cell row={r} col={c} value={value} onClick={() =&gt; <span class="at">onIncrement</span>(r, c)} /&gt;
+        &lt;/td&gt;
+      ))}
+    &lt;/tr&gt;
+  );
+}
+
+<span class="cm">// in Matrix:</span>
+{matrix.<span class="at">map</span>((values, r) =&gt; &lt;Row key={r} values={values} r={r} onIncrement={onIncrement} /&gt;)}</div>
+      <p>On <code>&lt;Row&gt;</code>, in Matrix — the element returned from <code>map</code>. And Row needs its own <code>r</code> prop: it can't read its key.</p>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 16 complete — all four, unaided (stretch)</span></label>
+</section>
+
+<section id="s17">
+  <div class="shead"><span class="chip">17</span><h2>Submitting the assignment</h2><span class="lvl core">Core</span><span class="tagline">before the deadline announced for this lab</span></div>
+
+  <div class="cue watch"><p class="cue-k">Complete means complete</p><p>This lab is graded. Submit <strong>once</strong>, before the deadline announced for this lab, and only when <code>npm test</code> is entirely green and the app works in the browser. Incomplete work is not accepted, and there is no partial credit for a partial submission. Stuck? Don't submit — ask in the lab, or ask a TA.</p></div>
+
+  <h3>1. Get npm test fully green</h3>
+  <div class="cmd"><span class="p">$</span> cd esd-labs/react-lab1
+<span class="p">$</span> npm test
+<span class="o"> Test Files  7 passed (7)</span>
+<span class="o">      Tests  36 passed (36)</span></div>
+  <p>Every test passed is the only acceptable result. When we grade, we <strong>put our own copy of the tests back in</strong> before running <code>npm test</code> — so editing or deleting a test can only cost you marks.</p>
+
+  <h3>2. Check the app</h3>
+  <p><code>npm run dev</code>, open <code>localhost:5173</code>: the 4×4 from <code>matrix.json</code> appears, a click adds one to that cell and to nothing else, the stats follow, and the console shows no red errors or warnings. Take your test <code>console.log</code>s out.</p>
+
+  <h3>3. Zip the react-lab1 folder — without node_modules</h3>
+  <p>Zip <code>react-lab1</code> itself, not the whole <code>esd-labs</code> folder, and leave out <code>node_modules</code> (and <code>dist</code>, if you ever ran a build). We run <code>npm install</code> ourselves, from your <code>package-lock.json</code>. From inside <code>esd-labs</code>:</p>
+  <div class="cmd"><span class="cm"># macOS / Linux</span>
+<span class="p">$</span> zip -r react-lab1.zip react-lab1 -x "react-lab1/node_modules/*" "react-lab1/dist/*"
+
+<span class="cm"># Windows (PowerShell) — delete react-lab1\node_modules (and react-lab1\dist) first</span>
+<span class="p">$</span> Compress-Archive -Path react-lab1 -DestinationPath react-lab1.zip</div>
+  <p>Open the zip once to check: the <code>react-lab1</code> folder with your <code>src/</code> inside, and no <code>node_modules</code>. It should be well under 1 MB; if it's tens of megabytes, <code>node_modules</code> got in. (After deleting it on Windows, run <code>npm install</code> again to keep working.)</p>
+
+  <h3>4. Submit the zip</h3>
+  <p>Upload <code>react-lab1.zip</code> on the submission platform before the deadline announced for this lab. Run <code>npm test</code> right before you zip, so what you submit is what you tested. Stretch work is never required; your zip carries it anyway.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Submitted — npm test green, app checked, react-lab1.zip uploaded</span></label>
+</section>
+
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+  <div class="gloss">
+    <div class="grow"><b>accessible name</b><span>What a screen reader announces for an element — and what Testing Library's <code>getByRole(…, { name })</code> matches. Set with <code>aria-label</code>, or taken from the text.</span></div>
+    <div class="grow"><b>component</b><span>A function, named with a capital letter, that takes props and returns JSX.</span></div>
+    <div class="grow"><b>composition</b><span>Building components out of other components: App → Matrix → Cell.</span></div>
+    <div class="grow"><b>controlled input</b><span>An input whose value comes from state, with an <code>onChange</code> that updates that state.</span></div>
+    <div class="grow"><b>derived value</b><span>Anything computed from state — the sum, the max. Computed during render, never stored.</span></div>
+    <div class="grow"><b>dependency array</b><span>The second argument of <code>useEffect</code>. <code>[]</code>: run once, after the first render. React Lab 2 goes further.</span></div>
+    <div class="grow"><b>dev server</b><span>A local server (Vite, at <code>localhost:5173</code>) that translates your files on request and updates the page as you save.</span></div>
+    <div class="grow"><b>effect</b><span>Code React runs after a render is on screen: <code>useEffect(() =&gt; { … }, [])</code>. For things that aren't rendering, like fetching.</span></div>
+    <div class="grow"><b>events up</b><span>A child reporting something by calling a function its parent passed down as a prop.</span></div>
+    <div class="grow"><b>fragment</b><span><code>&lt;&gt; … &lt;/&gt;</code>: groups elements so a component can return them together, without adding an element to the page.</span></div>
+    <div class="grow"><b>hook</b><span>A function starting with <code>use</code> that works only while a component renders, at its top level: <code>useState</code>, <code>useEffect</code>.</span></div>
+    <div class="grow"><b>immutable update</b><span>Making a new value with the change in it, instead of changing the old one. Untouched parts stay the same objects.</span></div>
+    <div class="grow"><b>JSX</b><span>HTML-like syntax that compiles to function calls returning plain objects that describe elements.</span></div>
+    <div class="grow"><b>key</b><span>A stable name for an item in a list, so React can match it between renders. On the element returned from <code>map</code>.</span></div>
+    <div class="grow"><b>lifting state up</b><span>Moving state to the closest common parent of every component that needs it, and passing it down.</span></div>
+    <div class="grow"><b>node_modules</b><span>The folder <code>npm install</code> fills with packages. Never edited, zipped or committed.</span></div>
+    <div class="grow"><b>Object.is</b><span>Same-object check. How React decides whether new state is different from the old.</span></div>
+    <div class="grow"><b>props</b><span>The one object a component is called with: the attributes written on its tag. Read-only; they flow down.</span></div>
+    <div class="grow"><b>public/</b><span>Vite serves this folder's files as they are: <code>public/matrix.json</code> is <code>/matrix.json</code>.</span></div>
+    <div class="grow"><b>pure</b><span>Same output for the same input, and no side effects. React expects components and updaters to be pure.</span></div>
+    <div class="grow"><b>reconciliation</b><span>React comparing a render's output with the previous one and changing only the DOM that differs.</span></div>
+    <div class="grow"><b>re-render</b><span>React calling a component function again after its state (or its parent) changed.</span></div>
+    <div class="grow"><b>state</b><span>Data a component remembers between renders, held by <code>useState</code>. Changing it re-renders.</span></div>
+    <div class="grow"><b>StrictMode</b><span>A development-only checker that calls components, updaters and effects twice to expose impure code.</span></div>
+    <div class="grow"><b>updater function</b><span>A function given to a setter, <code>(prev) =&gt; next</code>, run on the latest state.</span></div>
+    <div class="grow"><b>Vite</b><span>The dev server and build tool: <code>npm run dev</code>, <code>npm run build</code>.</span></div>
+  </div>
+</section>
+
+<div class="finish">
+  <h2>How to know you're ready</h2>
+  <p>You're ready for the lab if you can do all of these <em>without looking anything up</em>:</p>
+  <ol>
+    <li>Draw App → Header, Matrix → Cell, Stats, and say what each one owns and what it receives.</li>
+    <li>Trace a prop down: how the number 5 ends up as the text of one button.</li>
+    <li>Trace an event up: from a click to <code>setMatrix</code>, naming every function on the way.</li>
+    <li>Say why the numbers live in App, and not in Cell or Matrix.</li>
+    <li>Write <code>incrementAt</code> from memory, with untouched rows kept as the same arrays.</li>
+    <li>Say what React's <code>useState</code> does differently from the one you wrote in JS Lab 1, and why it can return a plain value.</li>
+    <li>Say what a key is for, why the index is fine in this grid, and what <code>key={value}</code> would break.</li>
+    <li>Say why the stats are computed, not stored.</li>
+    <li>Say what happens between <code>setMatrix(next)</code> and the screen changing — and why the button keeps its focus.</li>
+    <li>Explain the <code>useEffect</code> with <code>[]</code>, and why the fetch can't go in the component's body.</li>
+  </ol>
+
+  <h2 style="margin-top:30px;font-size:20px">React vs by hand</h2>
+  <div class="mention">
+    <div class="mrow"><b>useState(START)</b><span>By hand: <code>useState(START, render)</code> → <code>[getState, setState]</code> (JS Lab 1 §15). React needs no render argument and gives you the value.</span></div>
+    <div class="mrow"><b>return (JSX)</b><span>By hand: <code>render()</code> calling region functions with <code>createElement</code> and <code>textContent</code> (JS Lab 2 §07). The component's return <em>is</em> the render.</span></div>
+    <div class="mrow"><b>reconciliation</b><span>By hand: <code>previous.x !== state.x</code> per region (JS Lab 2 §08). React compares per element.</span></div>
+    <div class="mrow"><b>key={id}</b><span>By hand: <code>data-id</code> and <code>Number(dataset.id)</code>. React matches list items by key.</span></div>
+    <div class="mrow"><b>onClick={() =&gt; …}</b><span>By hand: one delegated listener and <code>closest()</code> (JS Lab 1 §13). React: a handler on each element; it delegates for you.</span></div>
+    <div class="mrow"><b>setX((prev) =&gt; …)</b><span>Same as by hand: an updater, run on the latest value (JS Lab 1 §05).</span></div>
+    <div class="mrow"><b>computed in render</b><span>Same as by hand: derived data, never stored (JS Lab 2 §06).</span></div>
+    <div class="mrow"><b>useEffect(…, [])</b><span>By hand: calling <code>load()</code> yourself at start-up (JS Lab 2 §07).</span></div>
+  </div>
+
+  <h2 style="margin-top:24px;font-size:20px">Components card</h2>
+  <div class="cmd"><span class="tg">function</span> <span class="at">Cell</span>({ row, col, value, onClick }) {       <span class="cm">// props: one object, destructured</span>
+  <span class="tg">return</span> (
+    &lt;button className=<span class="st">"cell"</span> aria-label={<span class="st">`Row ${row + 1}, column ${col + 1}: ${value}`</span>}
+            onClick={onClick}&gt;                     {<span class="cm">/* pass it, don't call it */</span>}
+      {value}
+    &lt;/button&gt;
+  );
+}
+
+&lt;Cell row={r} col={c} value={value} onClick={() =&gt; <span class="at">onIncrement</span>(r, c)} /&gt;
+{list.<span class="at">map</span>((item) =&gt; &lt;li key={item.id}&gt;{item.name}&lt;/li&gt;)}    <span class="cm">// key on what map returns</span>
+&lt;&gt;…&lt;/&gt;                                     <span class="cm">// a fragment: siblings, no wrapper</span>
+className=<span class="st">"x"</span>   value={<span class="st">5</span>}   style={{ color: <span class="st">"red"</span> }}
+cond ? &lt;A /&gt; : &lt;B /&gt;      n &gt; <span class="st">0</span> &amp;&amp; &lt;Badge /&gt;</div>
+
+  <h2 style="margin-top:24px;font-size:20px">State card</h2>
+  <div class="cmd"><span class="tg">const</span> [matrix, setMatrix] = <span class="at">useState</span>(START);         <span class="cm">// top level of the component</span>
+<span class="at">setMatrix</span>((prev) =&gt; <span class="at">incrementAt</span>(prev, row, col));    <span class="cm">// a NEW value, from the latest</span>
+<span class="tg">const</span> { sum } = <span class="at">stats</span>(matrix);                       <span class="cm">// derived: computed, not stored</span>
+
+list.<span class="at">map</span>((x, i) =&gt; (i === target ? <span class="at">change</span>(x) : x));  <span class="cm">// immutable update: only the changed</span>
+                                                     <span class="cm">// item is new; unchanged rows stay</span>
+                                                     <span class="cm">// the same arrays</span>
+
+<span class="at">useEffect</span>(() =&gt; {                                    <span class="cm">// after the first render, once</span>
+  <span class="at">fetch</span>(<span class="st">"/matrix.json"</span>).<span class="at">then</span>((res) =&gt; res.<span class="at">json</span>()).<span class="at">then</span>((data) =&gt; <span class="at">setMatrix</span>(data));
+}, []);</div>
+</div>
+
+<footer>M.Tech CSE · ESD · React Lab 1<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+</div>
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ---- */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  /* ---- progress: CORE sections drive the bar; stretch boxes are tracked separately.
+         Both are remembered in this browser, so they survive a reload. ---- */
+  function load(key){ try{ return JSON.parse(localStorage.getItem(key)||'[]'); }catch(err){ return []; } }
+  function save(key,list){ try{ localStorage.setItem(key,JSON.stringify(list.map(function(c){return c.checked}))); }catch(err){} }
+  var KEY='esd-react-lab1-progress', SKEY='esd-react-lab1-stretch';
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var extras=[].slice.call(document.querySelectorAll('.chk-s'));
+  var saved=load(KEY), savedS=load(SKEY);
+  checks.forEach(function(c,i){ if(saved[i]) c.checked=true; });
+  extras.forEach(function(c,i){ if(savedS[i]) c.checked=true; });
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=['Core first, in order — every section builds on the last.',
+             'Good start. A component is a function; JSX is what it returns.',
+             'Past halfway. Props down, events up — the state lives in App.',
+             'Nearly there. Click once, and watch two places change.',
+             'Core done. npm test green? Zip react-lab1 and submit (section 17) — then try the stretch parts.'];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    var s=extras.filter(function(c){return c.checked}).length;
+    msg.textContent=(n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))])+(s?'  ·  stretch: '+s+' / '+extras.length:'');
+    save(KEY,checks); save(SKEY,extras);
+  }
+  checks.concat(extras).forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^[$>]\s?/,'').trimEnd()}).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>

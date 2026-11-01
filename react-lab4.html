@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your own backend, end to end — React Lab 4</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#101614">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Condensed:wght@600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+.cue.work{border-left-color:var(--ink);background:var(--surface)}
+.cue.work .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.tg{color:var(--term-green)}
+.at{color:var(--signal)}
+.st{color:#B7C4C0}
+.tx{color:#FFFFFF}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 182px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+.quiz .a .cmd{margin-top:4px}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 168px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+/* ---- additions for the lab docs ---- */
+.cue.react{border-left-color:var(--term-green);background:var(--dark);color:#DDE3E0}
+.cue.react .cue-k{color:var(--term-green)}
+.cue.react code{background:#22302D;color:var(--term-green)}
+.cue.react strong{color:#FFF}
+.refs{font-family:var(--mono);font-size:12px;color:var(--muted);margin:-6px 0 16px;max-width:70ch}
+.refs a{color:var(--teal);font-weight:600}
+.part{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper);background:var(--ink);display:inline-block;padding:5px 10px;margin:64px 0 -28px}
+.toc .rpart{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);padding:10px 16px 6px;border-bottom:1px solid var(--line);background:var(--teal-soft);font-weight:600}
+table.grid{border-collapse:collapse;width:100%;max-width:70ch;background:var(--surface);border:1px solid var(--ink);margin:0 0 16px;font-size:14.5px}
+table.grid th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;text-align:left;color:var(--muted);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--ink)}
+table.grid td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.grid tr:last-child td{border-bottom:0}
+table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--teal);font-weight:600;white-space:nowrap}
+
+/* ---- core / stretch ---- */
+blockquote.prompt{margin:0 0 16px;max-width:70ch;background:var(--surface);border:1px solid var(--ink);border-left:5px solid var(--signal);padding:14px 17px;font-family:var(--mono);font-size:13px;line-height:1.7}
+.lvl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:3px 7px;align-self:center;white-space:nowrap}
+.lvl.core{background:var(--ink);color:var(--signal)}
+.lvl.stretch,.lvl.stretch-box{border:1px dashed var(--teal);color:var(--teal)}
+.lvl.ref{border:1px solid var(--muted);color:var(--muted)}
+.rrow .rl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:600;flex:0 0 auto;border:1px dashed var(--teal);padding:1px 6px;align-self:center}
+.rrow .rl.ref{color:var(--muted);border:1px solid var(--muted)}
+.rrow.is-extra .rw{color:var(--muted)}
+.stretch-box{border:1px dashed var(--teal);background:rgba(255,255,255,.55);padding:14px 16px 4px;margin:8px 0 18px}
+.stretch-box::before{content:"Stretch — optional. Do it if you can, and ask about it any time.";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600;margin-bottom:10px}
+.stretch-box h3:first-of-type{margin-top:0}
+/* tables whose first column holds long text (error messages): even, wrapping columns */
+table.grid.long-key{table-layout:fixed}
+table.grid.long-key td:first-child{white-space:normal;width:42%;overflow-wrap:anywhere}
+table.grid.long-key th:first-child{width:42%}
+.legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 0;font-size:14px;color:#2B3936}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+  table.grid td:first-child{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> React Lab 4 · AI-assisted</p>
+  <h1>Your own backend,<br><em>end to end</em></h1>
+  <p class="lede">For three labs the course app has talked to a mock API that lives inside the dev server, on the app's own address. It never went down, never forgot a token, and never asked about CORS. This lab gets the app ready for a real server — one that can be unreachable, can end your session, and can say no — and then points it at <em>your</em> Spring Boot backend. That last step is the one no isolated lab rehearses, and the one that trips people in the mini-project. Here you do it once, carefully, with the Network tab open.</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">16</span> core</div>
+      <div class="tracker-msg" id="msg">Core first, in order — the mock first, then your own backend.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill" style="width: 0%;"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p><strong>This is a pre-lab.</strong> You work through it at home, before the lab. The lab session is for your doubts, for going one level deeper, for the end-to-end check against your backend, and for one AI task. It assumes you've done the core sections.</p>
+  <p><strong>It continues React Lab 3.</strong> The folder starts from the <em>finished</em> Lab 3 app — routes, <code>AuthContext</code> with <code>sessionStorage</code>, <code>RequireAuth</code>, <code>RequireRole</code>, the admin page — so you're never blocked by something you didn't finish. If routing, context or the login flow feel shaky, open <a href="react-lab3.html">React Lab 3</a> again; this lab uses them, it doesn't repeat them.</p>
+  <p><strong>Aim to have your backend at conformance level C before the lab.</strong> That's the <a href="api-contract.html">backend contract</a> pack you've been working through alongside the React labs (<a href="api-contract.html#s13">its section 13</a> is level C). Sections 03–08 of this lab don't need it (they use the mock); sections 09–13 do.</p>
+  <p><strong>Graded in two parts.</strong> The frontend — <code>npm test</code> and <code>npm run inlab</code>, which run against the mock, so they never depend on your backend. And, graded separately, your backend — its conformance report at level C, CORS included. If your backend isn't ready, you still do every exercise with the mock and submit the frontend part; only the backend part's marks are at stake.</p>
+  <p><strong>Core and stretch.</strong> <span class="lvl core">Core</span> is mandatory — what we go through together, and what <code>npm test</code> checks. <span class="lvl stretch">Stretch</span> is extra, checked by <code>npm run test:stretch</code>. Ask about either any time.</p>
+  <p><strong>AI: not for the React pre-lab.</strong> The exercises are short; type them, so you know what each line does when it breaks against a real server. Your backend is your own code, under the contract pack's rules. AI is for the in-lab task (section 15), where you restrict it and judge it, as in Labs 2 and 3.</p>
+  <p>Keep DevTools open on the <strong>Network</strong> tab and the <strong>Console</strong> the whole time. Half of this lab is reading what the browser sent, what came back — and what the browser refused to hand to your code.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — first the app learns to expect failure (against the mock), then your backend takes over. Do every core section, in order; stretch is extra</div>
+  <div class="rpart">Part 1 · Getting set up</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">How this lab works</span></a>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">What you're building</span></a>
+  <div class="rpart">Part 2 · A client that expects failure</div>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">No answer at all — NetworkError</span></a>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">When a token dies in the middle of a session</span></a>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">One place for 401</span></a>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">Every logged-in call through api</span></a>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">Signing up — fieldErrors under their fields</span></a>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">Conflicts — a 409 is a state, not a string</span></a>
+  <div class="rpart">Part 3 · Your own backend</div>
+  <a class="rrow" href="#s9"><span class="rt">09</span><span class="rw">Pointing the app at your backend</span></a>
+  <a class="rrow" href="#s10"><span class="rt">10</span><span class="rw">CORS — what the browser checks</span></a>
+  <a class="rrow" href="#s11"><span class="rt">11</span><span class="rw">CORS in Spring Boot</span></a>
+  <a class="rrow" href="#s12"><span class="rt">12</span><span class="rw">The gate — conformance level C</span></a>
+  <a class="rrow" href="#s13"><span class="rt">13</span><span class="rw">End to end — two windows and the Network tab</span></a>
+  <div class="rpart">Part 4 · The lab</div>
+  <a class="rrow" href="#s14"><span class="rt">14</span><span class="rw">In the lab</span></a>
+  <a class="rrow" href="#s15"><span class="rt">15</span><span class="rw">The in-lab task — edit and delete a course, with AI</span></a>
+  <a class="rrow is-extra" href="#s16"><span class="rt">16</span><span class="rw">When it goes wrong</span><span class="rl ref">reference</span></a>
+  <a class="rrow is-extra" href="#s17"><span class="rt">17</span><span class="rw">Practice run, unaided</span><span class="rl">stretch</span></a>
+  <a class="rrow" href="#s18"><span class="rt">18</span><span class="rw">Submitting the assignment</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; reference cards</span></a>
+</nav>
+
+<div class="part">Part 1 · Getting set up</div>
+
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>How this lab works</h2><span class="lvl core">Core</span><span class="tagline">pull, install, test, run</span></div>
+
+  <p>Same setup as React Lab 3: one folder, a Vite app, tests you run with one command, and the mock course API served by <code>npm run dev</code> on the app's own address. Part 3 swaps the mock for your backend; until then, nothing here needs it.</p>
+
+  <h3>Getting the starter</h3>
+  <div class="dothis">
+    <h4>Do this now — pull, install, and run the tests</h4>
+    <ol>
+      <li>In your <code>esd-labs</code> folder, commit your own work, then pull. A new <code>react-lab4</code> folder appears next to the others; your Lab 3 work isn't touched.</li>
+      <li>Open the <strong><code>react-lab4</code> folder</strong> in VS Code and open its terminal.</li>
+    </ol>
+  </div>
+  <div class="cmd"><span class="p">$</span> cd esd-labs
+<span class="p">$</span> git pull
+<span class="p">$</span> cd react-lab4
+<span class="p">$</span> npm install
+<span class="p">$</span> npm test
+<span class="o"> Test Files  4 failed (4)</span>
+<span class="o">      Tests  27 failed | 7 passed (34)</span></div>
+  <p>The 7 that pass already are things Lab 3's app does right (a 403 isn't an expired session, say). Your job is to turn the 27 into 0. No new packages since Lab 3. Then start the app:</p>
+  <div class="cmd"><span class="p">$</span> npm run dev
+<span class="o">  ➜  Local:   http://localhost:5173/</span></div>
+  <p>Open <a href="http://localhost:5173/" target="_blank" rel="noopener">localhost:5173</a>. It's Lab 3's app, finished, with one addition: a line at the bottom of every page — <strong>API: the mock, on this server (/api)</strong>. In section 09 it changes to your backend's address; it's how you'll know, at a glance, which server the app is talking to. Accounts: <code>student@esd.local</code> / <code>student12345</code> (Sam), <code>riya@esd.local</code> / <code>riya12345</code> (Riya, already in the five full courses), <code>admin@esd.local</code> / <code>admin12345</code>.</p>
+
+  <h3>The folder</h3>
+  <div class="mention">
+    <div class="mrow"><b>src/api/client.js</b><span><code>apiFetch</code>, <code>ApiError</code> — and now <code>NetworkError</code> and <code>onUnauthorized</code>. Sections 03 and 05.</span></div>
+    <div class="mrow"><b>src/auth/AuthContext.jsx</b><span>Lab 3's, plus <code>api</code>, <code>expired</code> and <code>signup</code>. Sections 05 and 07.</span></div>
+    <div class="mrow"><b>src/pages/</b><span><code>LoginPage</code> (a message and a link, sections 06–07) and the new <code>SignupPage</code> (section 07). <code>Layout</code> and <code>NotFound</code> as in Lab 3.</span></div>
+    <div class="mrow"><b>src/courses/</b><span><code>CourseDetail</code> and <code>useCourse</code> — conflicts as states (section 08). The rest as in Lab 3; <code>AddCourseForm</code> grows in the lab (section 15).</span></div>
+    <div class="mrow"><b>src/me/</b><span>My courses, as in Lab 3; its hook goes through <code>api</code> (section 06).</span></div>
+    <div class="mrow"><b>src/admin/</b><span>Lab 3's New course page, and <code>EditCoursePage</code> — the in-lab task.</span></div>
+    <div class="mrow"><b>test/</b><span>The specification. <code>test/support/</code> runs the real mock in memory, and can now <em>restart</em> it — which is how the tests make tokens die (section 04).</span></div>
+    <div class="mrow"><b>inlab/</b><span>The in-lab AI task: <code>CONTRACT.md</code>, its tests, <code>PROMPTS.md</code>. Leave it until the lab.</span></div>
+    <div class="mrow"><b>mock/</b><span>The mock course API. Never edit it. <code>npm run mock</code> runs it on its own, like a real backend (section 10).</span></div>
+  </div>
+
+  <h3>The commands</h3>
+  <div class="cmd"><span class="p">$</span> npm test                               # every core test
+<span class="p">$</span> npx vitest run test/expiry.test.jsx    # one exercise
+<span class="p">$</span> npm run test:stretch                   # the stretch tests
+<span class="p">$</span> npm run inlab                          # the in-lab task's tests (in the lab)
+<span class="p">$</span> npm run dev                            # the app + the mock API at http://localhost:5173
+<span class="p">$</span> npm run mock                           # the mock API alone, on :8080, like a real backend</div>
+
+  <h3>Submitting</h3>
+  <p>A <strong>graded assignment</strong>, in two parts, graded separately. <strong>The frontend part</strong> (complete means complete): <code>npm test</code> and <code>npm run inlab</code> fully green — graded against the mock, so it never depends on your backend — and your prompt log filled in. <strong>The backend part</strong>: <code>conformance-report.txt</code> in the folder, with levels A, B, C and CORS ✓. If your backend isn't there yet, submit the frontend part anyway: the missing backend part costs only its own marks, and you can still use the mock for everything in the lab. Zipped and submitted once, by the end of the day of the lab. The next lab's starter — which contains this lab's finished code — is released that night, so late submissions can't be accepted. Section 18 has the steps.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — npm test runs, the app opens, I've seen the API line</span></label>
+</section>
+
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>What you're building</h2><span class="lvl core">Core</span><span class="tagline">the same app, ready for a real server</span></div>
+
+  <p>No new screens except one. What changes is what the app does when the server isn't the friendly mock:</p>
+  <table class="grid long-key">
+    <tr><th>When…</th><th>Lab 3's app</th><th>After this lab</th></tr>
+    <tr><td>the server can't be reached</td><td>"Failed to fetch"</td><td>"Can't reach the server — is your backend running?" (03)</td></tr>
+    <tr><td>your token dies mid-session</td><td>"Authentication required" on whatever page you're on, while the header still says you're logged in</td><td>the login page: "Your session has expired — log in again" — then back where you were (04–06)</td></tr>
+    <tr><td>you have no account</td><td>—</td><td><code>/signup</code>, with the server's message under each bad field (07)</td></tr>
+    <tr><td>Enroll is refused</td><td>the raw 409 message</td><td>a proper state for each conflict, fresh seat numbers, a disabled button when full (08)</td></tr>
+    <tr><td>the API is your Spring Boot</td><td>—</td><td><code>VITE_API_URL</code>, CORS in Spring Security, conformance level C, an end-to-end check in two windows (09–13)</td></tr>
+    <tr><td>an admin edits a course</td><td>—</td><td>edit and delete, built in the lab with AI (15)</td></tr>
+  </table>
+
+  <h3>The flow you'll walk at the end — against your backend</h3>
+  <div class="cmd"><span class="o">window B (student)  /  →  CS402  →  Enroll  →  log in  →  "You're enrolled."  2 seats left</span>
+<span class="o">window A (admin)    CS402  →  Edit course  →  capacity 1  →  saved</span>
+<span class="o">window B            reload  →  Full, Enroll disabled</span>
+<span class="o">window B            enroll up to 24 credits  →  one more  →  "…over the 24-credit limit…"</span>
+<span class="o">window B            log out in a duplicate tab  →  back in B, My courses  →  "Your session has expired"</span>
+<span class="o">your backend        stopped  →  reload  →  "Can't reach the server — is your backend running?"</span></div>
+
+  <div class="cue react"><p class="cue-k">The thread</p><p>Lab 1: change state, the screen follows. Lab 3: the URL and who's logged in are state too. This lab adds nothing new to that rule — it uses it. When a 401 ends the session, the app does <strong>one</strong> thing: set the session to <code>null</code>. The header, the guard on <code>/me</code>, the login page's message all follow on their own, because they already read that state.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 read — I know what changes, and in which section</span></label>
+</section>
+
+<div class="part">Part 2 · A client that expects failure</div>
+
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>No answer at all — NetworkError</h2><span class="lvl core">Core</span><span class="tagline">src/api/client.js</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p><code>fetch</code> rejects only when there's <em>no response</em>. A 404 or a 500 is a response: <code>fetch</code> resolves, and you check <code>res.ok</code> (<a href="js-app.html#s4">JS Lab 2 · §04</a>). Since Lab 2, <code>apiFetch</code> turns every non-2xx into an <code>ApiError</code>.</p></div>
+
+  <h3>Two kinds of failure</h3>
+  <table class="grid long-key">
+    <tr><th>What happened</th><th>What your code gets</th></tr>
+    <tr><td>The server answered with an error status: 400, 401, 403, 404, 409, 500</td><td>An <code>ApiError</code>, with <code>status</code>, the server's <code>message</code> and <code>fieldErrors</code>. You know exactly what went wrong.</td></tr>
+    <tr><td>No answer reached your code: the server is down, the port is wrong, you're offline — <strong>or the browser blocked the answer</strong> (CORS, section 10)</td><td><code>fetch</code> rejects with a <code>TypeError</code>, message <strong>"Failed to fetch"</strong>. No status, no body, no reason. The browser deliberately doesn't tell your code which one it was.</td></tr>
+  </table>
+  <p>Lab 3's client let that <code>TypeError</code> through, so every page that shows <code>err.message</code> said "Failed to fetch" — true, and no help to anyone. Your job: turn it into an error of its own, with a message a person can act on.</p>
+
+  <div class="dothis">
+    <h4>Do this now — see it before you fix it</h4>
+    <ol>
+      <li>With <code>npm run dev</code> running and the course list open, set the Network tab's throttling menu (it says <em>No throttling</em>) to <strong>Offline</strong>.</li>
+      <li>Click a course. The page says <em>Couldn't load the course: Failed to fetch</em>, and the Network tab shows the request as failed, with no status.</li>
+      <li>Set it back to <em>No throttling</em>.</li>
+    </ol>
+  </div>
+
+  <h3>Exercise — NetworkError</h3>
+  <p><code>NetworkError</code> is already declared at the top of <code>client.js</code>, with its fixed message. In <code>apiFetch</code>, wrap the <code>fetch</code> call so that when it rejects, you throw a <code>NetworkError</code> instead, keeping the browser's error as its <code>cause</code>:</p>
+  <div class="cmd"><span class="tg">export</span> <span class="tg">class</span> NetworkError <span class="tg">extends</span> Error {           <span class="cm">// given</span>
+  <span class="tg">constructor</span>(cause) {
+    <span class="tg">super</span>(<span class="st">"Can't reach the server — is your backend running?"</span>);
+    <span class="tg">this</span>.name = <span class="st">"NetworkError"</span>;
+    <span class="tg">this</span>.cause = cause;
+  }
+}
+
+<span class="cm">// in apiFetch — you write this:</span>
+<span class="tg">let</span> res;
+<span class="tg">try</span> {
+  res = <span class="tg">await</span> <span class="at">fetch</span>(<span class="st">`${API_BASE}${path}`</span>, init);
+} <span class="tg">catch</span> (err) {
+  <span class="tg">throw</span> <span class="tg">new</span> <span class="at">NetworkError</span>(err);      <span class="cm">// fetch rejects only when there's no response at all</span>
+}</div>
+  <p>Only the <code>fetch</code> call goes inside the <code>try</code>. A 4xx never lands in that <code>catch</code> — it's an answer, and the code after it turns it into an <code>ApiError</code> as before. Now the two kinds of failure are two classes: <code>err instanceof NetworkError</code> tells them apart, if a page ever needs to (a <em>Retry</em> button only makes sense for one of them). Most pages don't: they show <code>err.message</code>, so the new message appears on the course list, the course page, My courses and the login page without touching any of them.</p>
+
+  <div class="cue watch"><p class="cue-k">The message is a guess</p><p>"Is your backend running?" is the most likely cause, not the only one. If it <em>is</em> running, look at the Console: a red line starting <em>Access to fetch … has been blocked by CORS policy</em> means the server answered and the browser hid the answer from your code. Section 10 is about exactly that.</p></div>
+
+  <div class="cmd"><span class="p">$</span> npx vitest run test/client.test.jsx    # the "03 ·" tests pass; the "05 ·" ones wait for section 05</div>
+  <p>Then Offline again, click a course: the new message.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Why not put the whole of <code>apiFetch</code> — the <code>fetch</code>, the <code>res.ok</code> check, the <code>res.json()</code> — inside one big <code>try</code>, and throw a <code>NetworkError</code> from its <code>catch</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Then the <code>ApiError</code> thrown for a 409 would be caught too, and reported as "Can't reach the server" — the one thing it certainly isn't. A <code>try</code> should wrap only the line whose failure it means. Here that's the <code>fetch</code> call.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 complete — the 03 tests pass; Offline shows the new message</span></label>
+</section>
+
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>When a token dies in the middle of a session</h2><span class="lvl core">Core</span><span class="tagline">see the problem — no code yet</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>A 401 means "who are you?" — no token, or one that's invalid, expired or logged out (<a href="react-lab3.html#s9">React Lab 3 · §09</a>). This app keeps the session in <code>sessionStorage</code>, so it survives a reload (<a href="react-lab3.html#s10">Lab 3 · §10's stretch</a>, given here).</p></div>
+
+  <p>The app decides you're logged in when it <em>has</em> a token. The server decides when the token <em>works</em>. Those two can disagree, and they will. A token stops working when:</p>
+  <ul>
+    <li><strong>it expires</strong> — 3600 seconds after login, unless the server is set up otherwise;</li>
+    <li><strong>it's logged out somewhere else</strong> — in another tab, on another device: the server revokes it, everywhere;</li>
+    <li><strong>the server can no longer check it</strong> — the mock picks a new random signing secret every time it starts, so after you restart <code>npm run dev</code>, every token it issued before fails the signature check;</li>
+    <li><strong>it came from a different server</strong> — a token from the mock means nothing to your backend (section 09).</li>
+  </ul>
+  <p>In all four cases the app still holds the token, the header still shows your name — and the next logged-in request gets a 401.</p>
+
+  <div class="dothis">
+    <h4>Do this now — two real ways to kill a token</h4>
+    <ol>
+      <li><strong>Restart the server.</strong> Log in as Sam. In the terminal, stop <code>npm run dev</code> (<kbd>Ctrl</kbd>+<kbd>C</kbd>) and start it again. The page reloads itself; the header still says Sam. Click <em>My courses</em>: <em>Couldn't load your courses: Authentication required</em>. In the Network tab, the request carried the old token and got 401.</li>
+      <li><strong>Log out somewhere else.</strong> Log in again. In the Console, revoke the app's token behind its back — exactly what a <em>Log out</em> in another tab would do:</li>
+    </ol>
+  </div>
+  <div class="cmd"><span class="tg">const</span> { token } = <span class="tg">JSON</span>.<span class="at">parse</span>(sessionStorage.<span class="at">getItem</span>(<span class="st">"esd-session"</span>));
+(<span class="tg">await</span> <span class="at">fetch</span>(<span class="st">"/api/auth/logout"</span>, { method: <span class="st">"POST"</span>, headers: { Authorization: <span class="st">`Bearer ${token}`</span> } })).status
+<span class="o">// 204</span></div>
+  <p>Now open CS402 and press <em>Enroll</em>: <em>Authentication required</em>, as a red line under the button, while the header insists you're logged in. Lab 3 shipped this on purpose; the fix is the next two sections.</p>
+
+  <h3>What should happen instead</h3>
+  <p>One rule, the same everywhere: <strong>a 401 on a request that carried a token means the session is over.</strong> Forget it, send the person to the login page, tell them why, and after they log in, bring them back to where they were. Everything else — a wrong password, a 403, a 409 — stays the page's business.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>The token has an <code>exp</code> claim. Why not decode it in the browser and log the user out a moment before it expires — then there'd be no 401 to handle?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Three reasons. The contract makes the token opaque to clients: its inside is the server's business. Expiry isn't the only way a token dies — revocation and a server restart don't change <code>exp</code> at all. And the browser's clock may not agree with the server's. You'd still need 401 handling, so write that, once.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Is a 403 an expired session?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No. A 403 means the server <em>knows</em> who you are, and the answer is no — a student creating a course. Logging in again changes nothing, so sending them to the login page would be wrong. Only 401 means "who are you?".</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 complete — I've killed a token both ways and seen the 401</span></label>
+</section>
+
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>One place for 401</h2><span class="lvl core">Core</span><span class="tagline">client.js · AuthContext.jsx</span></div>
+
+  <p>The rule from section 04 has to apply to <em>every</em> logged-in request — loading My courses, Drop, Enroll, adding a course. If each page checked for 401 itself, you'd write the same lines five times, and the one you forget is the bug. So the design puts each job in exactly one place:</p>
+  <table class="grid long-key">
+    <tr><th>Job</th><th>Where</th></tr>
+    <tr><td><strong>Notice</strong> a 401 on a request that carried a token</td><td><code>apiFetch</code>, in <code>client.js</code>. It's the only code that sees every response. It calls an <code>onUnauthorized</code> function it was given — and doesn't know or care what that function does.</td></tr>
+    <tr><td><strong>React</strong> to it: forget the session, go to the login page, say why</td><td><code>sessionExpired()</code>, in <code>AuthProvider</code>. It owns the session, and it can navigate.</td></tr>
+    <tr><td><strong>Connect</strong> the two</td><td><code>api(path, options)</code>, also in <code>AuthProvider</code>: <code>apiFetch</code> with the token and <code>onUnauthorized: sessionExpired</code> already filled in. Every logged-in request goes through it (section 06).</td></tr>
+  </table>
+  <div class="cmd"><span class="o">useMyEnrollments ── api("/api/users/me/enrollments") ── apiFetch(…, { token, onUnauthorized }) ── fetch</span>
+<span class="o">                                                                         │</span>
+<span class="o">                                                     401, and a token was sent</span>
+<span class="o">                                                                         │</span>
+<span class="o">                       sessionExpired():  navigate("/login") · setSession(null) · setExpired(true)</span>
+<span class="o">                                                                         │</span>
+<span class="o">             the header, RequireAuth and the login page re-render from the new state (reactivity)</span></div>
+
+  <h3>Step 1 — apiFetch notices</h3>
+  <p>In <code>client.js</code>, <code>apiFetch</code> takes one more option, <code>onUnauthorized</code>. In the <code>!res.ok</code> branch, after building the <code>ApiError</code> and before throwing it:</p>
+  <div class="cmd"><span class="tg">if</span> (res.status === <span class="st">401</span> &amp;&amp; token &amp;&amp; onUnauthorized) <span class="at">onUnauthorized</span>();
+<span class="tg">throw</span> error;      <span class="cm">// still thrown: the caller must stop, whatever happens next</span></div>
+  <p>Each condition earns its place. <code>401</code>, not 403 (section 04). <code>token</code>: a 401 on a request <em>without</em> a token is just an answer — a wrong password at login is a 401 with no token, and must not say "your session has expired". <code>onUnauthorized</code>: it's optional, so <code>apiFetch</code> still works for code that doesn't pass one.</p>
+
+  <h3>Step 2 — AuthProvider reacts</h3>
+  <p>In <code>AuthContext.jsx</code>: an <code>expired</code> state, <code>false</code> to start; <code>login</code> sets it back to <code>false</code>; and <code>sessionExpired</code>:</p>
+  <div class="cmd"><span class="tg">const</span> [expired, setExpired] = <span class="at">useState</span>(<span class="tg">false</span>);     <span class="cm">// why nobody is logged in</span>
+<span class="tg">const</span> navigate = <span class="at">useNavigate</span>();
+<span class="tg">const</span> location = <span class="at">useLocation</span>();
+
+<span class="tg">function</span> <span class="at">sessionExpired</span>() {
+  <span class="at">navigate</span>(<span class="st">"/login"</span>, { replace: <span class="tg">true</span>, state: { <span class="tg">from</span>: location } });   <span class="cm">// first: leave, remembering where we were</span>
+  <span class="at">setSession</span>(<span class="tg">null</span>);                                                     <span class="cm">// then: forget the session</span>
+  <span class="at">setExpired</span>(<span class="tg">true</span>);                                                     <span class="cm">// and say why</span>
+}</div>
+  <p><code>AuthProvider</code> can use router hooks because it sits <em>inside</em> the router: <code>main.jsx</code> wraps <code>&lt;App /&gt;</code> in <code>&lt;BrowserRouter&gt;</code>, and <code>App</code> puts <code>AuthProvider</code> around the routes. <code>state: { from: location }</code> is Lab 3's redirect-back: the login page already sends you to <code>from</code> after logging in (<a href="react-lab3.html#s11">React Lab 3 · §11</a>).</p>
+  <p><strong>Navigate first</strong>, as Log out does in Lab 3, so you head for the login page before the user disappears. Here both updates happen in the same moment, so on a protected page like <code>/me</code>, <code>RequireAuth</code> may see "no user" first and send you to <code>/login</code> itself — with the same <code>from</code>. Either way you land on the login page, and that's why the reason lives in <code>AuthProvider</code>'s state (<code>expired</code>), not in the navigation state: whichever navigation wins, the message is there. <strong><code>replace</code></strong>, like <code>RequireAuth</code>: <kbd>Back</kbd> shouldn't lead to a page that needs the session that just ended. (It also means that when two requests get 401 together — in development, StrictMode runs every effect twice — you make one trip to <code>/login</code>, not two.)</p>
+  <p><code>expired</code> is not saved to <code>sessionStorage</code>: it describes this moment. A reload tomorrow shouldn't say your session just expired.</p>
+
+  <h3>Step 3 — api connects them</h3>
+  <div class="cmd"><span class="tg">function</span> <span class="at">api</span>(path, options = {}) {
+  <span class="tg">return</span> <span class="at">apiFetch</span>(path, { ...options, token: session?.token, onUnauthorized: sessionExpired });
+}
+
+<span class="tg">const</span> value = { user: session?.user ?? <span class="tg">null</span>, token: session?.token ?? <span class="tg">null</span>, expired, login, signup, logout, api };</div>
+  <p>Remove the two placeholders the starter left (<code>const expired = false</code> and the <code>api</code> that throws) when you write the real ones.</p>
+
+  <div class="cue react"><p class="cue-k">api is a closure</p><p><code>api</code> remembers <code>session</code> and <code>sessionExpired</code> from the render of <code>AuthProvider</code> that made it (<a href="js-react.html#s6">JS Lab 1 · §06</a>). A new render makes a new <code>api</code> with the new session. That's why callers never pass a token: the function already holds the right one.</p></div>
+
+  <h3>Why not something else?</h3>
+  <table class="grid long-key">
+    <tr><th>Another way</th><th>Why not here</th></tr>
+    <tr><td>Each page checks <code>err.status === 401</code> and logs out</td><td>The same lines in every page and hook. The one you forget shows "Authentication required" to a logged-out user who looks logged in.</td></tr>
+    <tr><td>A global in <code>client.js</code> — <code>setUnauthorizedHandler(fn)</code> — that <code>AuthProvider</code> fills in at start (what <em>axios interceptors</em> do)</td><td>It works, but it's a hidden connection: what <code>apiFetch</code> does depends on what some component did earlier, somewhere else. Tests have to reset it between runs. Here everything <code>apiFetch</code> needs arrives as an argument — the same reason it takes the token instead of finding it (<a href="react-lab3.html#s9">React Lab 3 · §09</a>).</td></tr>
+    <tr><td>Decode the token and log out at <code>exp</code></td><td>Section 04, Q1.</td></tr>
+  </table>
+
+  <div class="cmd"><span class="p">$</span> npx vitest run test/client.test.jsx    # all green now</div>
+  <p><code>test/expiry.test.jsx</code> still fails: nothing goes through <code>api</code> yet. That's section 06.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b><code>apiFetch</code> calls <code>onUnauthorized()</code> and then <em>still throws</em>. Why throw, if the user is being sent to the login page anyway?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Because the caller is in the middle of something: <code>enroll()</code> is about to read <code>enrollment.course</code>, <code>drop()</code> is about to remove a row from the list. If <code>apiFetch</code> returned normally (with what?), that code would carry on with nothing. Throwing stops it, the same way every other failure does.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 complete — client.test.jsx passes; I can say which job lives where</span></label>
+</section>
+
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>Every logged-in call through api</h2><span class="lvl core">Core</span><span class="tagline">the hooks · LoginPage.jsx</span></div>
+
+  <p><code>api</code> only helps the requests that use it. Find every <code>apiFetch(…, { token })</code> in the app and route it through <code>api</code> instead — the token drops out of the call, because <code>api</code> adds it:</p>
+  <div class="cmd"><span class="cm">// before (Lab 3)</span>
+<span class="tg">const</span> { token } = <span class="at">useAuth</span>();
+<span class="tg">await</span> <span class="at">apiFetch</span>(<span class="st">"/api/enrollments"</span>, { method: <span class="st">"POST"</span>, body: { courseId: course.id }, token });
+
+<span class="cm">// after</span>
+<span class="tg">const</span> { api } = <span class="at">useAuth</span>();
+<span class="tg">await</span> <span class="at">api</span>(<span class="st">"/api/enrollments"</span>, { method: <span class="st">"POST"</span>, body: { courseId: course.id } });</div>
+  <table class="grid long-key">
+    <tr><th>File</th><th>Calls to change</th></tr>
+    <tr><td><code>src/courses/useCourses.js</code></td><td><code>addCourse</code> — POST /api/courses</td></tr>
+    <tr><td><code>src/courses/useCourse.js</code></td><td><code>enroll</code> — POST /api/enrollments</td></tr>
+    <tr><td><code>src/me/useMyEnrollments.js</code></td><td>the effect — GET /api/users/me/enrollments — and <code>drop</code> — DELETE /api/enrollments/{id}</td></tr>
+  </table>
+
+  <h3>Which calls stay on plain apiFetch</h3>
+  <ul>
+    <li><strong>Public reads</strong> — the course list, one course. They need no token, so don't send one. There's a second reason: some backends reject a <em>bad</em> token even on a public endpoint (Spring's OAuth2 resource server does), so an expired token sent with <code>GET /api/courses</code> would break the public list.</li>
+    <li><strong>Login</strong> — there's no session yet; a 401 there is "Invalid email or password". And the <code>/api/users/me</code> call inside <code>login</code> uses the brand-new token it was just given.</li>
+    <li><strong>Logout</strong> — if its token is already dead, the server says 401, and the user, who just clicked <em>Log out</em>, should simply be logged out — not told their session expired. A test checks it.</li>
+  </ul>
+
+  <h3>The dependency array</h3>
+  <p><code>useMyEnrollments</code>'s effect now calls <code>api</code>, and its array stays <code>[token]</code>. Lab 2's rule says everything the effect reads that can change goes in the array (<a href="react-lab2.html#s5">React Lab 2 · §05</a>) — so why not <code>api</code>? <code>api</code> is a new function on every render of <code>AuthProvider</code>, but what it does depends only on the token: the token is the value that decides whether the list must load again. Putting <code>api</code> in the array wouldn't break anything — the list would just reload whenever <code>AuthProvider</code> re-renders, which is more often than needed. The tool that would make <code>api</code> itself stable, <code>useCallback</code>, is on the "not yet" list (<a href="react-lab2.html#s9">React Lab 2 · §09</a>).</p>
+
+  <h3>The login page says why</h3>
+  <p>In <code>LoginPage.jsx</code>, read <code>expired</code> from <code>useAuth()</code> and, when it's true, show a message above the form:</p>
+  <div class="cmd">{expired &amp;&amp; &lt;p role=<span class="st">"status"</span> className=<span class="st">"notice"</span>&gt;Your session has expired — log <span class="tg">in</span> again.&lt;/p&gt;}</div>
+  <p><code>role="status"</code>, not <code>"alert"</code>: it's information, and the form already uses <code>role="alert"</code> for a failed login. <code>LoginPage</code>'s <code>error</code> state is now the whole error object, not just its message — the stretch in section 07 needs its <code>fieldErrors</code>.</p>
+
+  <div class="dothis">
+    <h4>Do this now — both triggers again</h4>
+    <div class="cmd"><span class="p">$</span> npx vitest run test/expiry.test.jsx</div>
+    <ol>
+      <li>Log in, restart <code>npm run dev</code>, click <em>My courses</em>: the login page, "Your session has expired — log in again", and the header says <em>Log in</em>. Log in: back on My courses.</li>
+      <li>Open CS402, revoke the token from the Console (section 04), press <em>Enroll</em>: the login page, the message. Log in: back on CS402.</li>
+      <li>Log in with a wrong password: "Invalid email or password", and <em>no</em> expired message.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>You log in, then duplicate the tab (right-click the tab → <em>Duplicate</em>), and log out in the copy. What happens in the first tab on its next click on My courses — and why doesn't it happen at once?</div>
+    <details><summary>Show answer</summary><div class="a"><p>"Your session has expired". A duplicated tab gets a copy of <code>sessionStorage</code> — the same token. Logging out in the copy revoked that token on the server. The first tab doesn't know until it next uses the token: nothing tells a tab when the server changes its mind. The next logged-in request gets 401, and section 05's rule does the rest. That's revocation working.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 complete — expiry.test.jsx passes; both triggers send me to log in, and back</span></label>
+</section>
+
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>Signing up — fieldErrors under their fields</h2><span class="lvl core">Core</span><span class="tagline">AuthContext.signup · SignupPage.jsx · App.jsx</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>Controlled inputs, and one change handler for many fields with a computed key (<a href="react-lab2.html#s6">React Lab 2 · §06</a>). Lab 2's <code>AddCourseForm</code> already shows <code>fieldErrors</code> under its fields — read it again before you start; you'll write the same pattern yourself.</p></div>
+
+  <h3>The endpoint</h3>
+  <div class="cmd"><span class="o">POST /api/auth/signup     { "email": …, "password": …, "fullName": … }        no token</span>
+<span class="o">     → 201 { "id": 4, "email": "asha@test.com", "fullName": "Asha Rao", "role": "STUDENT", … }</span>
+<span class="o">     → 400 { "message": "Validation failed",</span>
+<span class="o">             "fieldErrors": { "email": "must be a well-formed email address",</span>
+<span class="o">                              "password": "size must be between 8 and 64" } }</span>
+<span class="o">     → 409 { "message": "Email already registered", "fieldErrors": null }</span></div>
+  <p>Note what the 201 is: the new <em>user</em>, not a token. To be logged in, you still log in. And note the contract's words about <code>fieldErrors</code>: "wording is free". Your backend's messages will be different from the mock's — so the page never compares them; it shows them.</p>
+
+  <h3>Step 1 — signup() in AuthContext</h3>
+  <div class="cmd"><span class="tg">async</span> <span class="tg">function</span> <span class="at">signup</span>({ email, password, fullName }) {
+  <span class="tg">await</span> <span class="at">apiFetch</span>(<span class="st">"/api/auth/signup"</span>, { method: <span class="st">"POST"</span>, body: { email, password, fullName } });
+  <span class="tg">return</span> <span class="at">login</span>(email, password);      <span class="cm">// the account exists now: log straight in</span>
+}</div>
+  <p>Plain <code>apiFetch</code>: there's no session yet. No <code>try</code>: if the signup fails, the <code>ApiError</code> goes to the page, which shows it — like <code>login</code> in Lab 3.</p>
+
+  <h3>Step 2 — SignupPage</h3>
+  <p>In <code>src/pages/SignupPage.jsx</code>: a heading <strong>"Create an account"</strong>; inputs labelled <strong>Full name</strong>, <strong>Email</strong>, <strong>Password</strong> (the <code>FIELDS</code> list at the top of the file has their names and types); a <strong>"Sign up"</strong> button. The form state is one object, <code>{ fullName, email, password }</code>, with one change handler — the <code>AddCourseForm</code> pattern. On submit: <code>await signup(form)</code>, then <code>navigate(from, { replace: true })</code>, with <code>from</code> worked out exactly as on the login page.</p>
+  <p>When it throws, keep two things: the error (for its message and status) and its <code>fieldErrors</code> (<code>err.fieldErrors ?? {}</code> — <code>null</code> for a 409 or a network error). Then, for each field:</p>
+  <div class="cmd">&lt;input
+  id={<span class="st">`signup-${name}`</span>}
+  …
+  aria-invalid={fieldErrors[name] ? <span class="tg">true</span> : <span class="tg">undefined</span>}
+  aria-describedby={fieldErrors[name] ? <span class="st">`signup-${name}-error`</span> : <span class="tg">undefined</span>}
+/&gt;
+{fieldErrors[name] &amp;&amp; &lt;p className=<span class="st">"field-error"</span> id={<span class="st">`signup-${name}-error`</span>}&gt;{fieldErrors[name]}&lt;/p&gt;}</div>
+  <p><code>aria-describedby</code> ties the message to its input: a screen reader reads "Email, invalid, must be a well-formed email address" together — and the tests find the message the same way (<code>toHaveAccessibleDescription</code>). <code>aria-invalid</code> is what turns the border red (it's in <code>styles.css</code>). Below the fields, the error's message in a <code>&lt;p role="alert"&gt;</code>; and when <code>error.status === 409</code>, a <strong>"Log in instead"</strong> link to <code>/login</code> inside it.</p>
+
+  <h3>400 and 409 are different kinds of no</h3>
+  <table class="grid long-key">
+    <tr><th>Status</th><th>What it's about</th><th>What the page offers</th></tr>
+    <tr><td>400 Validation failed</td><td>What you <em>typed</em>. The server says which field.</td><td>The message under each field. Fix them, submit again.</td></tr>
+    <tr><td>409 Email already registered</td><td>The <em>state</em> of the server: that account exists. Nothing you typed is malformed.</td><td>No field to fix. A different action: log in instead.</td></tr>
+  </table>
+
+  <h3>noValidate — let the server speak</h3>
+  <p>An <code>&lt;input type="email"&gt;</code> makes the browser check the address before submitting, with its own little bubble — so your page would never see the server's message for a bad email. Put <code>noValidate</code> on the <code>&lt;form&gt;</code> for this page: the browser still gives the right keyboard on a phone, but the server judges. In a real app you'd often keep both — the browser's checks are fast, the server's are the ones that count.</p>
+
+  <h3>Step 3 — the route and the link</h3>
+  <p>In <code>App.jsx</code>, a <code>signup</code> route for <code>&lt;SignupPage /&gt;</code>. On the login page, under the form: <em>No account yet?</em> <code>&lt;Link to="/signup" state={location.state}&gt;Sign up&lt;/Link&gt;</code>. Passing <code>location.state</code> along keeps the <code>from</code> a guard put there: open <code>/me</code> logged out, take the detour through Sign up, and you still land on My courses.</p>
+
+  <div class="dothis">
+    <h4>Do this now</h4>
+    <div class="cmd"><span class="p">$</span> npx vitest run test/signup.test.jsx</div>
+    <ol>
+      <li><code>/signup</code> with everything empty except a bad email and a short password: three messages, each under its field. Network tab: one POST, a 400, and its <code>fieldErrors</code> in the Response.</li>
+      <li><code>student@esd.local</code> with a good password: "Email already registered" and <em>Log in instead</em>.</li>
+      <li>A new email: logged in at once; the header shows your name. Network tab: <code>signup</code>, <code>login</code>, <code>me</code>, in that order.</li>
+    </ol>
+  </div>
+
+  <div class="stretch-box">
+    <h3>Stretch 1 — fieldErrors on the login page too</h3>
+    <p>Press <em>Log in</em> with nothing filled in: the server answers 400 with <code>fieldErrors</code> for <code>email</code> and <code>password</code>, and the page shows only "Validation failed". Show each message under its field, the same way (ids <code>login-email-error</code>, <code>login-password-error</code>). <code>test/stretch/login-fields.test.jsx</code>.</p>
+    <h3>Stretch 2 — a message goes when you fix its field</h3>
+    <p>On the signup page, a field's message is out of date the moment you edit that field. In the change handler, clear that field's entry — <code>setFieldErrors((prev) =&gt; ({ ...prev, [name]: undefined }))</code> — and leave the others. <code>test/stretch/clear-on-edit.test.jsx</code>.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Why does <code>signup</code> call <code>login</code>, instead of the backend returning a token from signup?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Because that's the contract: the 201 is the created resource, a <code>UserResponse</code>, like every other 201 in this API. Logging in is a separate, existing operation, so <code>signup</code> reuses it — one way to get a token, not two. The cost is one extra request, once per account.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 complete — signup.test.jsx passes; I've seen 400 and 409 in the Network tab</span></label>
+</section>
+
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>Conflicts — a 409 is a state, not a string</h2><span class="lvl core">Core</span><span class="tagline">CourseDetail.jsx · useCourse.enroll</span></div>
+
+  <p>In Lab 3, a refused Enroll showed the server's message as it came: "Course is full". Fine for a lab; not for people. Each conflict means something different and needs a different next step. The contract makes that possible with one sentence: clients display <code>message</code> and never parse it — <strong>"except the fixed messages this document lists, which clients may compare with exactly."</strong> For <code>POST /api/enrollments</code> it lists three:</p>
+  <table class="grid long-key">
+    <tr><th>The 409's message</th><th>The page says</th><th>And offers</th></tr>
+    <tr><td>Already enrolled in this course</td><td>You're already enrolled in this course.</td><td>a link to My courses</td></tr>
+    <tr><td>Course is full</td><td>This course is full — someone took the last seat.</td><td>fresh numbers: the seats say <em>Full</em>, Enroll is disabled</td></tr>
+    <tr><td>Credit limit of 24 exceeded</td><td>Enrolling would take you over the 24-credit limit. Drop a course first.</td><td>a link to My courses</td></tr>
+  </table>
+  <p>Anything else — a 404 because the course was just deleted, a <code>NetworkError</code> — still shows its message as it is. And a 401 shows nothing here: section 05 is already taking the user to log in.</p>
+
+  <h3>Step 1 — the lookup</h3>
+  <p>At the top of <code>CourseDetail.jsx</code>, a plain object from message to what to show, and a function that turns an error into the notice the page renders:</p>
+  <div class="cmd"><span class="tg">const</span> CONFLICTS = {
+  <span class="st">"Already enrolled in this course"</span>: { text: <span class="st">"You're already enrolled in this course."</span>, toMine: <span class="tg">true</span> },
+  <span class="st">"Course is full"</span>: { text: <span class="st">"This course is full — someone took the last seat."</span>, toMine: <span class="tg">false</span> },
+  <span class="st">"Credit limit of 24 exceeded"</span>: { text: <span class="st">"Enrolling would take you over the 24-credit limit. Drop a course first."</span>, toMine: <span class="tg">true</span> },
+};
+
+<span class="tg">function</span> <span class="at">enrollNotice</span>(err) {
+  <span class="tg">if</span> (err.status === <span class="st">409</span> &amp;&amp; CONFLICTS[err.message]) <span class="tg">return</span> { ok: <span class="tg">false</span>, ...CONFLICTS[err.message] };
+  <span class="tg">return</span> { ok: <span class="tg">false</span>, text: err.message, toMine: <span class="tg">false</span> };
+}</div>
+
+  <h3>Step 2 — handleEnroll and the render</h3>
+  <div class="cmd"><span class="tg">try</span> {
+  <span class="tg">await</span> <span class="at">enroll</span>();
+  <span class="at">setNotice</span>({ ok: <span class="tg">true</span>, text: <span class="st">"You're enrolled."</span>, toMine: <span class="tg">true</span> });
+} <span class="tg">catch</span> (err) {
+  <span class="tg">if</span> (err.status === <span class="st">401</span>) <span class="tg">return</span>;     <span class="cm">// the session ended: section 05 is taking us to log in</span>
+  <span class="at">setNotice</span>(<span class="at">enrollNotice</span>(err));
+}</div>
+  <p>In the JSX: <code>const full = course.seatsLeft === 0;</code> — derived during render, never stored — and <code>&lt;button … disabled={full}&gt;Enroll&lt;/button&gt;</code>. The notice keeps <code>role="status"</code> (success) or <code>role="alert"</code> (refused), and when <code>notice.toMine</code> is true it ends with <code>&lt;Link to="/me"&gt;My courses&lt;/Link&gt;</code>.</p>
+
+  <h3>Step 3 — after a 409, ask again</h3>
+  <p>A 409 often means the page is out of date: it said "1 seat left" because that was true when it loaded. Someone else took the seat since. So after a 409, <code>enroll()</code> in <code>useCourse.js</code> reloads the course before it passes the error on — <code>refresh()</code> is given:</p>
+  <div class="cmd"><span class="tg">async</span> <span class="tg">function</span> <span class="at">enroll</span>() {
+  <span class="tg">try</span> {
+    <span class="tg">const</span> enrollment = <span class="tg">await</span> <span class="at">api</span>(<span class="st">"/api/enrollments"</span>, { method: <span class="st">"POST"</span>, body: { courseId: course.id } });
+    <span class="at">setCourse</span>(enrollment.course);        <span class="cm">// success: the server's numbers, as in Lab 3</span>
+    <span class="tg">return</span> enrollment;
+  } <span class="tg">catch</span> (err) {
+    <span class="tg">if</span> (err.status === <span class="st">409</span>) <span class="tg">await</span> <span class="at">refresh</span>();   <span class="cm">// a conflict: the server's numbers, now</span>
+    <span class="tg">throw</span> err;
+  }
+}</div>
+  <p>Never patch the numbers yourself (<code>seatsLeft: 0</code>) — after "Already enrolled" or "Credit limit" the seats didn't change at all. The server knows; ask it.</p>
+  <p>Lab 3 left Enroll enabled on a full course so you'd see the server refuse. Now that you have, the disabled button is a courtesy — and only that. The rule still lives on the server, and a stale page still gets the 409. That's what step 3 is for.</p>
+
+  <div class="dothis">
+    <h4>Do this now — make each conflict happen</h4>
+    <div class="cmd"><span class="p">$</span> npx vitest run test/conflicts.test.jsx
+<span class="p">$</span> npm test                     # everything core: 34 passed</div>
+    <ol>
+      <li><strong>Someone takes the last seat.</strong> Log in as Sam and open CS501: 1 seat left. Open a private window on <code>localhost:5173</code>, log in as Riya, enroll in CS501. Back in Sam's window — without reloading — press Enroll: "This course is full…", the seats now say <em>Full</em>, the button is disabled. Network tab: the 409, then a GET of the course.</li>
+      <li><strong>Already enrolled.</strong> As Sam, enroll in CS402, then press Enroll again.</li>
+      <li><strong>Credit limit.</strong> Riya started with 18 credits, and step 1 gave her CS501: 22. As Riya, enroll in CS305 — 4 more would make 26. (Restarted the dev server since step 1? Then she's back at 18: CS305 takes her to 22, and CS402 would be 26.)</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Why may the page compare <code>err.message === "Course is full"</code>, but never <code>err.message === "No course with id 4"</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The contract fixes the first: every conforming backend sends exactly those words, so comparing them is safe — and the conformance suite checks it. The second is free wording: the mock says it one way, your backend another. Compare it and the page works against one server only. For anything not on the fixed list, compare <code>status</code>, never <code>message</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 complete — npm test is green; I've caused all three 409s</span></label>
+</section>
+
+<div class="part">Part 3 · Your own backend</div>
+
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>Pointing the app at your backend</h2><span class="lvl core">Core</span><span class="tagline">.env.local · VITE_API_URL</span></div>
+
+  <p>Every request the app makes starts with <code>API_BASE</code>, in <code>client.js</code>:</p>
+  <div class="cmd"><span class="tg">export</span> <span class="tg">const</span> API_BASE = (<span class="tg">import</span>.meta.env.VITE_API_URL ?? <span class="st">""</span>).<span class="at">replace</span>(/\/+$/, <span class="st">""</span>);
+<span class="cm">// fetch(`${API_BASE}/api/courses`)</span></div>
+  <p>So far <code>VITE_API_URL</code> was never set: <code>API_BASE</code> is <code>""</code>, the URL is just <code>/api/courses</code>, and the browser sends it to the app's own server — where Vite's mock plugin answers. One line changes that.</p>
+
+  <div class="dothis">
+    <h4>Do this now — switch to your backend</h4>
+    <ol>
+      <li>Start your Spring Boot backend on port 8080. Wait for <em>Started …Application</em>.</li>
+      <li>In VS Code, create a new file in the <code>react-lab4</code> folder — next to <code>package.json</code>, not in <code>src/</code> — named exactly <code>.env.local</code>, with one line:</li>
+    </ol>
+  </div>
+  <div class="cmd"><span class="o">VITE_API_URL=http://localhost:8080</span></div>
+  <ol start="3">
+    <li>Stop <code>npm run dev</code> and start it again. Vite reads <code>.env.local</code> when it starts, not while it runs.</li>
+    <li>Reload the page and look at the footer: <strong>API: http://localhost:8080</strong>. If it still says <em>the mock</em>, the file wasn't read — section 16 has the usual reasons.</li>
+    <li>The course list probably fails: "Can't reach the server — is your backend running?" — and it is running. The Console has a red line about <strong>CORS</strong>. That's the next two sections. (If it already works, you added CORS earlier — read on anyway.)</li>
+  </ol>
+  <p>To go back to the mock: delete <code>.env.local</code> and restart <code>npm run dev</code>. <code>npm test</code> works with or without it: the tests replace <code>fetch</code> with the in-memory mock, whatever the address.</p>
+
+  <h3>What changed — and what didn't</h3>
+  <table class="grid long-key">
+    <tr><th></th><th>The mock (no .env.local)</th><th>Your backend (VITE_API_URL set)</th></tr>
+    <tr><td>Who answers <code>/api/…</code></td><td>Vite's dev server, through the mock plugin (<code>vite.config.js</code>)</td><td>Your Spring Boot. <code>vite.config.js</code> leaves the mock plugin out when <code>VITE_API_URL</code> is set.</td></tr>
+    <tr><td>The request's URL</td><td><code>/api/courses</code> → <code>http://localhost:5173/api/courses</code></td><td><code>http://localhost:8080/api/courses</code></td></tr>
+    <tr><td>Same origin as the page?</td><td>Yes — so the browser has nothing to check</td><td><strong>No</strong> — port 8080 is another origin. The browser now checks CORS on every request.</td></tr>
+    <tr><td>Your React code</td><td colspan="2">Identical. Not one component knows which server it's talking to — that was the point of one <code>apiFetch</code> since Lab 2.</td></tr>
+  </table>
+
+  <h3>Three details worth knowing</h3>
+  <ul>
+    <li><strong>Only <code>VITE_</code> variables reach the browser.</strong> Vite pastes every <code>VITE_…</code> value into the JavaScript it sends to the browser, where anyone can read it. That's why there's a prefix: a variable without it stays on the dev server. Never put a secret in a <code>VITE_</code> variable.</li>
+    <li><strong>A trailing slash is dropped.</strong> <code>http://localhost:8080/</code> plus <code>/api/courses</code> would be <code>…8080//api/courses</code>, which Spring Security rejects. The given <code>API_BASE</code> strips it.</li>
+    <li><strong>Your first click may say "Your session has expired".</strong> <code>sessionStorage</code> still holds the mock's token, and your backend never issued it — section 04's fourth way a token dies. Section 05 handles it: log in again.</li>
+  </ul>
+
+  <div class="cue"><p class="cue-k">A known-good backend</p><p><code>npm run mock</code> runs the same mock on its own, on <strong>port 8080, with CORS</strong> for <code>http://localhost:5173</code> — like a finished backend would. Stop yours and start it when you want to know whether a problem is in the app or in your backend. Section 10 uses it.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 09 complete — the footer shows my backend's address</span></label>
+</section>
+
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>CORS — what the browser checks</h2><span class="lvl core">Core</span><span class="tagline">origins, preflights, and the headers that answer them</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>An <strong>origin</strong> is scheme + host + port. A page may <em>send</em> a request to another origin, but its JavaScript may only <em>read the answer</em> if that server says so, with <code>Access-Control-Allow-Origin</code> (<a href="js-app.html#s10">JS Lab 2 · §10</a>). <code>http://localhost:5173</code> and <code>http://localhost:8080</code> are different origins: same machine, different port.</p></div>
+
+  <h3>Why the mock never needed it</h3>
+  <p>With <code>npm run dev</code> alone, the page and the API both come from <code>http://localhost:5173</code>: one origin, nothing to check. The moment <code>API_BASE</code> points at port 8080, every request crosses origins, and the browser applies the CORS rules to each one. It's the <strong>browser</strong> that enforces them. <code>curl</code>, Postman and the conformance suite are not browsers: they never get blocked, which is why "it works in Postman" tells you nothing about CORS.</p>
+
+  <h3>Two kinds of cross-origin request</h3>
+  <table class="grid long-key">
+    <tr><th>Kind</th><th>In this app</th><th>What the browser does</th></tr>
+    <tr><td><strong>Simple</strong> — a GET (or a form-style POST) with no special headers</td><td><code>GET /api/courses</code>, <code>GET /api/courses/4</code></td><td>Sends it, with an <code>Origin</code> header. Hands the answer to your code only if the response carries <code>Access-Control-Allow-Origin</code> with your origin (or <code>*</code>).</td></tr>
+    <tr><td><strong>Preflighted</strong> — anything with an <code>Authorization</code> header, a JSON body (<code>Content-Type: application/json</code>), or PUT / DELETE</td><td>login, signup, <code>/api/users/me</code>, enroll, drop, every admin write</td><td>First asks permission with an <code>OPTIONS</code> request — the <strong>preflight</strong> — carrying no token and no body. Only if the answer allows the origin, the method and the headers does it send the real request. And the real response needs <code>Access-Control-Allow-Origin</code> too.</td></tr>
+  </table>
+  <div class="cmd"><span class="cm"># 1. the preflight — sent by the browser on its own, before your POST</span>
+<span class="o">OPTIONS /api/enrollments</span>
+<span class="o">  Origin: http://localhost:5173</span>
+<span class="o">  Access-Control-Request-Method: POST</span>
+<span class="o">  Access-Control-Request-Headers: authorization,content-type</span>
+<span class="o">→ 204  (or 200)</span>
+<span class="o">  Access-Control-Allow-Origin: http://localhost:5173</span>
+<span class="o">  Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS</span>
+<span class="o">  Access-Control-Allow-Headers: Authorization, Content-Type</span>
+<span class="o">  Access-Control-Max-Age: 3600          # remember this answer for an hour: no preflight each time</span>
+
+<span class="cm"># 2. the real request — only now</span>
+<span class="o">POST /api/enrollments</span>
+<span class="o">  Origin: http://localhost:5173</span>
+<span class="o">  Authorization: Bearer eyJhbGciOi…</span>
+<span class="o">→ 201  (or 401, 409 …)</span>
+<span class="o">  Access-Control-Allow-Origin: http://localhost:5173     # on errors too, or your code can't read the ApiError</span></div>
+  <p>Two consequences matter for your backend. <strong>The preflight carries no token</strong> — a browser never sends credentials on a preflight — so a server that demands a token on every request answers it 401, and the real request is never sent. And <strong>error responses need the header too</strong>: a 409 without it reaches your code as a <code>NetworkError</code>, not as the <code>ApiError</code> with the server's message.</p>
+  <p>CORS doesn't protect your API: anyone can call it with <code>curl</code>, and only your 401s and 403s stop them. It protects <em>people</em>: it stops some other website, open in their browser, from reading your API's answers on their behalf.</p>
+
+  <div class="dothis">
+    <h4>Do this now — watch it work, then break it on purpose</h4>
+    <p>Stop your backend for a moment (it uses port 8080). With <code>.env.local</code> still pointing at <code>http://localhost:8080</code>:</p>
+    <ol>
+      <li>Terminal 1: <code>npm run mock</code> — the mock on its own, on 8080, allowing <code>http://localhost:5173</code>. Terminal 2: <code>npm run dev</code>.</li>
+      <li>Open <code>localhost:5173</code>, Network tab, filter <strong>All</strong>. Log in. Before the <code>login</code> POST you'll see an <code>OPTIONS</code> row for the same URL — Chrome labels its type <em>preflight</em>. Click it: the request headers ask, the response headers allow. The <code>GET /api/courses</code> row has no preflight: it's a simple request.</li>
+      <li>Now be another origin. Terminal 3: <code>npx vite --port 5174</code>, and open <code>localhost:5174</code>. The list fails: "Can't reach the server — is your backend running?" The Console says why:</li>
+    </ol>
+  </div>
+  <div class="cmd"><span class="o">Access to fetch at 'http://localhost:8080/api/courses' from origin 'http://localhost:5174' has been</span>
+<span class="o">blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.</span></div>
+  <ol start="4">
+    <li>On 5174, try to log in. A preflighted request fails earlier, at the preflight:</li>
+  </ol>
+  <div class="cmd"><span class="o">Access to fetch at 'http://localhost:8080/api/auth/login' from origin 'http://localhost:5174' has been</span>
+<span class="o">blocked by CORS policy: Response to preflight request doesn't pass access control check:</span>
+<span class="o">No 'Access-Control-Allow-Origin' header is present on the requested resource.</span></div>
+  <ol start="5">
+    <li>In the Network tab the row's status says <strong>CORS error</strong>. The server <em>did</em> answer — the mock doesn't know or care which port you're on — and the browser refused to hand the answer to your code. Same machine, same code, one digit different. Stop the 5174 server (<kbd>Ctrl</kbd>+<kbd>C</kbd>). The same would happen to the app opened as <code>http://127.0.0.1:5173</code>: to a browser that's another origin than <code>http://localhost:5173</code>, even though it's the same computer.</li>
+    <li>Stop <code>npm run mock</code> and start your own backend again.</li>
+  </ol>
+  <p>This is also why the lab's <code>vite.config.js</code> sets <code>strictPort: true</code>: if 5173 is busy, Vite stops with an error instead of quietly moving to 5174, where every request would be blocked.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Your login works from <code>curl</code> but fails in the browser with a CORS error. Which side do you fix?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The server. A CORS error is the browser enforcing what the server's headers say (or don't). Nothing in your <code>fetch</code> can grant permission — options like <code>mode: "no-cors"</code> only make the response unreadable on purpose. <code>curl</code> works because it isn't a browser and doesn't check.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Why is <code>GET /api/users/me</code> preflighted, when <code>GET /api/courses</code> isn't?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The <code>Authorization</code> header. A GET with only ordinary headers is a simple request; adding <code>Authorization</code> makes the browser ask first.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 complete — I've seen a preflight, and caused and read a CORS error</span></label>
+</section>
+
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>CORS in Spring Boot</h2><span class="lvl core">Core</span><span class="tagline">SecurityConfig · a CorsConfigurationSource bean</span></div>
+
+  <p>The contract's CORS rule (<code>openapi.yaml</code>, last section of the description): for origin <code>http://localhost:5173</code>, allow methods <code>GET, POST, PUT, DELETE, OPTIONS</code> and headers <code>Authorization, Content-Type</code>; a preflight answers 200 or 204 with <code>Access-Control-Allow-Origin</code>; every actual response repeats it. In a Spring Boot app with Spring Security, that's two small changes to your <code>SecurityConfig</code>.</p>
+
+  <h3>1 — a CorsConfigurationSource bean</h3>
+  <div class="cmd"><span class="tg">import</span> java.util.List;
+<span class="tg">import</span> org.springframework.web.cors.CorsConfiguration;
+<span class="tg">import</span> org.springframework.web.cors.CorsConfigurationSource;
+<span class="tg">import</span> org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+@Bean
+public CorsConfigurationSource <span class="at">corsConfigurationSource</span>() {
+    CorsConfiguration config = <span class="tg">new</span> <span class="at">CorsConfiguration</span>();
+    config.<span class="at">setAllowedOrigins</span>(List.<span class="tg">of</span>(<span class="st">"http://localhost:5173"</span>));       <span class="cm">// exactly: no trailing slash</span>
+    config.<span class="at">setAllowedMethods</span>(List.<span class="tg">of</span>(<span class="st">"GET"</span>, <span class="st">"POST"</span>, <span class="st">"PUT"</span>, <span class="st">"DELETE"</span>, <span class="st">"OPTIONS"</span>));
+    config.<span class="at">setAllowedHeaders</span>(List.<span class="tg">of</span>(<span class="st">"Authorization"</span>, <span class="st">"Content-Type"</span>));
+    config.<span class="at">setMaxAge</span>(3600L);                                           <span class="cm">// browsers may cache the preflight</span>
+    UrlBasedCorsConfigurationSource source = <span class="tg">new</span> <span class="at">UrlBasedCorsConfigurationSource</span>();
+    source.<span class="at">registerCorsConfiguration</span>(<span class="st">"/api/**"</span>, config);
+    <span class="tg">return</span> source;
+}</div>
+
+  <h3>2 — turn it on in the security filter chain</h3>
+  <div class="cmd"><span class="tg">import</span> org.springframework.security.config.Customizer;
+
+@Bean
+public SecurityFilterChain <span class="at">securityFilterChain</span>(HttpSecurity http) throws Exception {
+    http
+        .<span class="at">cors</span>(Customizer.<span class="at">withDefaults</span>())      <span class="cm">// ← new: uses the CorsConfigurationSource bean above</span>
+        .<span class="at">csrf</span>(csrf -&gt; csrf.<span class="at">disable</span>())
+        <span class="cm">// … your session policy, authorizeHttpRequests, JWT filter — unchanged …</span>
+    <span class="tg">return</span> http.<span class="at">build</span>();
+}</div>
+  <p><code>.cors(…)</code> puts Spring's <code>CorsFilter</code> at the <em>front</em> of the security filter chain. From there it does two things: it answers every preflight itself, before authentication is even looked at — so a preflight with no token gets its 200, not a 401 — and it adds <code>Access-Control-Allow-Origin</code> to every response that comes back through the chain, the 401s and 403s from the security layer included. Restart your backend and reload the app: the course list loads, login works.</p>
+
+  <h3>Why @CrossOrigin isn't enough</h3>
+  <p>You may have seen <code>@CrossOrigin(origins = "http://localhost:5173")</code> on a controller, or a <code>WebMvcConfigurer</code> with <code>addCorsMappings</code>. Both belong to Spring MVC, which runs <em>after</em> Spring Security. A preflight has no token; with <code>anyRequest().authenticated()</code>, Security answers it 401 before MVC — and your annotation — ever sees it. Security's own 401 and 403 responses never pass through MVC either, so they'd go out without the header, and the app couldn't read them. Once Security is in the picture, CORS belongs in Security. Keep it in that one place: if you had <code>@CrossOrigin</code> or <code>addCorsMappings</code> before, remove them. With <code>.cors(…)</code> they're dead code — Spring's CORS handling skips a response that already has the header — and dead configuration misleads the next person who reads it. What <em>does</em> send the header twice, which browsers reject, is a hand-written filter or a <code>setHeader("Access-Control-Allow-Origin", …)</code> next to <code>.cors(…)</code>.</p>
+
+  <div class="cue watch"><p class="cue-k">Don't add allowCredentials</p><p><code>setAllowCredentials(true)</code> is for cookies. This app sends its token in a header, so it doesn't need it. And never combine it with <code>"*"</code> as the origin: Spring refuses that combination with an <code>IllegalArgumentException</code> on every request (you'll see 500s), and browsers would refuse it anyway.</p></div>
+
+  <h3>Check it with curl — the same questions a browser asks</h3>
+  <div class="cmd"><span class="p">$</span> curl -i -X OPTIONS http://localhost:8080/api/enrollments \
+<span class="o">    -H "Origin: http://localhost:5173" \</span>
+<span class="o">    -H "Access-Control-Request-Method: POST" \</span>
+<span class="o">    -H "Access-Control-Request-Headers: authorization,content-type"</span>
+<span class="o">HTTP/1.1 200</span>
+<span class="o">Access-Control-Allow-Origin: http://localhost:5173</span>
+<span class="o">Access-Control-Allow-Methods: GET,POST,PUT,DELETE,OPTIONS</span>
+<span class="o">Access-Control-Allow-Headers: authorization, content-type</span>
+<span class="o">Access-Control-Max-Age: 3600</span>
+
+<span class="p">$</span> curl -i http://localhost:8080/api/users/me -H "Origin: http://localhost:5173"
+<span class="o">HTTP/1.1 401</span>
+<span class="o">Access-Control-Allow-Origin: http://localhost:5173        # even on the security layer's 401</span></div>
+  <p>The exact spelling and order of the values may differ from this; what matters is that each header is there and allows what you asked. If the first command gives a <code>401</code>, Security is still answering preflights — <code>.cors(…)</code> is missing, or isn't in the chain your requests use. (On Windows PowerShell, type <code>curl.exe</code> instead of <code>curl</code>, and put each command on one line without the <code>\</code> — or run these in Git Bash.)</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 complete — both curl checks show the header; the app loads from my backend</span></label>
+</section>
+
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>The gate — conformance level C</h2><span class="lvl core">Core</span><span class="tagline">esd-labs/api-contract · conformance-report.txt</span></div>
+
+  <p>"It works when I click around" covers the paths you clicked. The conformance suite from the <a href="api-contract.html">backend contract</a> pack checks every rule the app relies on — the 409 messages, the credit limit, logout revocation, auth before body — and, since this lab, CORS: it sends the same preflights and <code>Origin</code> headers a browser would and checks what comes back. Level C plus CORS is the gate for this lab's backend part, which is graded on its own (section 18).</p>
+  <div class="cmd"><span class="p">$</span> cd esd-labs/api-contract
+<span class="p">$</span> npm run conformance                 # your backend on :8080 — levels A to C, plus CORS
+<span class="o">…</span>
+<span class="o">CORS — Browser access from http://localhost:5173</span>
+<span class="o">  ✓ X01  preflight: GET /api/courses with an Authorization header → allowed</span>
+<span class="o">  ✓ X02  preflight: POST /api/courses with Authorization and Content-Type → allowed</span>
+<span class="o">  ✓ X03  preflight: PUT /api/courses/1 → allowed</span>
+<span class="o">  ✓ X04  preflight: POST /api/enrollments → allowed (a preflight carries no token, so it must not be 401)</span>
+<span class="o">  ✓ X05  preflight: DELETE /api/enrollments/1 → allowed</span>
+<span class="o">  ✓ X06  GET /api/courses from the app's origin → the response carries Access-Control-Allow-Origin</span>
+<span class="o">  ✓ X07  an error response carries it too (404), so the app can read the ApiError</span>
+<span class="o">  ✓ X08  a 401 from the security layer carries it too</span>
+
+<span class="o">Level A ✓  Level B ✓  Level C ✓  Level D —  CORS ✓</span>
+<span class="o">Ready for React Lab 4 ✓ — CORS too</span></div>
+  <p>Read the CORS lines against sections 10 and 11: X04 is the "preflight must not be 401" rule; X07 and X08 are "error responses need the header too". Each failure prints the request, what was expected, what came back, and a hint. Fix the first failure first. The rest of the output is explained in the contract pack (<a href="api-contract.html#s15">§15 Reading the suite's output</a>).</p>
+
+  <h3>Save the report — it's part of your submission</h3>
+  <p>When the summary shows <strong>A, B, C and CORS all ✓</strong>, run it once more and save the output into this lab's folder:</p>
+  <div class="cmd"><span class="cm"># macOS / Linux — from esd-labs/api-contract</span>
+<span class="p">$</span> npm run -s conformance -- --level C &gt; ../react-lab4/conformance-report.txt
+
+<span class="cm"># Windows (PowerShell) — from esd-labs\api-contract</span>
+<span class="p">$</span> cmd /c "npm run -s conformance -- --level C &gt; ..\react-lab4\conformance-report.txt"</div>
+  <p>On Windows it goes through <code>cmd</code> on purpose: PowerShell decodes a program's output with the console's old code page before writing it, which turns ✓, ✗ and — into junk; <code>cmd</code>'s <code>&gt;</code> writes the bytes as they are.</p>
+  <p>Open <code>react-lab4/conformance-report.txt</code> and check the summary at the end. Run it again whenever you change your backend, so the file you submit is from the backend you have. The suite changes data while it runs (it signs up a few accounts and creates and deletes its own courses), so restart your backend afterwards if you want the seed data exactly as it was.</p>
+
+  <div class="stretch-box">
+    <h3>Stretch — a second opinion</h3>
+    <p>The contract pack shows how to run <strong>Schemathesis</strong> against your backend (<a href="api-contract.html#s17">§17</a>): it generates hundreds of odd requests from <code>openapi.yaml</code> and finds the 500s you never imagined. Run it after the suite is green, against a database you can throw away.</p>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 12 complete — A, B, C and CORS ✓; conformance-report.txt is in react-lab4</span></label>
+</section>
+
+<section id="s13">
+  <div class="shead"><span class="chip">13</span><h2>End to end — two windows and the Network tab</h2><span class="lvl core">Core</span><span class="tagline">the walk-through, against your backend</span></div>
+
+  <p>The suite proves your backend keeps the contract. This proves the <em>app</em> and your backend work together, in a real browser, with two people using them at once. Use two windows that don't share a session: a normal one for the <strong>admin</strong> (A) and a private/incognito one for the <strong>student</strong> (B) — or two browser profiles. (Each tab has its own <code>sessionStorage</code>, so two plain tabs would work too — but separate windows keep it obvious who's who.)</p>
+  <p>In both, open the Network tab with filter <strong>All</strong> and tick <strong>Preserve log</strong>, so requests stay listed when the app moves you to the login page.</p>
+
+  <table class="grid long-key">
+    <tr><th>Do</th><th>See — on the page, and in the Network tab</th></tr>
+    <tr><td>B: open the course list</td><td>The 20 seeded courses. <code>GET /api/courses</code> 200, <em>no</em> preflight; Response Headers include <code>Access-Control-Allow-Origin: http://localhost:5173</code>.</td></tr>
+    <tr><td>B: CS402 → Enroll → log in as Sam</td><td>A preflight, then <code>POST /api/auth/login</code> 200; a preflight, then <code>GET /api/users/me</code> with <code>Authorization: Bearer …</code>. Back on CS402.</td></tr>
+    <tr><td>B: Enroll</td><td>"You're enrolled.", 2 seats left. <code>POST /api/enrollments</code> 201; the Response is the enrollment, with the course's new <code>seatsLeft</code>.</td></tr>
+    <tr><td>A: log in as the admin → CS402 → Edit course → capacity <strong>1</strong> → Save changes</td><td>Saved: capacity 1, Full. (Edit course is built in the lab, section 15. Until then, do this step with your backend's Swagger UI or Postman, as the admin.)</td></tr>
+    <tr><td>B: reload CS402</td><td><em>Full</em>, Enroll disabled — the admin's change, through your backend, in the student's window.</td></tr>
+    <tr><td>A: enroll the admin in CS305, B: enroll Sam in CS305; then A: Edit CS305 → capacity 1</td><td>The form shows your backend's 409 and its message, through the app. The wording is your backend's own (the mock says "Capacity is below current enrollments"): only the contract's seven fixed messages are fixed.</td></tr>
+    <tr><td>B: enroll Sam in 4-credit courses until My courses says <em>24 of 24 credits</em>, then try one more</td><td>"Enrolling would take you over the 24-credit limit…", with a link to My courses. Your backend's 409 message matched the contract word for word — or the page would show it raw.</td></tr>
+    <tr><td>B: duplicate the tab; in the copy, Log out; back in the original, click My courses</td><td>The login page: "Your session has expired — log in again". <code>GET /api/users/me/enrollments</code> 401: your backend revoked the token. Log in: back on My courses.</td></tr>
+    <tr><td>B: sign up with a bad email, then a good one</td><td>Your backend's own wording under the Email field; then logged in as the new account.</td></tr>
+    <tr><td>Stop your backend; B: reload</td><td>"Can't reach the server — is your backend running?" — and the Console shows <code>net::ERR_CONNECTION_REFUSED</code>, with no CORS line. Start it again.</td></tr>
+  </table>
+
+  <div class="stretch-box">
+    <h3>Stretch — real expiry, from your own backend</h3>
+    <p>Set your backend's token lifetime to 60 seconds — whichever property your JWT code reads it from (something like <code>jwt.expiration</code>, or <code>app.jwt.expiry-seconds</code>) — and restart it. Log in, wait a minute, click My courses: the login page, with the message. The login response's <code>expiresIn</code> should now say 60. Set it back afterwards.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Restarting <code>npm run dev</code> ended your session against the mock. Does restarting <em>your</em> backend do the same?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Usually not. Your backend signs tokens with a secret from its configuration, the same after every restart, so old tokens still check out until they expire. What a restart may forget is the logout deny-list, if it's kept in memory — so a token that was logged out could work again. Try it, and say what your backend does.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 13 complete — every row works against my backend (the admin edit row after the lab)</span></label>
+</section>
+
+<div class="part">Part 4 · The lab</div>
+
+<section id="s14">
+  <div class="shead"><span class="chip">14</span><h2>In the lab</h2><span class="lvl core">Core</span><span class="tagline">doubts, deeper, your backend, one AI task</span></div>
+
+  <p>The lab assumes you've finished the core sections — ideally including 09–12 against your own backend. It runs like this:</p>
+  <ol>
+    <li>We <strong>scroll through the core sections</strong> together at the projector — stop us anywhere with a question (raise a hand).</li>
+    <li><strong>One level deeper</strong>: a preflight, live, in the Network tab; what each CORS error message means and where its fix lives; why the 401 rule lives in one place, and what the alternatives cost; what changes when the API is on another domain in production.</li>
+    <li><strong>Your backend, end to end</strong>: TAs walk the room while you finish sections 11–13. Three questions find most problems: <em>What does the footer say? Is there a red CORS line in the Console? What did the server actually answer?</em></li>
+    <li><strong>The in-lab task, with AI</strong>: edit and delete a course — section 15. Then the admin rows of section 13.</li>
+    <li><strong>What's next.</strong> The OAuth lab adds "Sign in with Google" to this same app, against your backend: Google's token goes to <code>POST /api/auth/google</code>, your backend checks it and issues its own JWT, and the session ends up in the same <code>AuthContext</code> — expiry handling, <code>api</code> and all. CORS has to be working for that, so finish it here.</li>
+  </ol>
+  <div class="cue calm"><p class="cue-k">Held loosely</p><p>This session is the course's buffer. If the schedule has slipped, your TAs may use it to catch up on an earlier lab or to start the mini-project instead. They'll say so when the lab is announced; the pre-lab and the submission stay as they are unless they say otherwise.</p></div>
+  <div class="cue work"><p class="cue-k">Bring</p><p>Your laptop with <code>esd-labs/react-lab4</code>, <code>npm test</code> as green as you could get it, <strong>your backend running at level C</strong> (CORS too, if you got there), and access to an AI assistant (a free account is enough) for section 15.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 14 read</span></label>
+</section>
+
+<section id="s15">
+  <div class="shead"><span class="chip">15</span><h2>The in-lab task — edit and delete a course, with AI</h2><span class="lvl core">Core</span><span class="tagline">inlab/ · npm run inlab</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>The method from Labs 2 and 3: give the AI a precise contract and a constraint prompt, then <em>judge</em> what comes back — nothing missing, nothing extra, nothing from the "not yet" list — and keep a prompt log (<a href="react-lab2.html#s11">React Lab 2 · §11–14</a>, <a href="react-lab3.html#s15">React Lab 3 · §15</a>). Start only when <code>npm test</code> is green.</p></div>
+
+  <h3>The task</h3>
+  <p>Admins can create courses (Lab 3); now they can change and remove them. The full spec is <code>inlab/CONTRACT.md</code>; in short:</p>
+  <ul>
+    <li><strong><code>AddCourseForm</code></strong> learns to edit: three optional props — <code>initial</code> (a course to start from), <code>heading</code>, <code>submitLabel</code>. Without them, it behaves exactly as before: the New course page mustn't change.</li>
+    <li><strong><code>useCourse</code></strong> gets <code>update(draft)</code> — <code>PUT /api/courses/{id}</code> with the whole course — and <code>remove()</code> — <code>DELETE</code>. Both through <code>api</code>.</li>
+    <li><strong><code>EditCoursePage</code></strong> at <code>/admin/courses/:id/edit</code>, admins only: "Edit CS402", the form filled in, <em>Save changes</em>; and <em>Delete course</em>, which asks first.</li>
+    <li>An <strong>"Edit course"</strong> link on the course page, for admins only, and the route in <code>App.jsx</code>.</li>
+  </ul>
+  <p>Before you prompt anything, write one line in <code>inlab/PROMPTS.md</code>: why should the form start from the course with <code>useState</code>'s initial value, and not with a <code>useEffect</code> that copies <code>initial</code> into state? (An effect that copies props into state runs <em>after</em> a render with the wrong values, and re-runs and overwrites what the admin typed whenever the prop changes. <code>useState(() =&gt; …)</code> runs once, before the first render. The page simply renders the form once the course has loaded.)</p>
+
+  <h3>The prompt</h3>
+  <p>Paste this constraint first, unchanged, then your request, <code>inlab/CONTRACT.md</code>, and the files it lists:</p>
+  <blockquote class="prompt">You are helping a student in a React lab. Use only what the lab has taught: React's useState, useEffect, custom hooks, context (createContext/useContext), and React Router 7 (react-router package, library mode). Do not use useMemo, useCallback, useReducer or useRef. Do not add any library or package. JavaScript with JSX, no TypeScript. Do not call fetch or apiFetch directly — every request goes through useAuth().api, inside the useCourse hook. Reuse AddCourseForm; do not write a second form. Do not copy props into state with useEffect. Change only the five files named in the contract, and show each one in full.</blockquote>
+
+  <h3>Judge it — before you run it</h3>
+  <table class="grid long-key">
+    <tr><th>Look for</th><th>Why it's wrong here</th></tr>
+    <tr><td>A second form component (<code>EditCourseForm</code>) copied from <code>AddCourseForm</code></td><td>Two forms to keep in step, and the copy loses Lab 2's <code>fieldErrors</code> handling sooner or later. One form, three optional props.</td></tr>
+    <tr><td><code>useEffect(() =&gt; setForm(…initial…), [initial])</code></td><td>Props copied into state by an effect: a render with empty fields first, and the admin's typing overwritten if <code>initial</code> changes. Use <code>useState</code>'s initial value; render the form after the course has loaded.</td></tr>
+    <tr><td><code>onAdd</code> renamed to <code>onSubmit</code> or <code>onSave</code></td><td>Breaks the New course page, which passes <code>onAdd</code>. The in-lab tests check New course still works.</td></tr>
+    <tr><td>A PUT body with only the changed fields</td><td>The contract says PUT is a full replacement: every field is required except <code>description</code>, which becomes <code>null</code> when left out. The form already builds the whole course.</td></tr>
+    <tr><td><code>fetch</code> or <code>apiFetch</code> with a hand-built <code>Authorization</code> header in the page</td><td>Skips <code>api</code>: no 401 handling, a second place that knows about tokens. Requests go through the hook, the hook goes through <code>api</code>.</td></tr>
+    <tr><td>A <code>try/catch</code> around <code>update</code> in the page</td><td>The form shows the errors <em>it</em> catches. Catch it in the page and the 409 "Capacity is below current enrollments" silently disappears.</td></tr>
+    <tr><td><code>window.location.href = "/"</code> after deleting</td><td>A full page load (<a href="react-lab3.html#s4">React Lab 3 · §04</a>). Use <code>navigate("/")</code>.</td></tr>
+    <tr><td>Removing the course from some list before the DELETE answers</td><td>If the server says 403 or 404, the page now shows something false. Wait for the 204.</td></tr>
+    <tr><td>The role read from the token, or a new <code>RoleContext</code></td><td><code>user.role</code> is in <code>useAuth()</code> already; <code>RequireRole</code> exists. And the API's 403 is what protects the data.</td></tr>
+  </table>
+
+  <h3>Check it — run it, then use it against your backend</h3>
+  <div class="cmd"><span class="p">$</span> npm run inlab          # the in-lab tests: inlab/edit-course.test.jsx
+<span class="p">$</span> npm test               # still green?</div>
+  <p>Then by hand, with <code>.env.local</code> pointing at your backend: as the admin, change CS402's capacity and land on its page with the new numbers; set a capacity below a course's enrollments and see your backend's 409 in the form; enter <code>cs-402</code> as the code and see your backend's <code>fieldErrors</code> message under Code; delete a course you created. In the Network tab, look at the PUT's request body: the whole course. As the student: no Edit link, and the edit URL says "You don't have access". Write one line in <code>PROMPTS.md</code> about what you checked and saw — then do the admin rows of section 13.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b><code>EditCoursePage</code> shows "Loading course…" until the course arrives, and only then renders <code>&lt;AddCourseForm initial={course} … /&gt;</code>. What would go wrong if it rendered the form straight away, with <code>initial={course}</code> still <code>null</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>useState</code>'s initial value is used once, on the first render. The form would start empty and stay empty when the course arrived a moment later — which is exactly the bug people "fix" with an effect that copies props into state. Rendering the form only once the data is there removes the problem instead of patching it.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 15 complete — npm run inlab green, PROMPTS.md filled in, tried against my backend</span></label>
+</section>
+
+<section id="s16">
+  <div class="shead"><span class="chip">16</span><h2>When it goes wrong</h2><span class="lvl ref">Reference</span><span class="tagline">the message, and what it means</span></div>
+
+  <h3>CORS — read the Console line, then fix the server</h3>
+  <table class="grid long-key">
+    <tr><th>The Console says</th><th>It usually means</th></tr>
+    <tr><td>…has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.</td><td>Your backend sent no CORS header for this origin. CORS isn't configured, or not for the origin you're on (check the address bar), or the path isn't covered (<code>/api/**</code>). If it's only on error responses — a 401, 404 or 409 — the error was written somewhere CORS doesn't reach (conformance X07, X08) (11).</td></tr>
+    <tr><td>…Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present…</td><td>The <code>OPTIONS</code> preflight got no CORS headers — almost always Spring Security answering it 401 before any CORS config ran. <code>.cors(…)</code> is missing from your <code>SecurityConfig</code>, or you only have <code>@CrossOrigin</code> on controllers (11).</td></tr>
+    <tr><td>…Response to preflight request doesn't pass access control check: It does not have HTTP ok status.</td><td>The preflight got CORS headers but a non-2xx status (401, 403, 405). Something after the CORS handling rejects <code>OPTIONS</code> — often a hand-written JWT filter that demands a token on every request. With <code>.cors(…)</code>, Spring answers preflights before your filter runs; check the filter isn't registered ahead of it.</td></tr>
+    <tr><td>…The 'Access-Control-Allow-Origin' header has a value 'http://localhost:5173' that is not equal to the supplied origin.</td><td>Your backend is right; the page is on another origin. <code>http://127.0.0.1:5173</code> instead of <code>localhost</code>, or another port. Open <code>http://localhost:5173</code> (10).</td></tr>
+    <tr><td>…The 'Access-Control-Allow-Origin' header contains multiple values 'http://localhost:5173, http://localhost:5173', but only one is allowed.</td><td>Two pieces of code each add the header. It isn't <code>@CrossOrigin</code> next to <code>.cors(…)</code>: Spring's own CORS handling skips a response that already has the header. Look for a hand-written filter, or a <code>setHeader("Access-Control-Allow-Origin", …)</code>, alongside <code>.cors(…)</code>. Remove it; keep the Security config (11).</td></tr>
+    <tr><td>…Request header field authorization is not allowed by Access-Control-Allow-Headers in preflight response.</td><td>Add <code>Authorization</code> (and <code>Content-Type</code>) to the allowed headers.</td></tr>
+    <tr><td>…Method PUT is not allowed by Access-Control-Allow-Methods in preflight response.</td><td>Add the method — the contract needs <code>GET, POST, PUT, DELETE, OPTIONS</code>.</td></tr>
+    <tr><td>…must not be the wildcard '*' when the request's credentials mode is 'include'.</td><td>Someone added <code>credentials: "include"</code> to a <code>fetch</code>. This app doesn't use cookies; remove it. (And on the server, <code>"*"</code> with <code>allowCredentials(true)</code> makes Spring throw on every request — 500s.)</td></tr>
+    <tr><td>The allowed origin is set, and it still never matches</td><td>A trailing slash: <code>"http://localhost:5173/"</code>. An origin has no path — not even <code>/</code>.</td></tr>
+  </table>
+
+  <h3>The app and its address</h3>
+  <table class="grid long-key">
+    <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>"Can't reach the server — is your backend running?" and <strong>no</strong> CORS line in the Console; the Network tab says <code>net::ERR_CONNECTION_REFUSED</code></td><td>Nothing is listening there: the backend isn't running, crashed at startup, or is on another port than <code>VITE_API_URL</code> says (03).</td></tr>
+    <tr><td>"Can't reach the server…" <strong>and</strong> a CORS line</td><td>The server answered; the browser hid it. The table above.</td></tr>
+    <tr><td>"Failed to fetch" on a page</td><td>Section 03 isn't done: <code>apiFetch</code> lets <code>fetch</code>'s <code>TypeError</code> through.</td></tr>
+    <tr><td>The footer still says <em>the mock</em> after creating <code>.env.local</code></td><td>The file wasn't read. It must sit next to <code>package.json</code>; be named exactly <code>.env.local</code> (Windows may have saved <code>.env.local.txt</code> — turn on file extensions); the variable must start with <code>VITE_</code>; and you must restart <code>npm run dev</code>. If you created it with PowerShell's <code>echo … &gt;</code>, it's UTF-16 and Vite can't read it: create it in VS Code (09).</td></tr>
+    <tr><td><code>Unexpected token '&lt;', "&lt;!doctype "... is not valid JSON</code></td><td>The app got an HTML page instead of JSON: <code>VITE_API_URL</code> points at the Vite server itself (<code>:5173</code>), which answers unknown paths with <code>index.html</code>. Set it to your backend's address.</td></tr>
+    <tr><td>Requests to <code>…8080//api/courses</code>, and a 400 "potentially malicious String "//""</td><td>A trailing slash on the base URL, in code that doesn't strip it. The given <code>API_BASE</code> does (09).</td></tr>
+    <tr><td>Red lines like "Failed to load resource: the server responded with a status of 409 (Conflict)"</td><td>The browser logs every 4xx and 5xx response. That's not your code crashing; the page shows what happened. Look at the request's Response tab.</td></tr>
+    <tr><td>Error: Port 5173 is already in use</td><td>Another dev server (Lab 3's?) is still running. Stop it. The lab sets <code>strictPort</code> so Vite won't drift to a port CORS doesn't allow (10).</td></tr>
+  </table>
+
+  <h3>Sessions and tokens</h3>
+  <table class="grid long-key">
+    <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>"Your session has expired" the first time you use your backend</td><td>Expected: <code>sessionStorage</code> held the mock's token. Log in again (09).</td></tr>
+    <tr><td>"Couldn't load your courses: Authentication required" while the header says you're logged in</td><td>That call doesn't go through <code>api</code> — it's still <code>apiFetch(…, { token })</code> (06).</td></tr>
+    <tr><td>"Your session has expired" after clicking <em>Log out</em>, or after a wrong password</td><td><code>logout</code> or <code>login</code> goes through <code>api</code>, or <code>apiFetch</code> calls <code>onUnauthorized</code> for a request without a token. Only logged-in calls use <code>api</code>; the check needs <code>token &amp;&amp;</code> (05–06).</td></tr>
+    <tr><td>Straight back to the login page right after logging in, every time</td><td>Your backend refuses its own new token: <code>/api/users/me</code> answers 401. Look at that request in the Network tab — a mismatch between how your backend signs tokens and how it checks them, or the role claim.</td></tr>
+    <tr><td>The course list fails with 401 against your backend, but not against the mock</td><td>An expired token is being sent to a public endpoint, and your backend (Spring's resource server does this) rejects any bad Bearer token, even on <code>permitAll</code> paths. Public reads use plain <code>apiFetch</code>, with no token (06).</td></tr>
+    <tr><td>"Your session has expired" every minute</td><td>Your backend's token lifetime is still short from section 13's stretch. Check <code>expiresIn</code> in the login response.</td></tr>
+    <tr><td>After a token dies, <kbd>Back</kbd> from the login page bounces you straight back to it</td><td><code>sessionExpired</code> navigates without <code>replace: true</code> (05).</td></tr>
+  </table>
+
+  <h3>Forms and conflicts</h3>
+  <table class="grid long-key">
+    <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>Only "Validation failed", never a message under a field</td><td>The page doesn't read <code>err.fieldErrors</code> — or your backend sends <code>fieldErrors: null</code> for a 400 (conformance B12–B13) (07).</td></tr>
+    <tr><td>The browser's own bubble ("Please include an '@'…") instead of the server's message</td><td><code>type="email"</code> without <code>noValidate</code> on the form (07).</td></tr>
+    <tr><td>Test: expected element to have description "must be …"</td><td>The message is on screen, but not tied to its input: <code>aria-describedby</code> must name the message's <code>id</code> (07).</td></tr>
+    <tr><td>"This course is full" — and the seats still say "1 seat left"</td><td><code>enroll()</code> doesn't <code>await refresh()</code> after a 409 (08).</td></tr>
+    <tr><td>Your backend's 409 shows raw ("Course full") instead of the page's sentence</td><td>Your backend's wording differs from the contract's fixed message. Fix the backend; conformance level C checks it (08).</td></tr>
+    <tr><td>The edit form is empty, or shows the previous course (in-lab)</td><td>The form rendered before the course arrived, so <code>useState</code>'s initial value was <code>null</code>. Render it after loading (15).</td></tr>
+  </table>
+
+  <div class="cue"><p class="cue-k">How to debug an integration problem</p><p>Three questions, in order. <strong>Which server?</strong> The footer. <strong>Did the browser hide the answer?</strong> The Console: a CORS line means yes, and the fix is on the server. <strong>What did the server say?</strong> The Network tab: the request's headers (<code>Origin</code>, <code>Authorization</code>), its status, its Response. Then, if it's the backend, reproduce it with <code>curl</code> or the conformance suite — no browser in the way.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 16 read</span></label>
+</section>
+
+<section id="s17">
+  <div class="shead"><span class="chip">17</span><h2>Practice run, unaided</h2><span class="lvl stretch">Stretch</span><span class="tagline">not graded</span></div>
+
+  <p>Answer each before you open it. A wrong answer is information: go back to the section it came from.</p>
+
+  <div class="quiz">
+    <div class="q"><b>P1</b>The page is on <code>http://localhost:5173</code>, the API on <code>http://localhost:8080</code>. Which requests are preflighted?
+      <ol type="a"><li><code>GET /api/courses</code></li><li><code>GET /api/users/me</code> with an <code>Authorization</code> header</li><li><code>POST /api/auth/login</code> with a JSON body</li><li>b and c</li></ol></div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>d.</strong> <code>Authorization</code> and a JSON <code>Content-Type</code> each make a request non-simple. A plain GET isn't preflighted — but its response still needs <code>Access-Control-Allow-Origin</code>.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P2</b>When does <code>fetch</code> reject?
+      <ol type="a"><li>On a 500</li><li>On a 401</li><li>When the server is down, or the browser blocks the response</li><li>On any status that isn't 2xx</li></ol></div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>c.</strong> Every status is a response, and <code>fetch</code> resolves for it. That's why <code>apiFetch</code> checks <code>res.ok</code>, and why a CORS block looks like a network failure.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P3</b>Login with a wrong password answers 401. Should <code>apiFetch</code> call <code>onUnauthorized</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No — and it doesn't, because no token was sent. A 401 is an expired <em>session</em> only when the request carried a token.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P4</b>You changed <code>.env.local</code> to a new port, reloaded the page, and the footer shows the old address. Why?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Vite reads <code>.env.local</code> when it starts, and pastes the value into the code it serves. Restart <code>npm run dev</code>, then reload.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P5</b>Your backend has <code>@CrossOrigin(origins = "http://localhost:5173")</code> on every controller, and the course list loads — but login fails with a CORS error. Why the difference?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>GET /api/courses</code> is a simple request to a public endpoint: it reaches the controller, and the annotation adds the header. Login is preflighted: the <code>OPTIONS</code> has no token and Spring Security answers it before MVC — no header. Configure CORS in Security (section 11) and remove the annotations.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>P6</b>A <code>NetworkError</code> on a logged-in request — should it end the session too?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No. The server never said anything about the token; it may just be restarting. Logging the person out would throw away a session that's probably still fine. Only the server's 401 ends it.</p></div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>W1</b>From a blank file: the <code>try/catch</code> in <code>apiFetch</code> that turns "no answer" into a <code>NetworkError</code>, and the line that calls <code>onUnauthorized</code>.</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd"><span class="tg">let</span> res;
+<span class="tg">try</span> {
+  res = <span class="tg">await</span> <span class="at">fetch</span>(<span class="st">`${API_BASE}${path}`</span>, init);
+} <span class="tg">catch</span> (err) {
+  <span class="tg">throw</span> <span class="tg">new</span> <span class="at">NetworkError</span>(err);
+}
+<span class="tg">if</span> (!res.ok) {
+  <span class="tg">const</span> error = <span class="tg">await</span> <span class="at">toApiError</span>(res);
+  <span class="tg">if</span> (res.status === <span class="st">401</span> &amp;&amp; token &amp;&amp; onUnauthorized) <span class="at">onUnauthorized</span>();
+  <span class="tg">throw</span> error;
+}</div>
+    </div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>W2</b>From a blank file: the Spring <code>CorsConfigurationSource</code> bean for this contract, and the one line that turns it on in the security chain.</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd">@Bean
+public CorsConfigurationSource <span class="at">corsConfigurationSource</span>() {
+    CorsConfiguration config = <span class="tg">new</span> <span class="at">CorsConfiguration</span>();
+    config.<span class="at">setAllowedOrigins</span>(List.<span class="tg">of</span>(<span class="st">"http://localhost:5173"</span>));
+    config.<span class="at">setAllowedMethods</span>(List.<span class="tg">of</span>(<span class="st">"GET"</span>, <span class="st">"POST"</span>, <span class="st">"PUT"</span>, <span class="st">"DELETE"</span>, <span class="st">"OPTIONS"</span>));
+    config.<span class="at">setAllowedHeaders</span>(List.<span class="tg">of</span>(<span class="st">"Authorization"</span>, <span class="st">"Content-Type"</span>));
+    UrlBasedCorsConfigurationSource source = <span class="tg">new</span> <span class="at">UrlBasedCorsConfigurationSource</span>();
+    source.<span class="at">registerCorsConfiguration</span>(<span class="st">"/api/**"</span>, config);
+    <span class="tg">return</span> source;
+}
+
+http.<span class="at">cors</span>(Customizer.<span class="at">withDefaults</span>());</div>
+    </div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 17 complete (stretch)</span></label>
+</section>
+
+<section id="s18">
+  <div class="shead"><span class="chip">18</span><h2>Submitting the assignment</h2><span class="lvl core">Core</span><span class="tagline">by the end of the day of the lab</span></div>
+
+  <div class="cue watch"><p class="cue-k">Two parts, graded separately</p><p>This lab is graded. Submit <strong>once</strong>, by the end of the day of the lab. <strong>The frontend part — complete means complete:</strong> <code>npm test</code> <em>and</em> <code>npm run inlab</code> entirely green, and <code>inlab/PROMPTS.md</code> filled in. It's graded against the mock, so it never depends on your backend; incomplete frontend work is not accepted, and there is no partial credit for it. <strong>The backend part, graded separately:</strong> <code>conformance-report.txt</code> showing levels A, B, C and CORS all ✓. If your backend isn't there yet, submit the frontend part anyway: the missing backend part costs only its own marks, and you can still use the mock for everything in the lab. Stuck? Ask a TA before the day ends.</p></div>
+
+  <h3>1. Get both test commands fully green</h3>
+  <div class="cmd"><span class="p">$</span> cd esd-labs/react-lab4
+<span class="p">$</span> npm test
+<span class="o">      Tests  34 passed (34)</span>
+<span class="p">$</span> npm run inlab
+<span class="o">      Tests  9 passed (9)</span></div>
+  <p>When we grade, we <strong>put our own copy of the tests back in</strong> — <code>test/</code>, <code>test/support/</code> and <code>inlab/edit-course.test.jsx</code> — before running them, so editing a test can only cost you marks. Stretch is never required.</p>
+
+  <h3>2. Check the report and the prompt log</h3>
+  <p>Run the suite once more against the backend you have now, and save it (section 12). Open <code>conformance-report.txt</code>: the summary at the end shows <code>Level A ✓  Level B ✓  Level C ✓</code> and <code>CORS ✓</code>. (Backend not there yet? Leave the report out and submit the frontend part — see above.) Open <code>inlab/PROMPTS.md</code>: your one line, your prompts, what you changed or rejected and why, and your check by hand.</p>
+
+  <h3>3. Zip the react-lab4 folder — without node_modules</h3>
+  <p>Zip <code>react-lab4</code> itself, not the whole <code>esd-labs</code> folder, and leave out <code>node_modules</code> and <code>dist</code>. From inside <code>esd-labs</code>:</p>
+  <div class="cmd"><span class="cm"># macOS / Linux</span>
+<span class="p">$</span> zip -r react-lab4.zip react-lab4 -x "react-lab4/node_modules/*" "react-lab4/dist/*"
+
+<span class="cm"># Windows (PowerShell) — first delete react-lab4\node_modules and react-lab4\dist</span>
+<span class="p">$</span> Compress-Archive -Path react-lab4 -DestinationPath react-lab4.zip</div>
+  <p>Open the zip once to check it has the <code>react-lab4</code> folder with your <code>src/</code>, <code>inlab/PROMPTS.md</code> and <code>conformance-report.txt</code> inside, and no <code>node_modules</code>. (On Windows, run <code>npm install</code> again afterwards to keep working.)</p>
+
+  <h3>4. Submit the zip</h3>
+  <p>Upload <code>react-lab4.zip</code> on the submission platform, by the end of the day of the lab. The next lab's starter — which contains this lab's finished code — is released that night, so late submissions can't be accepted. Run both test commands and the suite right before you zip, so what you submit is what you tested.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Submitted — both test commands green, PROMPTS.md filled, conformance-report.txt at level C (if my backend is ready), react-lab4.zip uploaded</span></label>
+</section>
+
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+  <div class="gloss">
+    <div class="grow"><b>409 Conflict</b><span>The request is well-formed, but clashes with the server's current state: already enrolled, full, over the credit limit, email taken.</span></div>
+    <div class="grow"><b>Access-Control-Allow-Origin</b><span>The response header that lets a page from that origin read the response. Needed on every cross-origin response — errors included.</span></div>
+    <div class="grow"><b>Access-Control-Allow-Methods / -Headers</b><span>In a preflight's answer: which methods and request headers the real request may use.</span></div>
+    <div class="grow"><b>Access-Control-Max-Age</b><span>How long the browser may reuse a preflight's answer before asking again.</span></div>
+    <div class="grow"><b>api</b><span>In this app: <code>useAuth().api(path, options)</code> — <code>apiFetch</code> with the token and the 401 reaction filled in. The way every logged-in request is made.</span></div>
+    <div class="grow"><b>conformance level C</b><span>The contract pack's checks for enrollments, admin writes and every 409 rule. With A and B, what this lab needs from your backend.</span></div>
+    <div class="grow"><b>CORS</b><span>Cross-Origin Resource Sharing: the browser's rule that a page may read another origin's responses only when that server's headers allow it.</span></div>
+    <div class="grow"><b>CorsFilter</b><span>The Spring filter that <code>http.cors(…)</code> adds at the front of the security chain: it answers preflights and adds the CORS headers to responses.</span></div>
+    <div class="grow"><b>.env.local</b><span>A file of settings Vite reads when it starts, kept out of Git. Here: <code>VITE_API_URL</code>.</span></div>
+    <div class="grow"><b>fieldErrors</b><span>In a 400's <code>ApiError</code>: one message per bad field, worded freely by the server. Shown under its field, never compared.</span></div>
+    <div class="grow"><b>fixed message</b><span>A <code>message</code> the contract spells out word for word (like "Course is full"), so clients may compare it.</span></div>
+    <div class="grow"><b>NetworkError</b><span>In this app: what <code>apiFetch</code> throws when no response reached your code — server down, wrong port, or blocked by CORS.</span></div>
+    <div class="grow"><b>noValidate</b><span>A form attribute that turns off the browser's own checks, so the server's messages can be seen.</span></div>
+    <div class="grow"><b>onUnauthorized</b><span>The function <code>apiFetch</code> calls on a 401 for a request that carried a token. Here, <code>sessionExpired</code>.</span></div>
+    <div class="grow"><b>origin</b><span>Scheme + host + port: <code>http://localhost:5173</code>. Change any part and it's another origin.</span></div>
+    <div class="grow"><b>preflight</b><span>The <code>OPTIONS</code> request a browser sends on its own, without a token, to ask whether a non-simple cross-origin request is allowed.</span></div>
+    <div class="grow"><b>revocation</b><span>The server refusing a token before it expires — after logout, here.</span></div>
+    <div class="grow"><b>session expiry</b><span>The moment the server stops accepting the token the app holds: expired, revoked, or unknown to it.</span></div>
+    <div class="grow"><b>simple request</b><span>A cross-origin GET (or form-style POST) with no special headers: sent without a preflight.</span></div>
+    <div class="grow"><b>VITE_ prefix</b><span>Only variables named <code>VITE_…</code> are pasted into the code the browser gets. Never a secret.</span></div>
+  </div>
+</section>
+
+<div class="finish">
+  <h2>How to know you're ready</h2>
+  <p>You're ready for the lab if you can do all of these <em>without looking anything up</em>:</p>
+  <ol>
+    <li>Tell "no answer" from "a bad answer": what <code>fetch</code> does for each, and what <code>apiFetch</code> turns each into.</li>
+    <li>Name four ways a token dies, and show two of them in the browser.</li>
+    <li>Say which three jobs make up the 401 rule, and which file each lives in — and why not a global handler.</li>
+    <li>Say which requests go through <code>api</code>, which don't, and why logout doesn't.</li>
+    <li>Explain the difference between a 400 with <code>fieldErrors</code> and a 409, and what the page offers for each.</li>
+    <li>Say which messages a page may compare, and why only those.</li>
+    <li>Explain what changes when <code>VITE_API_URL</code> is set — and what doesn't.</li>
+    <li>Walk through a preflight: who sends it, what it asks, what must come back, and what it never carries.</li>
+    <li>Explain why CORS goes in Spring Security, not in <code>@CrossOrigin</code>.</li>
+    <li>Read any CORS line in the Console and say where its fix lives.</li>
+  </ol>
+
+  <h2 style="margin-top:30px;font-size:20px">CORS card</h2>
+  <div class="cmd"><span class="cm">// The browser, page on http://localhost:5173, API on http://localhost:8080 (another origin):</span>
+<span class="cm">//   simple GET              → sent with Origin; readable only if the response has Access-Control-Allow-Origin</span>
+<span class="cm">//   Authorization / JSON /  → OPTIONS preflight first (no token, no body) → must be 2xx with</span>
+<span class="cm">//   PUT / DELETE              Allow-Origin + Allow-Methods + Allow-Headers → then the real request</span>
+<span class="cm">//   every response, errors included, repeats Access-Control-Allow-Origin</span>
+
+<span class="cm">// Spring Boot + Spring Security: in SecurityConfig</span>
+http.<span class="at">cors</span>(Customizer.<span class="at">withDefaults</span>());            <span class="cm">// a CorsFilter at the front of the security chain</span>
+
+@Bean
+public CorsConfigurationSource <span class="at">corsConfigurationSource</span>() {
+    CorsConfiguration config = <span class="tg">new</span> <span class="at">CorsConfiguration</span>();
+    config.<span class="at">setAllowedOrigins</span>(List.<span class="tg">of</span>(<span class="st">"http://localhost:5173"</span>));          <span class="cm">// exact; no trailing slash</span>
+    config.<span class="at">setAllowedMethods</span>(List.<span class="tg">of</span>(<span class="st">"GET"</span>, <span class="st">"POST"</span>, <span class="st">"PUT"</span>, <span class="st">"DELETE"</span>, <span class="st">"OPTIONS"</span>));
+    config.<span class="at">setAllowedHeaders</span>(List.<span class="tg">of</span>(<span class="st">"Authorization"</span>, <span class="st">"Content-Type"</span>));
+    config.<span class="at">setMaxAge</span>(3600L);
+    UrlBasedCorsConfigurationSource source = <span class="tg">new</span> <span class="at">UrlBasedCorsConfigurationSource</span>();
+    source.<span class="at">registerCorsConfiguration</span>(<span class="st">"/api/**"</span>, config);
+    <span class="tg">return</span> source;
+}
+<span class="cm">// Not @CrossOrigin (MVC runs after Security). One config, in Security. No allowCredentials with "*".</span>
+<span class="cm">// Fixed on the server, never in fetch. curl / Postman / the suite are never blocked.</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Integration checklist card</h2>
+  <div class="cmd"><span class="cm"># 1  backend at level C          esd-labs/api-contract: npm run conformance → A ✓ B ✓ C ✓</span>
+<span class="cm"># 2  CORS in SecurityConfig      .cors(...) + CorsConfigurationSource for http://localhost:5173</span>
+<span class="cm"># 3  check the preflight         curl -i -X OPTIONS …/api/enrollments -H "Origin: http://localhost:5173" …</span>
+<span class="cm"># 4  the gate                    npm run conformance → CORS ✓, "Ready for React Lab 4 ✓"</span>
+<span class="cm"># 5  save it                     npm run -s conformance -- --level C &gt; ../react-lab4/conformance-report.txt  (Windows: section 12)</span>
+<span class="cm"># 6  point the app               react-lab4/.env.local: VITE_API_URL=http://localhost:8080 → restart npm run dev</span>
+<span class="cm"># 7  which server?               the footer says API: http://localhost:8080</span>
+<span class="cm"># 8  two windows                 admin + student; Network tab: All, Preserve log</span>
+<span class="cm"># 9  read every failure          Console (CORS line?) → Network (status, headers, Response) → curl</span>
+<span class="cm"># 10 back to the mock            delete .env.local, restart npm run dev</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Client and auth card</h2>
+  <div class="cmd"><span class="tg">import</span> { API_BASE, ApiError, NetworkError, apiFetch } <span class="tg">from</span> <span class="st">"./api/client.js"</span>;
+
+<span class="at">apiFetch</span>(path, { method = <span class="st">"GET"</span>, body, token, onUnauthorized })
+<span class="cm">//   → the JSON body (null for a 204)</span>
+<span class="cm">//   no response at all        → throws NetworkError  "Can't reach the server — is your backend running?"</span>
+<span class="cm">//   non-2xx                   → throws ApiError { status, message, fieldErrors }</span>
+<span class="cm">//   401 AND a token was sent  → calls onUnauthorized() first, then throws the ApiError</span>
+
+<span class="tg">const</span> { user, token, expired, login, signup, logout, api } = <span class="at">useAuth</span>();
+<span class="at">login</span>(email, password)                   <span class="cm">// POST /api/auth/login → GET /api/users/me → session</span>
+<span class="at">signup</span>({ email, password, fullName })    <span class="cm">// POST /api/auth/signup → login(email, password)</span>
+<span class="at">logout</span>()                                 <span class="cm">// POST /api/auth/logout (errors ignored) → session null</span>
+<span class="at">api</span>(path, { method, body })              <span class="cm">// apiFetch + the token + onUnauthorized: sessionExpired</span>
+<span class="cm">// sessionExpired: navigate("/login", { replace: true, state: { from: location } }); setSession(null); setExpired(true)</span>
+
+<span class="cm">// Public reads, login, logout: plain apiFetch.  Everything else a logged-in user does: api.</span>
+<span class="cm">// Compare err.status — and err.message only for the contract's fixed messages.</span></div>
+</div>
+
+<footer>M.Tech CSE · ESD · React Lab 4<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+</div>
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ---- */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  /* ---- progress: CORE sections drive the bar; stretch boxes are tracked separately.
+         Both are remembered in this browser, so they survive a reload. ---- */
+  function load(key){ try{ return JSON.parse(localStorage.getItem(key)||'[]'); }catch(err){ return []; } }
+  function save(key,list){ try{ localStorage.setItem(key,JSON.stringify(list.map(function(c){return c.checked}))); }catch(err){} }
+  var KEY='esd-react-lab4-progress', SKEY='esd-react-lab4-stretch';
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var extras=[].slice.call(document.querySelectorAll('.chk-s'));
+  var saved=load(KEY), savedS=load(SKEY);
+  checks.forEach(function(c,i){ if(saved[i]) c.checked=true; });
+  extras.forEach(function(c,i){ if(savedS[i]) c.checked=true; });
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=['Core first, in order — the mock first, then your own backend.',
+             'Good start. One place for 401 is the idea the rest of the lab leans on.',
+             'Past halfway. Next: your own backend, and the browser\'s CORS check.',
+             'Nearly there. Section 13 walks the whole app against your backend, end to end.',
+             'Core done. npm test green, conformance report saved? The in-lab task is next (section 15), then submit (section 18).'];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    var s=extras.filter(function(c){return c.checked}).length;
+    msg.textContent=(n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))])+(s?'  ·  stretch: '+s+' / '+extras.length:'');
+    save(KEY,checks); save(SKEY,extras);
+  }
+  checks.concat(extras).forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^[$>]\s?/,'').trimEnd()}).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>

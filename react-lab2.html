@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Restrict, then judge — React Lab 2</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#101614">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Condensed:wght@600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+.cue.work{border-left-color:var(--ink);background:var(--surface)}
+.cue.work .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.tg{color:var(--term-green)}
+.at{color:var(--signal)}
+.st{color:#B7C4C0}
+.tx{color:#FFFFFF}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 182px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+.quiz .a .cmd{margin-top:4px}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 168px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+/* ---- additions for the lab docs ---- */
+.cue.react{border-left-color:var(--term-green);background:var(--dark);color:#DDE3E0}
+.cue.react .cue-k{color:var(--term-green)}
+.cue.react code{background:#22302D;color:var(--term-green)}
+.cue.react strong{color:#FFF}
+.refs{font-family:var(--mono);font-size:12px;color:var(--muted);margin:-6px 0 16px;max-width:70ch}
+.refs a{color:var(--teal);font-weight:600}
+.part{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper);background:var(--ink);display:inline-block;padding:5px 10px;margin:64px 0 -28px}
+.toc .rpart{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);padding:10px 16px 6px;border-bottom:1px solid var(--line);background:var(--teal-soft);font-weight:600}
+table.grid{border-collapse:collapse;width:100%;max-width:70ch;background:var(--surface);border:1px solid var(--ink);margin:0 0 16px;font-size:14.5px}
+table.grid th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;text-align:left;color:var(--muted);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--ink)}
+table.grid td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.grid tr:last-child td{border-bottom:0}
+table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--teal);font-weight:600;white-space:nowrap}
+
+/* ---- core / stretch ---- */
+.lvl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:3px 7px;align-self:center;white-space:nowrap}
+.lvl.core{background:var(--ink);color:var(--signal)}
+.lvl.stretch,.lvl.stretch-box{border:1px dashed var(--teal);color:var(--teal)}
+.lvl.ref{border:1px solid var(--muted);color:var(--muted)}
+.rrow .rl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:600;flex:0 0 auto;border:1px dashed var(--teal);padding:1px 6px;align-self:center}
+.rrow .rl.ref{color:var(--muted);border:1px solid var(--muted)}
+.rrow.is-extra .rw{color:var(--muted)}
+.stretch-box{border:1px dashed var(--teal);background:rgba(255,255,255,.55);padding:14px 16px 4px;margin:8px 0 18px}
+.stretch-box::before{content:"Stretch — optional. Do it if you can, and ask about it any time.";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600;margin-bottom:10px}
+.stretch-box h3:first-of-type{margin-top:0}
+/* tables whose first column holds long text (error messages): even, wrapping columns */
+table.grid.long-key{table-layout:fixed}
+table.grid.long-key td:first-child{white-space:normal;width:42%;overflow-wrap:anywhere}
+table.grid.long-key th:first-child{width:42%}
+.legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 0;font-size:14px;color:#2B3936}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+  table.grid td:first-child{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> React Lab 2 · AI required in the lab</p>
+  <h1>Restrict it,<br>then <em>judge</em> it</h1>
+  <p class="lede">In React Lab 1 you built components by hand and fetched one static file. A real screen needs more: loading and error states, effects that fetch and clean up after themselves, forms, and somewhere for the logic to live that isn't the JSX. At home, without AI, you build a course search the right way — so you know what right looks like. In the lab, AI writes a Courses page (list + add) against a precise contract, and your job is the part AI can't do for you: restrict what it may use, then audit what it hands back. Nothing missing, nothing extra, nothing from the "not yet" list.</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">15</span> core</div>
+      <div class="tracker-msg" id="msg">Core first, in order — the pre-lab is what lets you judge the AI.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill" style="width: 0%;"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p><strong>Two halves, two AI rules.</strong> Sections 01–09 are the <strong>pre-lab</strong>: you work through them at home, <strong>by hand, with no AI</strong>. Sections 10–14 are the <strong>lab session</strong>, and there <strong>AI is required</strong>. The order matters: you can only judge AI-written code if you've written the right version yourself.</p>
+  <p><strong>It continues React Lab 1.</strong> Components, props, lists and <code>key</code>, <code>useState</code>, events up through callback props, lifting state, and the first <code>useEffect</code> + <code>fetch</code> — all assumed. If one feels shaky, reopen <a href="react-lab1.html">React Lab 1</a>. From JS Lab 2 you need <a href="js-app.html#s4">§04 fetch and res.ok</a>, <a href="js-app.html#s6">§06 views</a> and <a href="js-app.html#s9">§09 latest-only</a>; they're linked where they come up.</p>
+  <p><strong>The thread is still reactivity:</strong> change the state, and the screen follows. This lab adds the two questions every real screen asks — what does the screen show <em>while</em> the state is on its way from a server, and <em>where</em> should each piece of state live?</p>
+  <p><strong>Core and stretch.</strong> <span class="lvl core">Core</span> is mandatory — what we go through together, and what <code>npm test</code> checks. <span class="lvl stretch">Stretch</span> is extra, checked by <code>npm run test:stretch</code> where there are tests. Ask about either any time.</p>
+  <p><strong>Most of you are on free AI accounts.</strong> The lab is designed for that: one precise prompt to generate, one or two to help with the fix. Don't spend them at home.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — the pre-lab by hand, then the lab with AI. Do every core section, in order; stretch is extra</div>
+  <div class="rpart">Part 1 · Getting set up</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">How this lab works</span></a>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">What you're building</span></a>
+  <div class="rpart">Part 2 · The contract</div>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">Reading the contract for one slice</span></a>
+  <div class="rpart">Part 3 · The pieces, by hand</div>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">Loading, error, empty — a view that only renders</span></a>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">Effects that fetch: dependencies and cleanup</span></a>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">Controlled inputs</span></a>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">Custom hooks — and why the view gets dumb</span></a>
+  <div class="rpart">Part 4 · Judging AI output</div>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">The shape of a good React slice</span></a>
+  <a class="rrow" href="#s9"><span class="rt">09</span><span class="rw">The "not yet" list, and why</span></a>
+  <div class="rpart">Part 5 · Lab day — AI required</div>
+  <a class="rrow" href="#s10"><span class="rt">10</span><span class="rw">In the lab</span></a>
+  <a class="rrow" href="#s11"><span class="rt">11</span><span class="rw">Generate — and expect the smell</span></a>
+  <a class="rrow" href="#s12"><span class="rt">12</span><span class="rw">Audit, with the sheet</span></a>
+  <a class="rrow" href="#s13"><span class="rt">13</span><span class="rw">Fix it to the seam</span></a>
+  <a class="rrow" href="#s14"><span class="rt">14</span><span class="rw">Strip "not yet", and confirm nothing breaks</span></a>
+  <div class="rpart">Part 6 · Reference and submission</div>
+  <a class="rrow is-extra" href="#s15"><span class="rt">15</span><span class="rw">When it goes wrong</span><span class="rl ref">reference</span></a>
+  <a class="rrow is-extra" href="#s16"><span class="rt">16</span><span class="rw">Practice run, unaided</span><span class="rl">stretch</span></a>
+  <a class="rrow" href="#s17"><span class="rt">17</span><span class="rw">Submitting the assignment</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; reference cards</span></a>
+</nav>
+
+<div class="part">Part 1 · Getting set up</div>
+
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>How this lab works</h2><span class="lvl core">Core</span><span class="tagline">pull, install, test, run</span></div>
+
+  <p>Same kind of folder as React Lab 1: a Vite app, tests that are the specification, one command to run them. Two things are new: a <strong>mock course API</strong> that <code>npm run dev</code> serves next to your app, and three Markdown files for the lab day.</p>
+  <p>Why a mock, and not your own Spring Boot backend? From the browser, a page on <code>localhost:5173</code> calling a backend on <code>localhost:8080</code> is a cross-origin call, which the browser blocks until the backend allows it with CORS — and CORS is added in React Lab 4 (<a href="api-contract.html#s14">The backend contract · §14</a>); the mock is served from the app's own origin, so there's nothing to allow.</p>
+
+  <h3>Getting the starter</h3>
+  <div class="dothis">
+    <h4>Do this now — pull, install, run the tests</h4>
+    <ol>
+      <li>In your <code>esd-labs</code> folder, pull. A new <code>react-lab2</code> folder appears; your other labs aren't touched.</li>
+      <li>Open the <strong><code>react-lab2</code> folder</strong> in VS Code and open its terminal.</li>
+    </ol>
+  </div>
+  <div class="cmd"><span class="p">$</span> cd esd-labs
+<span class="p">$</span> git pull
+<span class="p">$</span> cd react-lab2
+<span class="p">$</span> npm install
+<span class="p">$</span> npm test
+<span class="o"> Test Files  7 failed | 1 passed (8)</span>
+<span class="o">      Tests  52 failed | 8 passed (60)</span></div>
+  <p>Eight pass from the start: the seven tests of the API client, which is given, and one search test that passes because the placeholder does nothing. The rest is yours. At home you turn the 20 tests in <code>test/search/</code> green. In the lab, with AI, the 33 in <code>test/courses/</code>.</p>
+
+  <h3>Run the app</h3>
+  <div class="cmd"><span class="p">$</span> npm run dev
+<span class="o">  ➜  Local:   http://localhost:5173/</span></div>
+  <p>Open <a href="http://localhost:5173/" target="_blank" rel="noopener">localhost:5173</a>. You'll see a "Courses" heading with a placeholder ("Built in the lab, with AI"), and a second placeholder where the course search goes. Leave <code>npm run dev</code> running in one terminal and run tests in a second one. Vite reloads the page whenever you save.</p>
+
+  <h3>The folder</h3>
+  <div class="mention">
+    <div class="mrow"><b>src/api/client.js</b><span>The API client: <code>apiFetch</code> and <code>ApiError</code>. Given — read it in section 03; don't edit it.</span></div>
+    <div class="mrow"><b>src/search/</b><span>The pre-lab: <code>SearchResults.jsx</code> (04), <code>useCourseSearch.js</code> (05), <code>CourseSearch.jsx</code> (06), and <code>useDebounced.js</code> (06, stretch).</span></div>
+    <div class="mrow"><b>src/courses/</b><span>Lab day: four placeholder files. The AI's code goes here, and you fix it here.</span></div>
+    <div class="mrow"><b>CONTRACT.md</b><span>Lab day: the prompt you paste into the AI, and (§4) the exact shape the tests check.</span></div>
+    <div class="mrow"><b>PROMPTS.md, AUDIT.md</b><span>Lab day: your prompt log and your audit. Both are submitted.</span></div>
+    <div class="mrow"><b>ai-sample/CoursesPage.jsx</b><span>A typical AI first draft of the lab-day page. You audit it in section 09.</span></div>
+    <div class="mrow"><b>mock/</b><span>The mock course API. The same in every React lab. Don't edit it.</span></div>
+    <div class="mrow"><b>test/</b><span>The specification: <code>search/</code> (pre-lab), <code>courses/</code> (lab day), <code>stretch/</code>, and <code>support/fetch.js</code>, which explains how the tests fake the server. Read the tests; don't edit them.</span></div>
+    <div class="mrow"><b>src/App.jsx</b><span>Renders the two slices on one page. Given.</span></div>
+  </div>
+
+  <h3>The commands</h3>
+  <div class="cmd"><span class="p">$</span> npm test                         # every core test
+<span class="p">$</span> npm test -- test/search          # only the pre-lab tests
+<span class="p">$</span> npm test -- search/CourseSearch  # one file (any part of its path)
+<span class="p">$</span> npm run test:stretch             # the stretch tests
+<span class="p">$</span> npm run dev                      # the app + the mock API at http://localhost:5173</div>
+
+  <h3>Where the tests get a server from</h3>
+  <p>The tests don't need <code>npm run dev</code>. Each one replaces the browser's <code>fetch</code> with a <strong>stub</strong> — a stand-in function — that runs the real mock API inside the test: the same 20 seeded courses, the same validation, the same 409s your browser gets. A test can also make one request fail, or hold an answer back to check what the screen shows while it waits. <code>test/support/fetch.js</code> is short and commented; read it once.</p>
+
+  <h3>Submitting</h3>
+  <p>A <strong>graded assignment</strong>. You submit <code>npm test</code> fully green <em>plus</em> your filled-in <code>PROMPTS.md</code> and <code>AUDIT.md</code>, zipped, by the end of the day of the lab. The next lab's starter — which contains this lab's finished code — is released that night, so late submissions can't be accepted. Section 17 has the steps.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — npm test runs, the app opens at localhost:5173</span></label>
+</section>
+
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>What you're building</h2><span class="lvl core">Core</span><span class="tagline">two slices, one shape</span></div>
+
+  <p>One page, two <strong>slices</strong> — a slice being one feature, top to bottom: the screen, the logic, the call to the server.</p>
+  <div class="mention">
+    <div class="mrow"><b>Course search</b><span><strong>Pre-lab, by hand.</strong> A search box; type, and the courses whose code or title match appear. "Searching…", "Search failed.", "No courses match."</span></div>
+    <div class="mrow"><b>Courses — list + add</b><span><strong>Lab day, with AI.</strong> Every course in the catalogue, and a form to add one. The new course appears in its place in the list; a duplicate code or a bad field shows the server's message.</span></div>
+  </div>
+
+  <h3>The shape of a slice</h3>
+  <p>Both slices are cut the same way. This is the one architectural idea this lab teaches — the <strong>seam</strong> between the part that shows things and the part that gets and changes them:</p>
+  <div class="cmd"><span class="o">CourseSearch            owns the query; wires the two below together</span>
+<span class="o"> ├─ useCourseSearch()   useState + useEffect + apiFetch     ← fetch and logic live here</span>
+<span class="o"> └─ SearchResults       results, status  →  JSX             ← only renders</span>
+
+<span class="o">CoursesPage             calls the hook; passes data down, passes addCourse down</span>
+<span class="o"> ├─ useCourses()        useState + useEffect + apiFetch     ← fetch and logic live here</span>
+<span class="o"> ├─ CoursesView         courses, status, error  →  JSX      ← only renders</span>
+<span class="o"> └─ AddCourseForm       owns the half-typed form; onAdd ↑   ← raises "add this course"</span>
+
+<span class="o">           all of it talks to the server through  src/api/client.js  →  /api</span></div>
+  <p>At the end of React Lab 1, one component did everything: it held the state, ran the effect, fetched, and returned the JSX. For a static file that was fine. Here, with loading, errors, a form and a server that says no, that one component becomes the thing nobody can read or test. So the fetching and the logic move into a <strong>custom hook</strong>, and the component that draws becomes <strong>dumb</strong> — a compliment, here: it does one thing, and you can test it with nothing but props.</p>
+
+  <div class="cue react"><p class="cue-k">You've done this split before</p><p>JS Lab 2 had <strong>view functions</strong> (state in, plain data out, no DOM, no fetch) and a separate <code>load()</code> that fetched and dispatched events. <code>CoursesView</code> is the view function, now returning JSX. <code>useCourses</code> is <code>load()</code> plus the state it fills, now as a hook.</p></div>
+
+  <div class="cue"><p class="cue-k">Not in this lab</p><p>Several screens and URLs (routing), Context, a login screen and enrollments are React Lab 3. Pointing the app at your own Spring Boot backend, and CORS, are React Lab 4. Here the client logs in for you (section 03) and the mock API is the server.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 read — I can name the three parts of a slice</span></label>
+</section>
+
+<div class="part">Part 2 · The contract</div>
+
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>Reading the contract for one slice</h2><span class="lvl core">Core</span><span class="tagline">openapi.yaml · src/api/client.js</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p><code>fetch</code> resolves for a 404 or a 500 — only "no response at all" rejects — so every call checks <code>res.ok</code>: <a href="js-app.html#s4">JS Lab 2 · §04</a>. The whole API specification, its conformance levels and how your own backend is checked against it are covered in <a href="api-contract.html">the backend contract</a>. This section reads just the two operations the Courses slice needs.</p></div>
+
+  <p>Every React lab talks to one API: the <strong>course catalogue</strong>. Its contract is a file called <code>openapi.yaml</code> — an <strong>OpenAPI</strong> document. It lists every endpoint: its path and method, what goes in (query parameters, a request body), and what comes back for each status code, with the shapes of the data written once under <code>components.schemas</code>. It is frozen. The mock in <code>mock/</code> implements it; your Spring Boot backend grows into it.</p>
+
+  <h3>Four questions for any endpoint</h3>
+  <ol>
+    <li><strong>Method and path</strong> — what do I call?</li>
+    <li><strong>What goes in</strong> — parameters, a body, a token?</li>
+    <li><strong>What comes back when it works</strong> — which status, which shape?</li>
+    <li><strong>What can go wrong</strong> — which statuses, and what should the screen do for each?</li>
+  </ol>
+
+  <h3>GET /api/courses — the list</h3>
+  <div class="cmd"><span class="o">/api/courses:</span>
+<span class="o">  get:</span>
+<span class="o">    security: []                        public: no token needed</span>
+<span class="o">    parameters:</span>
+<span class="o">      - name: q                         optional: code or title contains q (any case)</span>
+<span class="o">        in: query</span>
+<span class="o">      - name: department                optional: exact department name</span>
+<span class="o">        in: query</span>
+<span class="o">    responses:</span>
+<span class="o">      '200':</span>
+<span class="o">        description: Courses sorted by `code` ascending</span>
+<span class="o">        content:</span>
+<span class="o">          application/json:</span>
+<span class="o">            schema:</span>
+<span class="o">              type: array</span>
+<span class="o">              items: { $ref: '#/components/schemas/Course' }</span></div>
+  <p>Shortened, with notes on the right. The answers: <code>GET /api/courses</code>, optionally <code>?q=data</code>; no body, no token; <code>200</code> and an array of <code>Course</code>, <strong>sorted by code</strong>. The contract also says "List order is part of the contract" — so if the screen adds a course, it has to keep that order too.</p>
+
+  <h3>POST /api/courses — add one</h3>
+  <div class="cmd"><span class="o">post:                                 no "security: []", so a token is required</span>
+<span class="o">  requestBody:</span>
+<span class="o">    required: true</span>
+<span class="o">    content:</span>
+<span class="o">      application/json:</span>
+<span class="o">        schema: { $ref: '#/components/schemas/CourseRequest' }</span>
+<span class="o">  responses:</span>
+<span class="o">    '201': Course                     the created course, with its new id</span>
+<span class="o">    '400': ValidationError            message "Validation failed", plus fieldErrors</span>
+<span class="o">    '401': Unauthorized               no token, or a bad one</span>
+<span class="o">    '403': Forbidden                  a token, but not an ADMIN's</span>
+<span class="o">    '409': ApiError                   "Course code already exists"</span></div>
+
+  <h3>What you send, and what you get back</h3>
+  <table class="grid">
+    <tr><th>Field</th><th>CourseRequest — you send</th><th>Course — you get back</th></tr>
+    <tr><td>id</td><td>never: the server assigns it</td><td>a number</td></tr>
+    <tr><td>code</td><td>required; 2–4 uppercase letters then 3 digits (<code>CS501</code>); unique</td><td>✓</td></tr>
+    <tr><td>title</td><td>required; 1–150 characters</td><td>✓</td></tr>
+    <tr><td>description</td><td>optional; may be <code>null</code></td><td>a string, or <code>null</code></td></tr>
+    <tr><td>department</td><td>required; 1–60 characters</td><td>✓</td></tr>
+    <tr><td>credits</td><td>required; a whole number, 1–6</td><td>✓</td></tr>
+    <tr><td>capacity</td><td>required; a whole number, 1–500</td><td>✓</td></tr>
+    <tr><td>seatsLeft</td><td>never: the server computes it</td><td><code>capacity</code> minus enrollments</td></tr>
+  </table>
+  <p>Two shapes, because the client never invents an <code>id</code> or a <code>seatsLeft</code>. Notice the types: <code>credits</code> is an <em>integer</em>. Every value an <code>&lt;input&gt;</code> gives you is a string (section 06), so the screen has to convert it.</p>
+
+  <h3>One error shape for everything</h3>
+  <p>Every non-2xx answer, from any endpoint, has the same body — <code>ApiError</code>:</p>
+  <div class="cmd">{
+  <span class="st">"timestamp"</span>: <span class="st">"2026-01-15T09:30:00Z"</span>,
+  <span class="st">"status"</span>: <span class="st">400</span>,
+  <span class="st">"error"</span>: <span class="st">"Bad Request"</span>,
+  <span class="st">"message"</span>: <span class="st">"Validation failed"</span>,
+  <span class="st">"path"</span>: <span class="st">"/api/courses"</span>,
+  <span class="st">"fieldErrors"</span>: { <span class="st">"code"</span>: <span class="st">"must be 2–4 uppercase letters followed by 3 digits"</span> }
+}</div>
+  <p>The contract's rule: <strong>clients display <code>message</code>; they never parse it.</strong> <code>fieldErrors</code> maps each bad field to a reason, only for a 400 validation error; otherwise it's <code>null</code>. So the screen needs no table of messages of its own — the server's words go straight onto it.</p>
+
+  <table class="grid long-key">
+    <tr><th>Status</th><th>What the Courses screen does</th></tr>
+    <tr><td>200 (the list)</td><td>Show it.</td></tr>
+    <tr><td>201 (created)</td><td>Insert the course from the body into the list, in code order. No need to fetch the list again — the body <em>is</em> the new course.</td></tr>
+    <tr><td>400 Validation failed</td><td>Show the message, and each <code>fieldErrors</code> reason under its own input.</td></tr>
+    <tr><td>401, 403</td><td>Show the message. (The client's stand-in login, below, means you shouldn't see these.)</td></tr>
+    <tr><td>409 Course code already exists</td><td>Show the message; keep what was typed so the user can change the code.</td></tr>
+    <tr><td>500, or no response</td><td>Loading the list: "Couldn't load courses: …". Adding: the message, in the form.</td></tr>
+  </table>
+
+  <h3>The client — given</h3>
+  <p>Nothing in the app calls <code>fetch</code> directly. Everything goes through <code>src/api/client.js</code>:</p>
+  <div class="cmd"><span class="tg">import</span> { apiFetch, ApiError } <span class="tg">from</span> <span class="st">"../api/client.js"</span>;
+
+<span class="tg">const</span> courses = <span class="tg">await</span> <span class="at">apiFetch</span>(<span class="st">"/api/courses"</span>);                        <span class="cm">// → Course[]</span>
+<span class="tg">const</span> created = <span class="tg">await</span> <span class="at">apiFetch</span>(<span class="st">"/api/courses"</span>, { method: <span class="st">"POST"</span>, body: courseRequest });
+
+<span class="cm">// any non-2xx throws an ApiError, built from the contract's error body:</span>
+error.status        <span class="o">// 409</span>
+error.message       <span class="o">// "Course code already exists"</span>
+error.fieldErrors   <span class="o">// null   (or { code: "must be …" } for a 400)</span></div>
+  <div class="dothis">
+    <h4>Do this now — read the client</h4>
+    <p>Open <code>src/api/client.js</code>. It's about 60 lines, and it's JS Lab 2's <code>getJSON</code> grown up: fetch, check <code>res.ok</code>, and on failure turn the error body into an <code>ApiError</code> with <code>status</code>, <code>message</code> and <code>fieldErrors</code>. "No response at all" isn't caught — fetch's own <code>TypeError("Failed to fetch")</code> reaches you unchanged. Find the line that does each of those things.</p>
+  </div>
+  <p>Two details. The base URL is <code>import.meta.env.VITE_API_URL ?? ""</code>: empty means "the same origin as the app", which is where <code>npm run dev</code> serves the mock. And adding a course needs an <strong>ADMIN</strong> token, but logging in is React Lab 3's job — so, as a <strong>stand-in</strong>, the client logs in as the seeded admin the first time it needs a token, keeps it in a variable, and sends it on every request that isn't a GET. Real apps never hard-code a password; in this lab, you never touch a token at all.</p>
+
+  <div class="dothis">
+    <h4>Do this now — call the API from the console</h4>
+    <p>With <code>npm run dev</code> running, open localhost:5173, then DevTools → Console, and the <strong>Network</strong> tab next to it.</p>
+  </div>
+  <div class="cmd"><span class="tg">await</span> <span class="at">fetch</span>(<span class="st">"/api/courses?q=data"</span>).<span class="at">then</span>((r) =&gt; r.<span class="at">json</span>())
+<span class="o">// [ { id: 2, code: "CS201", … }, { id: 3, code: "CS305", … }, { id: 14, code: "DS101", … } ]</span>
+
+<span class="tg">const</span> res = <span class="tg">await</span> <span class="at">fetch</span>(<span class="st">"/api/courses"</span>, { method: <span class="st">"POST"</span>, headers: { <span class="st">"Content-Type"</span>: <span class="st">"application/json"</span> }, body: <span class="st">"{}"</span> });
+res.status
+<span class="o">// 401</span>
+<span class="tg">await</span> res.<span class="at">json</span>()
+<span class="o">// { status: 401, error: "Unauthorized", message: "Authentication required", … }</span></div>
+  <p>The empty body didn't get a 400: with no token, the contract says a protected endpoint answers 401 <em>before</em> it looks at the body. Click both requests in the Network tab and find the status and the response.</p>
+
+  <h3>Why the contract is the leash on AI</h3>
+  <p>Ask an AI chat for "a React page that lists and adds courses" and it has to invent everything you didn't say: a path (<code>/courses</code>? <code>/api/v1/courses</code>?), field names (<code>courseName</code>, <code>courseCode</code>), an error shape, a library to fetch with, maybe TypeScript. Every invention is a bug you then debug — with a free account's limited prompts. Give it the contract, and every name, shape and status is fixed. Better still, you can <em>check</em> its output against the contract, line by line. That's what <code>CONTRACT.md</code> is for: this section's endpoints and shapes, the behaviour of the screen, the client, and the rules about what the AI may use.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>The form sends <code>credits: "4"</code> — the string straight from the input. What comes back?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>400</code>, <code>message: "Validation failed"</code>, <code>fieldErrors: { credits: "must be a whole number from 1 to 6" }</code>. The contract says integer; a string isn't one, even if it looks like 4. Convert with <code>Number(...)</code> before sending.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Adding <code>CS501</code> fails, and so does adding <code>cs501</code>. Different statuses — which is which, and why?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>CS501</code> is a valid code that already exists: <code>409</code>, "Course code already exists". <code>cs501</code> isn't a valid code at all (lowercase): <code>400</code> with <code>fieldErrors.code</code>. A 400 is "your request is malformed"; a 409 is "your request is fine, but it conflicts with what's already there".</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q3</b>After an add, the new course shows at the bottom of the list. Which sentence of the contract does the screen break?</div>
+    <details><summary>Show answer</summary><div class="a"><p>"List order is part of the contract: courses are sorted by <code>code</code> ascending." The server sends the list sorted; when the screen inserts a course itself, keeping that order is now the screen's job.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 complete — read client.js, saw a 401 in the Network tab</span></label>
+</section>
+
+<div class="part">Part 3 · The pieces, by hand</div>
+
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>Loading, error, empty — a view that only renders</h2><span class="lvl core">Core</span><span class="tagline">src/search/SearchResults.jsx</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>Components, props, and rendering a list with <code>.map</code> and a <code>key</code>: <a href="react-lab1.html">React Lab 1</a>. One <code>status</code> field instead of several booleans, and why: <a href="js-app.html#s5">JS Lab 2 · §05</a>. View functions that only turn data into output: <a href="js-app.html#s6">JS Lab 2 · §06</a>.</p></div>
+
+  <p>The moment data comes from a server, a screen has more than one thing to show. While the request is on its way: <strong>loading</strong>. If it fails: an <strong>error</strong>. If it worked and there's nothing: <strong>empty</strong>. Otherwise: the <strong>data</strong>. A search box adds a fifth: <strong>idle</strong>, nothing typed yet. Forget one, and the user stares at a blank space, unable to tell "still loading" from "nothing matched" from "broken".</p>
+
+  <h3>One status, not results.length</h3>
+  <p>It's tempting to decide what to show from the data: <code>results.length === 0</code> means "nothing". But an empty array is ambiguous: not loaded yet, loaded and empty, and failed all look the same. So the hook (next section) reports a <code>status</code> — one field, one of <code>"idle"</code>, <code>"loading"</code>, <code>"ready"</code>, <code>"error"</code> — and the view picks its output from that.</p>
+
+  <h3>Early returns</h3>
+  <p>A component is a function, so it can return early. <code>return null</code> renders nothing at all.</p>
+  <div class="cmd"><span class="tg">export</span> <span class="tg">function</span> <span class="at">SearchResults</span>({ results, status }) {
+  <span class="tg">if</span> (status === <span class="st">"idle"</span>) <span class="tg">return</span> <span class="tg">null</span>;
+  <span class="tg">if</span> (status === <span class="st">"loading"</span>) <span class="tg">return</span> &lt;p&gt;Searching…&lt;/p&gt;;
+  <span class="cm">// … "error", and "ready" with no results …</span>
+  <span class="tg">return</span> (
+    &lt;ul className=<span class="st">"results"</span>&gt;
+      {results.<span class="at">map</span>((course) =&gt; (
+        &lt;li key={course.id}&gt;…&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</div>
+
+  <h3>Exercise — SearchResults</h3>
+  <table class="grid long-key">
+    <tr><th>Props</th><th>Renders</th></tr>
+    <tr><td>status <code>"idle"</code></td><td>nothing (<code>null</code>)</td></tr>
+    <tr><td>status <code>"loading"</code></td><td><code>&lt;p&gt;Searching…&lt;/p&gt;</code></td></tr>
+    <tr><td>status <code>"error"</code></td><td><code>&lt;p&gt;Search failed.&lt;/p&gt;</code></td></tr>
+    <tr><td>status <code>"ready"</code>, no results</td><td><code>&lt;p&gt;No courses match.&lt;/p&gt;</code></td></tr>
+    <tr><td>status <code>"ready"</code></td><td>a <code>&lt;ul&gt;</code>, one <code>&lt;li key={course.id}&gt;</code> per course: <code>CS101 · Programming Fundamentals</code></td></tr>
+  </table>
+  <p>The key is the course's <code>id</code> — a stable identity from the data. Never the array index for a list that can change (React Lab 1): insert one course in the middle and every index after it now points at a different course.</p>
+
+  <h3>Why "only renders" pays</h3>
+  <p>Open <code>test/search/SearchResults.test.jsx</code>. Every test renders the component with an array and a string — no server, no waiting, no setup. The last one replaces <code>fetch</code> with a stub and checks it was <strong>never called</strong>. That's the property you'll demand of the AI's <code>CoursesView</code> in the lab, and the test for it there looks exactly the same.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>What should a search show while the user's second query is loading — the first query's results, or "Searching…"?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Either can be right; it's a choice. This lab shows "Searching…", because the old results answer a question the user is no longer asking. What matters is that the choice is made in one place — the view, from <code>status</code> — and not by accident.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 complete — test/search/SearchResults passes</span></label>
+</section>
+
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>Effects that fetch: dependencies and cleanup</h2><span class="lvl core">Core</span><span class="tagline">src/search/useCourseSearch.js</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>React Lab 1 ended with <code>useEffect(() =&gt; { … fetch … }, [])</code>: run this once, after the component first appears. And JS Lab 2 solved responses that arrive out of order with <code>track()</code>, a closure that knows whether it's still the latest call: <a href="js-app.html#s9">JS Lab 2 · §09</a>. This section joins the two.</p></div>
+
+  <h3>What an effect is for</h3>
+  <p>Rendering must be <strong>pure</strong>: from props and state, compute JSX, and nothing else — React may call your component more often than you expect. Talking to a server is a <strong>side effect</strong>: it reaches outside the component. So it goes in <code>useEffect</code>, which React runs <em>after</em> the screen has been updated. "After every render where something it depends on changed" — which is what the second argument says.</p>
+
+  <h3>The dependency array</h3>
+  <table class="grid long-key">
+    <tr><th>You write</th><th>React runs the effect</th></tr>
+    <tr><td><code>useEffect(fn, [])</code></td><td>Once, after the first render. Loading a list when a page appears.</td></tr>
+    <tr><td><code>useEffect(fn, [q])</code></td><td>After the first render, and after any render where <code>q</code> changed — compared with <code>Object.is</code>, the same reference check as <a href="js-app.html#s8">JS Lab 2 · §08</a>.</td></tr>
+    <tr><td><code>useEffect(fn)</code></td><td>After <strong>every</strong> render. With a <code>setState</code> inside: render → effect → fetch → setState → render → effect → … a request loop.</td></tr>
+  </table>
+  <p>The rule: list every value from the component that the effect reads. Imports (<code>apiFetch</code>) and state setters (<code>setResults</code>) never change, so they don't count. For a search, that leaves the query.</p>
+  <p>One trap follows from <code>Object.is</code>. An object, array or function created during render — <code>const params = { q }</code>, <code>[q]</code>, <code>() =&gt; …</code> — is a <strong>new</strong> value on every render, so as a dependency it never compares equal: the effect re-runs after every render, as if there were no array, and with a <code>setState</code> inside, that's the request loop again. Depend on primitives — the query string — and build any object you need <em>inside</em> the effect.</p>
+
+  <h3>Cleanup, and the ignore flag</h3>
+  <p>An effect may <strong>return a function</strong>: its <strong>cleanup</strong>. React calls it before running the effect again (the query changed) and when the component goes away. That's the exact moment JS Lab 2's <code>track()</code> needed: "a newer one has started". So the latest-only rule takes four lines:</p>
+  <div class="cmd"><span class="at">useEffect</span>(() =&gt; {
+  <span class="tg">let</span> ignore = <span class="tg">false</span>;
+  <span class="at">apiFetch</span>(<span class="st">`/api/courses?${new URLSearchParams({ q })}`</span>).<span class="at">then</span>((courses) =&gt; {
+    <span class="tg">if</span> (!ignore) <span class="at">setResults</span>(courses);
+  });
+  <span class="tg">return</span> () =&gt; {
+    ignore = <span class="tg">true</span>;
+  };
+}, [q]);</div>
+  <div class="cmd"><span class="o">type "data"    effect A runs: request A                ignoreA = false</span>
+<span class="o">type "learn"   cleanup A runs                          ignoreA = true</span>
+<span class="o">               effect B runs: request B                ignoreB = false</span>
+<span class="o">answer B       ignoreB is false → setResults(B)        the screen shows "learn" ✓</span>
+<span class="o">answer A       ignoreA is true  → dropped              an old answer can't overwrite a new one ✓</span></div>
+  <p>Each run of the effect has its <em>own</em> <code>ignore</code> — a closure, like <code>track</code>'s counter. Without the flag, whichever answer arrives <em>last</em> wins, and a slow "data" can land on top of "learn".</p>
+
+  <h3>StrictMode runs your effects twice — on purpose</h3>
+  <p><code>src/main.jsx</code> wraps the app in <code>&lt;StrictMode&gt;</code>. In development, React then mounts each component, runs its effects, <strong>runs their cleanups, and runs the effects again</strong> — to flush out effects that don't clean up after themselves. That double run happens only when a component first appears. Your search won't show it: on the first render the query is blank, so the effect sends nothing, and after that it runs once per change as you type. You'll see it on lab day, when the Courses page loads its list: two <code>GET /api/courses</code> in the Network tab when the page loads. That's expected in development, and a production build (<code>npm run build</code>) runs it once. With an ignore flag, the first answer is dropped. Without one, both answers set state — harmless while they're identical, wrong the day they differ.</p>
+
+  <h3>Exercise — useCourseSearch(query) → { results, status }</h3>
+  <ol>
+    <li><strong>Trim</strong> the query. A blank query sends <strong>no request</strong> and returns <code>{ results: [], status: "idle" }</code>.</li>
+    <li>Otherwise <code>GET /api/courses?q=…</code> with <code>apiFetch</code>, building the query string with <code>URLSearchParams</code> (<a href="js-app.html#s4">JS Lab 2 · §04</a>) so <code>R&amp;D</code> can't break the URL.</li>
+    <li>Status <code>"loading"</code> while it's on its way, <code>"ready"</code> with the results, <code>"error"</code> if it failed — set them with <code>useState</code>.</li>
+    <li>Search again when the trimmed query changes, and only then. Think about what goes in the dependency array: <code>"data"</code> and <code>" data "</code> are the same search.</li>
+    <li>Only the latest query's answer may reach the screen: the ignore flag, in the <code>.then</code> <em>and</em> the <code>.catch</code>.</li>
+  </ol>
+  <p>The idle case needn't be stored in state: if the trimmed query is blank, just <em>return</em> <code>{ results: [], status: "idle" }</code>. It's computed during render, like React Lab 1's stats — but it has to come <strong>after</strong> the hook calls. Section 07 says why.</p>
+
+  <div class="cue watch"><p class="cue-k">Not useEffect(async () =&gt; …)</p><p>An <code>async</code> function always returns a promise, and React expects an effect to return either nothing or a cleanup function. Use <code>.then</code>/<code>.catch</code> as above, or define an async function <em>inside</em> the effect and call it.</p></div>
+
+  <div class="stretch-box">
+    <h3>Stretch — watch the race happen</h3>
+    <p>Once section 06 puts the search on screen, start the dev server with a random delay on every request (stop the old one first):</p>
+    <div class="cmd"><span class="p">$</span> MOCK_DELAY=random npm run dev
+<span class="cm"># Windows (PowerShell):</span>
+<span class="p">$</span> $env:MOCK_DELAY="random"; npm run dev</div>
+    <p>Each request now takes 0.1–1.5 s. Type <code>data</code>, then quickly select it and type <code>learn</code>. Now comment out your ignore check in <code>.then</code> and try a few more times: sometimes the "data" results end up under a box that says "learn". Put the check back. (To slow down only the search instead of every request, add <code>&amp;delay=random</code> to the URL in your hook, temporarily.)</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Someone writes the search effect with no dependency array at all. What happens?</div>
+    <details><summary>Show answer</summary><div class="a"><p>It runs after every render. The answer calls <code>setResults</code> with a new array, which renders, which runs the effect, which fetches again — a loop of requests that never stops. You'd see the Network tab fill up.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>This effect declares <code>let ignore = false</code> and checks it in <code>.then</code>, but doesn't return anything. Does it protect against the race?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No. Nothing ever sets <code>ignore</code> to <code>true</code> — that's the cleanup's job, and there is no cleanup. The flag looks like protection and does nothing. It's a classic thing to find in AI-written code.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 complete — test/search/useCourseSearch passes</span></label>
+</section>
+
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>Controlled inputs</h2><span class="lvl core">Core</span><span class="tagline">src/search/CourseSearch.jsx</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p><code>&lt;label&gt;</code> and <code>&lt;input&gt;</code>, and linking them with <code>for</code>/<code>id</code>: <a href="html-forms.html#s14">HTML &amp; forms · §14</a>. A form's <code>submit</code>, and <code>event.preventDefault()</code>: <a href="js-react.html#s13">JS Lab 1 · §13</a>. Computed keys, <code>{ [name]: value }</code>: <a href="js-react.html#s8">JS Lab 1 · §08</a>.</p></div>
+
+  <h3>The input shows the state</h3>
+  <p>In JS Lab 2 the search box kept its own value and your code copied it into the state. In React you do it the other way round: the state is the one source of truth, and the input <em>displays</em> it. That's a <strong>controlled input</strong>:</p>
+  <div class="cmd"><span class="tg">const</span> [query, setQuery] = <span class="at">useState</span>(<span class="st">""</span>);
+
+&lt;input value={query} onChange={(event) =&gt; <span class="at">setQuery</span>(event.target.value)} /&gt;</div>
+  <p>The loop: you press a key → <code>onChange</code> → <code>setQuery</code> → React re-renders → the input shows the new <code>query</code>. Reactivity, applied to a form field. Because the value lives in state, everything else can use it — here, the hook gets <code>query</code> as its argument. Leave out <code>onChange</code> and you can't type at all: the input keeps showing the state, which never changes (React warns about it in the console).</p>
+
+  <h3>Labels</h3>
+  <div class="cmd">&lt;label htmlFor=<span class="st">"search-query"</span>&gt;Search courses&lt;/label&gt;
+&lt;input id=<span class="st">"search-query"</span> type=<span class="st">"search"</span> value={query} onChange={…} /&gt;</div>
+  <p>In JSX it's <code>htmlFor</code>, because <code>for</code> is a JavaScript keyword. The pair makes a click on the label focus the input, lets a screen reader announce "Search courses", and lets the tests find the input the way a user does: <code>getByLabelText("Search courses")</code>. No label, no test.</p>
+
+  <h3>Every value is a string</h3>
+  <p>Even <code>&lt;input type="number"&gt;</code> gives you a string. The contract wants integers for <code>credits</code> and <code>capacity</code>, so the form converts when it sends:</p>
+  <table class="grid">
+    <tr><th>Typed</th><th>.value</th><th>Number()</th><th>parseInt()</th></tr>
+    <tr><td>4</td><td><code>"4"</code></td><td><code>4</code></td><td><code>4</code></td></tr>
+    <tr><td>(nothing)</td><td><code>""</code></td><td><code>0</code></td><td><code>NaN</code></td></tr>
+    <tr><td>4.5</td><td><code>"4.5"</code></td><td><code>4.5</code></td><td><code>4</code></td></tr>
+    <tr><td>4abc</td><td><code>"4abc"</code></td><td><code>NaN</code></td><td><code>4</code></td></tr>
+  </table>
+  <p>Use <code>Number</code> and let the server judge: <code>0</code>, <code>4.5</code> and <code>NaN</code> (which <code>JSON.stringify</code> sends as <code>null</code>) all come back as a 400 with a clear reason under the field. <code>parseInt</code> quietly "fixes" <code>4.5</code> and <code>4abc</code> into <code>4</code> — the user's mistake disappears instead of being shown.</p>
+
+  <h3>A form with many fields — what's coming on lab day</h3>
+  <p>One field, one <code>useState</code>. Six fields: one object, and one handler that uses the input's <code>name</code> as a computed key:</p>
+  <div class="cmd"><span class="tg">const</span> [form, setForm] = <span class="at">useState</span>({ code: <span class="st">""</span>, title: <span class="st">""</span>, credits: <span class="st">""</span> <span class="cm">/* … */</span> });
+
+<span class="tg">function</span> <span class="at">handleChange</span>(event) {
+  <span class="tg">const</span> { name, value } = event.target;
+  <span class="at">setForm</span>((prev) =&gt; ({ ...prev, [name]: value }));     <span class="cm">// JS Lab 1 §08</span>
+}
+
+<span class="tg">async</span> <span class="tg">function</span> <span class="at">handleSubmit</span>(event) {
+  event.<span class="at">preventDefault</span>();                              <span class="cm">// no page reload: JS Lab 1 §13</span>
+  <span class="tg">await</span> <span class="at">onAdd</span>({                                        <span class="cm">// events up: React Lab 1</span>
+    ...form,
+    credits: <span class="tg">Number</span>(form.credits),                     <span class="cm">// "4" → 4</span>
+    capacity: <span class="tg">Number</span>(form.capacity),
+    description: form.description === <span class="st">""</span> ? <span class="tg">null</span> : form.description,   <span class="cm">// empty → null</span>
+  });
+}
+
+&lt;input name=<span class="st">"code"</span> value={form.code} onChange={handleChange} /&gt;</div>
+  <p>Start every field at <code>""</code>, never <code>undefined</code>: an input whose <code>value</code> starts <code>undefined</code> is uncontrolled, and React warns when it switches.</p>
+
+  <h3>Where the query lives</h3>
+  <p>In <code>CourseSearch</code>, because nobody else needs it. React Lab 1's rule for state: as low as possible, as high as necessary. The course list on lab day is different — the View shows it <em>and</em> adding a course changes it — so it lives higher, in the hook the page calls. The half-typed form isn't shared, so it stays in the form.</p>
+
+  <h3>Exercise — CourseSearch</h3>
+  <ul>
+    <li>A heading <code>Search the catalogue</code>.</li>
+    <li>A label <code>Search courses</code>, linked to a controlled <code>&lt;input type="search"&gt;</code>.</li>
+    <li><code>useCourseSearch(query)</code> for the data, <code>&lt;SearchResults&gt;</code> to show it.</li>
+  </ul>
+  <div class="dothis">
+    <h4>Do this now — check it in the browser</h4>
+    <ol>
+      <li>Type <code>learn</code>: Machine Learning and Deep Learning appear. Type <code>zzz</code>: "No courses match." Clear the box: the results go, and no request is sent.</li>
+      <li>Watch the Network tab while you type <code>learn</code>: one request per keystroke — <code>q=l</code>, <code>q=le</code>, … Five requests for one search. The stretch below fixes that.</li>
+    </ol>
+  </div>
+
+  <div class="stretch-box">
+    <h3>Stretch — debounce the search</h3>
+    <p>JS Lab 2's <a href="js-app.html#s9">debounce stretch</a>, as a hook. Write <code>useDebounced(value, ms)</code> in <code>src/search/useDebounced.js</code>: it returns <code>value</code>, but only once it has stopped changing for <code>ms</code> milliseconds. One <code>useState</code> for the settled value; one <code>useEffect</code> on <code>[value, ms]</code> that starts a <code>setTimeout</code>, and whose cleanup is <code>clearTimeout</code> — the cleanup runs whenever the value changes again, so the timer starts over. Then, in <code>CourseSearch</code>:</p>
+    <div class="cmd"><span class="tg">const</span> settledQuery = <span class="at">useDebounced</span>(query, <span class="st">250</span>);
+<span class="tg">const</span> { results, status } = <span class="at">useCourseSearch</span>(settledQuery);</div>
+    <p>The input still shows every keystroke — it reads <code>query</code> — while the search waits for a pause. One request per word. <code>npm run test:stretch</code>.</p>
+    <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Stretch — the search sends one request per pause</span></label>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>A test says <code>Unable to find a label with the text of: Search courses</code>, but the label is right there on screen. What's likely wrong?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The label isn't linked to the input: <code>htmlFor</code> missing or not matching the input's <code>id</code> (or <code>for</code> written instead of <code>htmlFor</code>). Or the text differs — "Search course", "Search courses:". Wrapping the input inside the <code>&lt;label&gt;</code> also links them.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Why does the stretch debounce the <em>query</em> before the hook, instead of putting a timer inside <code>useCourseSearch</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Each piece keeps one job: the hook fetches for whatever query it's given; <code>useDebounced</code> decides when a value has settled; the component wires them. Debouncing is then reusable for anything, and the hook stays as simple — and as testable — as before.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 complete — test/search all green, the search works in the browser</span></label>
+</section>
+
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>Custom hooks — and why the view gets dumb</h2><span class="lvl core">Core</span><span class="tagline">what you just built, and why it's shaped that way</span></div>
+
+  <h3>A custom hook is just a function</h3>
+  <p>A <strong>custom hook</strong> is a function whose name starts with <code>use</code> and that calls other hooks. That's all — nothing to register, no class. <code>useCourseSearch</code> is one: it calls <code>useState</code> twice and <code>useEffect</code> once, and returns what the component needs. The <code>use</code> prefix tells React (and the reader) that the rules of hooks apply inside.</p>
+  <p>A hook shares <strong>logic</strong>, not <strong>state</strong>. Each component that calls it gets its own: put two <code>&lt;CourseSearch /&gt;</code> on a page and you get two queries and two sets of requests. To share state, call the hook <em>once</em>, in the parent, and pass the values down — lifting state, from React Lab 1. (React Lab 3's Context is the other way.)</p>
+
+  <h3>The rules of hooks</h3>
+  <p>Call hooks only at the <strong>top level</strong> of a component or a custom hook: not inside an <code>if</code>, a loop, a callback, or after an early <code>return</code>. React tells your <code>useState</code> calls apart by their <em>order</em> — the first call is "state 1", the second "state 2" — so the order has to be the same on every render.</p>
+  <div class="cmd"><span class="cm">// ✗ when q becomes blank, the hooks below stop being called: the order changes</span>
+<span class="tg">if</span> (q === <span class="st">""</span>) <span class="tg">return</span> { results: [], status: <span class="st">"idle"</span> };
+<span class="tg">const</span> [results, setResults] = <span class="at">useState</span>([]);
+
+<span class="cm">// ✓ every hook first, every render; decisions after</span>
+<span class="tg">const</span> [results, setResults] = <span class="at">useState</span>([]);
+<span class="tg">const</span> [status, setStatus] = <span class="at">useState</span>(<span class="st">"idle"</span>);
+<span class="at">useEffect</span>(() =&gt; { … }, [q]);
+<span class="tg">if</span> (q === <span class="st">""</span>) <span class="tg">return</span> { results: [], status: <span class="st">"idle"</span> };</div>
+
+  <h3>What the split buys you</h3>
+  <ol>
+    <li><strong>The view is testable with nothing but props.</strong> <code>SearchResults</code>' tests need no server.</li>
+    <li><strong>The logic is testable with no screen.</strong> Open <code>test/search/useCourseSearch.test.jsx</code>: <code>renderHook(() =&gt; useCourseSearch("data"))</code> runs the hook inside a tiny test component, <code>result.current</code> is what it returned on the latest render, and <code>rerender({ q: "learn" })</code> is "the user typed something else". The race test there holds two answers back and releases them in the wrong order.</li>
+    <li><strong>The component reads in five seconds.</strong> <code>CourseSearch</code> is wiring: one state, one hook, one view.</li>
+  </ol>
+
+  <h3>The same seam, on lab day</h3>
+  <table class="grid">
+    <tr><th>Job</th><th>Pre-lab — yours</th><th>Lab day — the AI's, after your fix</th></tr>
+    <tr><td>Only renders</td><td><code>SearchResults</code></td><td><code>CoursesView</code></td></tr>
+    <tr><td>Fetch and logic</td><td><code>useCourseSearch</code></td><td><code>useCourses</code></td></tr>
+    <tr><td>Owns its input, raises events</td><td>(the search box)</td><td><code>AddCourseForm</code></td></tr>
+    <tr><td>Wiring</td><td><code>CourseSearch</code></td><td><code>CoursesPage</code></td></tr>
+  </table>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Why not let <code>CoursesView</code> call <code>useCourses()</code> itself, so the page has less to do?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Then the View fetches: you can't render it without a server, its tests need the network, and the form — which needs <code>addCourse</code> from the same hook — would have to call the hook a second time and get a second, separate list. Calling the hook once, in the page, and passing data down is what keeps one list on the screen.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Is <code>function formatSeats(n) { return n === 0 ? "Full" : `${n} seats left`; }</code> a hook? Should it be called <code>useSeats</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No, and no. It calls no hooks; it's a plain function. Naming it <code>use…</code> would make readers (and lint tools) apply the rules of hooks to it for nothing.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 read — I can say what each of my three search files is for</span></label>
+</section>
+
+<div class="part">Part 4 · Judging AI output</div>
+
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>The shape of a good React slice</h2><span class="lvl core">Core</span><span class="tagline">the professors' handout — keep it open in the lab</span></div>
+
+  <div class="cue calm"><p class="cue-k">The handout</p><p>This section is the course handout <strong>The Shape of a Good React Slice</strong>, in full. Your audit in the lab is done against it, and the viva asks its question.</p></div>
+
+  <p>A reference for judging AI-generated React code. AI will reach for structure you don't need and for hooks you haven't been taught. Use this sheet two ways: <strong>restrict</strong> what AI generates to what you know, and <strong>audit</strong> what it hands back — nothing missing, nothing extra, nothing from the "not yet" list.</p>
+  <p>As with the Spring Boot sheet, the list only means something against a concrete problem. <strong>The reason each element is present is the real lesson — not the element itself.</strong></p>
+
+  <h3>The reference feature: a Courses page — list + add</h3>
+  <ul>
+    <li>Fetch a list of courses from your Spring Boot endpoint and render them.</li>
+    <li>A form to add a new course.</li>
+    <li>When a course is added, the list reflects it.</li>
+  </ul>
+  <p>Small, one entity, mirrors the backend subscribe slice you already built. Every item below is earned by <em>this</em> feature.</p>
+  <p>(In this lab the endpoint is the mock API, which implements the same contract your Spring Boot backend grows into. Pointing the page at your own backend is React Lab 4.)</p>
+
+  <h3>Part A — What a good slice uses (the allowed list)</h3>
+  <table class="grid long-key">
+    <tr><th>Element</th><th>Why it's here in this feature</th></tr>
+    <tr><td>One View component that only renders</td><td>Takes data + callbacks as props, returns JSX. No fetch, no business logic inside it. This is the one architectural seam this lab teaches.</td></tr>
+    <tr><td>Fetch + logic in a separate hook or module (e.g. <code>useCourses</code>)</td><td>Where <code>useEffect</code> + <code>fetch</code> live, and where "add a course" is handled. The View <em>calls</em> it, doesn't <em>contain</em> it.</td></tr>
+    <tr><td><code>useState</code>, lifted to the right level</td><td>The course list and form state held where they're actually shared — in the parent — not scattered into children.</td></tr>
+    <tr><td><code>useEffect</code> — for the initial fetch only</td><td>Loading the list on mount is its one legitimate job here.</td></tr>
+    <tr><td>Props down, callbacks up</td><td>The form raises "add this course" upward; the parent owns the action and the state.</td></tr>
+    <tr><td><code>.map</code> to render the list</td><td>The same higher-order-function work from JS Lab 1, now in JSX.</td></tr>
+  </table>
+  <div class="cue"><p class="cue-k">Note — reading that row in this slice (not part of the handout)</p><p>The row's operative word is <strong>shared</strong>. The course list is shared — the View shows it and the add action changes it — so it lives above both, in <code>useCourses</code>, called by the page. The six half-typed form values are used only by the form, so they live in the form. What <em>is</em> lifted out of the form is the action: it calls <code>onAdd</code>, and the page decides what adding means. Lifting the values too would be structure nothing earns.</p></div>
+
+  <h3>Part B — Not yet (flag and strip if AI added it)</h3>
+  <p>None of these is required by this feature. If AI included one, that's a signal — name what it does <em>in this slice</em> or remove it.</p>
+  <table class="grid long-key">
+    <tr><th>Element</th><th>Why it's "not yet"</th></tr>
+    <tr><td><code>useMemo</code> / <code>useCallback</code></td><td>Performance optimization. Unearned at this scale. <strong>Strip it and confirm nothing breaks</strong> — that's the lesson: it was never load-bearing.</td></tr>
+    <tr><td><code>useReducer</code></td><td><code>useState</code> covers this slice. Reducers earn their place with complex, multi-action state you don't have here.</td></tr>
+    <tr><td><code>useRef</code></td><td>Not introduced, and nothing here needs a mutable ref or direct DOM access.</td></tr>
+    <tr><td>Context</td><td>Not introduced. Props are enough at this size.</td></tr>
+    <tr><td>A data-fetching library (React Query, etc.)</td><td>Plain <code>fetch</code> only. The library hides exactly the mechanics you're here to understand.</td></tr>
+    <tr><td>TypeScript</td><td>The labs are JavaScript. (TS is optional in the mini-project.)</td></tr>
+  </table>
+
+  <h3>The rule underneath both tables</h3>
+  <p>For every hook and every component split present in the code, <strong>name what it does in this slice, or cut it.</strong> Two failures, both disqualifying:</p>
+  <ul>
+    <li><em>"The AI added it"</em> is not a justification — you own what ships.</li>
+    <li><em>"Kept it just in case"</em> fails — unearned structure is the thing you're removing.</li>
+  </ul>
+  <p>This is the exact judgment AI can't do for you, and the one your work is graded on in the viva: pick any hook and be asked <strong><em>what earns this here?</em></strong></p>
+
+  <h3>How to use this sheet with AI</h3>
+  <ol>
+    <li><strong>Restrict up front.</strong> Paste a constraint into your prompt, e.g.:
+      <div class="cue" style="margin:10px 0 4px"><p>Use only <code>useState</code> and <code>useEffect</code>. Do <strong>not</strong> use <code>useMemo</code>, <code>useCallback</code>, <code>useReducer</code>, <code>useRef</code>, or context. No TypeScript. Plain <code>fetch</code>, no data-fetching library. One View component that only renders; put fetch and logic in a separate hook or module.</p></div>
+    </li>
+    <li><strong>Generate</strong>, then walk the output against Part A — is every allowed element present and in the right place?</li>
+    <li><strong>Scan for Part B.</strong> Did the AI use anything on the "not yet" list? Strip it and confirm the app still works.</li>
+    <li><strong>Extract the seam.</strong> If fetch/logic is sitting inside the component, pull it into a hook/module so the View only renders. This is the deliverable.</li>
+    <li>You may use AI again to help refactor — but <em>you</em> decide what's wrong first.</li>
+  </ol>
+  <p>Those five steps are sections 11–14. The constraint is in <code>CONTRACT.md</code>'s prompt, word for word.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 read — I can recite the rule underneath both tables</span></label>
+</section>
+
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>The "not yet" list, and why</h2><span class="lvl core">Core</span><span class="tagline">ai-sample/CoursesPage.jsx</span></div>
+
+  <p>"Not yet" doesn't mean "bad". Every item on the list is a real tool that real apps use. It means: <strong>nothing in this slice needs it, and you haven't been taught it</strong> — so if it's in your code, you can't say what it earns, and the rule says cut it. AI reaches for these out of habit, because most of the code it learned from was bigger than yours.</p>
+  <table class="grid long-key">
+    <tr><th>Not yet</th><th>What it does — and why not here</th></tr>
+    <tr><td><code>useMemo(fn, deps)</code></td><td>Remembers a computed value between renders until a dependency changes. Here the only candidate is sorting twenty courses — microseconds — and the list is kept sorted anyway.</td></tr>
+    <tr><td><code>useCallback(fn, deps)</code></td><td>Remembers a <em>function</em> between renders. AI adds it so a function can sit in an effect's dependency array. Put the code the effect needs <em>inside</em> the effect and there's nothing to list.</td></tr>
+    <tr><td><code>useReducer(reducer, initial)</code></td><td>JS Lab 2's <code>transition(state, event)</code> and <code>dispatch</code>, built in (<a href="js-app.html#s5">JS Lab 2 · §05</a>). Worth it when many events change state together; this slice has one load and one add.</td></tr>
+    <tr><td><code>useRef(initial)</code></td><td>A box that survives renders without causing one; also how you reach a real DOM element. Nothing here needs it. You'll meet it in the OAuth lab, to hold the element Google draws its sign-in button into.</td></tr>
+    <tr><td>Context</td><td>Passes a value to every component below, without props. React Lab 3 uses it for the logged-in user. Here, the page passes two props.</td></tr>
+    <tr><td>React Query, SWR, RTK Query, axios</td><td>Libraries that fetch, cache, retry and track loading for you. They hide exactly what sections 04–05 made you write — status, cleanup, the ignore flag — so you could no longer judge whether it's right. <code>apiFetch</code> is plain <code>fetch</code>.</td></tr>
+    <tr><td>TypeScript</td><td>Types catch a wrong prop or a misspelt field before the code runs — real value, and optional in the mini-project. The labs are JavaScript so the weakest link isn't the type syntax.</td></tr>
+  </table>
+
+  <h3>Exercise — strip it, and watch nothing break</h3>
+  <p><code>ai-sample/CoursesPage.jsx</code> is a typical AI first draft of the lab-day page: what an AI chat tends to produce for the contract when it's given the behaviour and the API, but no rules. It was put together for this lab so that the common smells are all in one place. It works. That's the point.</p>
+  <div class="dothis">
+    <h4>Do this now — at home, by hand</h4>
+    <ol>
+      <li>Copy it over the lab-day placeholder (nothing of yours is lost — the placeholder comes back in step 5):</li>
+    </ol>
+    <div class="cmd"><span class="p">$</span> cp ai-sample/CoursesPage.jsx src/courses/CoursesPage.jsx
+<span class="cm"># Windows (PowerShell):</span>
+<span class="p">$</span> Copy-Item ai-sample\CoursesPage.jsx src\courses\CoursesPage.jsx
+<span class="p">$</span> npm test -- courses/CoursesPage
+<span class="o">      Tests  4 passed (4)</span></div>
+    <ol start="2">
+      <li>Open the app. The list loads; adding works; a duplicate shows its message. The page's own tests pass. Now run <code>npm test -- test/courses</code>: the other three files still fail. "It works" and "it's a good slice" are different tests.</li>
+      <li>Find every "not yet" item in the file. Then remove them <strong>one at a time</strong>, and after each one, reload the page, add a course, and run <code>npm test -- courses/CoursesPage</code>:
+        <ul>
+          <li><code>useMemo</code> → a plain <code>const sortedCourses = [...courses].sort(…)</code>. Still sorted. (Then ask: does it need sorting at all? Who sorts the list?)</li>
+          <li><code>useCallback</code> around <code>fetchCourses</code> → a plain <code>async function fetchCourses()</code>, and the effect's dependency array becomes <code>[]</code>. (It's also called after every add — that's the reload smell, below.)</li>
+          <li><code>useCallback</code> around <code>handleSubmit</code> → a plain <code>async function</code>.</li>
+          <li><code>useRef</code> → delete the <code>useRef</code> line, the <code>ref={…}</code> attribute and the <code>focus()</code> call.</li>
+          <li>Finally, take the three names out of the <code>import</code> line.</li>
+        </ul>
+      </li>
+      <li>Every time: nothing breaks. None of them was load-bearing. Note one nuance: the <code>useRef</code> had a job you can name — "put the cursor back in Code after an add". A nameable job is the test for <em>keeping</em> something; it's still "not yet" here, so it goes, and you'd write that reason in the audit.</li>
+      <li>Put the placeholder back: <code>git checkout -- src/courses/CoursesPage.jsx</code>.</li>
+    </ol>
+  </div>
+  <p>Before you put it back, list the smells that <em>aren't</em> on Part B — you'll find the same ones in your own AI's output: thirteen <code>useState</code>s in one component; <code>loading</code> and <code>error</code> as separate fields instead of one status; <code>courseCount</code> stored in state when it's just <code>courses.length</code>; the list fetched <em>again</em> after every add (watch the list blink "Loading courses…"); <code>key={index}</code>; the fetch, the list and the form all in one component. The TA audits this file live at the start of the lab — bring your list.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>You removed <code>useMemo</code> from <code>sortedCourses</code>, and the list is still sorted. Why did nothing change?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>useMemo</code> doesn't make anything happen; it skips <em>repeating</em> a computation when the dependencies are unchanged. Without it, the sort just runs on every render — twenty items, too fast to notice. That's what "never load-bearing" means.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>The sample re-fetches the whole list after each add. It works. What's wrong with it, by the contract?</div>
+    <details><summary>Show answer</summary><div class="a"><p>A <code>201</code> carries the created course in its body — the contract says so — so the second request fetches twenty courses to learn about one you already have. It also flips the status to loading, so the list blinks. Insert the 201 body, in code order.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 09 complete — stripped the sample, nothing broke, placeholder restored</span></label>
+</section>
+
+<div class="part">Part 5 · Lab day — AI required</div>
+
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>In the lab</h2><span class="lvl core">Core</span><span class="tagline">doubts first, then the AI session</span></div>
+
+  <p>The lab assumes you've finished the core pre-lab, sections 01–09. It goes like this:</p>
+  <ol>
+    <li>We scroll through the <strong>core</strong> sections together at the projector — stop us anywhere with a question. Questions on stretch parts are welcome too.</li>
+    <li><strong>One level deeper:</strong> the TA audits <code>ai-sample/CoursesPage.jsx</code> live against the sheet, and asks "what earns this here?" of every hook — the viva question, practised.</li>
+    <li><strong>The AI session, on your own laptop:</strong> sections 11–14, in order. Generate, audit, fix, strip. Log every prompt as you go. The TAs come round; raise a hand when you're stuck.</li>
+    <li>Before you leave: <code>npm test</code> as green as you've got it, and <code>PROMPTS.md</code> and <code>AUDIT.md</code> filled in as far as you've got. You finish and submit afterwards (section 17).</li>
+  </ol>
+
+  <div class="cue watch"><p class="cue-k">A free account is a budget</p><p>Plan on about four prompts: <strong>one</strong> to generate, <strong>one or two</strong> to help with the fix once your audit says what's wrong, <strong>one</strong> spare. Every prompt is small and precise — you paste the contract and your decisions, never "it doesn't work, fix it". Keep one chat for the whole lab, so the contract stays in view. If you run out: you can audit <code>ai-sample/CoursesPage.jsx</code> instead, and do the fix by hand — tell us, and say so in <code>PROMPTS.md</code>.</p></div>
+
+  <div class="cue work"><p class="cue-k">Bring</p><p>Your laptop with <code>esd-labs/react-lab2</code>, <code>npm install</code> done and <code>test/search</code> green; your list of smells from section 09; and an AI chat you're already logged in to — ChatGPT, Gemini, Claude, Copilot, any of them. If you use one inside your editor, log what you asked it the same way.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 read — AI account ready, pre-lab done</span></label>
+</section>
+
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>Generate — and expect the smell</h2><span class="lvl core">Core</span><span class="tagline">CONTRACT.md · PROMPTS.md · AI required</span></div>
+
+  <div class="dothis">
+    <h4>Do this now — prompt 1</h4>
+    <ol>
+      <li>Open <code>CONTRACT.md</code> and read it once, top to bottom. You should recognise every line from sections 03–08.</li>
+      <li>Copy the <strong>prompt 1</strong> block — all of it, exactly — into a <strong>new</strong> chat and send it. Don't add §4. Don't add "make it clean" or "follow best practices".</li>
+      <li>Log it in <code>PROMPTS.md</code> as prompt 1.</li>
+      <li>Create each file the AI gave you, at the path it gave, in <code>src/courses/</code>. If one has the same name as a placeholder, replace the placeholder; leave the other placeholders alone. Don't touch <code>src/api/client.js</code>, <code>src/App.jsx</code> or the tests.</li>
+      <li>Run it, and write what you see in <code>AUDIT.md</code> §0 (below).</li>
+    </ol>
+  </div>
+
+  <h3>Run it like a user, then like a tester</h3>
+  <ul>
+    <li><strong>The list:</strong> twenty courses, in code order; CS201 says "Full".</li>
+    <li><strong>A valid add:</strong> <code>CS350</code>, Compiler Design, Computer Science, 4, 40 → it appears between CS305 and CS402, and the form clears.</li>
+    <li><strong>A duplicate:</strong> <code>CS501</code> → "Course code already exists", and what you typed stays.</li>
+    <li><strong>Bad input:</strong> <code>cs350</code> with credits <code>9</code> → "Validation failed", and a reason under Code and under Credits.</li>
+    <li><strong>The Network tab:</strong> how many requests on page load? How many per add?</li>
+    <li><strong><code>npm test</code>:</strong> how many pass? Which files fail?</li>
+  </ul>
+  <p>Quite possibly <code>test/courses/CoursesPage</code> passes while the View, hook or form tests fail — or the AI's files have other names, so those tests can't even find them. That isn't the AI failing the contract. The tests encode the <em>seam</em>, and a screen that works can still be the wrong shape.</p>
+
+  <h3>Why prompt 1 isn't "the clean version"</h3>
+  <p>Prompt 1 gives the AI the behaviour, the API, the client and the rules — including the handout's "one View component that only renders". It does <em>not</em> give the file names, props and return values in §4. That's deliberate: you want to see what an AI does with a precise contract and a limited vocabulary, and what it gets wrong is the material for your audit. Prompting for the clean version would hide exactly what you're here to learn to spot.</p>
+
+  <h3>The smells to expect</h3>
+  <p>Some of these, rarely all — it depends on the model and the day:</p>
+  <table class="grid long-key">
+    <tr><th>Smell</th><th>What it looks like</th></tr>
+    <tr><td>Fetch + logic + JSX in one component</td><td>The page has the <code>useEffect</code>, the <code>apiFetch</code> calls, the list and the form, all in one function.</td></tr>
+    <tr><td>Logic in the form</td><td>The form calls <code>apiFetch</code> itself instead of calling <code>onAdd</code>, so the list's owner never hears about the new course — or hears about it by reloading.</td></tr>
+    <tr><td>Scattered or duplicated state</td><td><code>loading</code> + <code>error</code> + <code>courses</code> as separate fields; a stored count, or a sorted copy of the list, kept in state.</td></tr>
+    <tr><td>State at the wrong level</td><td>Values lifted that nothing else reads: the six half-typed form values held in the hook or the page and passed down, though only the form uses them. Lift what's shared (the course list) and the action (<code>onAdd</code>), not the form's values.</td></tr>
+    <tr><td>Reload after add</td><td>A second <code>GET /api/courses</code> after every POST, instead of inserting the 201 body.</td></tr>
+    <tr><td>A "not yet" hook despite the rules</td><td><code>useCallback</code> around the load function, <code>useMemo</code> around a sort, a <code>useRef</code> for focus.</td></tr>
+    <tr><td>Rules the contract didn't ask for</td><td>Validation in the browser that copies the server's rules (now there are two sets to keep in step), a "success!" alert, a delete button.</td></tr>
+    <tr><td>An effect without cleanup</td><td>No <code>return</code> in the effect, or an ignore flag nothing ever sets (section 05, Q2).</td></tr>
+    <tr><td>Errors lost</td><td><code>catch (err) { console.log(err) }</code>; <code>fieldErrors</code> never shown; the error object rendered instead of its message.</td></tr>
+    <tr><td><code>key={index}</code></td><td>The list's keys are positions, not ids.</td></tr>
+  </table>
+
+  <div class="cue"><p class="cue-k">If it doesn't run</p><p>One fix prompt, with the <strong>exact</strong> error text and the file it points at — "it doesn't work" wastes a prompt. Log it. After two tries, stop and raise your hand: a TA can usually spot a wrong import path or a default-vs-named export faster than another prompt can.</p></div>
+
+  <div class="stretch-box">
+    <h3>Stretch — the unleashed control</h3>
+    <p>If you have a prompt to spare: open a <em>second</em> new chat, and paste prompt 1 with the whole "## Rules" part deleted. Don't use the code — just count what's in it from Part B, and how the structure differs. Log it as its own prompt. The difference between the two answers is what the rules bought you; write one line about it at the end of <code>PROMPTS.md</code>.</p>
+    <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Stretch — compared the output with and without the rules</span></label>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 complete — the AI's code is in src/courses, it runs, prompt 1 is logged</span></label>
+</section>
+
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>Audit, with the sheet</h2><span class="lvl core">Core</span><span class="tagline">AUDIT.md §0–4 · no AI in this step</span></div>
+
+  <p>This step is yours alone. Fill in <code>AUDIT.md</code> sections 0 to 4 <strong>before</strong> you ask the AI to change anything. Deciding what's wrong is the judgment the lab is about; if the AI decides, you've learned to forward its opinions.</p>
+
+  <h3>Part A — walk the allowed list</h3>
+  <p>For each row of the handout's Part A (section 08), find it in the AI's code — <code>file:line</code> — or write "missing", and say whether it's in the right place. The question for state is always: <strong>who needs it?</strong></p>
+  <table class="grid long-key">
+    <tr><th>State</th><th>Who needs it — so where it lives</th></tr>
+    <tr><td>The course list, the load status, the load error</td><td>The View shows them; the add action changes the list. → <code>useCourses</code>, called once by the page.</td></tr>
+    <tr><td>The six input values</td><td>Only the form. → <code>AddCourseForm</code>.</td></tr>
+    <tr><td>"Submitting", and the last add error</td><td>Only the form: it disables its button and shows the message. → <code>AddCourseForm</code>.</td></tr>
+    <tr><td>How many courses there are</td><td>Nobody needs it <em>stored</em>: it's <code>courses.length</code>. → nowhere; compute it.</td></tr>
+    <tr><td>A sorted copy of the list</td><td>The list is kept sorted when it changes. → nowhere extra.</td></tr>
+  </table>
+
+  <h3>Part B — scan for "not yet"</h3>
+  <p>Search, don't skim. In VS Code, <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> over <code>src/courses</code>, or from the terminal:</p>
+  <div class="cmd"><span class="cm"># macOS / Linux</span>
+<span class="p">$</span> grep -rnE "useMemo|useCallback|useReducer|useRef|useContext|createContext|axios|@tanstack|swr|fetch\(" src/courses
+<span class="cm"># Windows (PowerShell)</span>
+<span class="p">$</span> Select-String -CaseSensitive -Path src\courses\* -Pattern "useMemo|useCallback|useReducer|useRef|useContext|createContext|axios|@tanstack|swr|fetch\("</div>
+  <p><code>fetch(</code> with a small f catches a direct <code>fetch</code> call that bypasses <code>apiFetch</code> (and its token). For each hit: what does it do in this slice? Cut, or keep with a reason you could defend.</p>
+
+  <h3>The rule — one row per hook and per component</h3>
+  <p>Every <code>useState</code>, every <code>useEffect</code>, every custom hook call, every component: one sentence on what it does <em>in this slice</em>. Some answers that pass and some that don't:</p>
+  <table class="grid long-key">
+    <tr><th>Row</th><th>Verdict</th></tr>
+    <tr><td><code>useEffect</code> in <code>useCourses</code>: "loads the list when the page appears — the one thing here that happens without a user action"</td><td>✓ Earned. It names the job.</td></tr>
+    <tr><td><code>AddCourseForm</code>: "owns the six inputs and the submit; the page shouldn't hold half-typed text"</td><td>✓ Earned.</td></tr>
+    <tr><td><code>useCallback</code> on <code>handleSubmit</code>: "best practice, avoids re-renders"</td><td>✗ Names no job in this slice. Nothing here re-renders too much. Cut.</td></tr>
+    <tr><td><code>useState</code> for <code>courseCount</code>: "shows the count"</td><td>✗ The count is <code>courses.length</code>. Stored derived data goes stale the first time someone forgets to update it. Cut; compute.</td></tr>
+    <tr><td><code>CourseItem</code> component for one <code>&lt;li&gt;</code>: "the AI made it"</td><td>✗ Disqualifying, by the rule. If you can name a job (it would be reused, it's long), say it; otherwise inline it.</td></tr>
+  </table>
+
+  <h3>Decisions</h3>
+  <p>Finish with <code>AUDIT.md</code> §4: what you'll cut, what you'll move and where to, what's missing that you'll add. These are the instructions for the fix — yours, in your words.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 12 complete — AUDIT.md §0–4 filled in, decisions written</span></label>
+</section>
+
+<section id="s13">
+  <div class="shead"><span class="chip">13</span><h2>Fix it to the seam</h2><span class="lvl core">Core</span><span class="tagline">src/courses/* · CONTRACT.md §4 · test/courses</span></div>
+
+  <p><code>CONTRACT.md</code> §4 is the target: four files, their exact names, props and return values. The tests in <code>test/courses/</code> check it. The fix — a View that only renders, fetch and logic in a hook — is the deliverable.</p>
+
+  <h3>Work file by file</h3>
+  <ol>
+    <li><strong><code>CoursesView</code></strong> first: the easiest, because it's mostly deleting. Take the JSX for the four states and the list, make it a function of <code>{ courses, status, error }</code>, and remove everything else. <code>npm test -- courses/CoursesView</code>.</li>
+    <li><strong><code>useCourses</code></strong>: the state, the effect with its ignore flag, and <code>addCourse</code>, which inserts the 201 body in code order as a new array and lets an <code>ApiError</code> through. <code>npm test -- courses/useCourses</code>.</li>
+    <li><strong><code>AddCourseForm</code></strong>: the six controlled inputs, <code>Number(…)</code> on submit, <code>await onAdd(…)</code>, and the error display — the form's own state. <code>npm test -- courses/AddCourseForm</code>.</li>
+    <li><strong><code>CoursesPage</code></strong>: one hook call, a heading, two components. <code>npm test -- courses/CoursesPage</code>.</li>
+  </ol>
+  <p>Delete any file of the AI's that nothing imports any more. Then the whole of <code>npm test</code>, and the browser checks from section 11 again.</p>
+
+  <h3>AI may help now — with your decisions</h3>
+  <p>Once <code>AUDIT.md</code> §4 is written, you may ask the AI to help carry it out. The prompt carries <em>your</em> decisions; the AI does the typing. Something like:</p>
+  <div class="cmd"><span class="o">I audited the code you gave me. Change it exactly like this, and nothing else:</span>
+<span class="o">1. Move the GET and the add out of CoursesPage into useCourses() in src/courses/useCourses.js.</span>
+<span class="o">2. Replace the loading and error booleans with one status: "loading" | "ready" | "error".</span>
+<span class="o">3. After a successful POST, insert the returned course in code order. Don't fetch the list again.</span>
+<span class="o">4. &lt;your next decision from AUDIT.md&gt;</span>
+<span class="o">The files must end up with exactly this shape:</span>
+<span class="o">&lt;paste CONTRACT.md §4 here&gt;</span>
+<span class="o">Same rules as before: only useState and useEffect; no useMemo, useCallback, useReducer,</span>
+<span class="o">useRef or context; JavaScript; apiFetch only. Reply with the changed files in full.</span></div>
+  <p>Log it. Then check the reply against your decisions, line by line. A "refactor" from an AI often slips things back in, renames props, or changes behaviour nobody asked about. The tests will catch some of it; your audit catches the rest.</p>
+
+  <h3>Reading a failing test</h3>
+  <table class="grid long-key">
+    <tr><th>The test says</th><th>It usually means</th></tr>
+    <tr><td>expected undefined to be 'loading'</td><td>The hook returns <code>loading</code>/<code>isLoading</code> booleans, not one <code>status</code>.</td></tr>
+    <tr><td>expected "spy" to not be called at all, but actually been called…</td><td>The View or the form fetches. Move it into the hook; the form calls <code>onAdd</code>.</td></tr>
+    <tr><td>expected [ 'GET /api/courses', …(1) ] to have a length of 1 but got 2</td><td>The list is reloaded after an add. Insert the 201 body instead.</td></tr>
+    <tr><td>expected [ …(21) ] to have a length of 20 but got 21 (the "new array" test)</td><td><code>push</code> or <code>sort</code> on the existing array. Make a new one: <code>[...prev, created].sort(byCode)</code>.</td></tr>
+    <tr><td>expected { code: 'CS350', …(5) } to match object { … }</td><td>Read the diff under it. Usually <code>credits: "4"</code> where <code>4</code> was expected: <code>Number(…)</code>.</td></tr>
+    <tr><td>expected '' to be null</td><td>An empty description should be sent as <code>null</code>, as the contract says.</td></tr>
+    <tr><td>expected null to be an instance of ApiError</td><td><code>addCourse</code> catches the error and swallows it. Let it throw; the form catches it.</td></tr>
+    <tr><td>expected false to be true (in the "right under its own input" test)</td><td>A field's reason isn't between its input and the next one: it's in a list at the top, or inside the <code>&lt;label&gt;</code>.</td></tr>
+    <tr><td>Found multiple elements with the text: …</td><td>The same text is on screen twice — a reason shown both in a summary and under its field, say.</td></tr>
+  </table>
+
+  <div class="stretch-box">
+    <h3>Stretch — field errors a screen reader can find</h3>
+    <p>A red line under an input is invisible to a screen reader. Mark each input that has an error with <code>aria-invalid="true"</code>, give its reason an <code>id</code>, and point the input at it with <code>aria-describedby</code>. A screen reader then reads "Code, invalid entry, must be 2–4 uppercase letters…". Put <code>role="alert"</code> on the form's message so it's announced when it appears. <code>npm run test:stretch</code>.</p>
+    <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Stretch — accessible field errors</span></label>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 13 complete — npm test fully green, the browser checks pass</span></label>
+</section>
+
+<section id="s14">
+  <div class="shead"><span class="chip">14</span><h2>Strip "not yet", and confirm nothing breaks</h2><span class="lvl core">Core</span><span class="tagline">AUDIT.md §5–7</span></div>
+
+  <p>Look at your fixed code once more for anything from Part B — including anything you kept "for now". Remove each one <strong>separately</strong>, and after each, run <code>npm test</code> and add a course in the browser. Write each one in <code>AUDIT.md</code> §5: what you removed, the test result, what the app did. It should be the same story as section 09: nothing breaks, because none of it was load-bearing.</p>
+  <p>If the AI used nothing from Part B, that's a result too: write it in §5, with the rule in prompt 1 you think prevented it. You practised the stripping itself in section 09.</p>
+
+  <h3>The last pass: the rule</h3>
+  <p>Read your four files top to bottom and point at every hook call and every component. For each one, say out loud what it does in this slice. If you hesitate, it's either a gap in your understanding — reread its section — or a thing that shouldn't be there. This is the viva: any hook, <em>what earns this here?</em></p>
+  <p>Then fill in <code>AUDIT.md</code> §6 (before / after) and §7 (two sentences), and finish <code>PROMPTS.md</code>'s "Afterwards".</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 14 complete — stripped, re-tested, AUDIT.md finished</span></label>
+</section>
+
+<div class="part">Part 6 · Reference and submission</div>
+
+<section id="s15">
+  <div class="shead"><span class="chip">15</span><h2>When it goes wrong</h2><span class="lvl ref">Reference</span><span class="tagline">the error, and what it means</span></div>
+
+  <table class="grid long-key">
+    <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>Error: TODO, or TODO (lab day): …</td><td>That file is still the placeholder. Pre-lab: write it. Lab day: the AI's code didn't replace it — or your code imports it while the AI named its version differently.</td></tr>
+    <tr><td>Failed to resolve import "./CourseList.jsx"</td><td>The AI's code imports a file you didn't create, or under another name or folder. Create it, or fix the path.</td></tr>
+    <tr><td>does not provide an export named 'CoursesPage'</td><td>The AI used <code>export default</code>. The contract says named exports: <code>export function CoursesPage()</code>.</td></tr>
+    <tr><td>Two GET /api/courses in the Network tab on page load</td><td>StrictMode running your effect twice in development (section 05). Expected. Once in a production build.</td></tr>
+    <tr><td>The Network tab fills up with requests and never stops</td><td>An effect with no dependency array and a <code>setState</code> inside (section 05, Q1).</td></tr>
+    <tr><td>Failed to load resource: the server responded with a status of 409 (Conflict)</td><td>The browser logs every non-2xx response in red. If your screen shows the message, your code handled it; it's not your bug.</td></tr>
+    <tr><td>Authentication required when adding a course</td><td>The code calls <code>fetch</code> directly instead of <code>apiFetch</code>, so no token is sent. Or the dev server restarted (new tokens): add again — the client logs in afresh.</td></tr>
+    <tr><td>credits: must be a whole number from 1 to 6 — but you typed 4</td><td>Sent as the string <code>"4"</code>. <code>Number(form.credits)</code> (section 06).</td></tr>
+    <tr><td>You can't type in an input</td><td><code>value</code> without a working <code>onChange</code> — or the handler uses <code>event.target.name</code> and the input has no <code>name</code>.</td></tr>
+    <tr><td>A component is changing an uncontrolled input to be controlled</td><td>A field started as <code>undefined</code>. Start every field at <code>""</code>.</td></tr>
+    <tr><td>Each child in a list should have a unique "key" prop</td><td><code>key</code> missing on the <code>&lt;li&gt;</code>. Use <code>course.id</code>.</td></tr>
+    <tr><td>Objects are not valid as a React child (found: object with keys {…})</td><td>Rendering the error object, or <code>fieldErrors</code>, instead of a string: <code>{error.message}</code>, <code>{fieldErrors.code}</code>.</td></tr>
+    <tr><td>The page reloads when you press Add course</td><td><code>event.preventDefault()</code> missing in the submit handler.</td></tr>
+    <tr><td>The new course appears at the bottom</td><td>Inserted without sorting. <code>[...prev, created].sort(byCode)</code>.</td></tr>
+    <tr><td>The list blinks "Loading courses…" after an add</td><td>The list is fetched again after the POST. Insert the 201 body.</td></tr>
+    <tr><td>Unable to find a label with the text of: Code</td><td>The label says something else ("Course code"), or isn't linked to its input (<code>htmlFor</code>/<code>id</code>). The contract fixes the texts.</td></tr>
+    <tr><td>The AI wrote <code>.tsx</code> files, <code>: string</code>, <code>interface</code></td><td>TypeScript. Point it at the rules in prompt 1 and ask for JavaScript — one prompt, logged.</td></tr>
+    <tr><td>Port 5173 is already in use</td><td>Another <code>npm run dev</code> is still running. Stop it with <kbd>Ctrl</kbd>+<kbd>C</kbd> in its terminal.</td></tr>
+    <tr><td>npm test passes, but the browser page is blank</td><td>Open the console: a runtime error the tests don't reach, usually an import in <code>App.jsx</code>'s chain.</td></tr>
+  </table>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 15 read</span></label>
+</section>
+
+<section id="s16">
+  <div class="shead"><span class="chip">16</span><h2>Practice run, unaided</h2><span class="lvl stretch">Stretch</span><span class="tagline">no tests, no hints, no AI</span></div>
+
+  <p>Write each of these yourself, on top of your finished lab, without scrolling up. Keep <code>npm test</code> green. Then open the answer.</p>
+
+  <div class="quiz">
+    <div class="q"><b>P1</b>Optimistic add: show the new course in the list the moment the user submits, replace it with the server's version on success, and take it out again on failure.</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd"><span class="tg">async</span> <span class="tg">function</span> <span class="at">addCourse</span>(request) {
+  <span class="tg">const</span> temp = { ...request, id: <span class="st">`pending-${request.code}`</span>, seatsLeft: request.capacity };
+  <span class="at">setCourses</span>((prev) =&gt; [...prev, temp].<span class="at">sort</span>(byCode));
+  <span class="tg">try</span> {
+    <span class="tg">const</span> created = <span class="tg">await</span> <span class="at">apiFetch</span>(<span class="st">"/api/courses"</span>, { method: <span class="st">"POST"</span>, body: request });
+    <span class="at">setCourses</span>((prev) =&gt; prev.<span class="at">map</span>((c) =&gt; (c.id === temp.id ? created : c)));
+    <span class="tg">return</span> created;
+  } <span class="tg">catch</span> (error) {
+    <span class="at">setCourses</span>((prev) =&gt; prev.<span class="at">filter</span>((c) =&gt; c.id !== temp.id));
+    <span class="tg">throw</span> error;
+  }
+}</div>
+      <p>Every update is an updater function, because by the time the answer arrives the list may have changed. The trade-off: it feels instant, but on a 409 the course appears and then vanishes. Worth it when failures are rare; with a form the server often rejects, the plain version is the better default.</p>
+    </div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>P2</b>When loading fails, show a "Try again" button that loads the list again. What changes in the hook, and what in the View?</div>
+    <details><summary>Show answer</summary><div class="a">
+      <div class="cmd"><span class="cm">// useCourses</span>
+<span class="tg">const</span> [attempt, setAttempt] = <span class="at">useState</span>(<span class="st">0</span>);
+<span class="at">useEffect</span>(() =&gt; { <span class="cm">/* the same load, with its ignore flag */</span> }, [attempt]);
+<span class="tg">function</span> <span class="at">retry</span>() {
+  <span class="at">setStatus</span>(<span class="st">"loading"</span>);
+  <span class="at">setError</span>(<span class="tg">null</span>);
+  <span class="at">setAttempt</span>((n) =&gt; n + <span class="st">1</span>);
+}
+<span class="tg">return</span> { courses, status, error, addCourse, retry };
+
+<span class="cm">// CoursesView({ …, onRetry })</span>
+<span class="tg">if</span> (status === <span class="st">"error"</span>) <span class="tg">return</span> &lt;p&gt;Couldn't load courses: {error} &lt;button onClick={onRetry}&gt;Try again&lt;/button&gt;&lt;/p&gt;;</div>
+      <p><code>attempt</code> earns its place: it is the dependency that means "load again". The View still only renders — it raises the click through a prop.</p>
+    </div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>P3</b>Add a department dropdown above the list that shows only that department's courses, using <code>GET /api/courses?department=…</code>. Which hook changes, what are its dependencies, and who owns the selected department?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>useCourses(department)</code>: the effect builds the URL with <code>URLSearchParams</code> (so "Data Science &amp; AI" survives), depends on <code>[department]</code>, and keeps its ignore flag — it's now <code>useCourseSearch</code>'s shape exactly. The page owns <code>department</code> in a <code>useState</code> and renders a controlled <code>&lt;select&gt;</code>; the View doesn't know filtering exists.</p></div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>P4</b>Find both bugs: <code>useEffect(async () =&gt; { const data = await apiFetch("/api/courses"); setCourses(data); });</code></div>
+    <details><summary>Show answer</summary><div class="a"><p>One: the effect function is <code>async</code>, so it returns a promise where React expects nothing or a cleanup (React warns). Two: no dependency array, so it runs after every render, and <code>setCourses</code> with a new array causes the next render — requests forever. And with no cleanup there's no ignore flag either.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 16 complete (stretch)</span></label>
+</section>
+
+<section id="s17">
+  <div class="shead"><span class="chip">17</span><h2>Submitting the assignment</h2><span class="lvl core">Core</span><span class="tagline">tests + prompt log + audit</span></div>
+
+  <div class="cue watch"><p class="cue-k">Complete means complete</p><p>This lab is graded. Submit <strong>once</strong>, by the end of the day of the lab, and only when all three parts are done: <code>npm test</code> entirely green, <code>PROMPTS.md</code> logging every prompt, and <code>AUDIT.md</code> filled in. Incomplete work is not accepted, and there is no partial credit for a partial submission. Stuck? Ask a TA before the day ends.</p></div>
+
+  <h3>1. Get npm test fully green</h3>
+  <div class="cmd"><span class="p">$</span> cd esd-labs/react-lab2
+<span class="p">$</span> npm test
+<span class="o"> Test Files  8 passed (8)</span>
+<span class="o">      Tests  60 passed (60)</span></div>
+  <p>Nothing failing is the only acceptable result. When we grade, we <strong>put our own copy of the tests back in</strong> before running <code>npm test</code> — so editing or deleting a test can only cost you marks.</p>
+
+  <h3>2. Check the two files</h3>
+  <ul>
+    <li><code>PROMPTS.md</code>: every prompt you sent, in order, including the ones that didn't help; what came back; what you kept. The lab is "AI required": the log is how we see it was used — and how.</li>
+    <li><code>AUDIT.md</code>: every section filled in. Sections 0–4 describe the AI's <em>first</em> version, and your decisions come before the fix prompt that carries them out — <code>PROMPTS.md</code> shows the order.</li>
+  </ul>
+
+  <h3>3. Check the app</h3>
+  <p><code>npm run dev</code> and the four checks from section 11: the list, a valid add in the right place, a duplicate, bad input with reasons under the fields. And the search still works.</p>
+
+  <h3>4. Zip the react-lab2 folder — and only that folder</h3>
+  <p>Zip <code>react-lab2</code> itself, not the whole <code>esd-labs</code> folder, and leave out <code>node_modules</code> and <code>dist</code> — they're huge, and we reinstall. From inside <code>esd-labs</code>:</p>
+  <div class="cmd"><span class="cm"># macOS / Linux</span>
+<span class="p">$</span> zip -r react-lab2.zip react-lab2 -x "react-lab2/node_modules/*" "react-lab2/dist/*"
+
+<span class="cm"># Windows (PowerShell) — delete node_modules and dist first, then zip</span>
+<span class="p">$</span> Remove-Item -Recurse -Force react-lab2\node_modules, react-lab2\dist -ErrorAction SilentlyContinue
+<span class="p">$</span> Compress-Archive -Path react-lab2 -DestinationPath react-lab2.zip</div>
+  <p>Open the zip once to check it has the <code>react-lab2</code> folder with <code>src/</code>, <code>PROMPTS.md</code> and <code>AUDIT.md</code> inside, and no <code>node_modules</code>. (On Windows, <code>npm install</code> brings <code>node_modules</code> back afterwards.)</p>
+
+  <h3>5. Submit the zip</h3>
+  <p>Upload <code>react-lab2.zip</code> on the submission platform by the end of the day of the lab. The next lab's starter — which contains this lab's finished code — is released that night, so late submissions can't be accepted. Run <code>npm test</code> right before you zip, so what you submit is what you tested. Stretch work is never required; your zip carries it anyway.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Submitted — npm test green, PROMPTS.md and AUDIT.md filled in, react-lab2.zip uploaded</span></label>
+</section>
+
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+  <div class="gloss">
+    <div class="grow"><b>ApiError</b><span>The contract's one error shape (<code>status</code>, <code>message</code>, <code>fieldErrors</code>, …), and the error class <code>apiFetch</code> throws for any non-2xx answer.</span></div>
+    <div class="grow"><b>apiFetch</b><span>The given client: <code>fetch</code> + base URL + JSON + token + <code>res.ok</code> check. The only way the app talks to the API.</span></div>
+    <div class="grow"><b>cleanup</b><span>The function an effect returns. React runs it before the effect runs again, and when the component goes away.</span></div>
+    <div class="grow"><b>contract</b><span>The agreed description of an API — paths, shapes, statuses. Here, <code>openapi.yaml</code>; for the AI, <code>CONTRACT.md</code>.</span></div>
+    <div class="grow"><b>controlled input</b><span>An input whose <code>value</code> comes from state and whose <code>onChange</code> updates that state.</span></div>
+    <div class="grow"><b>custom hook</b><span>A function named <code>use…</code> that calls other hooks. Shares logic between components, not state.</span></div>
+    <div class="grow"><b>dependency array</b><span><code>useEffect</code>'s second argument: run again only when one of these changed (<code>Object.is</code>).</span></div>
+    <div class="grow"><b>derived value</b><span>Anything you can compute from state, like <code>courses.length</code>. Computed during render, never stored.</span></div>
+    <div class="grow"><b>dumb component / View</b><span>A component that only renders: props in, JSX out. No fetch, no logic, no state of its own.</span></div>
+    <div class="grow"><b>effect</b><span>Code that reaches outside the component (a request, a timer), run by React after rendering.</span></div>
+    <div class="grow"><b>fieldErrors</b><span>In a 400 <code>ApiError</code>: each bad field's name mapped to a human-readable reason.</span></div>
+    <div class="grow"><b>ignore flag</b><span>A variable an effect checks before using an answer, set to <code>true</code> by its cleanup. Latest-only, React-style.</span></div>
+    <div class="grow"><b>"not yet" list</b><span><code>useMemo</code>, <code>useCallback</code>, <code>useReducer</code>, <code>useRef</code>, Context, data-fetching libraries, TypeScript: real tools nothing in this slice needs.</span></div>
+    <div class="grow"><b>OpenAPI</b><span>A standard format for describing an HTTP API in one YAML or JSON file.</span></div>
+    <div class="grow"><b>prompt log</b><span><code>PROMPTS.md</code>: every prompt you sent and what you did with the answer.</span></div>
+    <div class="grow"><b>renderHook</b><span>Testing Library: runs a hook inside a tiny test component, so its results can be checked without a screen.</span></div>
+    <div class="grow"><b>rules of hooks</b><span>Call hooks only at the top level of a component or custom hook, in the same order every render.</span></div>
+    <div class="grow"><b>seam</b><span>The line between the part that shows things (the View) and the part that gets and changes them (the hook).</span></div>
+    <div class="grow"><b>slice</b><span>One feature, top to bottom: screen, logic, server call.</span></div>
+    <div class="grow"><b>status</b><span>One field for where a request stands: <code>"idle"</code>, <code>"loading"</code>, <code>"ready"</code>, <code>"error"</code>. Not several booleans.</span></div>
+    <div class="grow"><b>StrictMode</b><span>A development-only wrapper that, among other checks, runs every effect twice to expose missing cleanups.</span></div>
+    <div class="grow"><b>stub</b><span>A stand-in for a real function in a test — here, a <code>fetch</code> that answers from the in-process mock API.</span></div>
+    <div class="grow"><b>201 / 400 / 401 / 403 / 409</b><span>Created / your request is malformed / not logged in / logged in but not allowed / conflicts with what exists.</span></div>
+  </div>
+</section>
+
+<div class="finish">
+  <h2>How to know you're ready</h2>
+  <p>You're ready for the lab if you can do all of these <em>without looking anything up</em>:</p>
+  <ol>
+    <li>Answer the four questions for <code>POST /api/courses</code> from the contract, including every status the screen must handle.</li>
+    <li>Say why a screen needs one <code>status</code> rather than <code>results.length</code>.</li>
+    <li>Say what <code>[]</code>, <code>[q]</code> and no array do to an effect — and which one loops.</li>
+    <li>Explain the ignore flag with a timeline, and why StrictMode makes two requests on page load.</li>
+    <li>Write a controlled input, and say what <code>event.target.value</code> is for a number input.</li>
+    <li>Say what a custom hook is, and why a hook call can't go after an early return.</li>
+    <li>Recite the rule under the good-slice tables, and the two answers that fail it.</li>
+    <li>Name every item on the "not yet" list, and what each does.</li>
+    <li>Point at any hook in your code and say <em>what earns it here</em>.</li>
+  </ol>
+
+  <h2 style="margin-top:30px;font-size:20px">Good slice card</h2>
+  <div class="cmd"><span class="cm">// the hook: fetch and logic</span>
+<span class="tg">export</span> <span class="tg">function</span> <span class="at">useCourses</span>() {
+  <span class="tg">const</span> [courses, setCourses] = <span class="at">useState</span>([]);
+  <span class="tg">const</span> [status, setStatus] = <span class="at">useState</span>(<span class="st">"loading"</span>);
+  <span class="tg">const</span> [error, setError] = <span class="at">useState</span>(<span class="tg">null</span>);
+  <span class="at">useEffect</span>(() =&gt; { <span class="cm">/* load once, with an ignore flag */</span> }, []);
+  <span class="tg">async</span> <span class="tg">function</span> <span class="at">addCourse</span>(request) {
+    <span class="tg">const</span> created = <span class="tg">await</span> <span class="at">apiFetch</span>(<span class="st">"/api/courses"</span>, { method: <span class="st">"POST"</span>, body: request });
+    <span class="at">setCourses</span>((prev) =&gt; [...prev, created].<span class="at">sort</span>(byCode));   <span class="cm">// new array, in order</span>
+    <span class="tg">return</span> created;                                            <span class="cm">// errors fly through</span>
+  }
+  <span class="tg">return</span> { courses, status, error, addCourse };
+}
+
+<span class="cm">// the View: props in, JSX out</span>
+<span class="tg">export</span> <span class="tg">function</span> <span class="at">CoursesView</span>({ courses, status, error }) { <span class="cm">/* four states + .map with key */</span> }
+
+<span class="cm">// the form: owns its inputs, raises "add this course"</span>
+<span class="tg">export</span> <span class="tg">function</span> <span class="at">AddCourseForm</span>({ onAdd }) { <span class="cm">/* controlled inputs, Number(), await onAdd(…) */</span> }
+
+<span class="cm">// the page: wiring</span>
+<span class="tg">export</span> <span class="tg">function</span> <span class="at">CoursesPage</span>() {
+  <span class="tg">const</span> { courses, status, error, addCourse } = <span class="at">useCourses</span>();
+  <span class="tg">return</span> (
+    &lt;section&gt;
+      &lt;h1&gt;Courses&lt;/h1&gt;
+      &lt;CoursesView courses={courses} status={status} error={error} /&gt;
+      &lt;AddCourseForm onAdd={addCourse} /&gt;
+    &lt;/section&gt;
+  );
+}</div>
+
+  <h2 style="margin-top:24px;font-size:20px">Effect card</h2>
+  <div class="cmd"><span class="at">useEffect</span>(() =&gt; {
+  <span class="tg">if</span> (nothingToDo) <span class="tg">return</span>;                   <span class="cm">// no request, nothing to clean up</span>
+  <span class="tg">let</span> ignore = <span class="tg">false</span>;
+  <span class="at">load</span>(value)
+    .<span class="at">then</span>((data) =&gt; { <span class="tg">if</span> (!ignore) <span class="at">setData</span>(data); })
+    .<span class="tg">catch</span>(() =&gt; { <span class="tg">if</span> (!ignore) <span class="at">setFailed</span>(<span class="tg">true</span>); });   <span class="cm">// the flag on both paths</span>
+  <span class="tg">return</span> () =&gt; { ignore = <span class="tg">true</span>; };           <span class="cm">// a newer run, or unmount</span>
+}, [value]);                                 <span class="cm">// every value it reads — primitives, not objects built in render</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Form card</h2>
+  <div class="cmd"><span class="tg">const</span> [form, setForm] = <span class="at">useState</span>(EMPTY);                 <span class="cm">// every field starts ""</span>
+<span class="tg">const</span> onChange = (e) =&gt; <span class="at">setForm</span>((p) =&gt; ({ ...p, [e.target.name]: e.target.value }));
+
+<span class="tg">async</span> <span class="tg">function</span> <span class="at">onSubmit</span>(e) {
+  e.<span class="at">preventDefault</span>();
+  <span class="at">setSubmitting</span>(<span class="tg">true</span>);
+  <span class="tg">try</span> {
+    <span class="tg">await</span> <span class="at">onAdd</span>({ ...form, credits: <span class="tg">Number</span>(form.credits), capacity: <span class="tg">Number</span>(form.capacity),
+                  description: form.description === <span class="st">""</span> ? <span class="tg">null</span> : form.description });
+    <span class="at">setForm</span>(EMPTY);                                       <span class="cm">// only on success</span>
+  } <span class="tg">catch</span> (err) {
+    <span class="at">setError</span>(err);                                        <span class="cm">// err.message, err.fieldErrors</span>
+  } <span class="tg">finally</span> {
+    <span class="at">setSubmitting</span>(<span class="tg">false</span>);
+  }
+}</div>
+
+  <h2 style="margin-top:24px;font-size:20px">Not yet card</h2>
+  <div class="cmd"><span class="o">useMemo · useCallback · useReducer · useRef · Context · React Query / SWR / axios · TypeScript</span>
+<span class="o">For each one in your code: name what it does in THIS slice — or cut it.</span>
+<span class="o">"The AI added it" and "just in case" are not answers.</span></div>
+</div>
+
+<footer>M.Tech CSE · ESD · React Lab 2<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+</div>
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ---- */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  /* ---- progress: CORE sections drive the bar; stretch boxes are tracked separately.
+         Both are remembered in this browser, so they survive a reload. ---- */
+  function load(key){ try{ return JSON.parse(localStorage.getItem(key)||'[]'); }catch(err){ return []; } }
+  function save(key,list){ try{ localStorage.setItem(key,JSON.stringify(list.map(function(c){return c.checked}))); }catch(err){} }
+  var KEY='esd-react-lab2-progress', SKEY='esd-react-lab2-stretch';
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var extras=[].slice.call(document.querySelectorAll('.chk-s'));
+  var saved=load(KEY), savedS=load(SKEY);
+  checks.forEach(function(c,i){ if(saved[i]) c.checked=true; });
+  extras.forEach(function(c,i){ if(savedS[i]) c.checked=true; });
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=['Core first, in order — the pre-lab is what lets you judge the AI.',
+             'Good start. The contract and the four states carry the rest of the lab.',
+             'Past halfway. Effects, cleanup and controlled inputs are what AI gets subtly wrong.',
+             'Nearly there — the lab-day sections. Decide what is wrong before you ask the AI.',
+             'Core done. npm test green, PROMPTS.md and AUDIT.md filled in? Zip react-lab2 and submit (section 17).'];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    var s=extras.filter(function(c){return c.checked}).length;
+    msg.textContent=(n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))])+(s?'  ·  stretch: '+s+' / '+extras.length:'');
+    save(KEY,checks); save(SKEY,extras);
+  }
+  checks.concat(extras).forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^[$>]\s?/,'').trimEnd()}).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>

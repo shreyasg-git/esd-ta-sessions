@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Predict the bug, then prove it — React Bug Lab</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#101614">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Condensed:wght@600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+.cue.work{border-left-color:var(--ink);background:var(--surface)}
+.cue.work .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.tg{color:var(--term-green)}
+.at{color:var(--signal)}
+.st{color:#B7C4C0}
+.tx{color:#FFFFFF}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 182px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+.quiz .a .cmd{margin-top:4px}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 168px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+/* ---- additions for the lab docs ---- */
+.cue.react{border-left-color:var(--term-green);background:var(--dark);color:#DDE3E0}
+.cue.react .cue-k{color:var(--term-green)}
+.cue.react code{background:#22302D;color:var(--term-green)}
+.cue.react strong{color:#FFF}
+.refs{font-family:var(--mono);font-size:12px;color:var(--muted);margin:-6px 0 16px;max-width:70ch}
+.refs a{color:var(--teal);font-weight:600}
+.part{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper);background:var(--ink);display:inline-block;padding:5px 10px;margin:64px 0 -28px}
+.toc .rpart{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);padding:10px 16px 6px;border-bottom:1px solid var(--line);background:var(--teal-soft);font-weight:600}
+table.grid{border-collapse:collapse;width:100%;max-width:70ch;background:var(--surface);border:1px solid var(--ink);margin:0 0 16px;font-size:14.5px}
+table.grid th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;text-align:left;color:var(--muted);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--ink)}
+table.grid td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.grid tr:last-child td{border-bottom:0}
+table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--teal);font-weight:600;white-space:nowrap}
+
+/* ---- core / stretch ---- */
+.lvl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:3px 7px;align-self:center;white-space:nowrap}
+.lvl.core{background:var(--ink);color:var(--signal)}
+.lvl.stretch{border:1px dashed var(--teal);color:var(--teal)}
+.lvl.ref{border:1px solid var(--muted);color:var(--muted)}
+.rrow .rl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:600;flex:0 0 auto;border:1px dashed var(--teal);padding:1px 6px;align-self:center}
+.rrow .rl.ref{color:var(--muted);border:1px solid var(--muted)}
+.rrow.is-extra .rw{color:var(--muted)}
+.stretch-box{border:1px dashed var(--teal);background:rgba(255,255,255,.55);padding:14px 16px 4px;margin:8px 0 18px}
+.stretch-box::before{content:"Stretch — optional. Do it if you can, and ask about it any time.";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600;margin-bottom:10px}
+.stretch-box h3:first-of-type{margin-top:0}
+/* tables whose first column holds long text (error messages): even, wrapping columns */
+table.grid.long-key{table-layout:fixed}
+table.grid.long-key td:first-child{white-space:normal;width:42%;overflow-wrap:anywhere}
+table.grid.long-key th:first-child{width:42%}
+.legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 0;font-size:14px;color:#2B3936}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+  table.grid td:first-child{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> React Bug Lab · AI after prediction</p>
+  <h1>Predict the bug,<br><em>then</em> prove it</h1>
+  <p class="lede">You get a small React app you've never seen, a bug report from one of its users, and one planted bug. Before you run anything, you write down what's wrong, where it is, and what you'll see when you make it happen. Then you trigger it, fix it, and trigger it again. The written prediction is the point: it's what turns "I changed something and now it works" into "I knew why it broke, and I showed it".</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">11</span> core</div>
+      <div class="tracker-msg" id="msg">Core first, in order. Nothing to install yet: your app arrives on the day.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill" style="width: 0%;"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p><strong>This is a pre-lab.</strong> Read it at home, before the lab. There's nothing to install or build now: your app, one of 32, is handed out as a zip when the lab starts. The lab is for doing the method once, properly, and for the debrief.</p>
+  <p><strong>Nothing new is taught:</strong> every bug is one of the ideas from JS Labs 1–2 (<a href="js-react.html">JS Lab 1</a>, <a href="js-app.html">JS Lab 2</a>) and React Labs 1–3 (<a href="react-lab1.html">1</a>, <a href="react-lab2.html">2</a>, <a href="react-lab3.html">3</a>), done wrong in a way that real code does it wrong. Section 06 says which earlier section to reread for each symptom.</p>
+  <p><strong>Same format as the Spring Boot bug lab.</strong> One bug per student, done fully: <strong>predict → trigger → fix → re-trigger</strong>, then a whole-class debrief. Ungraded.</p>
+  <p><strong>Core and stretch.</strong> <span class="lvl core">Core</span> is what you need for the lab. <span class="lvl stretch">Stretch</span> is extra. Ask about either any time.</p>
+  <p><strong>AI after prediction.</strong> You may use AI in this lab, but only after you've handed in parts 1–4 of your <code>PREDICTION.md</code>. Section 02 says why, and section 08 says how.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — the method, then the tools, then the lab. Do every core section, in order; stretch is extra</div>
+  <div class="rpart">Part 1 · The method</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">How this lab works</span></a>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">Why you predict first</span></a>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">Reading a bug report</span></a>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">Writing a prediction</span></a>
+  <div class="rpart">Part 2 · The tools</div>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">Your debugging toolkit</span></a>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">From symptom to suspect</span></a>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">What "fixed" means</span></a>
+  <div class="rpart">Part 3 · The lab</div>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">Using AI — after the prediction</span></a>
+  <a class="rrow" href="#s9"><span class="rt">09</span><span class="rw">In the lab</span></a>
+  <a class="rrow" href="#s10"><span class="rt">10</span><span class="rw">The debrief</span></a>
+  <a class="rrow is-extra" href="#s11"><span class="rt">11</span><span class="rw">When it goes wrong</span><span class="rl ref">reference</span></a>
+  <a class="rrow is-extra" href="#s12"><span class="rt">12</span><span class="rw">Practice run, unaided</span><span class="rl">stretch</span></a>
+  <a class="rrow" href="#s13"><span class="rt">13</span><span class="rw">Handing in</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; reference cards</span></a>
+</nav>
+
+<div class="part">Part 1 · The method</div>
+
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>How this lab works</h2><span class="lvl core">Core</span><span class="tagline">one app, one bug, four steps</span></div>
+
+  <p>There are four small apps, all over the same course catalogue you've used since JS Lab 1: a semester planner, a seat watcher, a course comparer and a department explorer. Each comes in eight versions, and each version has <strong>exactly one planted bug</strong>. Everything else in it works. You get one of those 32 versions. Your neighbours get different ones.</p>
+
+  <h3>What's in your zip</h3>
+  <div class="mention">
+    <div class="mrow"><b>TRIGGER.md</b><span>The bug report: what a user saw, in their words; the exact steps to make it happen; and what should have happened. It never says where the bug is.</span></div>
+    <div class="mrow"><b>PREDICTION.md</b><span>Your prediction. Parts 1–4 are written <em>before</em> you start the app; parts 5–9 after.</span></div>
+    <div class="mrow"><b>src/</b><span>The app. Components, one or two custom hooks, a small API helper. A few hundred lines; you can read all of it.</span></div>
+    <div class="mrow"><b>mock/</b><span>The course API from the React labs, served at <code>/api</code> by <code>npm run dev</code>. Don't edit it.</span></div>
+    <div class="mrow"><b>README.md</b><span>How to run it.</span></div>
+  </div>
+
+  <h3>The four steps</h3>
+  <ol>
+    <li><strong>Predict.</strong> Run <code>npm install</code>, and while it runs, read <code>TRIGGER.md</code> and the code. Write parts 1–4 of <code>PREDICTION.md</code>: what's wrong, where, what you'll see when you trigger it, and what your fix will be. Hand them in. No app, no AI.</li>
+    <li><strong>Trigger.</strong> <code>npm run dev</code>, DevTools open, and follow the steps. Did you see what you predicted?</li>
+    <li><strong>Fix.</strong> The smallest change that removes the cause. AI is allowed from here on.</li>
+    <li><strong>Re-trigger.</strong> The same steps, from a fresh page load. The failure is gone, and nothing else broke. Then finish <code>PREDICTION.md</code>.</li>
+  </ol>
+  <p>A TA checks your fix by watching you re-trigger it and hearing you say why, in one sentence. Then the whole class debriefs together (section 10).</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 read — I know the four steps</span></label>
+</section>
+
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>Why you predict first</h2><span class="lvl core">Core</span><span class="tagline">and why AI waits</span></div>
+
+  <p>Debugging by poking — change a line, reload, change another — sometimes works. You end up with a working app and no idea what was wrong, so the next time you meet the same bug, you poke again. A prediction changes that, because it's a <strong>claim you can check</strong>:</p>
+  <div class="cmd"><span class="cm">// a guess:       "the header is broken"</span>
+<span class="cm">// a prediction:  "Header reads props.count, but App passes the number as total, so count</span>
+<span class="cm">//                 is undefined. The header will say 'undefined courses', the console will</span>
+<span class="cm">//                 show no error, and adding a course won't change it."</span></div>
+  <p>The second one can be wrong. That's what makes it valuable. If it comes true, you understood the code. If it doesn't, you've just found the exact spot where your picture of React differs from React — and that's the thing you're here to fix, more than the bug.</p>
+  <p>It has to be <strong>written down, before</strong> you run anything. Once you've seen the failure, every explanation feels obvious ("of course it was that"), and you can't tell any more whether you knew or just recognised it. Written first, there's no arguing with it.</p>
+
+  <h3>Why AI only after</h3>
+  <p>An AI assistant will often name the bug in a few seconds. At work, that's useful. Here it would skip the one step this lab exists for: building the model in your own head. So the rule, the same as the Spring Boot bug lab: <strong>parts 1–4 of <code>PREDICTION.md</code> are yours, handed in before any AI tool is open.</strong> After that, AI is a second opinion — and you're now in a position to judge it, because you have an opinion of your own. Section 08 has good ways to use it.</p>
+
+  <div class="cue"><p class="cue-k">A wrong prediction is a good result</p><p>The lab is ungraded, and there's no mark for being right. A specific prediction that turns out wrong teaches you more than a vague one that can't. In the debrief, "what fooled you?" is the most useful question in the room.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 read — I can say why the prediction comes first</span></label>
+</section>
+
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>Reading a bug report</h2><span class="lvl core">Core</span><span class="tagline">TRIGGER.md</span></div>
+
+  <p>Every <code>TRIGGER.md</code> has the same three parts. Here's one for an app that isn't in the lab:</p>
+  <div class="cmd"><span class="cm"># Bug report — Course Shelf</span>
+
+<span class="o">&gt; I click Add on a course and nothing happens.</span>
+
+<span class="cm">## Reproduce it</span>
+<span class="o">1. Wait for the list of courses.</span>
+<span class="o">2. Click Add next to CS101.</span>
+
+<span class="o">What should happen: CS101 appears on your shelf.</span></div>
+  <ul>
+    <li><strong>The report</strong> is the symptom, in a user's words. Users don't open DevTools, so it's incomplete on purpose: it says what they saw on the screen, nothing about requests or the console.</li>
+    <li><strong>The steps</strong> are exact. Follow them exactly — the order, the course codes, the menu settings. "Nearly the same steps" can miss the bug completely.</li>
+    <li><strong>What should happen</strong> is the behaviour you're restoring. Your fix is done when the steps produce it.</li>
+  </ul>
+  <p>The report <strong>never says where</strong>. The symptom is on the screen; the cause is usually somewhere else — in a hook, a helper, a parent component. Finding the path from one to the other is the work.</p>
+
+  <h3>The Network menu</h3>
+  <p>Every app has a <strong>Network</strong> menu in its header. It's a practice aid, not part of the app: it asks the mock API to misbehave on purpose, the way a real network does on a bad day.</p>
+  <table class="grid">
+    <tr><th>Setting</th><th>What the API does, from the next request on</th></tr>
+    <tr><td>Normal</td><td>Answers straight away.</td></tr>
+    <tr><td>Slow</td><td>Waits 1.2 seconds before every answer.</td></tr>
+    <tr><td>Random</td><td>Waits between 0.1 and 1.5 seconds — so two requests can come back in either order.</td></tr>
+    <tr><td>Failing</td><td>Answers every request with a 500 error and the usual error body.</td></tr>
+  </table>
+  <p>It's the mock's <code>?delay=…</code> and <code>?fail=1</code> options, which you met in <a href="js-app.html#s4">JS Lab 2 · §04</a>, added to every request. Reloading the page sets it back to Normal.</p>
+
+  <div class="cue watch"><p class="cue-k">"It doesn't happen every time"</p><p>Some reports say this. Believe it. Bugs that depend on timing show up in some runs and not others, so the steps tell you to repeat them. If you run them once and see nothing, you haven't shown there's no bug — run them five or six times.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Your report says "the total is wrong after I remove a course". You run the steps and the total looks right. What do you do?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Check that you followed the steps <em>exactly</em> — the same courses, in the same order, with the same Network setting, from a fresh page load. If it still looks right, repeat them a few times and tell your TA. Don't decide the bug isn't there after one try.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 read — I can read a TRIGGER.md and use the Network menu</span></label>
+</section>
+
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>Writing a prediction</h2><span class="lvl core">Core</span><span class="tagline">PREDICTION.md, parts 1–4</span></div>
+
+  <p>Parts 1–4 of <code>PREDICTION.md</code> ask four things. Here they are, answered twice for the Course Shelf report from section 03 — once weakly, once well. The code behind it:</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">CourseRow</span>({ course, onAdd }) {
+  <span class="tg">return</span> (
+    &lt;li&gt;
+      {course.code} {course.title}
+      &lt;button onclick={() =&gt; <span class="at">onAdd</span>(course)}&gt;Add&lt;/button&gt;
+    &lt;/li&gt;
+  );
+}</div>
+
+  <table class="grid">
+    <tr><th>Part</th><th>Weak</th><th>Strong</th></tr>
+    <tr><td>1. What's wrong</td><td>The Add button is broken.</td><td>The button's click handler is never attached: it's written <code>onclick</code>, and React only knows <code>onClick</code>.</td></tr>
+    <tr><td>2. Where</td><td>Somewhere in the course list.</td><td><code>CourseRow.jsx</code>, the <code>&lt;button&gt;</code> line. <code>onAdd</code> in the parent is fine.</td></tr>
+    <tr><td>3. What I'll see</td><td>Nothing happens when I click Add.</td><td>Nothing happens, and no request is sent. The console will <em>already</em> show a warning when the page loads: <code>Invalid event handler property `onclick`. Did you mean `onClick`?</code></td></tr>
+    <tr><td>4. My fix, and after it</td><td>Fix the button.</td><td>Rename it to <code>onClick</code>. After it, clicking Add puts CS101 on the shelf, and the warning is gone.</td></tr>
+  </table>
+
+  <p>The weak column restates the report. The strong column could be <strong>wrong in four different ways</strong>, and each one can be checked. That's what you're aiming for. Notice part 3: the strongest predictions say something the report <em>doesn't</em> — what the console, the Network tab, or one more click will show.</p>
+
+  <div class="dothis">
+    <h4>Questions that make a prediction specific</h4>
+    <ul>
+      <li>What does React do, step by step, when the user does the thing in the report? Which handler runs, which setter, which render, which effect?</li>
+      <li>What will the <strong>Network tab</strong> show: a request, no request, the wrong query string, a 500, a hundred requests?</li>
+      <li>What will the <strong>console</strong> show: an error, a React warning, nothing at all?</li>
+      <li>What happens if I then do <strong>one more thing</strong> — change a filter, reload, click again?</li>
+      <li>If I'm torn between two causes, what would I see that tells them apart?</li>
+    </ul>
+  </div>
+
+  <div class="cue"><p class="cue-k">You won't always find the line</p><p>If you can't find the exact line before handing in, write the best you have — "the effect in <code>useCourses</code>, I think its dependencies" — and say what you'd check first. A specific guess about the mechanism is worth more than a line number you found by luck.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 read — I can write a prediction someone could prove wrong</span></label>
+</section>
+
+<div class="part">Part 2 · The tools</div>
+
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>Your debugging toolkit</h2><span class="lvl core">Core</span><span class="tagline">console, Network, React's warnings, a log</span></div>
+
+  <p>None of these are new. This section puts them in one place, with what each one is good for when the bug is in React code.</p>
+
+  <h3>The console: errors and their stack</h3>
+  <p>When code throws, the console shows the error and a <strong>stack trace</strong>: the chain of function calls it happened in, newest first, with <code>file:line</code> links you can click. With React, the top of the stack is often a component — and that's where the error <em>happened</em>, not necessarily where it was <em>caused</em>. If a component crashes on <code>courses.map</code>, the question is where <code>courses</code> came from.</p>
+  <p>An error thrown while React is rendering takes the whole app down: React removes everything from the page and logs the error, with a line naming the component it happened in. A blank page with an error in the console is that.</p>
+
+  <h3>The Network tab: what really went to the server</h3>
+  <p>DevTools → <strong>Network</strong>, filter to <strong>Fetch/XHR</strong>. Every request the app makes is a row. For bugs in data loading, this is the first place to look, because it shows what <em>actually</em> happened rather than what the code seems to say:</p>
+  <ul>
+    <li><strong>Count the rows.</strong> One per change of filter? None? Two at start-up? Hundreds?</li>
+    <li><strong>Click a row.</strong> <em>Headers</em> shows the full URL — is the filter in the query string? <em>Response</em> shows the body — a list, or an error object?</li>
+    <li><strong>The status column.</strong> 200, 404, 500.</li>
+    <li><strong>The waterfall column.</strong> When each request started and when it finished. With several in flight, you can see which one finished <em>last</em>.</li>
+  </ul>
+
+  <h3>React's own warnings</h3>
+  <p>In development, React checks a few common mistakes and prints a warning in the console — often before you've clicked anything. Read the console when the page loads. Some you've met:</p>
+  <div class="cmd"><span class="o">Each child in a list should have a unique "key" prop.</span>
+<span class="o">A component is changing an uncontrolled input to be controlled.</span>
+<span class="o">Invalid event handler property `onclick`. Did you mean `onClick`?</span>
+<span class="o">Too many re-renders. React limits the number of renders to prevent an infinite loop.</span></div>
+  <p>Just as useful is knowing what React <strong>doesn't</strong> warn about. It doesn't check that your effect's dependency array lists what the effect reads, that you never change state in place, that a key is the item's id and not its position, or that a response is still the one you're waiting for. Those bugs are silent, and they're most of what's worth practising.</p>
+
+  <h3>A log in the right place</h3>
+  <p>One <code>console.log</code> in the right spot answers the question "did this run, and with what?":</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">Shelf</span>({ department }) {
+  <span class="tg">const</span> [shelf, setShelf] = <span class="at">useState</span>([]);
+  <span class="tg">console</span>.<span class="at">log</span>(<span class="st">"render Shelf"</span>, shelf);            <span class="cm">// once per render: did React re-render?</span>
+
+  <span class="at">useEffect</span>(() =&gt; {
+    <span class="tg">console</span>.<span class="at">log</span>(<span class="st">"effect: loading"</span>, department);  <span class="cm">// did the effect run, and for what?</span>
+    …
+  }, [department]);
+
+  <span class="tg">function</span> <span class="at">put</span>(course) {
+    <span class="tg">console</span>.<span class="at">log</span>(<span class="st">"put"</span>, course.code, shelf);      <span class="cm">// what does this handler see?</span>
+    …
+  }
+}</div>
+  <p>A log at the top of a component runs every time React renders it. If you click and no "render" line appears, React didn't re-render — so the question becomes <em>why not</em>. Delete the logs once you're done.</p>
+
+  <h3>StrictMode runs things twice — on purpose</h3>
+  <p>Every app's <code>main.jsx</code> wraps <code>&lt;App /&gt;</code> in <code>&lt;StrictMode&gt;</code>. In development only, React then renders each component twice and runs each effect, cleans it up, and runs it again when a component first appears. It's checking that your components and effects survive it. So: <strong>a "render" log printed twice, and two identical requests when the page loads, are normal</strong> in development. Two is normal; a number that keeps growing isn't.</p>
+
+  <div class="stretch-box">
+    <h3>React DevTools</h3>
+    <p>A browser extension (Chrome, Edge or Firefox) that adds a <strong>Components</strong> tab to DevTools. Pick a component and you see its props and its state, live, and you can edit them. Under its settings, <em>Highlight updates when components render</em> flashes every component that re-renders — handy for "did that click re-render anything?". It's optional: everything in this lab can be found with the console, the Network tab and a log.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>You open an app and the Network tab shows two identical <code>/api/courses</code> requests on load. Bug?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Not by itself. In development, StrictMode runs each effect twice when the component first appears, so two requests is expected. Wait a few seconds: if it stays at two, fine. If it keeps going up, that's a real problem.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 read — I know what each tool tells me</span></label>
+</section>
+
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>From symptom to suspect</h2><span class="lvl core">Core</span><span class="tagline">what you see → where to look</span></div>
+
+  <p>A bug report gives you a symptom. This table gives you somewhere to start looking for each common one, and the question to ask there. It doesn't tell you the answer: several symptoms share a cause, and one symptom can have several. Use it to choose what to read first and what to check in the Network tab or the console — then come back to your prediction.</p>
+
+  <table class="grid long-key">
+    <tr><th>You see</th><th>Look at, and ask</th></tr>
+    <tr><td>You click, and the screen doesn't change — but it does later, when something else changes.</td><td>The setter that click reaches. Is it given a <em>new</em> array or object, or the same one, changed? React compares references (<a href="js-react.html#s9">JS Lab 1 · §09</a>, <a href="js-react.html#s10">§10</a>; <a href="js-app.html#s8">JS Lab 2 · §08</a>).</td></tr>
+    <tr><td>Something you typed, ticked or opened in one row shows up in a different row after a row is removed or moved.</td><td>The <code>key</code> on that list. Does it identify the item, or its position? Where does that row's state live? (<a href="react-lab1.html#s6">React Lab 1 · §06</a>)</td></tr>
+    <tr><td>Changing a filter doesn't change the list, and the Network tab shows no new request.</td><td>The effect that loads the list. Does its dependency array name everything the effect reads? (<a href="react-lab2.html#s5">React Lab 2 · §05</a>)</td></tr>
+    <tr><td>The Network tab keeps filling with the same request; "Loading…" flickers; the fan spins.</td><td>The same effect's dependencies. Is one of them a new object, array or function every render — or is the array missing? (<a href="react-lab2.html#s5">React Lab 2 · §05</a>, the dependency array; <a href="react-lab1.html#s11">React Lab 1 · §11</a>, Q2)</td></tr>
+    <tr><td>On a slow or random network, the list sometimes belongs to an <em>earlier</em> choice.</td><td>Which response arrives last (the waterfall)? Does the effect ignore a response that's no longer current? (<a href="react-lab2.html#s5">React Lab 2 · §05</a>; <a href="js-app.html#s9">JS Lab 2 · §09</a>)</td></tr>
+    <tr><td>A counter stops counting, or the second of two quick actions undoes the first.</td><td>A function that runs <em>later</em> — in an interval, a timeout, after an <code>await</code>. Which render's values does it see? (<a href="js-react.html#s6">JS Lab 1 · §06</a>, closures and its "In React" note; the updater function, <a href="react-lab1.html#s8">React Lab 1 · §08</a>)</td></tr>
+    <tr><td>A total, a count or a label disagrees with the list it describes.</td><td>Is that value computed from the list during render, or kept in its own state? Who updates it — and who forgets to? (<a href="js-app.html#s6">JS Lab 2 · §06</a>)</td></tr>
+    <tr><td>Blank page; console: <code>….map is not a function</code> or <code>Cannot read properties of undefined</code>.</td><td>The data isn't what the component expects. Follow it back: what did the request return (Network → Response)? Did anything check <code>res.ok</code>? (<a href="js-app.html#s4">JS Lab 2 · §04</a>)</td></tr>
+    <tr><td>Each child in a list should have a unique "key" prop.</td><td>A <code>.map</code> returning elements without a <code>key</code>. Give each the item's id.</td></tr>
+    <tr><td>Objects are not valid as a React child (found: object with keys {id, code, …}).</td><td>JSX trying to show a whole object, like <code>{course}</code>. Show a field: <code>{course.title}</code>.</td></tr>
+    <tr><td>A component is changing an uncontrolled input to be controlled.</td><td>An input whose <code>value</code> starts as <code>undefined</code> and later becomes a string. Start the state at <code>""</code>.</td></tr>
+    <tr><td>Two identical requests and two "render" logs when the page loads.</td><td>Nothing: that's StrictMode in development (section 05).</td></tr>
+  </table>
+
+  <div class="cue watch"><p class="cue-k">Start from the data, not from the line that looks odd</p><p>Reading code for a line that "looks wrong" works for typos. For most React bugs, the wrong line looks perfectly normal — the problem is what it does over time. Follow the data instead: where does the value on the screen come from, who sets it, and when?</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 read — I know where I'd start for each symptom</span></label>
+</section>
+
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>What "fixed" means</h2><span class="lvl core">Core</span><span class="tagline">two conditions, both required</span></div>
+
+  <p>A bug is fixed when <strong>the trigger no longer reproduces it, and you can say why</strong>. Either one alone isn't enough.</p>
+  <ol>
+    <li><strong>The trigger no longer reproduces.</strong> Reload the page first, so the Network menu and the app start where the report starts. Then follow the same steps exactly. For a bug that "doesn't happen every time", repeat them as many times as it took to see it, and a few more.</li>
+    <li><strong>You can say why.</strong> One or two sentences: what was happening, and why your change stops it. "It works now" isn't why. "React only attaches a handler called <code>onClick</code>, so <code>onclick</code> was ignored and the click did nothing; renamed, React attaches it" is.</li>
+    <li><strong>Nothing else broke.</strong> Click through the rest of the app once: load, filter, add and remove, set the Network menu to Failing and check you still get a sensible message.</li>
+  </ol>
+
+  <h3>Changes that aren't fixes</h3>
+  <p>Some changes make the trigger stop showing the symptom without touching the cause. They'll come up in the debrief.</p>
+  <ul>
+    <li><strong>Removing <code>&lt;StrictMode&gt;</code></strong> to make the doubled request go away. The doubled request was never the bug.</li>
+    <li><strong>A <code>setTimeout</code></strong> "to wait for the state to update". State updates aren't late; the code is reading a value from the wrong render.</li>
+    <li><strong>A <code>try/catch</code> that swallows the error.</strong> The page no longer goes blank, and now it shows nothing at all, with no message.</li>
+    <li><strong>Reloading the page in code</strong>, or forcing a component to remount, so the stale thing disappears.</li>
+  </ul>
+  <p>The test for each: can you explain the original bug, and does your change remove <em>that</em>? Prefer the smallest change at the cause.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Your fix works, and you can explain it — but it's three times as long as the line you replaced. Is it fixed?</div>
+    <details><summary>Show answer</summary><div class="a"><p>By this section's definition, yes. Then look again: a long fix often means you're working around the cause instead of removing it. In the debrief, compare it with how others with the same kind of bug fixed theirs.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 read — I know when I'm done</span></label>
+</section>
+
+<div class="part">Part 3 · The lab</div>
+
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>Using AI — after the prediction</h2><span class="lvl core">Core</span><span class="tagline">a second opinion, not the first</span></div>
+
+  <p>Once parts 1–4 are handed in, you may use any AI tool. Use it to <strong>test your understanding</strong>, not to replace it. Free accounts run out quickly, so keep prompts small and specific.</p>
+
+  <h3>Good uses</h3>
+  <ul>
+    <li><strong>Check your explanation.</strong> Paste the report, the one file you think is wrong, and your part 1. "Is this explanation right? What would you check to confirm it?"</li>
+    <li><strong>Ask about a mechanism.</strong> "Why does <code>setX((prev) =&gt; …)</code> fix this when <code>setX(x + 1)</code> doesn't?" — and then check the answer against the app.</li>
+    <li><strong>Compare fixes.</strong> "Here are two fixes I'm considering. Which one removes the cause?"</li>
+  </ul>
+
+  <h3>Not useful here</h3>
+  <ul>
+    <li>Pasting the whole folder and asking "find the bug" — before or after. You'll get an answer you can't judge.</li>
+    <li>Accepting a fix you can't explain. If the AI's fix works and you don't know why, you're not done (section 07).</li>
+    <li>A fix that adds <code>useMemo</code>, <code>useCallback</code>, <code>useRef</code> or <code>useReducer</code>. They're still on the "not yet" list from <a href="react-lab2.html">React Lab 2</a>. Every bug in this lab has a fix that uses only what you know.</li>
+  </ul>
+
+  <p>Write down what you asked and what it said in part 9 of <code>PREDICTION.md</code> — especially where it was wrong. AI is confidently wrong about React bugs often enough that catching it is a skill.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 read — I know when and how to use AI in this lab</span></label>
+</section>
+
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>In the lab</h2><span class="lvl core">Core</span><span class="tagline">the session, in order</span></div>
+
+  <p>The whole session is the method from section 01, done once, properly, with TAs walking the room. In order:</p>
+  <ol>
+    <li><strong>Get your app.</strong> Your TA shares an assignment sheet. Find your row; it names one zip, like <code>react-bug-planner-3.zip</code>. Download that zip from the shared folder, unzip it anywhere, and run <code>npm install</code> inside it.</li>
+    <li><strong>Predict.</strong> While it installs, read <code>TRIGGER.md</code> and <code>src/</code>, and write parts 1–4 of <code>PREDICTION.md</code>. Hand them in the way your TA announces. No app, no AI, until you have.</li>
+    <li><strong>Trigger.</strong> <code>npm run dev</code>, open <code>http://localhost:5173</code>, DevTools open, and follow the steps. Write part 5.</li>
+    <li><strong>Fix, and re-trigger.</strong> AI is allowed now. Reload, run the steps again, click through the rest of the app.</li>
+    <li><strong>Show a TA.</strong> Raise your hand. Re-trigger it in front of them and say why it broke, in a sentence or two.</li>
+    <li><strong>Finish <code>PREDICTION.md</code></strong> (parts 6–9) and hand it in.</li>
+    <li><strong>Debrief</strong>, all together (section 10).</li>
+  </ol>
+  <p>One bug per student, done fully. Finished early? Ask your TA for a second zip — a different app and a different bug — and do it the same way, prediction first.</p>
+
+  <div class="cue work"><p class="cue-k">Bring</p><p>Your laptop with Node.js 20.19 or newer (the same as React Labs 1–3), this page read, and your React Lab folders so you can look things up. The packages are the same versions as those labs, so <code>npm install</code> is usually quick. Raise a hand when you're stuck — the TAs come to you.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 09 read — I know what happens in the lab</span></label>
+</section>
+
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>The debrief</h2><span class="lvl core">Core</span><span class="tagline">who predicted this? what fooled you?</span></div>
+
+  <p>The lab ends with everyone together. There are only eight kinds of bug across the 32 apps, and the debrief goes through them one at a time. For each one, the TA asks:</p>
+  <ul>
+    <li><strong>Who had this one?</strong> Hands up. You'll find people whose app looked nothing like yours with the same bug underneath it.</li>
+    <li><strong>Who predicted it?</strong> What did you write in part 1, and what made you think so?</li>
+    <li><strong>What fooled you?</strong> If your prediction was wrong, what did you believe that wasn't true? This is the part everyone learns from.</li>
+  </ul>
+  <p>Then the TA names the bug, shows it in two different apps side by side, and connects it to the lab where you first met the idea. The names come at the end on purpose: knowing what a bug is called is the least useful thing about it.</p>
+
+  <div class="cue"><p class="cue-k">Bring your part 9</p><p>Have your <code>PREDICTION.md</code> open. If your prediction was wrong, you have the most interesting story in the room.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 read — I'll bring my part 9</span></label>
+</section>
+
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>When it goes wrong</h2><span class="lvl ref">Reference</span><span class="tagline">setup problems, not the bug</span></div>
+
+  <table class="grid long-key">
+    <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>npm error enoent Could not read package.json</td><td>You're not inside the unzipped folder. <code>cd react-bug-&lt;your variant&gt;</code> first.</td></tr>
+    <tr><td>'vite' is not recognized / vite: command not found</td><td><code>npm install</code> hasn't run in this folder, or it failed. Run it again and read the last lines.</td></tr>
+    <tr><td><code>npm install</code> fails, no network</td><td><code>npm install --prefer-offline</code>: the packages are the versions React Labs 1–3 used, so npm usually has them cached.</td></tr>
+    <tr><td>Error: Port 5173 is already in use</td><td>Another <code>npm run dev</code> (a React lab, or a second copy of this one) is still running. Stop it with <kbd>Ctrl</kbd>+<kbd>C</kbd> in its terminal.</td></tr>
+    <tr><td>The page is blank as soon as it opens, before you've done anything</td><td>Read the console. If it's an error from a file you edited, it's your edit. If you haven't edited anything yet, tell your TA.</td></tr>
+    <tr><td>My edit doesn't show up</td><td>Check the terminal running <code>npm run dev</code> for an error. Vite reloads on save, so the file must be saved. When in doubt, reload the page.</td></tr>
+    <tr><td>The Network menu says Failing (or Slow), but nothing fails</td><td>You saved a file and the page updated itself without a full reload. Reload the page and set the menu again.</td></tr>
+    <tr><td>Courses I added are gone</td><td>Restarting <code>npm run dev</code> resets the mock API to its starting data. Normal.</td></tr>
+    <tr><td>Failed to fetch, or 404 on <code>/api/courses</code></td><td>You opened the page some other way than <code>npm run dev</code> at <code>http://localhost:5173</code>, or you have a <code>.env.local</code> with <code>VITE_API_URL</code> in this folder. Delete it.</td></tr>
+  </table>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 11 read</span></label>
+</section>
+
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>Practice run, unaided</h2><span class="lvl stretch">Stretch</span><span class="tagline">predict first, then open the answer</span></div>
+
+  <p>Four small bugs, none of them in the lab's apps. For each one, write your prediction in the same four parts — what's wrong, where, what you'd see, the fix — <em>before</em> you open the answer. If you want to check, paste the snippet into a React Lab app and run it.</p>
+
+  <div class="quiz">
+    <div class="q"><b>P1</b>A user says: "when my plan is empty, there's a lonely <strong>0</strong> on the page."
+      <div class="cmd"><span class="tg">function</span> <span class="at">PlanBadge</span>({ plan }) {
+  <span class="tg">return</span> &lt;div&gt;{plan.length &amp;&amp; &lt;span&gt;{plan.length} planned&lt;/span&gt;}&lt;/div&gt;;
+}</div>
+    </div>
+    <details><summary>Show answer</summary><div class="a"><p><code>&amp;&amp;</code> returns its left side when that side is falsy. With an empty plan, <code>plan.length &amp;&amp; …</code> is <code>0</code>, and React renders the number <code>0</code> (it skips <code>false</code>, <code>null</code> and <code>undefined</code>, but not <code>0</code>). Fix: <code>{plan.length &gt; 0 &amp;&amp; …}</code>. A strong prediction adds: "with one course it's fine; only exactly zero shows it".</p></div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>P2</b>A user says: "the page doesn't load at all." The console says <code>Too many re-renders</code>.
+      <div class="cmd"><span class="tg">function</span> <span class="at">Counter</span>() {
+  <span class="tg">const</span> [n, setN] = <span class="at">useState</span>(<span class="st">0</span>);
+  <span class="tg">return</span> &lt;button onClick={<span class="at">setN</span>(n + <span class="st">1</span>)}&gt;Clicked {n} times&lt;/button&gt;;
+}</div>
+    </div>
+    <details><summary>Show answer</summary><div class="a"><p><code>onClick={setN(n + 1)}</code> <em>calls</em> <code>setN</code> while rendering, and passes its result (<code>undefined</code>) as the handler. Calling a setter during render asks for another render, which calls it again, forever — React stops it with that error. Fix: pass a function, <code>onClick={() =&gt; setN(n + 1)}</code>. Functions are values (<a href="js-react.html#s4">JS Lab 1 · §04</a>).</p></div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>P3</b>A user says: "I can't type in the search box. The cursor's there, but nothing appears."
+      <div class="cmd"><span class="tg">function</span> <span class="at">Search</span>({ query }) {
+  <span class="tg">return</span> &lt;input value={query} placeholder=<span class="st">"Search…"</span> /&gt;;
+}</div>
+    </div>
+    <details><summary>Show answer</summary><div class="a"><p>A controlled input: React sets its value to <code>query</code> on every render, and nothing ever changes <code>query</code>, so every keystroke is undone. React warns about exactly this in the console: <em>You provided a `value` prop to a form field without an `onChange` handler</em>. Fix: lift the setter in too — <code>&lt;input value={query} onChange={(e) =&gt; onQuery(e.target.value)} /&gt;</code> — the controlled-input pattern from <a href="react-lab2.html">React Lab 2</a>.</p></div></details>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>P4</b>The list loads, and users are happy. But the console shows a warning as soon as the page loads.
+      <div class="cmd"><span class="at">useEffect</span>(<span class="tg">async</span> () =&gt; {
+  <span class="tg">const</span> res = <span class="tg">await</span> <span class="at">fetch</span>(<span class="st">"/api/courses"</span>);
+  <span class="at">setCourses</span>(<span class="tg">await</span> res.<span class="at">json</span>());
+}, []);</div>
+    </div>
+    <details><summary>Show answer</summary><div class="a"><p>An <code>async</code> function always returns a promise, so this effect returns a promise — and React expects an effect to return either nothing or a cleanup <em>function</em>. React warns (<em>useEffect must not return anything besides a function…</em>) and ignores it — so this effect can never have a cleanup, and has nowhere to put one when it needs to ignore an old response. Fix: put the async work in a function inside the effect and call it: <code>useEffect(() =&gt; { async function load() { … } load(); }, [])</code> — the shape React Lab 2 uses, which also leaves room for a proper cleanup.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 12 complete (stretch)</span></label>
+</section>
+
+<section id="s13">
+  <div class="shead"><span class="chip">13</span><h2>Handing in</h2><span class="lvl core">Core</span><span class="tagline">ungraded — the prediction is what counts</span></div>
+
+  <p>This lab is <strong>ungraded</strong>, like the Spring Boot bug lab. There's no code to submit and no tests to pass. What you hand in is <code>PREDICTION.md</code>, twice:</p>
+  <ol>
+    <li><strong>Parts 1–4, before you start the app and before any AI tool.</strong> Hand them in the way your TA announces at the start of the lab (usually: upload <code>PREDICTION.md</code> to the lab's submission slot, so it carries a timestamp). Then carry on.</li>
+    <li><strong>The whole file, parts 1–9, by the end of the lab</strong>, the same way. Don't edit parts 1–4 after handing them in: a wrong prediction is fine, a rewritten one defeats the point.</li>
+  </ol>
+  <p>Keep your fixed app folder until the debrief is over; your TA may ask to see it or to run a check on it.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 13 read — I know what to hand in, and when</span></label>
+</section>
+
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+  <div class="gloss">
+    <div class="grow"><b>bug report</b><span>The symptom, in a user's words, with steps to reproduce it. Says what, never where.</span></div>
+    <div class="grow"><b>cleanup (effect)</b><span>The function an effect returns. React runs it before the effect runs again, and when the component goes away.</span></div>
+    <div class="grow"><b>closure</b><span>A function together with the variables it could see when it was created — including the state values of that render.</span></div>
+    <div class="grow"><b>dependency array</b><span>The second argument to <code>useEffect</code>: the values the effect reads. React re-runs the effect when one of them changes (by <code>Object.is</code>).</span></div>
+    <div class="grow"><b>derived value</b><span>Anything you can compute from state, like a total. Computed during render, never stored separately.</span></div>
+    <div class="grow"><b>functional update</b><span><code>setX((prev) =&gt; next)</code>: React passes in the current value instead of the one your code captured.</span></div>
+    <div class="grow"><b>ignore flag</b><span><code>let ignore = false</code> in an effect, set to <code>true</code> in its cleanup, so a late response from an old run is thrown away.</span></div>
+    <div class="grow"><b>key</b><span>How React tells the items of a list apart between renders. Use the item's id.</span></div>
+    <div class="grow"><b>mutation</b><span>Changing an object or array in place (<code>push</code>, <code>sort</code>, <code>arr[i] =</code>). React can't see it, because the reference stays the same.</span></div>
+    <div class="grow"><b>Object.is</b><span>React's "is it the same?" check, for state and dependencies. Two objects are the same only if they're the same reference.</span></div>
+    <div class="grow"><b>prediction</b><span>A written, checkable claim about a bug — its cause, its place, what you'll see, and what the fix will change — made before you look.</span></div>
+    <div class="grow"><b>race condition</b><span>A bug where the result depends on which of several things finishes first.</span></div>
+    <div class="grow"><b>re-trigger</b><span>Running the same steps again after a fix, from a fresh page load, to show the failure is gone.</span></div>
+    <div class="grow"><b>stack trace</b><span>The chain of calls an error happened in, newest first, with file and line.</span></div>
+    <div class="grow"><b>stale closure</b><span>A function that runs later and still sees the state of the render that created it.</span></div>
+    <div class="grow"><b>StrictMode</b><span>A development-only wrapper that renders components and runs effects twice, to flush out code that isn't safe to repeat.</span></div>
+    <div class="grow"><b>symptom</b><span>What the failure looks like. Often far from the cause.</span></div>
+    <div class="grow"><b>trigger</b><span>The exact steps that make a bug show itself.</span></div>
+  </div>
+</section>
+
+<div class="finish">
+  <h2>How to know you're ready</h2>
+  <p>You're ready for the lab if you can do all of these <em>without looking anything up</em>:</p>
+  <ol>
+    <li>Say the four steps, in order, and when AI is allowed.</li>
+    <li>Say why the prediction is written down before you start the app.</li>
+    <li>Turn "the Add button is broken" into a prediction someone could prove wrong.</li>
+    <li>Say what the Network tab can show that the screen can't.</li>
+    <li>Say which bugs React warns about in the console, and name three it doesn't.</li>
+    <li>Explain why two requests on page load is normal in development.</li>
+    <li>Say what "fixed" means — both conditions — and name a change that isn't a fix.</li>
+  </ol>
+
+  <h2 style="margin-top:30px;font-size:20px">Prediction card</h2>
+  <div class="cmd"><span class="o">1. What's wrong      the cause, not the symptom</span>
+<span class="o">2. Where             file and line, or the component / hook / function</span>
+<span class="o">3. What I'll see     on screen, in the console, in the Network tab — more than the report says</span>
+<span class="o">4. My fix            the change, and what the same steps will show after it</span>
+<span class="o">                     → hand in 1–4, THEN start the app; AI only after this</span>
+<span class="o">5–9                  what happened · what I changed · re-trigger · why · what fooled me</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Toolkit card</h2>
+  <div class="cmd"><span class="tg">console</span>.<span class="at">log</span>(<span class="st">"render Shelf"</span>, shelf);         <span class="cm">// at the top of a component: did it re-render?</span>
+<span class="tg">console</span>.<span class="at">log</span>(<span class="st">"effect"</span>, department);          <span class="cm">// inside an effect: did it run, and for what?</span>
+
+<span class="cm">// DevTools → Network → Fetch/XHR:</span>
+<span class="cm">//   count the rows · click one: URL (query string), status, Response · the waterfall</span>
+
+<span class="cm">// Normal in development (StrictMode): two renders, two requests on load.</span>
+<span class="cm">// Silent in React: mutation, index keys, missing dependencies, stale closures, races.</span></div>
+</div>
+
+<footer>M.Tech CSE · ESD · React Bug Lab<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+</div>
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ---- */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  /* ---- progress: CORE sections drive the bar; stretch boxes are tracked separately.
+         Both are remembered in this browser, so they survive a reload. ---- */
+  function load(key){ try{ return JSON.parse(localStorage.getItem(key)||'[]'); }catch(err){ return []; } }
+  function save(key,list){ try{ localStorage.setItem(key,JSON.stringify(list.map(function(c){return c.checked}))); }catch(err){} }
+  var KEY='esd-react-bug-lab-progress', SKEY='esd-react-bug-lab-stretch';
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var extras=[].slice.call(document.querySelectorAll('.chk-s'));
+  var saved=load(KEY), savedS=load(SKEY);
+  checks.forEach(function(c,i){ if(saved[i]) c.checked=true; });
+  extras.forEach(function(c,i){ if(savedS[i]) c.checked=true; });
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=['Core first, in order. Nothing to install yet: your app arrives on the day.',
+             'Good start. The method is the whole lab: predict, trigger, fix, re-trigger.',
+             'Past halfway. The toolkit and the symptom table are what you will use in the lab.',
+             'Nearly there. Read what "fixed" means before you come.',
+             'Core done. You are ready for the lab. Try the practice run if you want a warm-up.'];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    var s=extras.filter(function(c){return c.checked}).length;
+    msg.textContent=(n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))])+(s?'  ·  stretch: '+s+' / '+extras.length:'');
+    save(KEY,checks); save(SKEY,extras);
+  }
+  checks.concat(extras).forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^[$>]\s?/,'').trimEnd()}).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>
