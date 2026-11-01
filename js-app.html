@@ -268,9 +268,10 @@ table.grid.long-key th:first-child{width:42%}
 <span class="p">$</span> git pull
 <span class="p">$</span> cd js-lab2
 <span class="p">$</span> npm test
-<span class="cm"># tests 45</span>
-<span class="cm"># pass 1</span>
-<span class="cm"># fail 44</span></div>
+<span class="o">…</span>
+<span class="o">ℹ tests 45</span>
+<span class="o">ℹ pass 1</span>
+<span class="o">ℹ fail 44</span></div>
   <p>As before, everything starts as <code>throw new Error("TODO")</code>, and your job is to turn the 44 into 0. Nothing to install. Don't have the repo yet? Section 01 of <a href="js-react.html#s1">Lab 1</a> has the clone command.</p>
 
   <h3 id="step0">Step 0 — bring your JS Lab 1 answer</h3>
@@ -868,17 +869,20 @@ res.status    <span class="o">// 404</span>
   <h3>1. Get npm test fully green</h3>
   <div class="cmd"><span class="p">$</span> cd esd-labs/js-lab2
 <span class="p">$</span> npm test
-<span class="cm"># tests 45</span>
-<span class="cm"># pass 45</span>
-<span class="cm"># fail 0</span></div>
-  <p><code># fail 0</code> is the only acceptable result. When we grade, we <strong>put our own copy of the tests back in</strong> before running <code>npm test</code> — so editing or deleting a test can only cost you marks.</p>
+<span class="o">…</span>
+<span class="o">ℹ tests 45</span>
+<span class="o">ℹ pass 45</span>
+<span class="o">ℹ fail 0</span></div>
+  <p><code>fail 0</code> is the only acceptable result. When we grade, we <strong>put our own copy of the tests back in</strong> before running <code>npm test</code> — so editing or deleting a test can only cost you marks.</p>
 
   <h3>2. Check the app</h3>
   <p><code>npm run web</code>, open <code>localhost:5500/web/</code>, and go through the section 07 checklist one last time — with the section 08 and 09 fixes in place: focus stays on a grade dropdown, and Random can't make the list disagree with the department.</p>
 
   <h3>3. Zip the js-lab2 folder — and only that folder</h3>
   <p>Zip <code>js-lab2</code> itself, not the whole <code>esd-labs</code> folder, and leave out <code>node_modules</code> if you ever created one. From inside <code>esd-labs</code>:</p>
-  <div class="cmd"><span class="cm"># macOS / Linux</span>
+  <div class="cmd"><span class="p">$</span> cd ..          # out of js-lab2, into esd-labs
+
+<span class="cm"># macOS / Linux</span>
 <span class="p">$</span> zip -r js-lab2.zip js-lab2 -x "js-lab2/node_modules/*"
 
 <span class="cm"># Windows (PowerShell) — delete js-lab2\node_modules first if it exists</span>

@@ -269,7 +269,7 @@ table.grid.long-key th:first-child{width:42%}
   </div>
 
   <h3>Getting the starter</h3>
-  <p>Every lab's starter code lives in one GitHub repository, <a href="https://github.com/shreyasg-git/esd-labs" target="_blank" rel="noopener"><code>esd-labs</code></a>, with one folder per lab. You clone it <strong>once</strong>. Before each later lab you <code>git pull</code>, and that lab's folder appears next to the ones you already have — your work in the older folders isn't touched.</p>
+  <p>Every lab's starter code lives in one GitHub repository, <a href="https://github.com/shreyasg-git/esd-labs" target="_blank" rel="noopener"><code>esd-labs</code></a>, with one folder per lab. You clone it <strong>once</strong>. Before each lab you <code>git pull</code> to get the latest version of every folder — your work in the folders isn't touched.</p>
   <div class="dothis">
     <h4>Do this now — clone it and run the tests</h4>
     <ol>
@@ -282,9 +282,10 @@ table.grid.long-key th:first-child{width:42%}
 <span class="p">$</span> node -v
 <span class="o">v22.11.0</span>
 <span class="p">$</span> npm test
-<span class="cm"># tests 66</span>
-<span class="cm"># pass 1</span>
-<span class="cm"># fail 65</span></div>
+<span class="o">…</span>
+<span class="o">ℹ tests 66</span>
+<span class="o">ℹ pass 1</span>
+<span class="o">ℹ fail 65</span></div>
   <p>Almost everything fails, and that's correct: every function starts as <code>throw new Error("TODO")</code>. Your job is to turn the 65 into 0. (The stretch tests are separate: <code>npm run test:stretch</code>.) There is nothing to <code>npm install</code> — the tests use the runner built into Node.</p>
 
   <div class="cue"><p class="cue-k">Keeping your work, and getting the next lab</p><p>Commit your work as you go (<code>git add -A</code>, <code>git commit -m "…"</code>) — <a href="git-basics.html">01 · Git, from absolute zero</a> covers it. Before each lab, run <code>git pull</code> in the <code>esd-labs</code> folder. New labs only <strong>add</strong> folders, so a pull never fights with your work. Each folder stands alone, with its own <code>npm test</code>: a half-finished lab can never break the next one. No git yet? Use <em>Code → Download ZIP</em> on the GitHub page — but you'll have to download again for each lab.</p></div>
@@ -337,13 +338,12 @@ table.grid.long-key th:first-child{width:42%}
 
   <div class="cmd"><span class="tg">import</span> { useState } <span class="tg">from</span> <span class="st">"react"</span>;
 <span class="tg">import</span> CourseCard <span class="tg">from</span> <span class="st">"./CourseCard.js"</span>;
+<span class="tg">import</span> { plannerCredits } <span class="tg">from</span> <span class="st">"./s11-catalog.js"</span>;
 
 <span class="tg">export</span> <span class="tg">default</span> <span class="tg">function</span> <span class="at">CoursePage</span>({ courses }) {
   <span class="tg">const</span> [planner, setPlanner] = <span class="at">useState</span>([]);
 
-  <span class="tg">const</span> credits = planner
-    .<span class="at">map</span>((id) =&gt; courses.<span class="at">find</span>((c) =&gt; c.id === id))
-    .<span class="at">reduce</span>((sum, c) =&gt; sum + c.credits, <span class="st">0</span>);
+  <span class="tg">const</span> credits = <span class="at">plannerCredits</span>(planner, courses);   <span class="cm">// yours, from section 11</span>
 
   <span class="tg">return</span> (
     &lt;main&gt;
@@ -365,7 +365,7 @@ table.grid.long-key th:first-child{width:42%}
     <div class="mrow"><b>import … export default</b><span>Modules — section 14.</span></div>
     <div class="mrow"><b>function CoursePage({ courses })</b><span>A component is a function; <code>{ courses }</code> is destructuring — sections 04 and 08.</span></div>
     <div class="mrow"><b>const [planner, setPlanner]</b><span>Array destructuring of a pair, one of which is a function — sections 04, 06, 08.</span></div>
-    <div class="mrow"><b>.map … .find … .reduce</b><span>The array toolkit — section 11.</span></div>
+    <div class="mrow"><b>plannerCredits(…)</b><span>A function you write in section 11 (stretch) — the array toolkit.</span></div>
     <div class="mrow"><b>planner.length &gt; 0 &amp;&amp; …</b><span>Expressions and short-circuiting — section 03.</span></div>
     <div class="mrow"><b>onAdd={() =&gt; …}</b><span>Passing a function, not calling it — sections 04 and 05.</span></div>
     <div class="mrow"><b>setPlanner((prev) =&gt; …)</b><span>Handing over a function to be called later — section 05.</span></div>
@@ -414,7 +414,7 @@ table.grid.long-key th:first-child{width:42%}
 <span class="tg">null</span> ?? <span class="st">"No description"</span>  <span class="o">// "No description"</span>
 <span class="st">0</span> ?? <span class="st">24</span>                   <span class="o">// 0</span></div>
 
-  <div class="cue watch"><p class="cue-k">The trap you will hit in React</p><p>A badge that should only show when the planner has something in it: <code>count &amp;&amp; `${count} in planner`</code>. When <code>count</code> is 3, you get the text. When it is 0, you don't get "nothing" — you get <strong>0</strong>, and React prints a stray <strong>0</strong> on the page. Make the left side a real boolean: <code>count &gt; 0 &amp;&amp; …</code>, or use a ternary.</p></div>
+  <div class="cue watch"><p class="cue-k">The trap you will hit in React</p><p>A badge that should only show when the planner has something in it: <code>count &amp;&amp; `${count} in planner`</code>. When <code>count</code> is 3, you get the text. When it is 0, you don't get "nothing" — you get <strong>0</strong>, and React prints a stray <strong>0</strong> on the page. Make the left side a real boolean: <code>count &gt; 0 &amp;&amp; …</code>, or use a ternary. (Your <code>plannerBadge</code> must return <code>null</code> for zero, not <code>false</code> — so use the ternary there.)</p></div>
 
   <h3>Optional chaining</h3>
   <p><code>course?.title</code> reads <code>title</code> if <code>course</code> exists, and gives <code>undefined</code> instead of crashing if it is <code>null</code> or <code>undefined</code>. You'll need it whenever data might not have arrived yet — and in React, on the first render, it usually hasn't.</p>
@@ -522,38 +522,42 @@ formatters.<span class="at">long</span>(courses[<span class="st">0</span>])     
 
   <h3>The receiver decides when to call it</h3>
   <p>When you pass a callback, you hand over control. <strong>You</strong> don't call it — the function you gave it to calls it, when it decides, with the arguments it chooses. <code>setTimeout</code> calls yours after a delay. <code>addEventListener</code> calls yours on each click, with an event object. <code>map</code> calls yours once per item, with that item.</p>
-  <p>Writing one yourself makes this concrete. Here's a function that counts how many items pass a test — the test is a callback:</p>
-  <div class="cmd"><span class="tg">function</span> <span class="at">countWhere</span>(list, predicate) {
-  <span class="tg">let</span> count = <span class="st">0</span>;
+  <p>Writing one yourself makes this concrete. Here's a function that returns the first item that passes a test — the test is a callback:</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">firstWhere</span>(list, predicate) {
   <span class="tg">for</span> (<span class="tg">const</span> item <span class="tg">of</span> list) {
-    <span class="tg">if</span> (<span class="at">predicate</span>(item)) count += <span class="st">1</span>;   <span class="cm">// WE call the callback, once per item</span>
+    <span class="tg">if</span> (<span class="at">predicate</span>(item)) <span class="tg">return</span> item;   <span class="cm">// WE call the callback, once per item, until one passes</span>
   }
-  <span class="tg">return</span> count;
+  <span class="tg">return</span> <span class="tg">undefined</span>;
 }
 
-<span class="at">countWhere</span>(courses, (c) =&gt; c.seatsLeft === <span class="st">0</span>)   <span class="o">// 5</span>
+<span class="at">firstWhere</span>(courses, (c) =&gt; c.seatsLeft === <span class="st">0</span>).code   <span class="o">// "CS201"  (the first full course)</span></div>
+  <p><code>firstWhere</code> knows how to search. It has no idea what you're searching for — the callback supplies that. One general function, any number of questions. (It's what the built-in <code>find</code> does — section 11.)</p>
+  <p>Your <code>countWhere(list, predicate)</code> walks the list the same way, but counts the items that pass instead of stopping at the first:</p>
+  <div class="cmd"><span class="at">countWhere</span>(courses, (c) =&gt; c.seatsLeft === <span class="st">0</span>)   <span class="o">// 5</span>
 <span class="at">countWhere</span>(courses, (c) =&gt; c.credits === <span class="st">2</span>)     <span class="o">// 3</span></div>
-  <p><code>countWhere</code> knows how to count. It has no idea what you're counting — the callback supplies that. One general function, any number of questions.</p>
 
   <h3>Functions that make functions</h3>
-  <p><code>sort</code> takes a <strong>comparator</strong>: a function of two items that returns a negative number if <code>a</code> comes first, positive if <code>b</code> does, and <code>0</code> if they're equal. Writing a comparator per field gets repetitive, so write a function that <em>builds</em> one:</p>
-  <div class="cmd"><span class="tg">function</span> <span class="at">byField</span>(field) {
-  <span class="tg">return</span> (a, b) =&gt; (a[field] &lt; b[field] ? -<span class="st">1</span> : a[field] &gt; b[field] ? <span class="st">1</span> : <span class="st">0</span>);
+  <p>A function can also <em>build</em> a function and hand it back, with a setting baked in:</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">atLeastCredits</span>(n) {
+  <span class="tg">return</span> (course) =&gt; course.credits &gt;= n;   <span class="cm">// a new test, made to order</span>
 }
 
-<span class="tg">const</span> bySeats = <span class="at">byField</span>(<span class="st">"seatsLeft"</span>);   <span class="cm">// a function, made to order</span>
-[...courses].<span class="at">sort</span>(bySeats)[<span class="st">0</span>].code      <span class="o">// "CS201"  (a full course)</span>
-[...courses].<span class="at">sort</span>(<span class="at">byField</span>(<span class="st">"title"</span>))[<span class="st">0</span>].title   <span class="o">// "Data Structures"</span></div>
+courses.<span class="at">filter</span>(<span class="at">atLeastCredits</span>(<span class="st">4</span>)).length   <span class="o">// 12</span>
+<span class="at">countWhere</span>(courses, <span class="at">atLeastCredits</span>(<span class="st">4</span>))     <span class="o">// 12 — the same test, handed to your countWhere</span></div>
+  <p><code>sort</code> takes a <strong>comparator</strong>: a function of two items that returns a negative number if <code>a</code> comes first, positive if <code>b</code> does, and <code>0</code> if they're equal. For one number field you can write it by hand:</p>
+  <div class="cmd">[...courses].<span class="at">sort</span>((a, b) =&gt; a.seatsLeft - b.seatsLeft)[<span class="st">0</span>].code   <span class="o">// "CS201"  (a full course)</span></div>
+  <p>Writing one per field gets repetitive, so <code>byField(field)</code> <em>builds</em> the comparator for any field — the same move as <code>atLeastCredits</code>. Subtraction won't do for it: it must work for strings too, and <code>"a" - "b"</code> is <code>NaN</code>. Compare with <code>&lt;</code> and <code>&gt;</code> instead, which work on both.</p>
+  <div class="cmd"><span class="tg">const</span> byTitle = <span class="at">byField</span>(<span class="st">"title"</span>);
+<span class="at">byTitle</span>(courses[<span class="st">0</span>], courses[<span class="st">1</span>])   <span class="o">// 1   — "Programming Fundamentals" comes after "Data Structures"</span>
+<span class="at">byTitle</span>(courses[<span class="st">1</span>], courses[<span class="st">0</span>])   <span class="o">// -1</span>
+<span class="at">byTitle</span>(courses[<span class="st">0</span>], courses[<span class="st">0</span>])   <span class="o">// 0</span></div>
   <div class="cue watch"><p class="cue-k">Why [...courses] and not courses</p><p><code>sort</code> changes the array you call it on. The <code>[...courses]</code> makes a copy first so the original keeps its order. Section 09 explains why this matters; for now, always sort a copy.</p></div>
 
   <h3>Handing over a function to compute later</h3>
-  <p>Here is the idea from this section you'll use most in React. Imagine a setter that accepts <em>either</em> a new value <em>or</em> a function that works the new value out from the current one:</p>
-  <div class="cmd"><span class="tg">function</span> <span class="at">applyUpdate</span>(current, update) {
-  <span class="tg">return</span> <span class="tg">typeof</span> update === <span class="st">"function"</span> ? <span class="at">update</span>(current) : update;
-}
-
-<span class="at">applyUpdate</span>(<span class="st">3</span>, <span class="st">5</span>)             <span class="o">// 5   — a value: just use it</span>
+  <p>Here is the idea from this section you'll use most in React. Imagine a setter that accepts <em>either</em> a new value <em>or</em> a function that works the new value out from the current one. That's your <code>applyUpdate(current, update)</code>:</p>
+  <div class="cmd"><span class="at">applyUpdate</span>(<span class="st">3</span>, <span class="st">5</span>)             <span class="o">// 5   — a value: just use it</span>
 <span class="at">applyUpdate</span>(<span class="st">3</span>, (n) =&gt; n + <span class="st">1</span>)  <span class="o">// 4   — a function: call it with the current value</span></div>
+  <p>To tell the two apart, ask what you were handed: <code>typeof x === "function"</code> is <code>true</code> only for functions.</p>
   <p>Now apply three updates in a row, each to the result of the one before. Compare these two:</p>
   <div class="cmd"><span class="tg">const</span> count = <span class="st">0</span>;
 
@@ -604,15 +608,16 @@ formatters.<span class="at">long</span>(courses[<span class="st">0</span>])     
 
   <h3>Function factories</h3>
   <p>A function that builds and returns another function, with some settings baked in. Each call makes a <strong>new</strong> function with its <strong>own</strong> variables:</p>
-  <div class="cmd"><span class="tg">function</span> <span class="at">createIdGenerator</span>(prefix) {
-  <span class="tg">let</span> n = <span class="st">0</span>;
-  <span class="tg">return</span> () =&gt; <span class="st">`${prefix}-${++n}`</span>;
+  <div class="cmd"><span class="tg">function</span> <span class="at">createGreeter</span>(greeting) {
+  <span class="tg">let</span> calls = <span class="st">0</span>;
+  <span class="tg">return</span> (name) =&gt; <span class="st">`${greeting}, ${name} (call ${++calls})`</span>;
 }
-<span class="tg">const</span> nextOrder = <span class="at">createIdGenerator</span>(<span class="st">"ORD"</span>);
-<span class="tg">const</span> nextTicket = <span class="at">createIdGenerator</span>(<span class="st">"TKT"</span>);
-<span class="at">nextOrder</span>();  <span class="at">nextOrder</span>();
-<span class="at">nextOrder</span>()    <span class="o">// "ORD-3"</span>
-<span class="at">nextTicket</span>()   <span class="o">// "TKT-1"   — its own n, untouched by the other</span></div>
+<span class="tg">const</span> hello = <span class="at">createGreeter</span>(<span class="st">"Hello"</span>);
+<span class="tg">const</span> hi = <span class="at">createGreeter</span>(<span class="st">"Hi"</span>);
+<span class="at">hello</span>(<span class="st">"Asha"</span>);
+<span class="at">hello</span>(<span class="st">"Ravi"</span>)   <span class="o">// "Hello, Ravi (call 2)"</span>
+<span class="at">hi</span>(<span class="st">"Asha"</span>)      <span class="o">// "Hi, Asha (call 1)"   — its own calls, untouched by the other</span></div>
+  <p>Your <code>createIdGenerator(prefix)</code> is a factory like this one: <code>const next = createIdGenerator("ORD")</code>, then <code>next()</code> gives <code>"ORD-1"</code>, then <code>"ORD-2"</code> — and a second generator starts again from 1.</p>
 
   <h3>A closure sees the variable, not a copy</h3>
   <p>A closure doesn't take a snapshot of a value. It keeps a link to the <strong>variable</strong>. If the variable changes, the closure sees the change:</p>
@@ -663,15 +668,9 @@ total = <span class="st">24</span>;
   </div>
 
   <h3>A value only a function can change</h3>
-  <p>Put these ideas together. Lock a value inside a closure, and hand back <strong>two</strong> functions: one to read it, one to replace it. Nothing else in the program can reach the value.</p>
-  <div class="cmd"><span class="tg">function</span> <span class="at">createBox</span>(initial) {
-  <span class="tg">let</span> value = initial;
-  <span class="tg">const</span> <span class="tg">get</span> = () =&gt; value;
-  <span class="tg">const</span> <span class="tg">set</span> = (next) =&gt; { value = next; };
-  <span class="tg">return</span> [<span class="tg">get</span>, <span class="tg">set</span>];
-}
-
-<span class="tg">const</span> [getPlanner, setPlanner] = <span class="at">createBox</span>([]);
+  <p>Put these ideas together. <code>createBox(initial)</code> locks a value inside a closure — a variable inside the call, like <code>calls</code> above, starting at <code>initial</code> — and hands back <strong>two</strong> arrow functions in an array: one that returns the variable, and one that replaces it with whatever it's given. Nothing else in the program can reach the value.</p>
+  <div class="cmd"><span class="tg">const</span> [getPlanner, setPlanner] = <span class="at">createBox</span>([]);
+<span class="at">getPlanner</span>()   <span class="o">// []</span>
 <span class="at">setPlanner</span>([<span class="st">4</span>, <span class="st">10</span>]);
 <span class="at">getPlanner</span>()   <span class="o">// [4, 10]</span></div>
   <p>Look at the last two lines and then back at section 02: <code>const [planner, setPlanner] = useState([])</code>. Same shape. A value you can't touch directly, and a function that is the only way to change it. Why would React <em>want</em> to force every change through a function? Because a function can do something extra every time it's called. Hold that question — section 15 answers it, and you'll build the answer yourself.</p>
@@ -687,14 +686,14 @@ total = <span class="st">24</span>;
     <h4>Do this now — src/s06-closures.js</h4>
     <ul>
       <li><code>createIdGenerator(prefix)</code> — two generators must not share a count.</li>
-      <li><code>makeCreditCheck(limit)</code> — returns a function <code>(credits) =&gt; boolean</code> that remembers the limit.</li>
-      <li><code>createBox(initial)</code> — returns <code>[get, set]</code>, exactly as above. Type it, don't copy it.</li>
+      <li><code>makeCreditCheck(limit)</code> — returns a function <code>(credits) =&gt; boolean</code> that remembers the limit: <code>true</code> when <code>credits</code> is at most the limit.</li>
+      <li><code>createBox(initial)</code> — returns <code>[get, set]</code>, as described above.</li>
     </ul>
   </div>
   <div class="cmd"><span class="p">$</span> node --test test/s06.test.js</div>
 
   <div class="quiz">
-    <div class="q"><b>Q1</b>In <code>createBox</code>, how could code outside the function read <code>value</code> without calling <code>get</code>?</div>
+    <div class="q"><b>Q1</b>In <code>createBox</code>, how could code outside the function read the boxed value without calling the getter?</div>
     <details><summary>Show answer</summary><div class="a"><p>It can't. Scope only looks outward, and there's no name bound to <code>value</code> outside <code>createBox</code>. The closure keeps it alive, but only <code>get</code> and <code>set</code> can reach it. That's privacy with no keyword needed.</p></div></details>
   </div>
   <div class="quiz">
@@ -721,40 +720,40 @@ total = <span class="st">24</span>;
   <p>And one exception: an <strong>arrow function has no <code>this</code> of its own</strong>. It uses the <code>this</code> of the code around it, like any other outer variable.</p>
 
   <h3>The callback trap</h3>
-  <p>Here's a class that keeps a planner. It works when you call the method on the object — and breaks the moment you pass the method somewhere as a callback:</p>
-  <div class="cmd"><span class="tg">class</span> PlannerList {
-  <span class="tg">constructor</span>(owner) {
-    <span class="tg">this</span>.owner = owner;
-    <span class="tg">this</span>.ids = [];
+  <p>Here's a class that keeps a playlist. It works when you call the method on the object — and breaks the moment you pass the method somewhere as a callback:</p>
+  <div class="cmd"><span class="tg">class</span> Playlist {
+  <span class="tg">constructor</span>(name) {
+    <span class="tg">this</span>.name = name;
+    <span class="tg">this</span>.songs = [];
   }
-  <span class="at">add</span>(id) {
-    <span class="tg">this</span>.ids.<span class="at">push</span>(id);
+  <span class="at">addSong</span>(title) {
+    <span class="tg">this</span>.songs.<span class="at">push</span>(title);
   }
 }
 
-<span class="tg">const</span> list = <span class="tg">new</span> <span class="at">PlannerList</span>(<span class="st">"Asha"</span>);
-list.<span class="at">add</span>(<span class="st">4</span>);                 <span class="cm">// fine — called as obj.method(), this = list</span>
-[<span class="st">10</span>, <span class="st">18</span>].<span class="at">forEach</span>(list.add);  <span class="cm">// TypeError: Cannot read properties of undefined (reading 'ids')</span></div>
-  <p>Why? <code>list.add</code> without parentheses is just the function — it isn't attached to <code>list</code> any more. <code>forEach</code> later calls it as a plain <code>add(10)</code>: pattern two, <code>this</code> is <code>undefined</code>, and <code>this.ids</code> crashes.</p>
+<span class="tg">const</span> mix = <span class="tg">new</span> <span class="at">Playlist</span>(<span class="st">"Road trip"</span>);
+mix.<span class="at">addSong</span>(<span class="st">"Song A"</span>);                       <span class="cm">// fine — called as obj.method(), this = mix</span>
+[<span class="st">"Song B"</span>, <span class="st">"Song C"</span>].<span class="at">forEach</span>(mix.addSong);   <span class="cm">// TypeError: Cannot read properties of undefined (reading 'songs')</span></div>
+  <p>Why? <code>mix.addSong</code> without parentheses is just the function — it isn't attached to <code>mix</code> any more. <code>forEach</code> later calls it as a plain <code>addSong("Song B")</code>: pattern two, <code>this</code> is <code>undefined</code>, and <code>this.songs</code> crashes.</p>
 
   <h3>Three fixes</h3>
   <div class="cmd"><span class="cm">// 1. Bind once, in the constructor — this is fixed for good</span>
-<span class="tg">constructor</span>(owner) {
-  <span class="tg">this</span>.owner = owner;
-  <span class="tg">this</span>.ids = [];
-  <span class="tg">this</span>.add = <span class="tg">this</span>.add.<span class="at">bind</span>(<span class="tg">this</span>);
+<span class="tg">constructor</span>(name) {
+  <span class="tg">this</span>.name = name;
+  <span class="tg">this</span>.songs = [];
+  <span class="tg">this</span>.addSong = <span class="tg">this</span>.addSong.<span class="at">bind</span>(<span class="tg">this</span>);
 }
 
 <span class="cm">// 2. Make the method an arrow-function class field — it takes this from the class</span>
-add = (id) =&gt; {
-  <span class="tg">this</span>.ids.<span class="at">push</span>(id);
+addSong = (title) =&gt; {
+  <span class="tg">this</span>.songs.<span class="at">push</span>(title);
 };
 
 <span class="cm">// 3. Don't detach it — wrap the call in an arrow at the call site</span>
-[<span class="st">10</span>, <span class="st">18</span>].<span class="at">forEach</span>((id) =&gt; list.<span class="at">add</span>(id));</div>
+[<span class="st">"Song B"</span>, <span class="st">"Song C"</span>].<span class="at">forEach</span>((title) =&gt; mix.<span class="at">addSong</span>(title));</div>
 
   <h3>A short history of this in React</h3>
-  <p>Until 2019, most React components were classes, and every event handler had to be bound by hand:</p>
+  <p>Before hooks arrived, most React components were classes, and every event handler had to be bound by hand:</p>
   <div class="cmd"><span class="tg">class</span> Counter <span class="tg">extends</span> React.Component {
   <span class="tg">constructor</span>(props) {
     <span class="tg">super</span>(props);
@@ -785,12 +784,12 @@ add = (id) =&gt; {
   <div class="cmd"><span class="p">$</span> node predict/this.js</div>
   <div class="dothis">
     <h4>Do this now — src/s07-this.js</h4>
-    <p><code>PlannerList</code> is written and broken in exactly the way above. Fix it with fix 1 <strong>or</strong> fix 2 (fix 3 isn't allowed — the tests detach the method on purpose). Be ready to say in the lab why your fix works.</p>
+    <p><code>PlannerList</code> is written and broken in exactly the way above — its <code>add</code> plays the part of <code>addSong</code>. Fix it with fix 1 <strong>or</strong> fix 2 (fix 3 isn't allowed — the tests detach the method on purpose). Be ready to say in the lab why your fix works.</p>
   </div>
   <div class="cmd"><span class="p">$</span> node --test test/s07.test.js</div>
 
   <div class="quiz">
-    <div class="q"><b>Q1</b>After fixing the class with <code>bind</code>, what does <code>const { describe } = list; describe()</code> do?</div>
+    <div class="q"><b>Q1</b>After fixing <code>PlannerList</code> with <code>bind</code>, what does <code>const { describe } = list; describe()</code> do, if <code>list</code> is a <code>PlannerList</code>?</div>
     <details><summary>Show answer</summary><div class="a"><p>It throws. You only bound <code>add</code>. Destructuring <code>describe</code> detaches it, the plain call gives it <code>this = undefined</code>, and <code>this.owner</code> crashes. Each method that will be passed around needs its own fix.</p></div></details>
   </div>
   <div class="quiz">
@@ -820,10 +819,10 @@ name   <span class="o">// "Enterprise Software Development"</span>
 room   <span class="o">// "TBA"</span>
 
 <span class="cm">// destructure right in the parameter list</span>
-<span class="tg">function</span> <span class="at">describeCourse</span>({ code, title, credits = <span class="st">3</span> }) {
-  <span class="tg">return</span> <span class="st">`${code}: ${title} (${credits} cr)`</span>;
+<span class="tg">function</span> <span class="at">roomLabel</span>({ code, room = <span class="st">"TBA"</span> }) {
+  <span class="tg">return</span> <span class="st">`${code} meets in ${room}`</span>;
 }
-<span class="at">describeCourse</span>(course)   <span class="o">// "CS402: Enterprise Software Development (4 cr)"</span></div>
+<span class="at">roomLabel</span>(course)   <span class="o">// "CS402 meets in TBA"</span></div>
 
   <h3>Array destructuring — by position</h3>
   <div class="cmd"><span class="tg">const</span> [first, second] = [<span class="st">"CS101"</span>, <span class="st">"CS201"</span>, <span class="st">"CS305"</span>];
@@ -854,15 +853,14 @@ tail   <span class="o">// [10, 18]</span>
 summary   <span class="o">// { id: 4, code: "CS402", title: …, department: …, credits: 4, … } — no description</span></div>
 
   <h3>Default parameters — a value for an argument that's left out</h3>
-  <p>The <code>=</code> you used inside <code>{ credits = 3 }</code> works on plain parameters too. If the caller leaves the argument out, the default is used instead:</p>
-  <div class="cmd"><span class="tg">function</span> <span class="at">seatsLabel</span>(seatsLeft, whenFull = <span class="st">"Full"</span>) {
-  <span class="tg">return</span> seatsLeft &gt; <span class="st">0</span> ? <span class="st">`${seatsLeft} seats left`</span> : whenFull;
+  <p>The <code>=</code> you used inside <code>{ room = "TBA" }</code> works on plain parameters too. If the caller leaves the argument out, the default is used instead:</p>
+  <div class="cmd"><span class="tg">function</span> <span class="at">creditsLabel</span>(credits, unit = <span class="st">"cr"</span>) {
+  <span class="tg">return</span> <span class="st">`${credits} ${unit}`</span>;
 }
-<span class="at">seatsLabel</span>(<span class="st">3</span>)               <span class="o">// "3 seats left"</span>
-<span class="at">seatsLabel</span>(<span class="st">0</span>)               <span class="o">// "Full"</span>
-<span class="at">seatsLabel</span>(<span class="st">0</span>, <span class="st">"Waitlist"</span>)   <span class="o">// "Waitlist"</span>
-<span class="at">seatsLabel</span>(<span class="st">0</span>, <span class="tg">undefined</span>)    <span class="o">// "Full"  — undefined counts as "left out"</span>
-<span class="at">seatsLabel</span>(<span class="st">0</span>, <span class="tg">null</span>)         <span class="o">// null    — null doesn't</span></div>
+<span class="at">creditsLabel</span>(<span class="st">4</span>)               <span class="o">// "4 cr"</span>
+<span class="at">creditsLabel</span>(<span class="st">4</span>, <span class="st">"credits"</span>)    <span class="o">// "4 credits"</span>
+<span class="at">creditsLabel</span>(<span class="st">4</span>, <span class="tg">undefined</span>)    <span class="o">// "4 cr"    — undefined counts as "left out"</span>
+<span class="at">creditsLabel</span>(<span class="st">4</span>, <span class="tg">null</span>)         <span class="o">// "4 null"  — null doesn't</span></div>
   <p>The default is worked out on every call that needs it, so <code>items = []</code> gives each call its own new array. You'll lean on this in JS Lab 2: <code>getJSON(url, fetchFn = fetch)</code> uses the real <code>fetch</code> when the app calls it with one argument, and the tests pass a fake one as the second (<a href="js-app.html#s4">JS Lab 2 · §04</a>).</p>
 
   <h3>Shorthand properties and computed keys</h3>
@@ -870,10 +868,10 @@ summary   <span class="o">// { id: 4, code: "CS402", title: …, department: …
 <span class="tg">const</span> short = { id, code: code2 };   <span class="cm">// { id: id } can be written { id }</span>
 
 <span class="cm">// a key that lives in a variable: square brackets</span>
-<span class="tg">const</span> field = <span class="st">"title"</span>;
-<span class="tg">const</span> form = { code: <span class="st">"CS610"</span>, title: <span class="st">""</span>, credits: <span class="st">"4"</span> };
-<span class="tg">const</span> next = { ...form, [field]: <span class="st">"Compilers"</span> };
-next   <span class="o">// { code: "CS610", title: "Compilers", credits: "4" }</span></div>
+<span class="tg">const</span> key = <span class="st">"department"</span>;
+<span class="tg">const</span> filters = { department: <span class="st">""</span>, search: <span class="st">""</span> };
+<span class="tg">const</span> next = { ...filters, [key]: <span class="st">"Electronics"</span> };
+next   <span class="o">// { department: "Electronics", search: "" }</span></div>
   <p>That last line is the one to remember. With a computed key, <strong>one</strong> function can update <strong>any</strong> field of a form — the field name arrives as data.</p>
 
   <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>Every component receives its inputs ("props") as one object, and you destructure them: <code>function CourseCard({ course, onAdd })</code>. Every <code>useState</code> is array destructuring. And the standard form handler, which you'll write in React Lab 1, is one line: <code>setForm({ ...form, [e.target.name]: e.target.value })</code>.</p></div>
@@ -881,9 +879,9 @@ next   <span class="o">// { code: "CS610", title: "Compilers", credits: "4" }</s
   <div class="dothis">
     <h4>Do this now — src/s08-destructuring.js</h4>
     <ul>
-      <li><code>describeCourse({ code, title, credits = 3 })</code> — destructure in the parameter list.</li>
+      <li><code>describeCourse({ code, title, credits = 3 })</code> — destructure in the parameter list: <code>describeCourse(course)</code> gives <code>"CS402: Enterprise Software Development (4 cr)"</code>.</li>
       <li><code>updateField(form, name, value)</code> — new object, one field changed, computed key.</li>
-      <li><code>withoutField(obj, key)</code> — new object without <code>key</code>, using rest. (Hint: <code>const { [key]: _removed, ...rest } = obj</code>.)</li>
+      <li><code>withoutField(obj, key)</code> — new object without <code>key</code>, using rest. (Hint: the key's name is in a variable, so on the left of <code>=</code> you need a computed key to pull that one field out — and <code>...rest</code> to collect the others.)</li>
       <li><code>firstAndRest(list)</code> — returns the pair <code>[first, rest]</code>.</li>
     </ul>
   </div>
@@ -947,7 +945,7 @@ ids = [<span class="st">3</span>];         <span class="cm">// TypeError: Assign
   <p><code>structuredClone(plan)</code> copies <em>every</em> level. It exists, and you should know it does — but you'll rarely need it, because the immutable updates in the next section copy only the path you change, which is cheaper and keeps everything else shared.</p>
 
   <h3>Freezing — how the tests catch you</h3>
-  <p><code>Object.freeze(obj)</code> makes an object read-only, but only one level deep. The tests use a small helper that freezes every level. Open <code>support/helpers.js</code> and read it — it's eight lines and uses recursion, <code>Object.keys</code> and <code>Object.isFrozen</code>.</p>
+  <p><code>Object.freeze(obj)</code> makes an object read-only, but only one level deep. The tests use a small helper that freezes every level. Open <code>support/helpers.js</code> and read it — it's seven lines and uses recursion, <code>Object.keys</code> and <code>Object.isFrozen</code>.</p>
   <div class="cmd"><span class="tg">const</span> frozen = <span class="tg">Object</span>.<span class="at">freeze</span>([<span class="st">4</span>, <span class="st">10</span>]);
 frozen.<span class="at">push</span>(<span class="st">18</span>);    <span class="cm">// TypeError: Cannot add property 2, object is not extensible</span></div>
 
@@ -988,25 +986,24 @@ frozen.<span class="at">push</span>(<span class="st">18</span>);    <span class=
   <div class="cue watch"><p class="cue-k">Never on data you were given</p><p><code>push</code>, <code>pop</code>, <code>shift</code>, <code>unshift</code>, <code>splice</code>, <code>sort</code>, <code>reverse</code>, and <code>obj.field = …</code>. They all change the original. Use them freely on arrays you just created yourself — never on the ones passed in.</p></div>
 
   <h3>Updating one item inside a list</h3>
-  <div class="cmd"><span class="tg">function</span> <span class="at">takeSeat</span>(courses, courseId) {
-  <span class="tg">return</span> courses.<span class="at">map</span>((c) =&gt;
-    c.id === courseId ? { ...c, seatsLeft: c.seatsLeft - <span class="st">1</span> } : c
-  );
+  <div class="cmd"><span class="tg">function</span> <span class="at">renameCourse</span>(courses, courseId, title) {
+  <span class="tg">return</span> courses.<span class="at">map</span>((c) =&gt; (c.id === courseId ? { ...c, title } : c));
 }
 
-<span class="tg">const</span> next = <span class="at">takeSeat</span>(courses, <span class="st">5</span>);
+<span class="tg">const</span> next = <span class="at">renameCourse</span>(courses, <span class="st">5</span>, <span class="st">"Distributed Systems II"</span>);
 next === courses         <span class="o">// false — a new list</span>
 next[<span class="st">4</span>] === courses[<span class="st">4</span>]   <span class="o">// false — a new object for the course that changed</span>
 next[<span class="st">0</span>] === courses[<span class="st">0</span>]   <span class="o">// true  — every other course is the SAME object</span></div>
-  <p>Only the path to the change is new: the list, and the one course. Everything else is shared. That's what makes it cheap, and it's what lets React skip re-drawing the 19 cards that didn't change.</p>
+  <p>Only the path to the change is new: the list, and the one course. Everything else is shared. That's what makes it cheap, and it's what lets React skip re-drawing the 19 cards that didn't change. Your <code>takeSeat</code> is this pattern with a different change inside.</p>
 
   <h3>When nothing changes, return the same thing</h3>
-  <div class="cmd"><span class="tg">function</span> <span class="at">addToPlanner</span>(planner, courseId) {
-  <span class="tg">return</span> planner.<span class="at">includes</span>(courseId) ? planner : [...planner, courseId];
+  <div class="cmd"><span class="tg">function</span> <span class="at">setTitle</span>(course, title) {
+  <span class="tg">return</span> course.title === title ? course : { ...course, title };
 }
-<span class="tg">const</span> p = [<span class="st">4</span>, <span class="st">10</span>];
-<span class="at">addToPlanner</span>(p, <span class="st">10</span>) === p   <span class="o">// true — already there, so nothing new</span></div>
-  <p>Returning the <em>same</em> reference is how you say "no change". Given the same reference, React skips the re-render entirely.</p>
+<span class="tg">const</span> c = courses[<span class="st">0</span>];
+<span class="at">setTitle</span>(c, c.title) === c   <span class="o">// true — same title, so nothing new</span>
+<span class="at">setTitle</span>(c, <span class="st">"Intro"</span>) === c   <span class="o">// false — a real change, a new object</span></div>
+  <p>Returning the <em>same</em> reference is how you say "no change". Given the same reference, React skips the re-render entirely. <code>addToPlanner</code> and <code>removeFromPlanner</code> do this: <code>addToPlanner([4, 10], 10)</code> hands back the very same array.</p>
 
   <div class="cue react"><p class="cue-k">In React, this becomes…</p><p>Every state update in React is one of the patterns in that table. Adding to a list: <code>setPlanner([...planner, id])</code>. Removing: <code>setPlanner(planner.filter((x) =&gt; x !== id))</code>. Updating one item: a <code>map</code> with a spread inside. Components must also be <strong>pure</strong> — given the same props and state, render the same thing — and all side effects go in event handlers or effects. In development, React (in Strict Mode) even runs your components twice to catch impure ones.</p></div>
 
@@ -1052,29 +1049,34 @@ next[<span class="st">0</span>] === courses[<span class="st">0</span>]   <span c
 
   <h3>some and every</h3>
   <p>Both take a test and return a boolean. <code>some</code> stops at the first <code>true</code>; <code>every</code> stops at the first <code>false</code>. On an empty array, <code>some</code> is <code>false</code> and <code>every</code> is <code>true</code> ("nothing failed").</p>
-  <div class="cmd">courses.<span class="at">some</span>((c) =&gt; c.seatsLeft === <span class="st">0</span>)     <span class="o">// true  — at least one is full</span>
+  <div class="cmd">courses.<span class="at">some</span>((c) =&gt; c.credits === <span class="st">2</span>)       <span class="o">// true  — at least one 2-credit course</span>
 courses.<span class="at">every</span>((c) =&gt; c.credits &gt;= <span class="st">2</span>)       <span class="o">// true  — none is below 2</span>
 [].<span class="at">every</span>((c) =&gt; c.seatsLeft &gt; <span class="st">0</span>)           <span class="o">// true  — vacuously</span>
 
 <span class="cm">// a list of checks, all of which must pass</span>
-<span class="tg">const</span> checks = [course.seatsLeft &gt; <span class="st">0</span>, !planner.<span class="at">includes</span>(course.id), total + course.credits &lt;= <span class="st">24</span>];
-checks.<span class="at">every</span>(<span class="tg">Boolean</span>)   <span class="cm">// Boolean is a function too — passed, not called</span></div>
+<span class="tg">const</span> password = <span class="st">"esd2026!"</span>;
+<span class="tg">const</span> checks = [password.length &gt;= <span class="st">8</span>, /\d/.<span class="at">test</span>(password), password !== <span class="st">"password"</span>];
+checks.<span class="at">every</span>(<span class="tg">Boolean</span>)   <span class="o">// true — Boolean is a function too: passed, not called</span></div>
 
   <h3>reduce into an object</h3>
-  <div class="cmd"><span class="tg">const</span> perDepartment = courses.<span class="at">reduce</span>((counts, c) =&gt; {
-  counts[c.department] = (counts[c.department] ?? <span class="st">0</span>) + <span class="st">1</span>;
-  <span class="tg">return</span> counts;
+  <div class="cmd"><span class="cm">// an index: look any course up by its code</span>
+<span class="tg">const</span> byCode = courses.<span class="at">reduce</span>((index, c) =&gt; {
+  index[c.code] = c;
+  <span class="tg">return</span> index;
 }, {});                        <span class="cm">// ← the initial value: an empty object we just made</span>
-perDepartment   <span class="o">// { "Computer Science": 5, Electronics: 4, Mathematics: 4, … }</span></div>
-  <p>Changing <code>counts</code> inside the callback is fine: it's the object <em>you</em> created as the initial value, not data anyone gave you.</p>
+byCode.CS402.title   <span class="o">// "Enterprise Software Development"</span></div>
+  <p>Changing <code>index</code> inside the callback is fine: it's the object <em>you</em> created as the initial value, not data anyone gave you. <code>countByDepartment</code> builds an object the same way, but each value is a running count — and the first time a department turns up, it has no count yet (<code>??</code> from section 03 helps).</p>
 
   <h3>Chains read like a sentence</h3>
-  <div class="cmd"><span class="cm">// "Computer Science courses with seats, by code, as cards"</span>
-<span class="tg">const</span> cards = courses
-  .<span class="at">filter</span>((c) =&gt; c.department === <span class="st">"Computer Science"</span>)
-  .<span class="at">filter</span>((c) =&gt; c.seatsLeft &gt; <span class="st">0</span>)
-  .<span class="at">toSorted</span>(<span class="at">byField</span>(<span class="st">"code"</span>))
-  .<span class="at">map</span>(toCardView);       <span class="cm">// passed, not called: map will call it per course</span></div>
+  <div class="cmd"><span class="cm">// "titles of the 2-credit courses with 10 or more seats left, A to Z"</span>
+<span class="tg">const</span> titles = courses
+  .<span class="at">filter</span>((c) =&gt; c.credits === <span class="st">2</span>)
+  .<span class="at">filter</span>((c) =&gt; c.seatsLeft &gt;= <span class="st">10</span>)
+  .<span class="at">map</span>((c) =&gt; c.title)
+  .<span class="at">toSorted</span>();
+titles   <span class="o">// ["Ethics in Technology", "Technical Communication"]</span>
+
+courses.<span class="at">map</span>(toCardView)   <span class="cm">// a function can go in a chain by name — passed, not called</span></div>
 
   <h3>Find things by id, never by position</h3>
   <p>A course's position changes every time you sort, filter or remove something; its <code>id</code> never does. Store ids, look things up with <code>find</code>, compare with <code>===</code> on ids. The planner holds <code>[4, 10, 18]</code>, not <code>[3, 9, 17]</code>.</p>
@@ -1100,8 +1102,8 @@ perDepartment   <span class="o">// { "Computer Science": 5, Electronics: 4, Math
   <div class="cmd"><span class="p">$</span> node --test test/s11.test.js</div>
 
   <div class="quiz">
-    <div class="q"><b>Q1</b>What does <code>courses.reduce((sum, c) =&gt; sum + c.credits)</code> (no initial value) return?</div>
-    <details><summary>Show answer</summary><div class="a"><p>Garbage. With no initial value, the first <strong>course object</strong> becomes the starting <code>sum</code>, and <code>{…} + 4</code> turns into a string like <code>"[object Object]4444…"</code>. Always pass the initial value: <code>, 0)</code>.</p></div></details>
+    <div class="q"><b>Q1</b>What does <code>courses.reduce((sum, c) =&gt; sum + c.seatsLeft)</code> (no initial value) return?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Garbage. With no initial value, the first <strong>course object</strong> becomes the starting <code>sum</code>, and <code>{…} + 0</code> turns into a string like <code>"[object Object]0123…"</code>. Always pass the initial value: <code>, 0)</code>.</p></div></details>
   </div>
   <div class="quiz">
     <div class="q"><b>Q2</b>Why is <code>checks.every(Boolean)</code> allowed, with no arrow function?</div>
@@ -1214,30 +1216,24 @@ item.<span class="at">remove</span>();                                 <span cla
   </div>
 
   <h3>Reading a whole form into one object</h3>
-  <p>Four sections meet in one line: a NodeList turned into an array (12), <code>reduce</code> (11), spread (08) and a computed key (08).</p>
-  <div class="cmd"><span class="tg">const</span> fields = <span class="tg">Array</span>.<span class="tg">from</span>(form.<span class="at">querySelectorAll</span>(<span class="st">"input, select"</span>));
-
-<span class="tg">function</span> <span class="at">readForm</span>() {
-  <span class="tg">return</span> fields.<span class="at">reduce</span>((values, field) =&gt; ({ ...values, [field.name]: field.value }), {});
-}
-<span class="at">readForm</span>()   <span class="o">// { code: "cs610", title: "Compilers", department: "Computer Science", credits: "4" }</span></div>
+  <p>Three sections meet in one line: <code>reduce</code> (11), spread (08) and a computed key (08). Here is that line building an object from a list of courses:</p>
+  <div class="cmd">courses.<span class="at">slice</span>(<span class="st">0</span>, <span class="st">3</span>).<span class="at">reduce</span>((acc, c) =&gt; ({ ...acc, [c.code]: c.title }), {})
+<span class="o">// { CS101: "Programming Fundamentals", CS201: "Data Structures", CS305: "Database Systems" }</span></div>
+  <p>A form's fields are a list too, and each field has a <code>name</code> and a <code>value</code>. Step 3 in <code>web/form.js</code> is the same move over the fields, giving <code>{ code: "cs610", title: "Compilers", department: "Computer Science", credits: "4" }</code>.</p>
   <p>Note: everything comes out of an input as a <strong>string</strong>, including <code>credits</code>. Converting with <code>Number(…)</code> is your job.</p>
 
   <h3>Validation with every</h3>
-  <div class="cmd"><span class="tg">function</span> <span class="at">isComplete</span>(values) {
-  <span class="tg">const</span> filled = <span class="tg">Object</span>.<span class="at">values</span>(values).<span class="at">every</span>((v) =&gt; v.<span class="at">trim</span>() !== <span class="st">""</span>);
-  <span class="tg">const</span> credits = <span class="tg">Number</span>(values.credits);
-  <span class="tg">return</span> filled &amp;&amp; <span class="tg">Number</span>.<span class="at">isInteger</span>(credits) &amp;&amp; credits &gt;= <span class="st">1</span> &amp;&amp; credits &lt;= <span class="st">6</span>;
-}
-
-form.<span class="at">addEventListener</span>(<span class="st">"input"</span>, () =&gt; {        <span class="cm">// every field's "input" bubbles up to the form</span>
-  submit.disabled = !<span class="at">isComplete</span>(<span class="at">readForm</span>());
-});</div>
+  <p><code>Object.values(obj)</code> gives you an object's values as an array — so <code>every</code> can check all of them at once:</p>
+  <div class="cmd"><span class="tg">const</span> marks = { quiz: <span class="st">"8"</span>, lab: <span class="st">""</span>, viva: <span class="st">"7"</span> };
+<span class="tg">Object</span>.<span class="at">values</span>(marks).<span class="at">every</span>((m) =&gt; m !== <span class="st">""</span>)   <span class="o">// false — lab is empty</span>
+<span class="tg">Number</span>.<span class="at">isInteger</span>(<span class="tg">Number</span>(<span class="st">"4"</span>))                 <span class="o">// true</span>
+<span class="tg">Number</span>.<span class="at">isInteger</span>(<span class="tg">Number</span>(<span class="st">"4.5"</span>))               <span class="o">// false</span></div>
+  <p>That's what <code>isComplete(values)</code> needs: every field non-blank once trimmed, and credits a whole number from 1 to 6. For step 4 of the form, you don't need a listener per field: every field's <code>"input"</code> event bubbles up to the <code>form</code>, so one listener there can re-check the whole form and set the button's <code>disabled</code>.</p>
 
   <div class="dothis">
     <h4>Do this now — src/s13-forms.js, then web/form.js</h4>
     <ol>
-      <li>Write <code>isComplete(values)</code> and <code>toCourse(values, nextId)</code> in <code>src/s13-forms.js</code> and pass <code>node --test test/s13.test.js</code>. These are pure, so they're tested in Node.</li>
+      <li>Write <code>isComplete(values)</code> and <code>toCourse(values, nextId)</code> in <code>src/s13-forms.js</code> (for <code>toCourse</code>: call <code>nextId()</code> for the id; <code>description</code> is <code>null</code>, and <code>capacity</code> and <code>seatsLeft</code> are both 60) and pass <code>node --test test/s13.test.js</code>. These are pure, so they're tested in Node.</li>
       <li>Open <code>web/form.js</code> and work through steps 1–6 in its comments. Run <code>npm run web</code> and test in the browser as you go.</li>
       <li>For step 6, first attach a listener to the <code>li</code> <em>and</em> one to its Remove button, and watch Remove also select the item. Then fix it with <code>stopPropagation</code>. <strong>Stretch:</strong> replace both with one delegated listener on the list.</li>
     </ol>
@@ -1276,7 +1272,9 @@ form.<span class="at">addEventListener</span>(<span class="st">"input"</span>, (
 <span class="cm">// src/s11-catalog.js</span>
 <span class="tg">import</span> { toCardView } <span class="tg">from</span> <span class="st">"./s04-functions.js"</span>;        <span class="cm">// curly braces, exact name</span>
 <span class="tg">import</span> { byField as compareBy } <span class="tg">from</span> <span class="st">"./s05-higher-order.js"</span>;   <span class="cm">// rename on import</span>
-<span class="tg">import</span> * as catalog <span class="tg">from</span> <span class="st">"./s11-catalog.js"</span>;            <span class="cm">// everything, as one object</span>
+
+<span class="cm">// test/s11.test.js</span>
+<span class="tg">import</span> * as catalog <span class="tg">from</span> <span class="st">"../src/s11-catalog.js"</span>;      <span class="cm">// everything, as one object</span>
 
 <span class="cm">// a default export: one per file, imported with any name, no braces</span>
 <span class="tg">export</span> <span class="tg">default</span> <span class="tg">function</span> <span class="at">CourseCard</span>({ course }) { <span class="cm">/* … */</span> }
@@ -1327,7 +1325,7 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
   <p>Click <strong>+</strong> and the number goes up. Now delete the second line in the handler and click again. <code>count</code> still goes up — log it and see — but the page doesn't move. <strong>Changing a variable does nothing to the screen.</strong> The browser has no idea <code>count</code> exists. Something has to copy the value into the page, every time.</p>
 
   <h3>Stage 2 — more buttons, more copies</h3>
-  <p>Add a <strong>−</strong> button and a <strong>Reset</strong>. Then the page grows: an "even / odd" label, the − button disabled when the count would go below zero, and the count in the browser tab's title. Every handler now has to update every one of them:</p>
+  <p>Make the <strong>−</strong> and <strong>Reset</strong> buttons work (they're already on the page). Then the page grows: an "even / odd" label, the − button disabled when the count would go below zero, and the count in the browser tab's title. Every handler now has to update every one of them:</p>
   <div class="cmd">inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; {
   count += <span class="st">1</span>;
   countEl.textContent = count;
@@ -1369,38 +1367,13 @@ reset.<span class="at">addEventListener</span>(<span class="st">"click"</span>, 
   <p>Much better. There's now exactly one place that knows how the number becomes the page, so the Reset bug can't happen. But two problems are left. Every change still needs a <code>render()</code> after it — forget one and that button silently stops updating the page. And <code>count</code> is an ordinary variable: any code anywhere can change it without redrawing.</p>
 
   <h3>Stage 4 — make changing and redrawing one action</h3>
-  <p>You already have the tool, from section 06: lock the value inside a closure so the <strong>only</strong> way to change it is through a function. Then put the <code>render()</code> call inside that function. Now it's impossible to change the value without redrawing.</p>
-  <div class="cmd"><span class="cm">// src/s15-state.js</span>
-<span class="tg">export</span> <span class="tg">function</span> <span class="at">useState</span>(initial, onChange) {
-  <span class="tg">let</span> value = initial;                   <span class="cm">// private: lives in the closure (06)</span>
-  <span class="tg">const</span> getState = () =&gt; value;
-  <span class="tg">const</span> setState = (next) =&gt; {
-    value = next;
-    <span class="at">onChange</span>();                          <span class="cm">// the hidden code: redraw</span>
-  };
-  <span class="tg">return</span> [getState, setState];           <span class="cm">// a pair, so you choose the names (08)</span>
-}</div>
+  <p>You already have the tool, from section 06: lock the value inside a closure so the <strong>only</strong> way to change it is through a function. Then put the redraw inside that function. Now it's impossible to change the value without redrawing.</p>
+  <p>So <code>useState(initial, onChange)</code> in <code>src/s15-state.js</code> is your <code>createBox</code> from section 06 with one addition: it takes a second argument, <code>onChange</code> — the redraw — and the setter calls it every time it stores a new value. It returns the pair <code>[getState, setState]</code>, so the caller chooses the names (section 08). In <code>web/counter.js</code> it's used like this:</p>
   <div class="cmd"><span class="cm">// web/counter.js</span>
 <span class="tg">import</span> { useState } <span class="tg">from</span> <span class="st">"../src/s15-state.js"</span>;
 
-<span class="tg">const</span> [getCount, setCount] = <span class="at">useState</span>(<span class="st">0</span>, render);
-
-<span class="tg">function</span> <span class="at">render</span>() {
-  <span class="tg">const</span> count = <span class="at">getCount</span>();
-  countEl.textContent = count;
-  parityEl.textContent = count % <span class="st">2</span> === <span class="st">0</span> ? <span class="st">"even"</span> : <span class="st">"odd"</span>;
-  dec.disabled = count - <span class="st">1</span> &lt; <span class="st">0</span>;
-  <span class="tg">document</span>.title = <span class="st">`Count: ${count}`</span>;
-}
-
-inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; <span class="at">setCount</span>(<span class="at">getCount</span>() + <span class="st">1</span>));
-dec.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; <span class="at">setCount</span>(<span class="at">getCount</span>() - <span class="st">1</span>));
-reset.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; <span class="at">setCount</span>(<span class="st">0</span>));
-<span class="at">render</span>();   <span class="cm">// draw once at the start</span></div>
-  <p>Look at the handlers. Each one is a single line, and <strong>none of them touches the page</strong>. They only say what the new state is; the setter does the rest. A second piece of state is one more line — the step input:</p>
-  <div class="cmd"><span class="tg">const</span> [getStep, setStep] = <span class="at">useState</span>(<span class="st">1</span>, render);
-stepInput.<span class="at">addEventListener</span>(<span class="st">"input"</span>, () =&gt; <span class="at">setStep</span>(<span class="tg">Number</span>(stepInput.value) || <span class="st">1</span>));
-inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, () =&gt; <span class="at">setCount</span>(<span class="at">getCount</span>() + <span class="at">getStep</span>()));</div>
+<span class="tg">const</span> [getCount, setCount] = <span class="at">useState</span>(<span class="st">0</span>, render);   <span class="cm">// render is your stage 3 function</span></div>
+  <p>Now <code>render()</code> reads <code>getCount()</code> instead of a variable, and each handler becomes one line that only says what the new count is — <code>setCount(…)</code> — and never touches the page; the setter does the rest. Call <code>render()</code> once at the start to draw the first screen. A second piece of state — the step input — is one more <code>useState</code> line, and +, − and the disabled check then use the step instead of 1.</p>
   <p>That's reactivity. Your handlers change state and nothing else; the screen follows. One way to say it that you'll hear again: <strong>the view is a function of the state</strong> — <code>render()</code> reads the state and produces the page, and <code>setState</code> makes sure it runs whenever the state changes.</p>
 
   <div class="cue"><p class="cue-k">Seen in the JavaScript concepts lecture</p><p>The shop demo's <code>setState(next)</code> — replace the state, then call <code>render</code> — is this stage 4, with the state in a top-level variable instead of a closure. Its <code>Object.is</code> check and the updater-function fix for stale closures are the two upgrades in "A smarter setState" below.</p></div>
@@ -1409,19 +1382,14 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
   <p>Because the value on its own can't do anything when it changes — that was stage 1's lesson. The setter is the only door to the value, and the door has code bolted to it: store the new value, then redraw. That's the answer to the question from section 06. A plain variable can't notify anyone. A function can.</p>
 
   <h3>A smarter setState</h3>
-  <p>Two upgrades make your <code>useState</code> behave like React's. Both use ideas from earlier sections.</p>
-  <div class="cmd"><span class="tg">const</span> setState = (next) =&gt; {
-  <span class="cm">// 1. a value, or an updater function (section 05)</span>
-  <span class="tg">const</span> resolved = <span class="tg">typeof</span> next === <span class="st">"function"</span> ? <span class="at">next</span>(value) : next;
-  <span class="cm">// 2. nothing changed? then don't redraw (section 09)</span>
-  <span class="tg">if</span> (<span class="tg">Object</span>.<span class="at">is</span>(resolved, value)) <span class="tg">return</span>;
-  value = resolved;
-  <span class="at">onChange</span>();
-};</div>
+  <p>Two upgrades to your setter make your <code>useState</code> behave like React's. Both use ideas from earlier sections.</p>
   <ol>
-    <li><strong>Accept an updater function</strong>, exactly like <code>applyUpdate</code> in section 05. Handlers become <code>setCount((c) =&gt; c + 1)</code>, which always works from the latest value.</li>
-    <li><strong>Skip the redraw when nothing changed</strong>, using <code>Object.is</code>. Notice what follows: if you <code>push</code> onto the array in state and pass the same array back, <code>Object.is</code> says "same" and nothing redraws. That's why every update must make a <strong>new</strong> value (section 10) — and React behaves exactly the same way.</li>
+    <li><strong>Accept an updater function</strong>, exactly like <code>applyUpdate</code> in section 05: if the setter is handed a function, it calls it with the current value and uses what comes back. Handlers become <code>setCount((c) =&gt; c + 1)</code>, which always works from the latest value.</li>
+    <li><strong>Skip the redraw when nothing changed</strong>: if <code>Object.is(newValue, currentValue)</code> is <code>true</code>, store nothing and don't call <code>onChange</code>. Notice what follows: if you <code>push</code> onto the array in state and pass the same array back, <code>Object.is</code> says "same" and nothing redraws. That's why every update must make a <strong>new</strong> value (section 10) — and React behaves exactly the same way.</li>
   </ol>
+  <div class="cmd"><span class="tg">const</span> [getCount, setCount] = <span class="at">useState</span>(<span class="st">5</span>, render);
+<span class="at">setCount</span>((c) =&gt; c + <span class="st">1</span>);   <span class="cm">// render runs; getCount() is now 6</span>
+<span class="at">setCount</span>(<span class="st">6</span>);              <span class="cm">// same value: render does NOT run</span></div>
   <p>Make both changes and pass <code>node --test test/s15-smarter.test.js</code>.</p>
 
   <div class="stretch-box">
@@ -1489,13 +1457,12 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
   <div class="cmd"><span class="cm">// CoursePage.js</span>
 <span class="tg">import</span> { useState } <span class="tg">from</span> <span class="st">"react"</span>;
 <span class="tg">import</span> CourseCard <span class="tg">from</span> <span class="st">"./CourseCard.js"</span>;
+<span class="tg">import</span> { plannerCredits } <span class="tg">from</span> <span class="st">"./s11-catalog.js"</span>;
 
 <span class="tg">export</span> <span class="tg">default</span> <span class="tg">function</span> <span class="at">CoursePage</span>({ courses }) {
   <span class="tg">const</span> [planner, setPlanner] = <span class="at">useState</span>([]);
 
-  <span class="tg">const</span> credits = planner
-    .<span class="at">map</span>((id) =&gt; courses.<span class="at">find</span>((c) =&gt; c.id === id))
-    .<span class="at">reduce</span>((sum, c) =&gt; sum + c.credits, <span class="st">0</span>);
+  <span class="tg">const</span> credits = <span class="at">plannerCredits</span>(planner, courses);   <span class="cm">// yours, from section 11</span>
 
   <span class="tg">return</span> (
     &lt;main&gt;
@@ -1518,7 +1485,7 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
     <li><strong><code>{seatsLeft === 0 ? "Full" : `${seatsLeft} left`}</code></strong> — JSX braces hold one expression (03), so the either/or is a ternary, with a template literal inside.</li>
     <li><strong><code>onClick={onAdd}</code></strong> — passing the function, not calling it (04). The card doesn't know what "add" means; its parent does. The card just calls the callback it was handed: events flow up (05).</li>
     <li><strong><code>const [planner, setPlanner] = useState([])</code></strong> — array destructuring of a pair (08): a value you don't change directly, and the one function that changes it. Your <code>useState</code> from section 15, almost exactly.</li>
-    <li><strong><code>.map(…find…).reduce(…, 0)</code></strong> — ids to courses, then a total (11). Computed fresh on every render, never stored, so it can't drift.</li>
+    <li><strong><code>plannerCredits(planner, courses)</code></strong> — ids to courses, then a total: your stretch function from section 11. Computed fresh on every render, never stored, so it can't drift.</li>
     <li><strong><code>planner.length &gt; 0 &amp;&amp; &lt;span&gt;…</code></strong> — "only if", written safely so a 0 never shows (03).</li>
     <li><strong><code>courses.map((course) =&gt; &lt;CourseCard key={course.id} … /&gt;)</code></strong> — a list on screen is <code>map</code> (11), with a stable id as the key, never the index.</li>
     <li><strong><code>onAdd={() =&gt; setPlanner(…)}</code></strong> — a new arrow per card, which closes over <em>that</em> card's <code>course</code> (06). Exactly your <code>buildButtons</code> from section 04.</li>
@@ -1578,11 +1545,11 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
     <tr><td>Cannot read properties of undefined (reading 'title')</td><td>The thing before <code>.title</code> doesn't exist — usually a <code>find</code> that matched nothing. Check the id, or use <code>?.</code> (03).</td></tr>
     <tr><td>map returns [undefined, …]</td><td>Braces with no <code>return</code>, or an object literal without parentheses (04).</td></tr>
     <tr><td>Expected values to be strictly equal … !==</td><td>Read both values in the message: the test printed what it expected and what you returned.</td></tr>
-    <tr><td>Expected "actual" to be strictly unequal / the SAME object</td><td>A test checks references: you returned the same object where it wanted a new one, or a new one where nothing changed (10).</td></tr>
+    <tr><td>Values have same structure but are not reference-equal / Expected "actual" not to be reference-equal to "expected"</td><td>A test checks references: you returned the same object where it wanted a new one, or a new one where nothing changed (10).</td></tr>
     <tr><td>ERR_MODULE_NOT_FOUND</td><td>A wrong path, or a missing <code>.js</code> on a relative import (14).</td></tr>
     <tr><td>Cannot use import statement outside a module</td><td>The <code>&lt;script&gt;</code> tag needs <code>type="module"</code>, or <code>package.json</code> lost <code>"type": "module"</code>.</td></tr>
     <tr><td>The form page is blank, console says "blocked by CORS policy" / file://</td><td>You opened the HTML file directly. Use <code>npm run web</code> and the <code>localhost</code> address (14).</td></tr>
-    <tr><td>EADDRINUSE :5500</td><td>Something is already on that port, maybe an old <code>npm run web</code>. Stop it with <kbd>Ctrl</kbd>+<kbd>C</kbd>, or run <code>PORT=5600 npm run web</code> (on Windows: <code>set PORT=5600 &amp;&amp; npm run web</code>).</td></tr>
+    <tr><td>EADDRINUSE :5500</td><td>Something is already on that port, maybe an old <code>npm run web</code>. Stop it with <kbd>Ctrl</kbd>+<kbd>C</kbd>, or run <code>PORT=5600 npm run web</code> (Windows PowerShell: <code>$env:PORT=5600; npm run web</code> — Command Prompt: <code>set PORT=5600 &amp;&amp; npm run web</code>).</td></tr>
     <tr><td>npm : running scripts is disabled</td><td>PowerShell's execution policy (section 01). Use Command Prompt.</td></tr>
   </table>
 
@@ -1600,18 +1567,18 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
     <div class="q"><b>P1</b><code>groupByDepartment(courses)</code> → <code>{ "Computer Science": [course, …], … }</code>, using one <code>reduce</code>.</div>
     <details><summary>Show answer</summary><div class="a">
       <div class="cmd"><span class="tg">const</span> groupByDepartment = (courses) =&gt;
-  courses.<span class="at">reduce</span>((groups, c) =&gt; ({
-    ...groups,
-    [c.department]: [...(groups[c.department] ?? []), c],
-  }), {});</div>
-      <p>Spread, a computed key, <code>??</code> for the first course in each group, and an initial value. (Mutating <code>groups</code> inside would also be fine — you created it.)</p>
+  courses.<span class="at">reduce</span>((groups, c) =&gt; {
+    <span class="tg">if</span> (!groups[c.department]) groups[c.department] = [];
+    groups[c.department].<span class="at">push</span>(c);
+    <span class="tg">return</span> groups;
+  }, {});</div>
+      <p>One <code>reduce</code>, a computed key and an initial value. Pushing into <code>groups</code> is fine — you created it, and every array in it.</p>
     </div></details>
   </div>
   <div class="quiz">
-    <div class="q"><b>P2</b><code>toggleInPlanner(planner, id)</code> — removes the id if it's there, adds it if not. Never changes <code>planner</code>.</div>
+    <div class="q"><b>P2</b><code>moveToFront(planner, id)</code> — a new planner with <code>id</code> first and the others in their order (<code>id</code> is already in it). Never changes <code>planner</code>.</div>
     <details><summary>Show answer</summary><div class="a">
-      <div class="cmd"><span class="tg">const</span> toggleInPlanner = (planner, id) =&gt;
-  planner.<span class="at">includes</span>(id) ? planner.<span class="at">filter</span>((x) =&gt; x !== id) : [...planner, id];</div>
+      <div class="cmd"><span class="tg">const</span> moveToFront = (planner, id) =&gt; [id, ...planner.<span class="at">filter</span>((x) =&gt; x !== id)];</div>
     </div></details>
   </div>
   <div class="quiz">
@@ -1622,21 +1589,17 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
     </div></details>
   </div>
   <div class="quiz">
-    <div class="q"><b>P4</b><code>createUndoBox(initial)</code> → <code>[get, set, undo]</code>. <code>undo()</code> goes back to the value before the last <code>set</code>; with no history left, it does nothing.</div>
+    <div class="q"><b>P4</b><code>createLimiter(max)</code> → a function that returns <code>true</code> the first <code>max</code> times it's called, and <code>false</code> after that. Two limiters must not share a count.</div>
     <details><summary>Show answer</summary><div class="a">
-      <div class="cmd"><span class="tg">function</span> <span class="at">createUndoBox</span>(initial) {
-  <span class="tg">let</span> value = initial;
-  <span class="tg">let</span> history = [];
-  <span class="tg">const</span> <span class="tg">get</span> = () =&gt; value;
-  <span class="tg">const</span> <span class="tg">set</span> = (next) =&gt; { history = [...history, value]; value = next; };
-  <span class="tg">const</span> undo = () =&gt; {
-    <span class="tg">if</span> (history.length === <span class="st">0</span>) <span class="tg">return</span>;
-    value = history.<span class="at">at</span>(-<span class="st">1</span>);
-    history = history.<span class="at">slice</span>(<span class="st">0</span>, -<span class="st">1</span>);
+      <div class="cmd"><span class="tg">function</span> <span class="at">createLimiter</span>(max) {
+  <span class="tg">let</span> used = <span class="st">0</span>;
+  <span class="tg">return</span> () =&gt; {
+    <span class="tg">if</span> (used &gt;= max) <span class="tg">return</span> <span class="tg">false</span>;
+    used += <span class="st">1</span>;
+    <span class="tg">return</span> <span class="tg">true</span>;
   };
-  <span class="tg">return</span> [<span class="tg">get</span>, <span class="tg">set</span>, undo];
 }</div>
-      <p>Two private variables in one closure, shared by three functions.</p>
+      <p>A factory (06): each call to <code>createLimiter</code> gets its own <code>used</code>, which only the returned function can reach.</p>
     </div></details>
   </div>
   <div class="quiz">
@@ -1662,14 +1625,17 @@ inc.<span class="at">addEventListener</span>(<span class="st">"click"</span>, ()
   <h3>1. Get npm test fully green</h3>
   <div class="cmd"><span class="p">$</span> cd esd-labs/js-lab1
 <span class="p">$</span> npm test
-<span class="cm"># tests 63</span>
-<span class="cm"># pass 63</span>
-<span class="cm"># fail 0</span></div>
-  <p><code># fail 0</code> is the only acceptable result. When we grade, we <strong>put our own copy of the tests back in</strong> before running <code>npm test</code> — so editing or deleting a test can only cost you marks, never gain them.</p>
+<span class="o">…</span>
+<span class="o">ℹ tests 66</span>
+<span class="o">ℹ pass 66</span>
+<span class="o">ℹ fail 0</span></div>
+  <p><code>fail 0</code> is the only acceptable result. When we grade, we <strong>put our own copy of the tests back in</strong> before running <code>npm test</code> — so editing or deleting a test can only cost you marks, never gain them.</p>
 
   <h3>2. Zip the js-lab1 folder — and only that folder</h3>
   <p>Zip <code>js-lab1</code> itself, not the whole <code>esd-labs</code> folder, and leave out <code>node_modules</code> if you ever created one (this lab doesn't need it). From inside <code>esd-labs</code>:</p>
-  <div class="cmd"><span class="cm"># macOS / Linux</span>
+  <div class="cmd"><span class="p">$</span> cd ..          # out of js-lab1, into esd-labs
+
+<span class="cm"># macOS / Linux</span>
 <span class="p">$</span> zip -r js-lab1.zip js-lab1 -x "js-lab1/node_modules/*"
 
 <span class="cm"># Windows (PowerShell) — delete js-lab1\node_modules first if it exists</span>
@@ -1754,7 +1720,6 @@ list.<span class="at">filter</span>((x) =&gt; x.id !== id)                    <s
 list.<span class="at">map</span>((x) =&gt; x.id === id ? { ...x, f: v } : x)  <span class="cm">// update one</span>
 list.<span class="at">toSorted</span>(cmp)                                 <span class="cm">// sort a copy</span>
 { ...obj, field: value }                           <span class="cm">// update a field</span>
-{ ...obj, [name]: value }                          <span class="cm">// update a field named in a variable</span>
 <span class="tg">const</span> { field, ...rest } = obj                     <span class="cm">// remove a field</span>
 nothingChanged ? same : next                       <span class="cm">// same reference = no re-render</span></div>
 
