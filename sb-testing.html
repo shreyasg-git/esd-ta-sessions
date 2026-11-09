@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prove it works — Spring Boot</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#101614">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Condensed:wght@600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+.cue.work{border-left-color:var(--ink);background:var(--surface)}
+.cue.work .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.tg{color:var(--term-green)}
+.at{color:var(--signal)}
+.st{color:#B7C4C0}
+.tx{color:#FFFFFF}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 182px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+.quiz .a .cmd{margin-top:4px}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 168px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+/* ---- additions for the lab docs ---- */
+.cue.react{border-left-color:var(--term-green);background:var(--dark);color:#DDE3E0}
+.cue.react .cue-k{color:var(--term-green)}
+.cue.react code{background:#22302D;color:var(--term-green)}
+.cue.react strong{color:#FFF}
+.refs{font-family:var(--mono);font-size:12px;color:var(--muted);margin:-6px 0 16px;max-width:70ch}
+.refs a{color:var(--teal);font-weight:600}
+.part{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper);background:var(--ink);display:inline-block;padding:5px 10px;margin:64px 0 -28px}
+.toc .rpart{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);padding:10px 16px 6px;border-bottom:1px solid var(--line);background:var(--teal-soft);font-weight:600}
+table.grid{border-collapse:collapse;width:100%;max-width:70ch;background:var(--surface);border:1px solid var(--ink);margin:0 0 16px;font-size:14.5px}
+table.grid th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;text-align:left;color:var(--muted);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--ink)}
+table.grid td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.grid tr:last-child td{border-bottom:0}
+table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--teal);font-weight:600;white-space:nowrap}
+
+/* ---- core / stretch ---- */
+.lvl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:3px 7px;align-self:center;white-space:nowrap}
+.lvl.core{background:var(--ink);color:var(--signal)}
+.lvl.stretch{border:1px dashed var(--teal);color:var(--teal)}
+.lvl.ref{border:1px solid var(--muted);color:var(--muted)}
+.rrow .rl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:600;flex:0 0 auto;border:1px dashed var(--teal);padding:1px 6px;align-self:center}
+.rrow .rl.ref{color:var(--muted);border:1px solid var(--muted)}
+.rrow.is-extra .rw{color:var(--muted)}
+.stretch-box{border:1px dashed var(--teal);background:rgba(255,255,255,.55);padding:14px 16px 4px;margin:8px 0 18px}
+.stretch-box::before{content:"Stretch — optional. Do it if you can, and ask about it any time.";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600;margin-bottom:10px}
+.stretch-box h3:first-of-type{margin-top:0}
+/* tables whose first column holds long text (error messages): even, wrapping columns */
+table.grid.long-key{table-layout:fixed}
+table.grid.long-key td:first-child{white-space:normal;width:42%;overflow-wrap:anywhere}
+table.grid.long-key th:first-child{width:42%}
+.legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 0;font-size:14px;color:#2B3936}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+  table.grid td:first-child{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> Spring Boot · B4 · Self-paced</p>
+  <h1>Prove<br><em>it works</em></h1>
+  <p class="lede">In the Bug Lab you got an API that looked fine and a test class that knew it wasn't. You made eight red tests green. This manual explains what those tests were doing, line by line, what each failure message was telling you, and the method under the whole lab: <strong>predict, trigger, fix, re-trigger</strong>. Then it puts the same tests and tools on your own Product project, so you can prove your own backend works.</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">11</span> core</div>
+      <div class="tracker-msg" id="msg">Core first, in order: 01–03 explain the Bug Lab, 04–06 bring its tests to your Product project.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill" style="width: 0%;"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p><strong>The Bug Lab is done and submitted.</strong> This page explains it. Nothing here is lab work, and there is nothing to hand in.</p>
+  <p><strong>Keep your own project open.</strong> Every worked example runs on the Product app you built in Spring Boot Labs 1 and 2. Sections 01–03 also read the Bug Lab's test file, <code>Lab3BugTests.java</code>, so open the Bug Lab project too if you still have it. Missing a step in your Product project? Clone the shared reference, <code>https://github.com/sivasomanath2502/ESD_Session</code>, and run <code>git switch --detach lab2-complete</code> in it.</p>
+  <p><strong>No Bug Lab answers here.</strong> You made those fixes yourself. This page names the <em>kinds</em> of bug and the method, and plants its own small bugs in the Product app to show them.</p>
+  <p><strong>Core and stretch.</strong> <span class="lvl core">Core</span> sections tell the whole story. <span class="lvl stretch">Stretch</span> boxes are extra. Tick each section as you finish it; your ticks stay in this browser.</p>
+  <p><strong>It builds on the other Spring Boot manuals</strong> and doesn't repeat them: <a href="sb-request-flow.html">From request to row</a> (beans, controllers, repositories), <a href="sb-good-slice.html">A slice you can defend</a> (DTOs, validation, the exception handler) and <a href="sb-security.html">Who are you, and what may you do</a> (Spring Security and JWTs).</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — the Bug Lab first, then your own project. Core sections in order; stretch is extra</div>
+  <div class="rpart">Part 1 · The Bug Lab, explained</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">What the Bug Lab gave you</span></a>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">How its tests are built</span></a>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">Reading a test that fails</span></a>
+  <div class="rpart">Part 2 · Tests on your own project</div>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">Setting up tests in the Product project</span></a>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">Your first tests: a status, JSON, a 404, a 400</span></a>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">The method, on a planted bug</span></a>
+  <div class="rpart">Part 3 · Finding the cause</div>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">Reading a stack trace</span></a>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">Logs, levels and the SQL</span></a>
+  <a class="rrow" href="#s9"><span class="rt">09</span><span class="rw">Reproducing by hand: Swagger, curl, the database</span></a>
+  <div class="rpart">Part 4 · Bugs by kind, and what's next</div>
+  <a class="rrow" href="#s10"><span class="rt">10</span><span class="rw">Six kinds of bug, and the test that catches each</span></a>
+  <a class="rrow" href="#s11"><span class="rt">11</span><span class="rw">Using this in your contract backend</span></a>
+  <a class="rrow is-extra" href="#s12"><span class="rt">12</span><span class="rw">When it goes wrong</span><span class="rl ref">reference</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; reference cards</span></a>
+</nav>
+
+<div class="part">Part 1 · The Bug Lab, explained</div>
+
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>What the Bug Lab gave you</h2><span class="lvl core">Core</span><span class="tagline">the app, the suite, the loop</span></div>
+
+  <p>In the Bug Lab you didn't write tests. You were given an API with eight things wrong with it, a list of those eight, and a test class that already checked each one. Your job was to change the app until the tests passed. This section names the pieces, so the rest of the page can talk about them.</p>
+
+  <div class="mention">
+    <div class="mrow"><b>The app</b><span>A Campus Event Registration API. Events have a capacity; students register for an event with their email; a registration is <code>ACTIVE</code> or <code>CANCELLED</code>. Spring Boot 3.3.5, Spring Data JPA, an in-memory H2 database and Swagger UI. No security.</span></div>
+    <div class="mrow"><b>The bug list</b><span><code>ESD-Lab3-Bugs-to-Fix.md</code>: eight bugs, each written as "it does this; it should do that", most with the status code it should return.</span></div>
+    <div class="mrow"><b>The tests</b><span><code>Lab3BugTests.java</code>: one test per bug, named <code>B1_…</code> to <code>B8_…</code>, plus <code>smoke_eventListWorks</code>. At the start, the eight failed and the smoke test passed.</span></div>
+    <div class="mrow"><b>The loop</b><span>The README's step 6: one bug at a time — find a failing test, reproduce it, investigate, fix, rerun that test, rerun them all.</span></div>
+    <div class="mrow"><b>The report</b><span>For each bug: observed behaviour, expected behaviour, root cause, correction, verification — with screenshots.</span></div>
+    <div class="mrow"><b>Two feature tasks</b><span>Registration transfer and check-in. Not covered here: this page is about proving code works, not building it.</span></div>
+  </div>
+
+  <h3>The loop is a method</h3>
+  <p>The README's six steps are one idea, repeated eight times. Written as a method:</p>
+  <table class="grid">
+    <tr><th>Step</th><th>What you do</th></tr>
+    <tr><td>Predict</td><td>Before you run anything, say what you expect and why. "The test wants 409. I think the app returns 201, because nothing checks the capacity." Sections 03 and 06.</td></tr>
+    <tr><td>Trigger</td><td>Make the wrong behaviour happen on demand: the failing test, or the same request in Swagger or curl. Sections 03 and 09.</td></tr>
+    <tr><td>Find the cause</td><td>Follow the evidence to one line of code: the failure message, the stack trace, the log, the SQL. Sections 07 and 08.</td></tr>
+    <tr><td>Fix</td><td>Change the app — never the test — at the cause, not where the symptom showed up. Section 06.</td></tr>
+    <tr><td>Re-trigger</td><td>Run the same test again: green. Then run all of them, to check you broke nothing else. Section 06.</td></tr>
+  </table>
+  <p>The report's headings are the same method written down. <em>Observed</em> and <em>expected</em> are the trigger and the prediction. <em>Root cause</em> is what you found. <em>Correction</em> is the fix. <em>Verification</em> is the re-trigger. If you could fill all five boxes for a bug, you understood it. If you couldn't fill <em>root cause</em>, the test went green but you don't yet know why.</p>
+
+  <div class="cue watch"><p class="cue-k">Why the tests were off-limits</p><p>A test is the specification, written as code. Change it to match the app and it now specifies the bug. The README said "Do not change or weaken the tests", and the same holds for tests you write yourself: if a test really is wrong, change it on purpose, as a decision about what the app should do — never just to get a green tick.</p></div>
+
+  <h3>Six kinds of bug</h3>
+  <p>The eight bugs weren't eight different problems. Each was one of six kinds, and each kind looks the same from the outside in any app, yours included:</p>
+  <div class="mention">
+    <div class="mrow"><b>Validation missing</b><span>Bad input is accepted.</span></div>
+    <div class="mrow"><b>A rule not enforced</b><span>A request that breaks a business rule succeeds.</span></div>
+    <div class="mrow"><b>A status mapped wrong</b><span>The right failure comes back with the wrong number.</span></div>
+    <div class="mrow"><b>A state not saved</b><span>The response says it worked; the database didn't change.</span></div>
+    <div class="mrow"><b>A filter missing</b><span>A list holds rows it shouldn't.</span></div>
+    <div class="mrow"><b>A wrong lookup</b><span>You get a real object, just not the one you asked for.</span></div>
+  </div>
+  <p>Section 10 takes each kind and shows what you see, which assertion catches it, and where in the code to look.</p>
+
+  <div class="cue"><p class="cue-k">Your Product app is not the Bug Lab</p><p>The Bug Lab ran on Spring Boot 3.3.5 with no security. Your Product project runs on Boot 4.1.1, with Spring Security and JWTs from Lab 2. The tests work the same way in both. Where a name or an import is different, there's an "On Boot 3" note, and where security changes what you see, the page says so.</p></div>
+
+  <div class="dothis">
+    <h4>Try it — open the two projects</h4>
+    <ol>
+      <li>If you still have the Bug Lab project, open <code>src/test/java/edu/iiitb/esdlab3/Lab3BugTests.java</code> and keep it beside this page for sections 02 and 03.</li>
+      <li>Open your Product project and run it once, so you know it starts: <code>Started EcommerceApplication</code> appears in the console.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>The report asks for both a <em>root cause</em> and a <em>correction</em>. Why isn't the correction enough?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The correction says what you changed. The root cause says why the old code behaved wrongly. You can make a test pass with a change you don't understand — at the wrong place, or by luck. Writing the cause in one sentence is how you check that your fix is at the cause and not at the symptom.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>At the start of the lab, the smoke test passed. Why have it at all?</div>
+    <details><summary>Show answer</summary><div class="a"><p>It shows that the app starts and that one simple request works. If the smoke test fails too, the problem isn't one of the eight bugs: the whole app is broken (section 03, "Every test red at once").</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — I can name the five steps and the six kinds</span></label>
+</section>
+
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>How its tests are built</h2><span class="lvl core">Core</span><span class="tagline">five ideas in 150 lines</span></div>
+
+  <p>Look past the bug names and <code>Lab3BugTests.java</code> uses only five ideas: start the app, get a fake HTTP client, empty the tables, and then <strong>arrange, act, assert</strong> in every test. Here is the top of the class (lines 28–45 of the file):</p>
+  <div class="cmd"><span class="at">@SpringBootTest</span>
+<span class="at">@AutoConfigureMockMvc</span>
+<span class="tg">class</span> Lab3BugTests {
+
+    <span class="at">@Autowired</span>
+    MockMvc mvc;
+
+    <span class="at">@Autowired</span>
+    EventRepository events;
+
+    <span class="at">@Autowired</span>
+    RegistrationRepository registrations;
+
+    <span class="at">@BeforeEach</span>
+    <span class="tg">void</span> <span class="at">clean</span>() {
+        registrations.<span class="at">deleteAll</span>();
+        events.<span class="at">deleteAll</span>();
+    }</div>
+
+  <div class="mention">
+    <div class="mrow"><b>@SpringBootTest</b><span>Starts your whole application inside the test run: every bean, the H2 database, Hibernate creating the tables. It starts once and is kept for every test that asks for the same setup.</span></div>
+    <div class="mrow"><b>@AutoConfigureMockMvc</b><span>Also builds a <code>MockMvc</code> connected to that application.</span></div>
+    <div class="mrow"><b>@Autowired fields</b><span>The test asks Spring for beans, the way your services do (<a href="sb-request-flow.html">From request to row</a>). With the repositories, a test can write and read rows directly.</span></div>
+    <div class="mrow"><b>@BeforeEach clean()</b><span>Runs before every test, so each test starts with empty tables and none depends on what another left behind. Registrations go first because each one points at an event: deleting an event that still has registrations would break the foreign key.</span></div>
+    <div class="mrow"><b>throws Exception</b><span>On every test that calls <code>perform(…)</code>, because it can throw. If it does, the test <em>errors</em> instead of failing (section 03).</span></div>
+  </div>
+
+  <h3>What MockMvc runs, and what it skips</h3>
+  <figure class="board">
+    <svg viewBox="0 0 780 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A MockMvc test sends its request straight into the real application: through the security filters, the DispatcherServlet, the controller, the service and the repository to the H2 database. The response comes back as an object that andExpect reads. Tomcat, a port, the network and the forward to /error are not involved.">
+      <text x="0" y="16" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">ONE MOCKMVC REQUEST — WHAT RUNS FOR REAL, AND WHAT DOESN'T</text>
+      <rect x="116" y="40" width="664" height="92" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      <text x="128" y="58" font-family="IBM Plex Mono, monospace" font-size="11" fill="#0B5D51" font-weight="600">THE REAL APP — started once by @SpringBootTest</text>
+      <rect x="0" y="72" width="100" height="46" fill="#101614"/>
+      <text x="50" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#F5C518">your test</text>
+      <text x="50" y="108" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#F5C518">mvc.perform(…)</text>
+      <rect x="128" y="72" width="100" height="46" fill="#FFFFFF" stroke="#0F1A18" stroke-width="1.5"/>
+      <text x="178" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0F1A18">filters</text>
+      <text x="178" y="108" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="#5A6B67">security</text>
+      <rect x="248" y="72" width="136" height="46" fill="#FFFFFF" stroke="#0F1A18" stroke-width="1.5"/>
+      <text x="316" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0F1A18">DispatcherServlet</text>
+      <text x="316" y="108" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="#5A6B67">@Valid · your advice</text>
+      <rect x="404" y="72" width="104" height="46" fill="#FFFFFF" stroke="#0F1A18" stroke-width="1.5"/>
+      <text x="456" y="99" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0F1A18">controller</text>
+      <rect x="528" y="72" width="92" height="46" fill="#FFFFFF" stroke="#0F1A18" stroke-width="1.5"/>
+      <text x="574" y="99" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0F1A18">service</text>
+      <rect x="640" y="72" width="128" height="46" fill="#FFFFFF" stroke="#0F1A18" stroke-width="1.5"/>
+      <text x="704" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0F1A18">repository</text>
+      <text x="704" y="108" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="#5A6B67">real SQL on H2</text>
+      <path d="M100 95 L124 95" stroke="#0B5D51" stroke-width="2" fill="none"/>
+      <path d="M118 90 L126 95 L118 100" fill="none" stroke="#0B5D51" stroke-width="2"/>
+      <path d="M228 95 L244 95" stroke="#0B5D51" stroke-width="2" fill="none"/>
+      <path d="M238 90 L246 95 L238 100" fill="none" stroke="#0B5D51" stroke-width="2"/>
+      <path d="M384 95 L400 95" stroke="#0B5D51" stroke-width="2" fill="none"/>
+      <path d="M394 90 L402 95 L394 100" fill="none" stroke="#0B5D51" stroke-width="2"/>
+      <path d="M508 95 L524 95" stroke="#0B5D51" stroke-width="2" fill="none"/>
+      <path d="M518 90 L526 95 L518 100" fill="none" stroke="#0B5D51" stroke-width="2"/>
+      <path d="M620 95 L636 95" stroke="#0B5D51" stroke-width="2" fill="none"/>
+      <path d="M630 90 L638 95 L630 100" fill="none" stroke="#0B5D51" stroke-width="2"/>
+      <path d="M316 118 L316 152 L50 152 L50 124" stroke="#0F1A18" stroke-width="2" fill="none"/>
+      <path d="M44 132 L50 121 L56 132" fill="none" stroke="#0F1A18" stroke-width="2"/>
+      <text x="64" y="172" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#0F1A18">the response comes back as a Java object — andExpect(status(), jsonPath(…)) reads it</text>
+      <rect x="1" y="192" width="778" height="50" fill="none" stroke="#5A6B67" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <text x="14" y="212" font-family="IBM Plex Mono, monospace" font-size="11" fill="#5A6B67" font-weight="600">NOT IN THE PICTURE</text>
+      <text x="14" y="231" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#0F1A18">Tomcat · a port · the network · the forward to /error after an error your code didn't handle (section 09)</text>
+    </svg>
+    <figcaption>Everything inside the frame is your real code, running real SQL. MockMvc replaces only the network: the request and the response are objects in memory.</figcaption>
+  </figure>
+  <p><code>MockMvc</code> is a fake HTTP client. It builds a request object in memory and hands it straight to Spring's <code>DispatcherServlet</code>, in the same Java process, on the same thread. No server starts, no port opens, and nothing crosses the network. Everything after that point is real: your filters (in the Product app, Spring Security), the controller, <code>@Valid</code>, your exception handler, Jackson, the service, the repository, and real SQL on H2. That's why a MockMvc test can catch a wrong status: the status comes from your real code. The one thing it skips is what a real server does with an error your code didn't handle. Section 09 shows when that matters.</p>
+
+  <h3>One test, three parts</h3>
+  <p>Every test in the file has the same shape. Here is B3 (lines 65–76):</p>
+  <div class="cmd"><span class="at">@Test</span>
+<span class="tg">void</span> <span class="at">B3_rejectsRegistrationAtCapacity</span>() <span class="tg">throws</span> Exception {
+    Event e = events.<span class="at">save</span>(<span class="tg">new</span> <span class="at">Event</span>(<span class="st">"Full"</span>, <span class="st">1</span>));
+    registrations.<span class="at">save</span>(
+            <span class="tg">new</span> <span class="at">Registration</span>(e, <span class="st">"first@example.com"</span>, RegistrationStatus.ACTIVE)
+    );
+
+    mvc.<span class="at">perform</span>(<span class="at">post</span>(<span class="st">"/api/events/"</span> + e.<span class="at">getId</span>() + <span class="st">"/registrations"</span>)
+                    .<span class="at">contentType</span>(MediaType.APPLICATION_JSON)
+                    .<span class="at">content</span>(<span class="st">"{\"studentEmail\":\"second@example.com\"}"</span>))
+            .<span class="at">andExpect</span>(<span class="at">status</span>().<span class="at">isConflict</span>());
+}</div>
+  <table class="grid long-key">
+    <tr><th>Line</th><th>What it does</th></tr>
+    <tr><td>events.save(…), registrations.save(…)</td><td><strong>Arrange.</strong> Writes rows straight to the database through the repositories, skipping the API, so the test controls exactly what exists: one event with one seat, already taken.</td></tr>
+    <tr><td>mvc.perform(post(url))</td><td><strong>Act.</strong> Builds a request: the HTTP method and the URL. <code>get</code>, <code>post</code>, <code>put</code> and <code>delete</code> come from <code>MockMvcRequestBuilders</code>.</td></tr>
+    <tr><td>.contentType(MediaType.APPLICATION_JSON)</td><td>The <code>Content-Type</code> header. Leave it out and <code>@RequestBody</code> refuses the body with <strong>415</strong> Unsupported Media Type.</td></tr>
+    <tr><td>.content("{…}")</td><td>The body, as a string of JSON. The <code>\"</code> are Java escapes for quotes. On Product below, a text block (<code>"""…"""</code>, Java 15+) reads more easily.</td></tr>
+    <tr><td>.andExpect(status().isConflict())</td><td><strong>Assert.</strong> Reads the status of the response. If it isn't 409, the test fails.</td></tr>
+  </table>
+
+  <h3>The other shapes in the file</h3>
+  <div class="mention">
+    <div class="mrow"><b>jsonPath (B6)</b><span><code>jsonPath("$", hasSize(1))</code> says the body is a list of one item; <code>jsonPath("$[0].studentEmail").value(…)</code> checks a field of the first item. In a JSON path, <code>$</code> is the whole body, <code>.name</code> a field, <code>[0]</code> the first element and <code>[*]</code> every element. <code>hasSize</code> is a Hamcrest <em>matcher</em>.</span></div>
+    <div class="mrow"><b>Read the row back (B5)</b><span>After the request, <code>registrations.findById(…)</code> reads the database, and <code>assertEquals</code> checks the status column. A 204 only says the code returned 204. Only the row says whether anything changed.</span></div>
+    <div class="mrow"><b>No Spring at all (B7)</b><span><code>new ApiExceptionHandler()</code>, a <code>MockHttpServletRequest</code>, a direct call to the handler method, and a check on the <code>ResponseEntity</code>. That's a plain <strong>unit test</strong>: no app starts, so it's very fast, and it tests one method alone.</span></div>
+    <div class="mrow"><b>Give the bug room (B8)</b><span>It saves one event before asking for id 99999. With no events at all, a lookup that falls back to "some event" would find nothing and pass by accident.</span></div>
+    <div class="mrow"><b>The smoke test</b><span>One cheap request that should always work.</span></div>
+  </div>
+
+  <p>B7's shape works on your Product app too. Your Lab 2 <code>GlobalExceptionHandler</code> can be tested the same way:</p>
+  <div class="cmd"><span class="tg">package</span> com.esd.ecommerce;
+
+<span class="tg">import</span> com.esd.ecommerce.dto.ApiErrorResponse;
+<span class="tg">import</span> com.esd.ecommerce.exception.GlobalExceptionHandler;
+<span class="tg">import</span> com.esd.ecommerce.exception.ProductNotFoundException;
+<span class="tg">import</span> org.junit.jupiter.api.Test;
+<span class="tg">import</span> org.springframework.http.HttpStatus;
+<span class="tg">import</span> org.springframework.http.ResponseEntity;
+<span class="tg">import</span> org.springframework.mock.web.MockHttpServletRequest;
+
+<span class="tg">import</span> <span class="tg">static</span> org.junit.jupiter.api.Assertions.assertEquals;
+
+<span class="tg">class</span> GlobalExceptionHandlerTests {
+
+    <span class="at">@Test</span>
+    <span class="tg">void</span> <span class="at">productNotFoundBecomes404</span>() {
+        GlobalExceptionHandler handler = <span class="tg">new</span> <span class="at">GlobalExceptionHandler</span>();
+        MockHttpServletRequest request =
+                <span class="tg">new</span> <span class="at">MockHttpServletRequest</span>(<span class="st">"GET"</span>, <span class="st">"/api/products/get-id/7"</span>);
+
+        ResponseEntity&lt;ApiErrorResponse&gt; response =
+                handler.<span class="at">handleProductNotFound</span>(<span class="tg">new</span> <span class="at">ProductNotFoundException</span>(<span class="st">7L</span>), request);
+
+        <span class="at">assertEquals</span>(HttpStatus.NOT_FOUND, response.<span class="at">getStatusCode</span>());
+        <span class="at">assertEquals</span>(<span class="st">"Product with ID 7 not found"</span>, response.<span class="at">getBody</span>().<span class="at">getMessage</span>());
+        <span class="at">assertEquals</span>(<span class="st">"/api/products/get-id/7"</span>, response.<span class="at">getBody</span>().<span class="at">getPath</span>());
+    }
+}</div>
+
+  <div class="cue"><p class="cue-k">On Boot 3 (the Bug Lab)</p><p><code>@AutoConfigureMockMvc</code> was imported from <code>org.springframework.boot.test.autoconfigure.web.servlet</code>. On Boot 4 (your Product app) it is <code>org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc</code>, from the <code>spring-boot-starter-webmvc-test</code> dependency your pom already has. <code>@SpringBootTest</code>, <code>MockMvc</code>, the request builders and the matchers didn't move.</p></div>
+
+  <div class="dothis">
+    <h4>Try it — label one test</h4>
+    <p>In <code>Lab3BugTests.java</code>, pick B4 and B6. For each, find the arrange lines, the act line and the assert lines. Then answer Q1 below without looking.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>In B4, what does the arrange step create, and why is the email in the request written in capitals?</div>
+    <details><summary>Show answer</summary><div class="a"><p>An event with three seats and one <code>ACTIVE</code> registration for <code>student@example.com</code>. The request registers <code>STUDENT@example.com</code>: the same person in different letters. The bug list says email comparison should ignore case, so the capitals are the whole point of the test — a check that compares exactly would let the duplicate through.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>B5 already expects <code>204 No Content</code>. Why does it also read the row?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Because the status is just a number the controller returns. A cancel method can return 204 and change nothing. The row is the only proof that the state changed. (Section 10, "a state not saved".)</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q3</b>Why does <code>clean()</code> run before each test, rather than once before all of them?</div>
+    <details><summary>Show answer</summary><div class="a"><p>JUnit doesn't promise an order for the tests, and the application — with its database — is shared between them. Emptying the tables before each test means every test starts from the same place, and a test can't pass or fail because of rows another test left behind.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 complete — I can read any test in Lab3BugTests as arrange, act, assert</span></label>
+</section>
+
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>Reading a test that fails</h2><span class="lvl core">Core</span><span class="tagline">two numbers, then the response</span></div>
+
+  <p>A red test has already done half the work. It tells you what it wanted and what it got. Read that before you open any of the app's code.</p>
+
+  <h3>Failure or error</h3>
+  <p>JUnit has two kinds of red. A <strong>failure</strong> is an assertion saying no: an <code>AssertionError</code> with "expected … but was …". An <strong>error</strong> is the test throwing something else before it could assert — an exception out of <code>perform(…)</code>, or an app that wouldn't start. Maven counts them separately at the end of <code>mvn test</code>:</p>
+  <div class="cmd">[ERROR] Tests run: 9, Failures: 8, Errors: 0, Skipped: 0
+…
+[INFO] BUILD FAILURE</div>
+  <p>A failure means the code ran and answered wrongly. An error means it didn't get as far as answering. They send you to different places.</p>
+
+  <h3>The status message</h3>
+  <div class="cmd">Status expected:&amp;lt;400&amp;gt; but was:&amp;lt;201&amp;gt;</div>
+  <p><em>Expected</em> is the test; <em>was</em> is the app. The pair narrows the search before you've opened a file — this is the <strong>predict</strong> step:</p>
+  <table class="grid">
+    <tr><th>You see</th><th>It suggests</th></tr>
+    <tr><td>400 wanted, 201 or 200 came</td><td>The app accepted input it should have rejected: validation didn't run, or isn't there.</td></tr>
+    <tr><td>409 wanted, 201 came</td><td>A business rule wasn't checked: the service saved without asking.</td></tr>
+    <tr><td>409 wanted, 400 came</td><td>The rule was checked and its exception thrown — but the exception is mapped to the wrong status.</td></tr>
+    <tr><td>404 wanted, 200 came</td><td>The app found something when there was nothing to find: a wrong lookup.</td></tr>
+    <tr><td>2xx wanted, 401 / 403 came</td><td>Security stopped the request before your controller. In a test, usually a missing user (section 05).</td></tr>
+    <tr><td>2xx wanted, 400 / 415 came</td><td>The body was refused before your method ran: invalid, unreadable, or sent without a content type.</td></tr>
+  </table>
+
+  <h3>The other messages</h3>
+  <p>Each assertion has its own wording. You'll meet all four on the Product app later in this page:</p>
+  <div class="cmd">JSON path "$.message" expected:&amp;lt;Product with ID 99999 not found&amp;gt; but was:&amp;lt;…&amp;gt;
+
+JSON path "$"
+Expected: a collection with size &amp;lt;1&amp;gt;
+     but: collection size was &amp;lt;0&amp;gt;
+
+No value at JSON path "$.validationErrors.name"
+
+expected: &amp;lt;Notebook A4&amp;gt; but was: &amp;lt;Notebook&amp;gt;</div>
+  <div class="mention">
+    <div class="mrow"><b>JSON path … expected … but was</b><span>The field is there but holds something else.</span></div>
+    <div class="mrow"><b>Expected: a collection with size</b><span>Hamcrest's wording for <code>hasSize</code>: the list is longer or shorter than it should be. Section 08.</span></div>
+    <div class="mrow"><b>No value at JSON path</b><span>The field isn't in the body at all. Usually a different body came back from the one you expected: an error body instead of data, or the other way round.</span></div>
+    <div class="mrow"><b>expected: &lt;…&gt; but was: &lt;…&gt;</b><span>JUnit's own <code>assertEquals</code>, with spaces in its wording. Section 10.</span></div>
+  </div>
+
+  <h3>Scroll up: the request and the response</h3>
+  <p>When a MockMvc test fails, Spring Boot prints the whole exchange in the test's output, just above the failure: the request, the controller method that handled it, any exception your advice resolved, and the response. Here is a shortened example, from the bug you'll plant in section 06:</p>
+  <div class="cmd">MockHttpServletRequest:
+      HTTP Method = POST
+      Request URI = /api/products/add-product
+…
+Handler:
+             Type = com.esd.ecommerce.controller.ProductController
+           Method = com.esd.ecommerce.controller.ProductController#addProduct(ProductRequest)
+…
+Resolved Exception:
+             Type = null
+…
+MockHttpServletResponse:
+           Status = 201
+…
+             Body = {"category":"Books", … ,"name":"", … }</div>
+  <p>Read it from the bottom up. <code>Status</code> and <code>Body</code> are what the app answered. <code>Resolved Exception</code> names the exception your advice turned into the response; here it's <code>null</code>, because as far as the app knew, nothing went wrong. <code>Handler</code> says which method ran, so you know which file to open first. Tests that pass print nothing: Boot prints the exchange only on failure.</p>
+
+  <h3>Every test red at once</h3>
+  <p>If every test fails, the smoke test too, and each one says <code>Failed to load ApplicationContext</code>, no single bug is to blame: the application didn't start inside the test. Only the first test shows the real reason. The rest say <code>ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context</code>, which means "same problem as above; not trying again". Find the first failing test and read its <strong>last</strong> <code>Caused by</code>. Section 07 shows how.</p>
+
+  <div class="dothis">
+    <h4>Try it — make one test fail on purpose</h4>
+    <ol>
+      <li>In <code>Lab3BugTests.java</code>, change the smoke test's <code>status().isOk()</code> to <code>status().isCreated()</code>. Run only that test (the green arrow beside it).</li>
+      <li>Read the message: both numbers are in it. Then scroll up in the output and find <code>Status</code> in the printed response.</li>
+      <li>Change it back and run it again: green.</li>
+    </ol>
+    <p>No Bug Lab project any more? Do this with section 05's tests instead.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>A test says <code>Status expected:&lt;201&gt; but was:&lt;403&gt;</code>. Before you open any code, where do you look?</div>
+    <details><summary>Show answer</summary><div class="a"><p>At security. 403 means the request was refused because of who sent it, before the controller ran. In a test that usually means the user in the request doesn't have the role the route needs. Nothing in the service is involved yet.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>A test expects <code>jsonPath("$.name").value("Pen")</code> and fails with <code>No value at JSON path "$.name"</code>. The status assertion above it was <code>isOk()</code> and passed. What came back?</div>
+    <details><summary>Show answer</summary><div class="a"><p>A 200 whose body has no top-level <code>name</code>: most likely a list (<code>[{…}]</code>), so the path would be <code>$[0].name</code>. Scroll up to the printed <code>Body</code> and look at its first character.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 complete — I read a failure message before reading code</span></label>
+</section>
+
+<div class="part">Part 2 · Tests on your own project</div>
+
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>Setting up tests in the Product project</h2><span class="lvl core">Core</span><span class="tagline">a test database, a test user</span></div>
+
+  <p>The Bug Lab came with its tests set up. Your Product project has only the one test Spring Initializr wrote, <code>EcommerceApplicationTests</code>, which checks that the app starts. Before you add more, three things differ from the Bug Lab — and one of them can cost you your data.</p>
+
+  <div class="cue watch"><p class="cue-k">Your tests would run on your MySQL</p><p>The Bug Lab used H2 for everything. Your Product app's <code>application.properties</code> points at MySQL, <code>ecommerceDB</code>. A <code>@SpringBootTest</code> starts the real app with that file — so a test that empties a table the way the Bug Lab's <code>clean()</code> did would empty your real <code>products</code> table. Add the test database below before you write a single test.</p></div>
+
+  <h3>1 · What your pom already has</h3>
+  <p>Spring Initializr added two test starters (lab2-complete <code>pom.xml</code>, lines 57–66): <code>spring-boot-starter-data-jpa-test</code> and <code>spring-boot-starter-webmvc-test</code>. Between them you have JUnit, MockMvc, JsonPath, Hamcrest, AssertJ and Mockito. Nothing to add for those.</p>
+
+  <h3>2 · Add two test dependencies</h3>
+  <p>Inside <code>&lt;dependencies&gt;</code> in your <code>pom.xml</code>:</p>
+  <div class="cmd"><span class="cm">&lt;!-- tests run on an in-memory database, never on your MySQL --&gt;</span>
+&lt;<span class="tg">dependency</span>&gt;
+    &lt;<span class="tg">groupId</span>&gt;com.h2database&lt;/<span class="tg">groupId</span>&gt;
+    &lt;<span class="tg">artifactId</span>&gt;h2&lt;/<span class="tg">artifactId</span>&gt;
+    &lt;<span class="tg">scope</span>&gt;test&lt;/<span class="tg">scope</span>&gt;
+&lt;/<span class="tg">dependency</span>&gt;
+
+<span class="cm">&lt;!-- a logged-in user inside a test --&gt;</span>
+&lt;<span class="tg">dependency</span>&gt;
+    &lt;<span class="tg">groupId</span>&gt;org.springframework.boot&lt;/<span class="tg">groupId</span>&gt;
+    &lt;<span class="tg">artifactId</span>&gt;spring-boot-starter-security-test&lt;/<span class="tg">artifactId</span>&gt;
+    &lt;<span class="tg">scope</span>&gt;test&lt;/<span class="tg">scope</span>&gt;
+&lt;/<span class="tg">dependency</span>&gt;</div>
+  <div class="mention">
+    <div class="mrow"><b>h2, scope test</b><span>On the classpath only while tests run. Your app itself still runs on MySQL. No version: Spring Boot chooses it.</span></div>
+    <div class="mrow"><b>spring-boot-starter-security-test</b><span>Lets a test act as a logged-in user — your add, update and delete routes are ADMIN-only. On Boot 4 this starter also connects Spring Security's test support to MockMvc; plain <code>spring-security-test</code> on its own doesn't make <code>@WithMockUser</code> reach the request.</span></div>
+  </div>
+  <p>After editing the pom, reload Maven in IntelliJ (the reload button in the Maven tool window, or the small "Load Maven Changes" icon that appears in the editor).</p>
+  <div class="cue"><p class="cue-k">On Boot 3</p><p>The dependency was <code>org.springframework.security:spring-security-test</code>, and Boot 3 connected it to MockMvc by itself.</p></div>
+
+  <h3>3 · A properties file just for tests</h3>
+  <p>Create <code>src/test/resources/application.properties</code> (make the <code>resources</code> folder if it isn't there):</p>
+  <div class="cmd"><span class="cm"># Used instead of src/main/resources/application.properties when tests run.</span>
+<span class="cm"># An in-memory H2 database: made for the test run, gone afterwards. MySQL is never touched.</span>
+<span class="at">spring.datasource.url</span>=<span class="st">jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1</span>
+<span class="at">spring.datasource.username</span>=<span class="st">sa</span>
+<span class="at">spring.datasource.password</span>=<span class="st"></span>
+<span class="at">spring.jpa.hibernate.ddl-auto</span>=<span class="st">create-drop</span>
+
+<span class="cm"># This file replaces the main one, so repeat every app.* property your code reads.</span>
+<span class="at">app.security.jwt.issuer</span>=<span class="st">ecommerce-api</span>
+<span class="at">app.security.jwt.expiration-seconds</span>=<span class="st">3600</span>
+<span class="at">app.security.jwt.secret</span>=<span class="st">test-only-secret-key-that-is-at-least-32-bytes-long</span></div>
+  <p>When tests run, this file is used <strong>instead of</strong> your main <code>application.properties</code>, not on top of it: both files have the same name, and the test copy comes first on the classpath. That's why it repeats the three <code>app.security.jwt.*</code> properties. Leave the secret out and every test fails with <code>Could not resolve placeholder 'app.security.jwt.secret'</code> — section 07 reads that trace. <code>ddl-auto=create-drop</code> makes Hibernate create the tables from your entities when the tests start. H2 starts empty, so each test saves the rows it needs.</p>
+
+  <h3>4 · Where test classes go</h3>
+  <p>In <code>src/test/java/com/esd/ecommerce/</code>, next to <code>EcommerceApplicationTests</code>. <code>@SpringBootTest</code> finds your app by looking for <code>@SpringBootApplication</code> in the test's package and then in its parent packages, so a test must sit in <code>com.esd.ecommerce</code> or in a package below it.</p>
+
+  <div class="dothis">
+    <h4>Try it — prove the tests don't need MySQL</h4>
+    <ol>
+      <li>Add the two dependencies and the file, then reload Maven.</li>
+      <li>If you can, stop your MySQL server.</li>
+      <li>Run <code>EcommerceApplicationTests</code> (right-click → Run). Green means the app started on H2 with your test properties. With MySQL stopped, that's proof the tests never touch it.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>You put <code>logging.level.org.hibernate.SQL=DEBUG</code> in your <em>main</em> <code>application.properties</code>. Do your tests print SQL?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No. When tests run, the test file replaces the main one, so nothing from the main file applies. Put settings you want in tests into <code>src/test/resources/application.properties</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 complete — my Product tests run on H2</span></label>
+</section>
+
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>Your first tests: a status, JSON, a 404, a 400</h2><span class="lvl core">Core</span><span class="tagline">the Bug Lab's style, on Product</span></div>
+
+  <p>Here is a test class for the Product API in the Bug Lab's style. Every part of it is something section 02 explained. The new parts are text blocks for the JSON and a logged-in admin. Save it as <code>src/test/java/com/esd/ecommerce/ProductApiTests.java</code>:</p>
+  <div class="cmd"><span class="tg">package</span> com.esd.ecommerce;
+
+<span class="tg">import</span> com.esd.ecommerce.entity.Product;
+<span class="tg">import</span> com.esd.ecommerce.repository.ProductRepository;
+<span class="tg">import</span> org.junit.jupiter.api.BeforeEach;
+<span class="tg">import</span> org.junit.jupiter.api.Test;
+<span class="tg">import</span> org.springframework.beans.factory.annotation.Autowired;
+<span class="tg">import</span> org.springframework.boot.test.context.SpringBootTest;
+<span class="tg">import</span> org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+<span class="tg">import</span> org.springframework.http.MediaType;
+<span class="tg">import</span> org.springframework.test.web.servlet.MockMvc;
+
+<span class="tg">import</span> java.math.BigDecimal;
+
+<span class="tg">import</span> <span class="tg">static</span> org.hamcrest.Matchers.containsInAnyOrder;
+<span class="tg">import</span> <span class="tg">static</span> org.hamcrest.Matchers.hasSize;
+<span class="tg">import</span> <span class="tg">static</span> org.junit.jupiter.api.Assertions.assertEquals;
+<span class="tg">import</span> <span class="tg">static</span> org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+<span class="tg">import</span> <span class="tg">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+<span class="tg">import</span> <span class="tg">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+<span class="tg">import</span> <span class="tg">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+<span class="tg">import</span> <span class="tg">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+<span class="at">@SpringBootTest</span>
+<span class="at">@AutoConfigureMockMvc</span>
+<span class="tg">class</span> ProductApiTests {
+
+    <span class="at">@Autowired</span>
+    MockMvc mvc;
+
+    <span class="at">@Autowired</span>
+    ProductRepository products;
+
+    <span class="at">@BeforeEach</span>
+    <span class="tg">void</span> <span class="at">clean</span>() {
+        products.<span class="at">deleteAll</span>();
+    }
+
+    <span class="tg">private</span> Product <span class="at">saved</span>(String name, String category) {
+        <span class="tg">return</span> products.<span class="at">save</span>(<span class="tg">new</span> <span class="at">Product</span>(
+                <span class="tg">null</span>, name, <span class="st">"for tests"</span>, <span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">"49.00"</span>), category, <span class="st">10</span>));
+    }
+
+    <span class="at">@Test</span>
+    <span class="tg">void</span> <span class="at">getAllListsEveryProduct</span>() <span class="tg">throws</span> Exception {
+        <span class="at">saved</span>(<span class="st">"Notebook"</span>, <span class="st">"Books"</span>);
+        <span class="at">saved</span>(<span class="st">"Pen"</span>, <span class="st">"Stationery"</span>);
+
+        mvc.<span class="at">perform</span>(<span class="at">get</span>(<span class="st">"/api/products/get-all"</span>))
+                .<span class="at">andExpect</span>(<span class="at">status</span>().<span class="at">isOk</span>())
+                .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$"</span>, <span class="at">hasSize</span>(<span class="st">2</span>)))
+                .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$[*].name"</span>, <span class="at">containsInAnyOrder</span>(<span class="st">"Notebook"</span>, <span class="st">"Pen"</span>)));
+    }
+
+    <span class="at">@Test</span>
+    <span class="tg">void</span> <span class="at">getByIdReturnsThatProduct</span>() <span class="tg">throws</span> Exception {
+        <span class="at">saved</span>(<span class="st">"Notebook"</span>, <span class="st">"Books"</span>);
+        Product pen = <span class="at">saved</span>(<span class="st">"Pen"</span>, <span class="st">"Stationery"</span>);
+
+        mvc.<span class="at">perform</span>(<span class="at">get</span>(<span class="st">"/api/products/get-id/"</span> + pen.<span class="at">getId</span>()))
+                .<span class="at">andExpect</span>(<span class="at">status</span>().<span class="at">isOk</span>())
+                .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$.name"</span>).<span class="at">value</span>(<span class="st">"Pen"</span>))
+                .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$.category"</span>).<span class="at">value</span>(<span class="st">"Stationery"</span>));
+    }
+
+    <span class="at">@Test</span>
+    <span class="tg">void</span> <span class="at">unknownIdIs404WithTheErrorBody</span>() <span class="tg">throws</span> Exception {
+        <span class="at">saved</span>(<span class="st">"Notebook"</span>, <span class="st">"Books"</span>);   <span class="cm">// another product exists, so a wrong lookup has room to show</span>
+
+        mvc.<span class="at">perform</span>(<span class="at">get</span>(<span class="st">"/api/products/get-id/99999"</span>))
+                .<span class="at">andExpect</span>(<span class="at">status</span>().<span class="at">isNotFound</span>())
+                .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$.status"</span>).<span class="at">value</span>(<span class="st">404</span>))
+                .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$.message"</span>).<span class="at">value</span>(<span class="st">"Product with ID 99999 not found"</span>))
+                .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$.path"</span>).<span class="at">value</span>(<span class="st">"/api/products/get-id/99999"</span>));
+    }
+
+    <span class="at">@Test</span>
+    <span class="tg">void</span> <span class="at">adminCanAddAProduct</span>() <span class="tg">throws</span> Exception {
+        mvc.<span class="at">perform</span>(<span class="at">post</span>(<span class="st">"/api/products/add-product"</span>)
+                        .<span class="at">with</span>(<span class="at">user</span>(<span class="st">"admin"</span>).<span class="at">roles</span>(<span class="st">"ADMIN"</span>))
+                        .<span class="at">contentType</span>(MediaType.APPLICATION_JSON)
+                        .<span class="at">content</span>(<span class="st">"""
+                                {"name": "Notebook", "price": 49.00, "category": "Books", "stock": 10}
+                                """</span>))
+                .<span class="at">andExpect</span>(<span class="at">status</span>().<span class="at">isCreated</span>())
+                .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$.id"</span>).<span class="at">isNumber</span>())
+                .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$.name"</span>).<span class="at">value</span>(<span class="st">"Notebook"</span>));
+
+        <span class="at">assertEquals</span>(<span class="st">1</span>, products.<span class="at">count</span>());   <span class="cm">// read the database, not just the response</span>
+    }
+
+    <span class="at">@Test</span>
+    <span class="tg">void</span> <span class="at">blankNameIsRejectedWith400</span>() <span class="tg">throws</span> Exception {
+        mvc.<span class="at">perform</span>(<span class="at">post</span>(<span class="st">"/api/products/add-product"</span>)
+                        .<span class="at">with</span>(<span class="at">user</span>(<span class="st">"admin"</span>).<span class="at">roles</span>(<span class="st">"ADMIN"</span>))
+                        .<span class="at">contentType</span>(MediaType.APPLICATION_JSON)
+                        .<span class="at">content</span>(<span class="st">"""
+                                {"name": "   ", "price": 49.00, "category": "Books", "stock": 10}
+                                """</span>))
+                .<span class="at">andExpect</span>(<span class="at">status</span>().<span class="at">isBadRequest</span>())
+                .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$.message"</span>).<span class="at">value</span>(<span class="st">"Request validation failed"</span>))
+                .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$.validationErrors.name"</span>).<span class="at">value</span>(<span class="st">"Product name is required"</span>));
+
+        <span class="at">assertEquals</span>(<span class="st">0</span>, products.<span class="at">count</span>());
+    }
+
+    <span class="at">@Test</span>
+    <span class="tg">void</span> <span class="at">addingWithoutALoginIs401</span>() <span class="tg">throws</span> Exception {
+        mvc.<span class="at">perform</span>(<span class="at">post</span>(<span class="st">"/api/products/add-product"</span>)
+                        .<span class="at">contentType</span>(MediaType.APPLICATION_JSON)
+                        .<span class="at">content</span>(<span class="st">"""
+                                {"name": "Notebook", "price": 49.00, "category": "Books", "stock": 10}
+                                """</span>))
+                .<span class="at">andExpect</span>(<span class="at">status</span>().<span class="at">isUnauthorized</span>());
+    }
+}</div>
+
+  <div class="mention">
+    <div class="mrow"><b>saved(…)</b><span>A small helper for the arrange step. <code>Product</code> has an all-arguments constructor from Lombok; the <code>null</code> id lets the database choose one.</span></div>
+    <div class="mrow"><b>getAllListsEveryProduct</b><span>Two rows, then the status, the length, and the names in any order. <code>findAll()</code> promises no order, so the test doesn't assume one.</span></div>
+    <div class="mrow"><b>getByIdReturnsThatProduct</b><span>Saves two and asks for the <em>second</em>, so a lookup that returns "the first product" would fail.</span></div>
+    <div class="mrow"><b>unknownIdIs404WithTheErrorBody</b><span>B8's idea: another product exists. Then the error body your <code>GlobalExceptionHandler</code> builds — its status, message and path.</span></div>
+    <div class="mrow"><b>adminCanAddAProduct</b><span><code>.with(user("admin").roles("ADMIN"))</code> puts a logged-in ADMIN into this one request. Then the test reads the database: one row.</span></div>
+    <div class="mrow"><b>blankNameIsRejectedWith400</b><span>The validation failure: 400, your handler's message, the field error under <code>validationErrors.name</code> — and nothing saved.</span></div>
+    <div class="mrow"><b>addingWithoutALoginIs401</b><span>The same request with no user. Spring Security runs before your controller, so without a user every add is 401, whatever the body.</span></div>
+  </div>
+
+  <div class="cue"><p class="cue-k">A user, not a token</p><p>In the running app you log in and send a JWT. The test needs none of that: <code>user(…)</code> sets the logged-in user directly, so the test checks your product code and not your login code. Putting <code>@WithMockUser(roles = "ADMIN")</code> on a test method does the same for the whole method. Testing login and tokens themselves is a different job: <a href="sb-security.html">Who are you, and what may you do</a>.</p></div>
+
+  <h3>Running them</h3>
+  <div class="cmd"><span class="p">$</span> ./mvnw test -Dtest=ProductApiTests
+<span class="o">…</span>
+<span class="o">[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0</span>
+<span class="o">…</span>
+<span class="p">$</span> ./mvnw test -Dtest=ProductApiTests#blankNameIsRejectedWith400
+<span class="cm"># just that one test</span>
+<span class="p">$</span> ./mvnw test
+<span class="cm"># every test in the project</span></div>
+  <p>On Windows, use <code>mvnw.cmd</code> in Command Prompt, or <code>.\mvnw</code> in PowerShell with the <code>-D</code> argument in quotes: <code>.\mvnw test "-Dtest=ProductApiTests"</code>. In IntelliJ, click the green arrow beside the class or beside one test.</p>
+
+  <div class="dothis">
+    <h4>Try it — run them, then break one</h4>
+    <ol>
+      <li>Add the class and run it: six green.</li>
+      <li>In <code>unknownIdIs404WithTheErrorBody</code>, change the expected message to <code>"Product 99999 not found"</code>. Predict the failure message, run it, and compare. Change it back.</li>
+    </ol>
+  </div>
+
+  <div class="stretch-box">
+    <h3>Other kinds of test you'll meet</h3>
+    <p>Everything above starts the whole app. Two other kinds start only part of it, and one tool isn't a Java test at all. The Bug Lab used none of them; learn the full-app test first.</p>
+    <div class="mention">
+      <div class="mrow"><b>@DataJpaTest</b><span>Starts only the JPA part — entities, repositories, a database — and runs each test in a transaction that is rolled back at the end. For testing a repository method on its own. Boot 4: <code>org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest</code> (Boot 3: <code>org.springframework.boot.test.autoconfigure.orm.jpa</code>), from <code>spring-boot-starter-data-jpa-test</code>, already in your pom.</span></div>
+      <div class="mrow"><b>@WebMvcTest + @MockitoBean</b><span>Starts only the web layer for one controller; the service is replaced by a Mockito stand-in that you tell what to return. For testing a controller and your advice alone. Boot 4: <code>org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest</code>; <code>@MockitoBean</code> is <code>org.springframework.test.context.bean.override.mockito.MockitoBean</code>. Boot 3's <code>@MockBean</code> no longer exists in Boot 4.</span></div>
+      <div class="mrow"><b>Schemathesis</b><span>Reads an OpenAPI file and sends hundreds of generated requests to a running backend, checking every response against it. The contract doc shows it for your contract backend: <a href="api-contract.html#s17">api-contract §17</a>.</span></div>
+    </div>
+    <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Read — I know what each of the three is for (stretch)</span></label>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 complete — ProductApiTests runs green</span></label>
+</section>
+
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>The method, on a planted bug</h2><span class="lvl core">Core</span><span class="tagline">predict, trigger, fix, re-trigger</span></div>
+
+  <p>Now the Bug Lab's loop, on code you know. You'll plant one bug in the Product app, watch a test catch it, and take it out again. Commit first (<code>git commit -am "before planting"</code>) so that undoing it is one command.</p>
+
+  <h3>Plant it</h3>
+  <p>In <code>ProductController.addProduct</code>, delete <code>@Valid</code> (lab2-complete, line 48):</p>
+  <div class="cmd"><span class="at">@PostMapping</span>(<span class="st">"/add-product"</span>)
+<span class="tg">public</span> ResponseEntity&lt;ProductResponse&gt; <span class="at">addProduct</span>(
+        <span class="at">@RequestBody</span> ProductRequest request) {          <span class="cm">// planted: @Valid deleted</span>
+
+    ProductResponse savedProduct = productService.<span class="at">addProduct</span>(request);
+
+    <span class="tg">return</span> ResponseEntity.<span class="at">status</span>(HttpStatus.CREATED).<span class="at">body</span>(savedProduct);
+}</div>
+
+  <h3>1 · Predict</h3>
+  <p>Before running anything, write down what you expect and why. The rules are still on <code>ProductRequest</code> — <code>@NotBlank</code> on <code>name</code> — but nothing checks them any more: <code>@Valid</code> is the switch that tells Spring to validate the body before calling your method (<a href="sb-good-slice.html">A slice you can defend</a>). So a body with <code>"name": "   "</code> reaches the service, <code>trim()</code> turns the name into <code>""</code>, and the product is saved. <strong>Prediction:</strong> <code>blankNameIsRejectedWith400</code> goes red, with 201 where it wanted 400. The other five stay green.</p>
+
+  <h3>2 · Trigger</h3>
+  <p>Run <code>ProductApiTests</code>. The red test is your trigger: one click, the same result every time.</p>
+  <div class="cmd">Status expected:&amp;lt;400&amp;gt; but was:&amp;lt;201&amp;gt;</div>
+  <p>The prediction was right, number for number. That matters. If a test goes red for a reason you didn't predict, you don't understand the bug yet, however obvious the fix looks. Scroll up to the printed exchange (section 03): <code>Status = 201</code>, and <code>"name":""</code> in the body. The row was saved.</p>
+  <div class="cue"><p class="cue-k">When there's no test yet</p><p>Write one now — <strong>before</strong> the fix. Write the test for the right behaviour, run it, and watch it fail with the numbers you predicted. A test you have never seen fail might not be testing anything: a test with a wrong URL, or one that asserts nothing, is just as green.</p></div>
+  <p>By hand, this route needs an ADMIN token in the running app (<a href="sb-security.html">Who are you, and what may you do</a>). The test makes itself the admin in one line — one more reason to trigger with a test.</p>
+
+  <h3>3 · Fix</h3>
+  <p>Put <code>@Valid</code> back. That fix is at the cause. A fix at the symptom — say, <code>if (request.getName().isBlank())</code> in the service — would also turn this test green. But the rule would then live in two places, the other fields still wouldn't be validated, and this 400 would look different from every other 400 your app sends.</p>
+
+  <h3>4 · Re-trigger</h3>
+  <p>Run <code>blankNameIsRejectedWith400</code> again: green. Then run the whole class, then the whole project: still green. That second run is the README's last step: the check that your fix didn't break something else. Here it couldn't have, but on a fix to shared code — a handler, a repository method — that is the run that catches it.</p>
+
+  <h3>The report, filled in</h3>
+  <table class="grid">
+    <tr><th>Heading</th><th>One sentence</th></tr>
+    <tr><td>Observed</td><td><code>POST /api/products/add-product</code> with <code>"name": "   "</code> returns 201, and a product with an empty name is saved.</td></tr>
+    <tr><td>Expected</td><td>400, with <code>validationErrors.name</code> = "Product name is required", and nothing saved.</td></tr>
+    <tr><td>Root cause</td><td><code>@Valid</code> was missing on the request-body parameter, so Bean Validation never ran.</td></tr>
+    <tr><td>Correction</td><td>Restored <code>@Valid</code> on <code>addProduct</code>'s parameter.</td></tr>
+    <tr><td>Verification</td><td><code>blankNameIsRejectedWith400</code>: red before (expected 400, was 201), green after; the full suite green.</td></tr>
+  </table>
+  <p>If your root-cause sentence only repeats the observed one in other words ("it accepted blank names"), it isn't a cause yet. A cause names the line, or the missing line, and why it produces what you observed.</p>
+
+  <div class="dothis">
+    <h4>Try it — the whole loop</h4>
+    <ol>
+      <li>Plant the bug. Write your prediction down. Run the tests and compare.</li>
+      <li>Put <code>@Valid</code> back. Run everything.</li>
+      <li>Now delete <code>@Valid</code> from <code>updateProduct</code> instead (line 58) and predict which of the six tests goes red. Run them, then put it back.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>In step 3 of the Try it, which test goes red?</div>
+    <details><summary>Show answer</summary><div class="a"><p>None. None of the six sends a bad body to <code>update</code>, so the bug goes unnoticed. A green suite only proves what its tests check. That's a gap in the tests, not proof that update is fine.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>A classmate fixed a Bug Lab test by changing its expected status to the one the app returned. The test went green. What did they prove?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Only that the app returns what it returns. The test now describes the bug instead of the requirement. That's why the README forbade it.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 complete — planted, predicted, caught, fixed, re-run</span></label>
+</section>
+
+<div class="part">Part 3 · Finding the cause</div>
+
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>Reading a stack trace</h2><span class="lvl core">Core</span><span class="tagline">Caused by, and your own frame</span></div>
+
+  <p>Keep <code>@Valid</code> deleted from <code>addProduct</code> for a moment, and add one more test to <code>ProductApiTests</code> — a body with no name at all:</p>
+  <div class="cmd"><span class="at">@Test</span>
+<span class="tg">void</span> <span class="at">missingNameIsRejectedWith400</span>() <span class="tg">throws</span> Exception {
+    mvc.<span class="at">perform</span>(<span class="at">post</span>(<span class="st">"/api/products/add-product"</span>)
+                    .<span class="at">with</span>(<span class="at">user</span>(<span class="st">"admin"</span>).<span class="at">roles</span>(<span class="st">"ADMIN"</span>))
+                    .<span class="at">contentType</span>(MediaType.APPLICATION_JSON)
+                    .<span class="at">content</span>(<span class="st">"""
+                            {"price": 49.00, "category": "Books", "stock": 10}
+                            """</span>))
+            .<span class="at">andExpect</span>(<span class="at">status</span>().<span class="at">isBadRequest</span>())
+            .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$.validationErrors.name"</span>).<span class="at">value</span>(<span class="st">"Product name is required"</span>));
+}</div>
+  <p>With <code>@Valid</code> in place it passes: <code>@NotBlank</code> rejects a missing name too. Without <code>@Valid</code>, it doesn't fail — it <em>errors</em>. There's no "expected … but was …". There's this (shortened: framework line numbers and counts will differ on your machine):</p>
+  <div class="cmd">jakarta.servlet.ServletException: Request processing failed: java.lang.NullPointerException: Cannot invoke "String.trim()" because the return value of "com.esd.ecommerce.dto.ProductRequest.getName()" is null
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1008)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:…)
+	…
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:…)
+	…
+	at org.springframework.test.web.servlet.MockMvc.perform(MockMvc.java:…)
+	at com.esd.ecommerce.ProductApiTests.missingNameIsRejectedWith400(ProductApiTests.java:…)
+	…
+Caused by: java.lang.NullPointerException: Cannot invoke "String.trim()" because the return value of "com.esd.ecommerce.dto.ProductRequest.getName()" is null
+	at com.esd.ecommerce.service.ProductService.addProduct(ProductService.java:36)
+	at com.esd.ecommerce.controller.ProductController.addProduct(ProductController.java:50)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:…)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:…)
+	…
+	... 90 more</div>
+
+  <h3>How to read it</h3>
+  <ol>
+    <li><strong>The first line</strong> is the outer exception and its message. <code>ServletException: Request processing failed</code> is a wrapper: the <code>DispatcherServlet</code> wraps whatever your code threw. Its message already quotes the inner exception, but read on.</li>
+    <li><strong>Skip the frames under it.</strong> Each <code>at …</code> line is a method that was running, newest first. This block is the wrapper's own route: the servlet, the security filters, MockMvc, your test method. That's framework code doing its job.</li>
+    <li><strong>Find <code>Caused by</code>.</strong> It's the exception inside the wrapper. If there are several <code>Caused by</code> lines, the <strong>last</strong> one is the root cause: the thing that went wrong first.</li>
+    <li><strong>Find your first frame.</strong> Under the last <code>Caused by</code>, the first line in your package, <code>com.esd.ecommerce</code>, is where it happened: <code>ProductService.addProduct</code>, line 36. The line under it is its caller: <code>ProductController.addProduct</code>, line 50. Frames from <code>java.base/</code>, <code>jdk.internal</code> and <code>org.springframework</code> are the framework calling you.</li>
+    <li><strong>Read the message as a sentence.</strong> Java's <code>NullPointerException</code> says exactly which value was null: the return value of <code>getName()</code>. Line 36 is <code>product.setName(request.getName().trim());</code>.</li>
+    <li><strong><code>... 90 more</code></strong> means the rest of this chain is the same as the block above it, so Java doesn't print it twice.</li>
+  </ol>
+  <p>Now the cause. Line 36 assumes the name is there, because validation should have rejected the body before the service ran. The null is a symptom; the missing <code>@Valid</code> is the cause — the same bug as section 06, with a different input. Same fix. A null check on line 36 would stop the crash and hide the bug.</p>
+
+  <h3>The same crash in the running app</h3>
+  <p>In a running app's console, Tomcat logs the same crash as one <code>ERROR</code> line followed by the root cause's frames (shortened):</p>
+  <div class="cmd">… ERROR … o.a.c.c.C.[.[.[/].[dispatcherServlet] : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: java.lang.NullPointerException: Cannot invoke "String.trim()" because the return value of "com.esd.ecommerce.dto.ProductRequest.getName()" is null] with root cause
+
+java.lang.NullPointerException: Cannot invoke "String.trim()" because the return value of "com.esd.ecommerce.dto.ProductRequest.getName()" is null
+	at com.esd.ecommerce.service.ProductService.addProduct(ProductService.java:36)
+	at com.esd.ecommerce.controller.ProductController.addProduct(ProductController.java:50)
+	…</div>
+  <p>"with root cause" means the trace printed under it is already the innermost exception, so there's no <code>Caused by</code> to hunt for. What the <em>client</em> sees is another matter: section 09.</p>
+
+  <h3>When the app doesn't start</h3>
+  <p>The other trace you'll meet in tests is the one behind "every test red at once" (section 03). Here is what you get if the test properties leave out the JWT secret. Shortened — the beans in the middle depend on which one Spring was building when it failed:</p>
+  <div class="cmd">java.lang.IllegalStateException: Failed to load ApplicationContext for [WebMergedContextConfiguration@… testClass = com.esd.ecommerce.ProductApiTests, …]
+	…
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name '…' …
+	…
+Caused by: org.springframework.util.PlaceholderResolutionException: Could not resolve placeholder 'app.security.jwt.secret' in value "${app.security.jwt.secret}"
+	…</div>
+  <p>Same rule: go to the last <code>Caused by</code>. It names the missing property, and the fix is to add it to <code>src/test/resources/application.properties</code> (section 04). The <code>Caused by</code> lines above it are only the chain of beans that needed the one that couldn't be made. Startup errors in the running app have the same shape; the common ones are in <a href="sb-request-flow.html">From request to row</a>.</p>
+
+  <div class="dothis">
+    <h4>Try it — read your own trace</h4>
+    <ol>
+      <li>With <code>@Valid</code> still deleted, run <code>missingNameIsRejectedWith400</code>. In IntelliJ's test output, find the last <code>Caused by</code> and click the blue <code>ProductService.java:36</code> link: it opens the line.</li>
+      <li>Put <code>@Valid</code> back and run the whole class: seven green.</li>
+    </ol>
+  </div>
+
+  <div class="stretch-box">
+    <h3>When reading isn't enough: the debugger</h3>
+    <p>A trace shows where code crashed. When nothing crashes and a value is simply wrong, stop the code and look at it. In IntelliJ:</p>
+    <ol>
+      <li><strong>Set a breakpoint.</strong> Click in the gutter beside line 28 of <code>ProductService</code>, the <code>findById</code> line in <code>getProductById</code>. A red dot appears.</li>
+      <li><strong>Debug, don't Run.</strong> Right-click <code>unknownIdIs404WithTheErrorBody</code> → Debug. (Or start the app with Debug and send the request from Swagger.) Execution stops on the red line, and the Variables pane shows <code>id</code> = 99999.</li>
+      <li><strong>Step.</strong> Step Over (<kbd>F8</kbd>) runs the line. Step Into (<kbd>F7</kbd>) goes into the method being called — on a repository call that means Spring's generated code, not yours, so Step Out (<kbd>Shift</kbd>+<kbd>F8</kbd>) to come back. Resume with <kbd>F9</kbd> (macOS: <kbd>Cmd</kbd>+<kbd>Opt</kbd>+<kbd>R</kbd>).</li>
+      <li><strong>Evaluate.</strong> Evaluate Expression (<kbd>Alt</kbd>+<kbd>F8</kbd>; macOS <kbd>Opt</kbd>+<kbd>F8</kbd>) runs any Java while stopped: try <code>productRepository.count()</code> or <code>productRepository.findById(id).isPresent()</code>.</li>
+      <li><strong>Only when it matters.</strong> Right-click the red dot and give it a condition, such as <code>id == 99999</code>, so it stops only for that request.</li>
+    </ol>
+    <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Stopped on a breakpoint and evaluated an expression (stretch)</span></label>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>A trace's last <code>Caused by</code> is followed by frames from <code>org.hibernate…</code>, then <code>org.springframework.data…</code>, then <code>com.esd.ecommerce.service.ProductService.updateProduct(ProductService.java:57)</code>, then more <code>org.springframework…</code>. Which line of code do you open first?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>ProductService.java</code>, line 57: the first frame in your own package under the last <code>Caused by</code>. The Hibernate and Spring Data frames above it are what your line called; the error surfaced inside them, but your line is the one you can change.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 complete — I can find the root cause and my own frame</span></label>
+</section>
+
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>Logs, levels and the SQL</h2><span class="lvl core">Core</span><span class="tagline">when nothing crashes</span></div>
+
+  <p>A trace tells you where something crashed. Most bugs don't crash; they quietly return the wrong thing. For those, you want the app to tell you what it's doing: which method a request reached, what SQL it sent, and which values went into that SQL.</p>
+
+  <h3>Levels</h3>
+  <p>Every log line has a level: <code>ERROR</code>, <code>WARN</code>, <code>INFO</code>, <code>DEBUG</code>, <code>TRACE</code>, from most to least serious. Spring Boot shows <code>INFO</code> and above by default. You can choose a level for each package in <code>application.properties</code>; a package then shows that level and everything more serious:</p>
+  <div class="cmd"><span class="cm"># the SQL Hibernate sends to the database</span>
+<span class="at">logging.level.org.hibernate.SQL</span>=<span class="st">DEBUG</span>
+<span class="cm"># the values bound to each ? in that SQL (TRACE, not DEBUG)</span>
+<span class="at">logging.level.org.hibernate.orm.jdbc.bind</span>=<span class="st">TRACE</span>
+<span class="cm"># which controller method each request reached, and the status it left with</span>
+<span class="at">logging.level.org.springframework.web</span>=<span class="st">DEBUG</span>
+<span class="cm"># your own log lines</span>
+<span class="at">logging.level.com.esd.ecommerce</span>=<span class="st">DEBUG</span></div>
+  <p>Each line works on its own. Turn on the one you need, and turn it off again afterwards. For tests, put them in <code>src/test/resources/application.properties</code>; for the running app, in the main file.</p>
+  <div class="cue"><p class="cue-k">show-sql versus the logger</p><p>Your Lab 2 <code>application.properties</code> has <code>spring.jpa.show-sql=true</code> and <code>format_sql=true</code>. They print every statement as <code>Hibernate: select …</code>, but straight to the console, around the logging system: no time, no level, and no bound values. <code>logging.level.org.hibernate.SQL=DEBUG</code> logs the same SQL as a proper log line, and the bind category adds the values. Use one or the other: with both on, you see every statement twice. These category names are the same on Boot 3 (Hibernate 6). Older tutorials for Hibernate 5 name a different bind category.</p></div>
+
+  <h3>A bug you can only see in the SQL</h3>
+  <p>Suppose the rule is: <em>category search ignores case</em> — <code>get-category/books</code> finds the products in "Books". Lab 2's service calls <code>findByCategory(category)</code>. Does it keep the rule? Predict, then add this test to <code>ProductApiTests</code>:</p>
+  <div class="cmd"><span class="at">@Test</span>
+<span class="tg">void</span> <span class="at">categoryFilterIgnoresCase</span>() <span class="tg">throws</span> Exception {
+    <span class="at">saved</span>(<span class="st">"Notebook"</span>, <span class="st">"Books"</span>);
+    <span class="at">saved</span>(<span class="st">"Pen"</span>, <span class="st">"Stationery"</span>);
+
+    mvc.<span class="at">perform</span>(<span class="at">get</span>(<span class="st">"/api/products/get-category/books"</span>))
+            .<span class="at">andExpect</span>(<span class="at">status</span>().<span class="at">isOk</span>())
+            .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$"</span>, <span class="at">hasSize</span>(<span class="st">1</span>)))
+            .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$[0].name"</span>).<span class="at">value</span>(<span class="st">"Notebook"</span>));
+}</div>
+  <p>On H2 it's red:</p>
+  <div class="cmd">JSON path "$"
+Expected: a collection with size &amp;lt;1&amp;gt;
+     but: collection size was &amp;lt;0&amp;gt;</div>
+  <p>An empty list isn't an error, so there's no trace to read. Add the SQL and bind lines to <code>src/test/resources/application.properties</code> and run it again. In the test output (shortened):</p>
+  <div class="cmd">… DEBUG … org.hibernate.SQL : select p1_0.id,p1_0.category, … from products p1_0 where p1_0.category=?
+… TRACE … org.hibernate.orm.jdbc.bind : binding parameter (1:VARCHAR) &amp;lt;- [books]</div>
+  <p>There's the cause, in two lines. Spring Data turned <code>findByCategory</code> into <code>category=?</code>, and the value bound to <code>?</code> is <code>books</code>, exactly as typed. The row says <code>Books</code>. On H2, those aren't equal.</p>
+
+  <div class="cue watch"><p class="cue-k">Now try it on MySQL</p><p>Run your app and open <code>http://localhost:8080/api/products/get-category/electronics</code>. It finds the Laptop. MySQL's default collation — its rule for comparing text — ignores case; H2 compares exactly. So on MySQL the rule was kept, but by the database, by accident. Move to another database, or change the column's collation, and it silently breaks. The test on H2 found a rule your code never stated.</p></div>
+
+  <p>State it in the code. Spring Data reads <code>IgnoreCase</code> in a method name (<a href="sb-request-flow.html">From request to row</a> explains derived queries):</p>
+  <div class="cmd"><span class="cm">// ProductRepository</span>
+List&lt;Product&gt; <span class="at">findByCategoryIgnoreCase</span>(String category);</div>
+  <div class="cmd"><span class="cm">// ProductService</span>
+<span class="tg">public</span> List&lt;ProductResponse&gt; <span class="at">getProductsByCategory</span>(String category) {
+    log.<span class="at">debug</span>(<span class="st">"Filtering products by category '{}'"</span>, category);
+    <span class="tg">return</span> productRepository.<span class="at">findByCategoryIgnoreCase</span>(category)
+            .<span class="at">stream</span>()
+            .<span class="at">map</span>(<span class="tg">this</span>::toProductResponse)
+            .<span class="at">toList</span>();
+}</div>
+  <p>Now the SQL compares <code>upper(p1_0.category)=upper(?)</code>, and the test is green — on H2 and on MySQL.</p>
+
+  <h3>Your own log lines</h3>
+  <p>The <code>log.debug</code> line in that method is yours. Declare a logger once at the top of the class:</p>
+  <div class="cmd"><span class="tg">import</span> org.slf4j.Logger;
+<span class="tg">import</span> org.slf4j.LoggerFactory;
+
+<span class="at">@Service</span>
+<span class="at">@RequiredArgsConstructor</span>
+<span class="tg">public</span> <span class="tg">class</span> ProductService {
+
+    <span class="tg">private</span> <span class="tg">static</span> <span class="tg">final</span> Logger log = LoggerFactory.<span class="at">getLogger</span>(ProductService.<span class="tg">class</span>);
+
+    <span class="tg">private</span> <span class="tg">final</span> ProductRepository productRepository;
+
+    <span class="cm">// … the methods, as before</span>
+}</div>
+  <p>With <code>logging.level.com.esd.ecommerce=DEBUG</code>, each call prints a <code>DEBUG</code> line ending in <code>Filtering products by category 'books'</code>. Why not <code>System.out.println</code>? A log line has a level, a time and the class name; you can switch it off with one property instead of hunting it down to delete it; and the <code>{}</code> placeholder only builds the message when that level is on.</p>
+
+  <h3>Did the request reach my code?</h3>
+  <p><code>logging.level.org.springframework.web=DEBUG</code> prints each request's way through Spring MVC (shortened):</p>
+  <div class="cmd">… DEBUG … : GET "/api/products/get-category/books", parameters={}
+… DEBUG … : Mapped to com.esd.ecommerce.controller.ProductController#getProductByCategory(String)
+… DEBUG … : Completed 200 OK</div>
+  <p>If the <code>Mapped to</code> line doesn't name your controller method, the request never reached it: check the URL and the HTTP method. If it does and the answer is still wrong, the cause is in your code, after that line.</p>
+
+  <div class="dothis">
+    <h4>Try it — read the SQL of your running app</h4>
+    <ol>
+      <li>In your <em>main</em> <code>application.properties</code>, comment out the two show-sql lines and add the SQL and bind lines. Restart the app.</li>
+      <li>Open <code>get-category/electronics</code>, then <code>get-category/Electronics</code>. In the console, find the SQL and the bound value for each.</li>
+      <li>Put your file back the way you like it.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>The SQL log shows <code>where p1_0.category=?</code> and the bind line shows <code>[Books ]</code> — with a space at the end. The filter finds nothing. Where's the bug?</div>
+    <details><summary>Show answer</summary><div class="a"><p>In the input, not in the query: the value arrives with a trailing space and nobody trims it. The bind line is the only place you'd see that space, because the URL and the code both look fine.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>A list endpoint should filter but returns every row. The SQL log shows <code>select … from products p1_0</code> with no <code>where</code>. Which kind of bug is it, and where do you look?</div>
+    <details><summary>Show answer</summary><div class="a"><p>A filter missing (section 10). With no <code>where</code> in the SQL, the condition never reached the database: look at which repository method the service calls — probably <code>findAll()</code> — or at the query on the method it calls.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 complete — I've read the SQL and the bound value</span></label>
+</section>
+
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>Reproducing by hand: Swagger, curl, the database</h2><span class="lvl core">Core</span><span class="tagline">the client's view</span></div>
+
+  <p>A test is the trigger you can repeat. Doing it by hand is how you explore: change the body, try the next id, look at the headers. In the Bug Lab you did this in Swagger; the same tools work on Product.</p>
+
+  <h3>Swagger UI</h3>
+  <div class="mention">
+    <div class="mrow"><b>Where</b><span><code>http://localhost:8080/swagger-ui/index.html</code>, in both apps. The JSON description behind it is at <code>/v3/api-docs</code>; springdoc builds it from your controllers.</span></div>
+    <div class="mrow"><b>Try it out</b><span>Open an operation, click <em>Try it out</em>, edit the parameters or the body, then <em>Execute</em>. Underneath you get the curl command it ran, the response code, the body and the headers.</span></div>
+    <div class="mrow"><b>Admin routes</b><span>In the Product app, click <em>Authorize</em> and paste a token from <code>/api/auth/login</code>. How roles reach Spring Security — and why an admin token can still get 403 — is in <a href="sb-security.html">Who are you, and what may you do</a>. The public GET routes need nothing.</span></div>
+  </div>
+
+  <h3>curl</h3>
+  <div class="cmd"><span class="p">$</span> curl -i http://localhost:8080/api/products/get-id/99999
+<span class="o">HTTP/1.1 404</span>
+<span class="o">…</span>
+<span class="o">Content-Type: application/json</span>
+<span class="o">…</span>
+
+<span class="o">{"error":"Not Found","message":"Product with ID 99999 not found","path":"/api/products/get-id/99999","status":404,"timestamp":"…Z","validationErrors":null}</span></div>
+  <p><code>-i</code> prints the status line and the headers too, which is often where the answer is. The body is your <code>GlobalExceptionHandler</code>'s <code>ApiErrorResponse</code>. Its fields come out in alphabetical order: Boot 4's JSON library, Jackson 3, sorts them by default (on Boot 3 they came in the order they're declared). Postman shows the same thing — use whichever you like.</p>
+
+  <h3>The database</h3>
+  <div class="mention">
+    <div class="mrow"><b>Bug Lab (H2)</b><span>The H2 console at <code>http://localhost:8080/h2-console</code>. On its login form, replace the JDBC URL with the app's — <code>jdbc:h2:mem:esdlab3</code> — user <code>sa</code>, empty password. The tables were <code>campus_events</code> and <code>event_registrations</code>. An in-memory database exists only while the app runs.</span></div>
+    <div class="mrow"><b>Product (MySQL)</b><span>MySQL Workbench or the <code>mysql</code> command line: <code>SELECT * FROM products;</code> in <code>ecommerceDB</code>.</span></div>
+    <div class="mrow"><b>Why look</b><span>After a request that should change a row, look at the row. A 200 or a 204 says what the code returned, not what's in the table.</span></div>
+  </div>
+  <div class="cue"><p class="cue-k">On Boot 4</p><p>The H2 console moved into its own module, <code>org.springframework.boot:spring-boot-h2console</code>. Without that dependency, <code>spring.h2.console.enabled=true</code> does nothing.</p></div>
+
+  <h3>When the test and curl disagree</h3>
+  <p>Try this on your running Product app, with no token:</p>
+  <div class="cmd"><span class="p">$</span> curl -i http://localhost:8080/api/products/get-id/abc
+<span class="o">HTTP/1.1 401</span>
+<span class="o">…</span>
+
+<span class="o">{"error":"Unauthorized","message":"Authentication is required. Please provide a valid JWT token.","path":"/error","status":401,"timestamp":"…Z","validationErrors":null}</span></div>
+  <p>The same request in a MockMvc test gives <strong>400</strong>. Here's why. <code>abc</code> isn't a <code>Long</code>, so Spring answers 400 — but a real server doesn't send that 400 straight back. It hands the error to Spring Boot's error page, <code>/error</code>, as a second, internal request. That second request goes through Spring Security too, and your <code>SecurityConfig</code> doesn't permit <code>/error</code>. So a caller without a token gets your 401 instead.</p>
+  <p>Two clues give it away: <code>"path":"/error"</code> in the body, and the console, which still says what really happened (shortened):</p>
+  <div class="cmd">… WARN … : Resolved [org.springframework.web.method.annotation.MethodArgumentTypeMismatchException: …]</div>
+  <p>MockMvc has no server, so it never makes the <code>/error</code> request — that's the gap in the section 02 diagram. The same happens to any exception your code doesn't handle: an anonymous caller sees 401, not 500 (section 10). Closing the gap belongs to your error handling and your security rules: handle the exception in your advice (<a href="sb-good-slice.html">A slice you can defend</a>), or permit <code>/error</code> (<a href="sb-security.html">Who are you, and what may you do</a>). The contract wants the first: every error as your own error body.</p>
+
+  <div class="dothis">
+    <h4>Try it — the client's view</h4>
+    <ol>
+      <li>Run both curl commands above against your running app. Compare the <code>path</code> in the two bodies.</li>
+      <li>Find the <code>WARN … Resolved [</code> line in the console for the second one.</li>
+      <li>Open Swagger UI, run <code>get-id</code> with <code>99999</code>, and compare its curl command with yours.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>A classmate says: "My test says 400 but Postman says 401 — the test must be wrong." What do you tell them?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Both are right about different things. The test shows what Spring decided (400). Postman shows what a real server sent after forwarding that error to <code>/error</code>, which security blocked for a caller without a token (401). Look for <code>"path":"/error"</code> and the WARN line. The fix is in error handling or security, not in the test.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 09 complete — I've reproduced a test by hand and read the headers</span></label>
+</section>
+
+<div class="part">Part 4 · Bugs by kind, and what's next</div>
+
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>Six kinds of bug, and the test that catches each</h2><span class="lvl core">Core</span><span class="tagline">what you see, what to assert, where to look</span></div>
+
+  <p>Every bug in the Bug Lab was one of these six. They're worth knowing as kinds, because each one looks the same from the outside in any app — yours included — and each has a test shape that catches it.</p>
+  <table class="grid long-key">
+    <tr><th>Kind</th><th>What you see · the test that catches it · where to look</th></tr>
+    <tr><td>Validation missing</td><td>Bad input is accepted: 201 or 200 where 400 belongs.<br><strong>Catch it:</strong> assert <code>status().isBadRequest()</code>, then <code>jsonPath</code> on the field error.<br><strong>Look in:</strong> the request DTO's constraints, or <code>@Valid</code> on the controller parameter (section 06).</td></tr>
+    <tr><td>A rule not enforced</td><td>A request that breaks a business rule succeeds.<br><strong>Catch it:</strong> arrange the data exactly at the limit — full, duplicate, the last one left — then assert <code>status().isConflict()</code>.<br><strong>Look in:</strong> the service, before it saves: the check is missing, or it's wrong exactly at the limit.</td></tr>
+    <tr><td>A status mapped wrong</td><td>The right failure with the wrong number, or a crash where a 4xx belongs.<br><strong>Catch it:</strong> assert the exact status.<br><strong>Look in:</strong> the exception handler's mapping, or an exception that no handler maps.</td></tr>
+    <tr><td>A state not saved</td><td>A success status, an unchanged row.<br><strong>Catch it:</strong> read the row back with the repository after the request.<br><strong>Look in:</strong> the service: the change is never saved, or the condition around it is wrong.</td></tr>
+    <tr><td>A filter missing</td><td>A list holds rows it shouldn't.<br><strong>Catch it:</strong> assert <code>jsonPath("$", hasSize(n))</code> and a field that identifies each row.<br><strong>Look in:</strong> the repository query (its method name or <code>@Query</code>); the SQL log shows it (section 08).</td></tr>
+    <tr><td>A wrong lookup</td><td>A real object, but not the one you asked for — or one when there should be none.<br><strong>Catch it:</strong> arrange another row first, then assert 404 or an identifying field.<br><strong>Look in:</strong> the service's <code>find…</code> call, and what it does when nothing matches.</td></tr>
+  </table>
+  <p>Here are two of them, planted on Product.</p>
+
+  <h3>A crash where a 404 belongs</h3>
+  <p>Plant it: in <code>ProductService.getProductById</code>, replace Lab 2's <code>orElseThrow</code> with <code>.get()</code>:</p>
+  <div class="cmd"><span class="tg">public</span> ProductResponse <span class="at">getProductById</span>(Long id) {
+    Product product = productRepository.<span class="at">findById</span>(id).<span class="at">get</span>();   <span class="cm">// planted</span>
+
+    <span class="tg">return</span> <span class="at">toProductResponse</span>(product);
+}</div>
+  <p><strong>Predict.</strong> <code>findById(99999)</code> returns an empty <code>Optional</code>, and <code>.get()</code> on an empty <code>Optional</code> throws <code>NoSuchElementException</code> with the message "No value present". Nothing in <code>GlobalExceptionHandler</code> maps that exception, so there is no 404. <strong>Trigger:</strong> <code>unknownIdIs404WithTheErrorBody</code> errors (shortened):</p>
+  <div class="cmd">jakarta.servlet.ServletException: Request processing failed: java.util.NoSuchElementException: No value present
+	…
+Caused by: java.util.NoSuchElementException: No value present
+	at java.base/java.util.Optional.get(Optional.java:…)
+	at com.esd.ecommerce.service.ProductService.getProductById(ProductService.java:28)
+	…</div>
+  <p>From curl, without a token, it isn't even a 500: the crash goes to <code>/error</code>, and you get section 09's 401 with <code>"path":"/error"</code>. <strong>Fix:</strong> Lab 2's own line, <code>.orElseThrow(() -&gt; new ProductNotFoundException(id))</code> — an exception that your handler maps to 404. That's this kind's fix in general: make the failure an exception that something maps to the right status.</p>
+
+  <h3>A response that lies</h3>
+  <p>Plant it: in <code>ProductService.updateProduct</code>, delete the <code>save</code> line and build the response from the object you changed:</p>
+  <div class="cmd"><span class="tg">public</span> ProductResponse <span class="at">updateProduct</span>(Long id, ProductRequest request) {
+    Product existingProduct = productRepository.<span class="at">findById</span>(id)
+            .<span class="at">orElseThrow</span>(() -&gt; <span class="tg">new</span> <span class="at">ProductNotFoundException</span>(id));
+
+    existingProduct.<span class="at">setName</span>(request.<span class="at">getName</span>().<span class="at">trim</span>());
+    existingProduct.<span class="at">setDescription</span>(request.<span class="at">getDescription</span>());
+    existingProduct.<span class="at">setPrice</span>(request.<span class="at">getPrice</span>());
+    existingProduct.<span class="at">setCategory</span>(request.<span class="at">getCategory</span>().<span class="at">trim</span>());
+    existingProduct.<span class="at">setStock</span>(request.<span class="at">getStock</span>());
+
+    <span class="tg">return</span> <span class="at">toProductResponse</span>(existingProduct);                 <span class="cm">// planted: save(...) deleted</span>
+}</div>
+  <p><strong>Predict.</strong> The PUT returns 200 with the new name, because the response is built from the Java object, and the object did change. The row didn't: nothing wrote it. The status can't tell the difference. Only reading the row can, the way B5 did. Add this test (and <code>import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;</code>):</p>
+  <div class="cmd"><span class="at">@Test</span>
+<span class="tg">void</span> <span class="at">updateChangesTheRow</span>() <span class="tg">throws</span> Exception {
+    Product notebook = <span class="at">saved</span>(<span class="st">"Notebook"</span>, <span class="st">"Books"</span>);
+
+    mvc.<span class="at">perform</span>(<span class="at">put</span>(<span class="st">"/api/products/update/"</span> + notebook.<span class="at">getId</span>())
+                    .<span class="at">with</span>(<span class="at">user</span>(<span class="st">"admin"</span>).<span class="at">roles</span>(<span class="st">"ADMIN"</span>))
+                    .<span class="at">contentType</span>(MediaType.APPLICATION_JSON)
+                    .<span class="at">content</span>(<span class="st">"""
+                            {"name": "Notebook A4", "price": 49.00, "category": "Books", "stock": 3}
+                            """</span>))
+            .<span class="at">andExpect</span>(<span class="at">status</span>().<span class="at">isOk</span>())
+            .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$.name"</span>).<span class="at">value</span>(<span class="st">"Notebook A4"</span>));
+
+    <span class="at">assertEquals</span>(<span class="st">"Notebook A4"</span>, products.<span class="at">findById</span>(notebook.<span class="at">getId</span>()).<span class="at">orElseThrow</span>().<span class="at">getName</span>());
+}</div>
+  <p>With the bug planted, both <code>andExpect</code> lines pass and the last line fails:</p>
+  <div class="cmd">expected: &amp;lt;Notebook A4&amp;gt; but was: &amp;lt;Notebook&amp;gt;</div>
+  <p><strong>Fix:</strong> Lab 2's own <code>productRepository.save(existingProduct)</code>. (Inside a <code>@Transactional</code> method, changes to an entity you loaded are written when the transaction commits, even without <code>save</code>: <a href="sb-good-slice.html">A slice you can defend</a>.)</p>
+
+  <div class="dothis">
+    <h4>Try it — plant, predict, catch</h4>
+    <p>Plant one of the two bugs. Write down which test goes red and the exact message you expect. Run, compare, put Lab 2's line back, and run everything.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Sort the eight bugs in <code>ESD-Lab3-Bugs-to-Fix.md</code> into the six kinds.</div>
+    <details><summary>Show answer</summary><div class="a"><p>1 and 2 (capacity, blank email): validation missing. 3 and 4 (over capacity, duplicate): a rule not enforced. 5 (cancellation): a state not saved. 6 (active listing): a filter missing. 7 (capacity conflict as 400): a status mapped wrong. 8 (another event instead of 404): a wrong lookup.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>A bug report: "Deleting a product returns 204, but it's still in get-all." Which kind is it, and what does the test that proves it assert?</div>
+    <details><summary>Show answer</summary><div class="a"><p>A state not saved. After the DELETE, read the database — <code>products.findById(id)</code> should be empty, or <code>get-all</code> should be one shorter. The 204 alone proves nothing.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 complete — I can name the kind from the symptom</span></label>
+</section>
+
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>Using this in your contract backend</h2><span class="lvl core">Core</span><span class="tagline">a suite you didn't write</span></div>
+
+  <p>The contract's conformance suite is the Bug Lab's idea at the scale of a whole backend: checks you didn't write, against code you did. The method is the same.</p>
+  <div class="cmd"><span class="p">$</span> cd esd-labs/api-contract
+<span class="p">$</span> npm run conformance -- --level A</div>
+  <p>Your backend must be running on port 8080. Each failed check prints the request it sent, what the contract expected, what came back, and often a hint: read it the way you read "expected … but was …" (section 03). The contract doc explains the output and a way to work through it: <a href="api-contract.html#s15">api-contract §15, Reading the suite's output</a>.</p>
+  <ul>
+    <li>One level at a time, lowest first. The first failure often causes the ones after it.</li>
+    <li>Reproduce the failed check with <code>curl -i</code>, and watch your backend's log while you do (sections 08 and 09).</li>
+    <li>Before you fix it, write it as a MockMvc test in your own project (section 05). It goes red for the reason you predicted, then green — and it keeps checking after you've moved on.</li>
+    <li>Change one thing, rerun that check, then rerun the level.</li>
+  </ul>
+  <p>Schemathesis, the optional second opinion that generates requests from <code>openapi.yaml</code>, is in <a href="api-contract.html#s17">api-contract §17</a>.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 read — I know how to work through a failed check</span></label>
+</section>
+
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>When it goes wrong</h2><span class="lvl ref">Reference</span><span class="tagline">the symptom, and what it means</span></div>
+
+  <table class="grid long-key">
+    <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>Every test fails: Failed to load ApplicationContext</td><td>The app didn't start inside the test. Read the first failing test's last <code>Caused by</code> (07). Often a property missing from the test properties file (04).</td></tr>
+    <tr><td>ApplicationContext failure threshold (1) exceeded</td><td>The same failure as an earlier test; Spring didn't try again. Scroll to the first one (03).</td></tr>
+    <tr><td>Your MySQL products vanished after running tests</td><td>The tests ran on MySQL: no <code>src/test/resources/application.properties</code>, or no H2 dependency. Add both (04).</td></tr>
+    <tr><td>Unable to find a @SpringBootConfiguration by searching packages upwards from the test</td><td>The test class isn't in <code>com.esd.ecommerce</code> or a package below it (04).</td></tr>
+    <tr><td>Status expected:&lt;…&gt; but was:&lt;401&gt; in an add, update or delete test</td><td>No user in the request. Add <code>.with(user("admin").roles("ADMIN"))</code> (05).</td></tr>
+    <tr><td>@WithMockUser seems ignored: still 401</td><td>On Boot 4 you need <code>spring-boot-starter-security-test</code>, not just <code>spring-security-test</code> (04).</td></tr>
+    <tr><td>Status expected:&lt;…&gt; but was:&lt;415&gt;</td><td>The request has a body but no <code>.contentType(MediaType.APPLICATION_JSON)</code> (02).</td></tr>
+    <tr><td>The test errors: ServletException: Request processing failed</td><td>An exception nothing handled. Read its <code>Caused by</code> and your first frame (07).</td></tr>
+    <tr><td>No value at JSON path …</td><td>That field isn't in the body. Look at the printed <code>Body</code>: often an error body where you expected data, or a list where you expected one object (03).</td></tr>
+    <tr><td>A filter finds rows on MySQL but nothing in the test</td><td>Case. MySQL ignores it by default; H2 doesn't. Say it in the code with <code>IgnoreCase</code> (08).</td></tr>
+    <tr><td>curl or Postman says 401; the test says 400, or crashes</td><td>The error went to <code>/error</code>, which your security rules guard. Look for <code>"path":"/error"</code> and the WARN line in the console (09).</td></tr>
+    <tr><td>A test passes alone but fails in the full run</td><td>It depends on rows another test left behind. Empty the tables in <code>@BeforeEach</code>, as the Bug Lab did (02).</td></tr>
+    <tr><td>Every SQL statement appears twice</td><td><code>show-sql</code> and <code>logging.level.org.hibernate.SQL</code> are both on. Keep one (08).</td></tr>
+    <tr><td>SQL in the log, but no values</td><td>The bind category must be <code>TRACE</code>, not <code>DEBUG</code> (08).</td></tr>
+    <tr><td>H2 console: Database … not found</td><td>The login form still has its own default JDBC URL. Use the app's: <code>jdbc:h2:mem:esdlab3</code> (09).</td></tr>
+    <tr><td>mvn: command not found / 'mvn' is not recognized</td><td>Maven isn't installed on its own. Use the wrapper in the project: <code>./mvnw</code>, or <code>mvnw.cmd</code> on Windows (05).</td></tr>
+    <tr><td>PowerShell runs the wrong tests with -Dtest=…</td><td>Put the argument in quotes: <code>"-Dtest=ProductApiTests"</code> (05).</td></tr>
+  </table>
+
+  <div class="cue"><p class="cue-k">How to debug, generally</p><p>Read the failure message first and predict from its two numbers. Then the last <code>Caused by</code> and your first frame, if there's a trace. If there isn't, turn on the log that shows what you can't see — the SQL, the bound values, the mapping — and reproduce the request by hand. Change one thing at a time, and rerun the same test after each change.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 12 read</span></label>
+</section>
+
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+  <div class="gloss">
+    <div class="grow"><b>application context</b><span>All of your app's beans, started. <code>@SpringBootTest</code> starts one per setup and reuses it.</span></div>
+    <div class="grow"><b>arrange, act, assert</b><span>The three parts of a test: set up the data, send the request, check the result.</span></div>
+    <div class="grow"><b>assertion</b><span>A check that fails the test if it's false: <code>andExpect(…)</code>, <code>assertEquals(…)</code>.</span></div>
+    <div class="grow"><b>bind parameter</b><span>A <code>?</code> in SQL. Its value is sent separately; the bind log shows it.</span></div>
+    <div class="grow"><b>Caused by</b><span>The start of an inner exception in a stack trace. The last one is the root cause.</span></div>
+    <div class="grow"><b>collation</b><span>A database's rule for comparing text — for example, whether case matters.</span></div>
+    <div class="grow"><b>error (in a test)</b><span>The test threw an exception before it could assert.</span></div>
+    <div class="grow"><b>failure (in a test)</b><span>An assertion said no: "expected … but was …".</span></div>
+    <div class="grow"><b>frame</b><span>One <code>at …</code> line of a stack trace: a method that was running, with its file and line.</span></div>
+    <div class="grow"><b>H2</b><span>A database written in Java that can live in memory. Used for the Bug Lab and for tests.</span></div>
+    <div class="grow"><b>JSONPath</b><span>A path into a JSON body: <code>$</code>, <code>$.name</code>, <code>$[0].name</code>, <code>$[*].name</code>.</span></div>
+    <div class="grow"><b>log level</b><span><code>ERROR</code>, <code>WARN</code>, <code>INFO</code>, <code>DEBUG</code>, <code>TRACE</code>. A package set to a level shows that level and everything more serious.</span></div>
+    <div class="grow"><b>matcher</b><span>A Hamcrest object such as <code>hasSize(1)</code> that checks a value and describes any mismatch.</span></div>
+    <div class="grow"><b>MockMvc</b><span>A fake HTTP client that calls the <code>DispatcherServlet</code> directly, with no server and no network.</span></div>
+    <div class="grow"><b>planted bug</b><span>A bug put in on purpose, to practise finding it.</span></div>
+    <div class="grow"><b>regression</b><span>Something that worked and broke because of a later change. Running every test after a fix catches it.</span></div>
+    <div class="grow"><b>root cause</b><span>The first thing that went wrong, and what a fix should change.</span></div>
+    <div class="grow"><b>smoke test</b><span>One cheap check that the app starts and answers.</span></div>
+    <div class="grow"><b>stack trace</b><span>The list of methods that were running when an exception was thrown, newest first.</span></div>
+    <div class="grow"><b>symptom</b><span>What you see go wrong. Not the same as the cause.</span></div>
+    <div class="grow"><b>test slice</b><span>A test that starts only part of the app: <code>@WebMvcTest</code>, <code>@DataJpaTest</code>.</span></div>
+    <div class="grow"><b>unit test</b><span>A test of one class with no Spring started, like the Bug Lab's B7.</span></div>
+  </div>
+</section>
+
+<div class="finish">
+  <h2>How to know you're ready</h2>
+  <p>You understood the Bug Lab, and can do the same on your own backend, if you can do all of these <em>without looking anything up</em>:</p>
+  <ol>
+    <li>Say what <code>@SpringBootTest</code>, <code>@AutoConfigureMockMvc</code> and <code>@BeforeEach</code> each did in <code>Lab3BugTests</code>.</li>
+    <li>Point to the arrange, act and assert lines of any test in it.</li>
+    <li>Say what MockMvc runs for real, and what it skips.</li>
+    <li>From <code>Status expected:&lt;409&gt; but was:&lt;400&gt;</code> alone, say which kind of bug to suspect.</li>
+    <li>Find the root cause and your first frame in a stack trace, and say what <code>... 90 more</code> means.</li>
+    <li>Turn on the SQL and bind logs, and read what a query compared.</li>
+    <li>Explain why a test on H2 and the app on MySQL can disagree, and why curl and MockMvc can.</li>
+    <li>Write a MockMvc test for a status, a JSON field, a 404 and a validation failure, with a logged-in admin where needed.</li>
+    <li>Write a failing test before a fix, and say why it must fail first.</li>
+    <li>Fill in the five report headings for a bug, one sentence each.</li>
+  </ol>
+
+  <h2 style="margin-top:30px;font-size:20px">MockMvc card</h2>
+  <div class="cmd">mvc.<span class="at">perform</span>(<span class="at">get</span>(<span class="st">"/api/products/get-id/"</span> + pen.<span class="at">getId</span>()))
+        .<span class="at">andExpect</span>(<span class="at">status</span>().<span class="at">isOk</span>())                 <span class="cm">// isCreated() isBadRequest() isNotFound() isUnauthorized()</span>
+        .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$.name"</span>).<span class="at">value</span>(<span class="st">"Pen"</span>));
+
+mvc.<span class="at">perform</span>(<span class="at">post</span>(<span class="st">"/api/products/add-product"</span>)
+                .<span class="at">with</span>(<span class="at">user</span>(<span class="st">"admin"</span>).<span class="at">roles</span>(<span class="st">"ADMIN"</span>))    <span class="cm">// a logged-in admin, no token</span>
+                .<span class="at">contentType</span>(MediaType.APPLICATION_JSON)
+                .<span class="at">content</span>(<span class="st">"""
+                        {"name": "Notebook", "price": 49.00, "category": "Books", "stock": 10}
+                        """</span>))
+        .<span class="at">andExpect</span>(<span class="at">status</span>().<span class="at">isCreated</span>())
+        .<span class="at">andExpect</span>(<span class="at">jsonPath</span>(<span class="st">"$.id"</span>).<span class="at">isNumber</span>());
+
+<span class="at">assertEquals</span>(<span class="st">1</span>, products.<span class="at">count</span>());                  <span class="cm">// then read the database</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">JSONPath card</h2>
+  <div class="cmd">$                          the whole body
+$.message                  a field of an object
+$.validationErrors.name    a field inside a field
+$[0].name                  a field of the first item of a list
+$[*].name                  that field of every item
+jsonPath("$", hasSize(2))                         a list of two
+jsonPath("$[*].name", containsInAnyOrder(…))      these values, any order</div>
+
+  <h2 style="margin-top:24px;font-size:20px">Logging card</h2>
+  <div class="cmd"><span class="at">logging.level.org.hibernate.SQL</span>=<span class="st">DEBUG</span>
+<span class="at">logging.level.org.hibernate.orm.jdbc.bind</span>=<span class="st">TRACE</span>
+<span class="at">logging.level.org.springframework.web</span>=<span class="st">DEBUG</span>
+<span class="at">logging.level.com.esd.ecommerce</span>=<span class="st">DEBUG</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Stack trace card</h2>
+  <div class="cmd">first line         the outer exception — often only a wrapper
+Caused by: …       an inner one; the LAST Caused by is the root cause
+at com.esd…        your first frame under it: the file and line to open
+at org.spring…     the framework calling you — skip
+... 90 more        the same frames as above, not repeated</div>
+</div>
+
+<footer>M.Tech CSE · ESD · Spring Boot<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+</div>
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ---- */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  /* ---- progress: CORE sections drive the bar; stretch boxes are tracked separately.
+         Both are remembered in this browser, so they survive a reload. ---- */
+  function load(key){ try{ return JSON.parse(localStorage.getItem(key)||'[]'); }catch(err){ return []; } }
+  function save(key,list){ try{ localStorage.setItem(key,JSON.stringify(list.map(function(c){return c.checked}))); }catch(err){} }
+  var KEY='esd-sb-testing-progress', SKEY='esd-sb-testing-stretch';
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var extras=[].slice.call(document.querySelectorAll('.chk-s'));
+  var saved=load(KEY), savedS=load(SKEY);
+  checks.forEach(function(c,i){ if(saved[i]) c.checked=true; });
+  extras.forEach(function(c,i){ if(savedS[i]) c.checked=true; });
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=["Core first, in order: 01–03 explain the Bug Lab, 04–06 bring its tests to your Product project.", "Good start. Keep Lab3BugTests.java and your Product project open beside this page.", "Past halfway — now the tools for finding the cause.", "Nearly there: the six kinds of bug, then the contract pointer.", "Core done. Try the stretch boxes, or plant a bug of each kind and catch it with a test."];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    var s=extras.filter(function(c){return c.checked}).length;
+    msg.textContent=(n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))])+(s?'  ·  stretch: '+s+' / '+extras.length:'');
+    save(KEY,checks); save(SKEY,extras);
+  }
+  checks.concat(extras).forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^[$>]\s?/,'').trimEnd()}).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Who are you, and what may you do — Spring Boot</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#101614">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Condensed:wght@600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+.cue.work{border-left-color:var(--ink);background:var(--surface)}
+.cue.work .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.tg{color:var(--term-green)}
+.at{color:var(--signal)}
+.st{color:#B7C4C0}
+.tx{color:#FFFFFF}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 182px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+.quiz .a .cmd{margin-top:4px}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 168px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+/* ---- additions for the lab docs ---- */
+.cue.react{border-left-color:var(--term-green);background:var(--dark);color:#DDE3E0}
+.cue.react .cue-k{color:var(--term-green)}
+.cue.react code{background:#22302D;color:var(--term-green)}
+.cue.react strong{color:#FFF}
+.refs{font-family:var(--mono);font-size:12px;color:var(--muted);margin:-6px 0 16px;max-width:70ch}
+.refs a{color:var(--teal);font-weight:600}
+.part{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper);background:var(--ink);display:inline-block;padding:5px 10px;margin:64px 0 -28px}
+.toc .rpart{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);padding:10px 16px 6px;border-bottom:1px solid var(--line);background:var(--teal-soft);font-weight:600}
+table.grid{border-collapse:collapse;width:100%;max-width:70ch;background:var(--surface);border:1px solid var(--ink);margin:0 0 16px;font-size:14.5px}
+table.grid th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;text-align:left;color:var(--muted);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--ink)}
+table.grid td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.grid tr:last-child td{border-bottom:0}
+table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--teal);font-weight:600;white-space:nowrap}
+
+/* ---- core / stretch ---- */
+.lvl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:3px 7px;align-self:center;white-space:nowrap}
+.lvl.core{background:var(--ink);color:var(--signal)}
+.lvl.stretch{border:1px dashed var(--teal);color:var(--teal)}
+.lvl.ref{border:1px solid var(--muted);color:var(--muted)}
+.rrow .rl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:600;flex:0 0 auto;border:1px dashed var(--teal);padding:1px 6px;align-self:center}
+.rrow .rl.ref{color:var(--muted);border:1px solid var(--muted)}
+.rrow.is-extra .rw{color:var(--muted)}
+.stretch-box{border:1px dashed var(--teal);background:rgba(255,255,255,.55);padding:14px 16px 4px;margin:8px 0 18px}
+.stretch-box::before{content:"Stretch — optional. Do it if you can, and ask about it any time.";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600;margin-bottom:10px}
+.stretch-box h3:first-of-type{margin-top:0}
+/* tables whose first column holds long text (error messages): even, wrapping columns */
+table.grid.long-key{table-layout:fixed}
+table.grid.long-key td:first-child{white-space:normal;width:42%;overflow-wrap:anywhere}
+table.grid.long-key th:first-child{width:42%}
+.legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 0;font-size:14px;color:#2B3936}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+  table.grid td:first-child{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> Spring Boot · B3 · Self-paced</p>
+  <h1>Who are you,<br>and what <em>may you do</em></h1>
+  <p class="lede">Spring Boot Lab 2 gave you a working security setup: signup, login, a token on every request, admin-only product writes, and logout. Most of it arrived ready-made, and it ran whether or not anyone explained it. This page goes through those files one at a time — what each line does, which Spring class runs because of it, and what you can send from Postman to watch it happen.</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">15</span> core</div>
+      <div class="tracker-msg" id="msg">Core first, in order. Keep your Lab 2 project open beside this page.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill" style="width: 0%;"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p><strong>The lab is done and submitted.</strong> This page explains the security half of the code you already have. There is nothing to build, nothing to submit, and no tests to pass.</p>
+  <p><strong>Keep your own Lab 2 project open</strong> — IntelliJ, MySQL running, Postman ready. Every core section starts from lines in it, labelled like <code>lab2-complete · config/SecurityConfig.java · lines 26–31</code> (paths are under <code>src/main/java/com/esd/ecommerce/</code>). If your project is incomplete or different, clone the shared reference, <a href="https://github.com/sivasomanath2502/ESD_Session" target="_blank" rel="noopener">ESD_Session</a>, and run <code>git switch --detach lab2-complete</code>.</p>
+  <p><strong>The other half of Lab 2</strong> — DTOs, validation, <code>GlobalExceptionHandler</code> — is in <a href="sb-good-slice.html">B2 · A slice you can defend</a>. The Java underneath (Lombok, lambdas, <code>Optional</code>) is in <a href="sb-java.html">B0 · The Java that Spring code leans on</a>.</p>
+  <p><strong>Core and stretch.</strong> <span class="lvl core">Core</span> sections are the page. <span class="lvl stretch">Stretch</span> boxes go one step further, always about your own code. "Try it" boxes are short pokes at your running app: if one asks you to change a line, undo it afterwards.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — do the core sections in order; stretch is extra</div>
+  <div class="rpart">Part 1 · The picture</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">Your security code, file by file</span></a>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">Stateless: no session, a token every time</span></a>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">The filter chain — where security happens</span></a>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">One login, one request, end to end</span></a>
+  <div class="rpart">Part 2 · Who are you</div>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">Signup — a password you can't read back</span></a>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">Login — AuthenticationManager and UserDetailsService</span></a>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">Issuing the token — JwtService and JwtEncoder</span></a>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">Reading a token by hand</span></a>
+  <div class="rpart">Part 3 · What may you do</div>
+  <a class="rrow" href="#s9"><span class="rt">09</span><span class="rw">Checking a token — JwtDecoder and its validators</span></a>
+  <a class="rrow" href="#s10"><span class="rt">10</span><span class="rw">The rules, top to bottom</span></a>
+  <a class="rrow" href="#s11"><span class="rt">11</span><span class="rw">Roles in the token — the ROLE_ / SCOPE_ trap</span></a>
+  <a class="rrow" href="#s12"><span class="rt">12</span><span class="rw">401 or 403, as JSON</span></a>
+  <a class="rrow" href="#s13"><span class="rt">13</span><span class="rw">Who is calling — the current user</span></a>
+  <a class="rrow" href="#s14"><span class="rt">14</span><span class="rw">Logout, when the token is the session</span></a>
+  <div class="rpart">Part 4 · From here</div>
+  <a class="rrow" href="#s15"><span class="rt">15</span><span class="rw">Using this in your contract backend</span></a>
+  <a class="rrow is-extra" href="#s16"><span class="rt">16</span><span class="rw">When it goes wrong</span><span class="rl ref">reference</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; reference cards</span></a>
+</nav>
+
+<div class="part">Part 1 · The picture</div>
+
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>Your security code, file by file</h2><span class="lvl core">Core</span><span class="tagline">two questions, thirteen files</span></div>
+
+  <p>Every request to your API meets two questions, in this order:</p>
+  <ol>
+    <li><strong>Who are you?</strong> That's <strong>authentication</strong>. When it fails — no token, a forged one, an expired one — the answer is <strong>401 Unauthorized</strong>. (The name is old and confusing: 401 means "not authenticated".)</li>
+    <li><strong>What may you do?</strong> That's <strong>authorization</strong>. When it fails — you're a STUDENT and this route is for ADMINs — the answer is <strong>403 Forbidden</strong>.</li>
+  </ol>
+  <p>Each security file in your project answers one of those questions, or helps another file answer it:</p>
+
+  <div class="mention">
+    <div class="mrow"><b>config/SecurityConfig</b><span>The rules: which routes are open, which need a token, which need ADMIN. Also: no sessions, CSRF off, JSON errors. Sections 02, 03, 10.</span></div>
+    <div class="mrow"><b>config/SecurityBeansConfig</b><span>Two beans: the BCrypt password encoder and the <code>AuthenticationManager</code>. Sections 05, 06.</span></div>
+    <div class="mrow"><b>config/JwtConfig</b><span>The secret key, the <code>JwtEncoder</code> that signs tokens, the <code>JwtDecoder</code> that checks them. Sections 07, 09.</span></div>
+    <div class="mrow"><b>config/JwtRevocationValidator</b><span>One extra check inside the decoder: has this token been logged out? Section 14.</span></div>
+    <div class="mrow"><b>config/RestSecurityErrorHandler</b><span>Writes the 401 and 403 bodies as JSON. Section 12.</span></div>
+    <div class="mrow"><b>controller/AuthController</b><span><code>/api/auth/signup</code>, <code>login</code>, <code>me</code>, <code>logout</code>. Sections 05, 06, 13, 14.</span></div>
+    <div class="mrow"><b>service/AuthService</b><span>What signup and login actually do. Sections 05, 06.</span></div>
+    <div class="mrow"><b>service/CustomUserDetailsService</b><span>How Spring loads a user by email during login. Section 06.</span></div>
+    <div class="mrow"><b>service/JwtService</b><span>Puts the claims together and asks the encoder to sign them. Section 07.</span></div>
+    <div class="mrow"><b>service/TokenRevocationService</b><span>With <code>entity/RevokedToken</code> and its repository: the logout table. Section 14.</span></div>
+    <div class="mrow"><b>entity/User, Role</b><span>The <code>users</code> table; every account is <code>STUDENT</code> or <code>ADMIN</code>. Section 05.</span></div>
+    <div class="mrow"><b>dto/SignupRequest …</b><span><code>SignupRequest</code>, <code>LoginRequest</code>, <code>AuthResponse</code>, <code>UserResponse</code>: the JSON in and out. Their validation annotations are B2's subject.</span></div>
+    <div class="mrow"><b>application.properties</b><span>Lines 9–11: the issuer, the lifetime, the secret. Section 07.</span></div>
+  </div>
+
+  <p>All of it rests on two starters in your <code>pom.xml</code>:</p>
+  <p class="refs">lab2-complete · pom.xml · lines 68–78</p>
+  <div class="cmd"><span class="cm">&lt;!-- Spring Security: authentication and authorization --&gt;</span>
+&lt;<span class="tg">dependency</span>&gt;
+    &lt;<span class="tg">groupId</span>&gt;org.springframework.boot&lt;/<span class="tg">groupId</span>&gt;
+    &lt;<span class="tg">artifactId</span>&gt;spring-boot-starter-security&lt;/<span class="tg">artifactId</span>&gt;
+&lt;/<span class="tg">dependency</span>&gt;
+
+<span class="cm">&lt;!-- Spring Security JWT / Bearer token support --&gt;</span>
+&lt;<span class="tg">dependency</span>&gt;
+    &lt;<span class="tg">groupId</span>&gt;org.springframework.boot&lt;/<span class="tg">groupId</span>&gt;
+    &lt;<span class="tg">artifactId</span>&gt;spring-boot-starter-security-oauth2-resource-server&lt;/<span class="tg">artifactId</span>&gt;
+&lt;/<span class="tg">dependency</span>&gt;</div>
+  <p>The first brings Spring Security: the filter chain, password encoders, <code>AuthenticationManager</code>. The second is misleadingly named. You are not doing "OAuth2 login". A <strong>resource server</strong>, in OAuth2's vocabulary, is simply an API that accepts bearer tokens — and this starter is Spring's ready-made "check a JWT on every request", plus the Nimbus library that signs and reads JWTs. Your app uses it for its own tokens.</p>
+
+  <div class="cue"><p class="cue-k">Something you won't find</p><p>There's no <code>@EnableWebSecurity</code> anywhere. Spring Boot adds it for you when Spring Security is on the classpath. And because you declared your own <code>SecurityFilterChain</code> bean, Boot's default security — a login form and a generated password — steps aside completely. Everything security does in your app is in these files.</p></div>
+
+  <div class="dothis">
+    <h4>Try it — find the open doors</h4>
+    <p>Open <code>SecurityConfig.java</code> and read lines 38–82. Write down every route a request with <strong>no token</strong> may call. Keep the list; section 10 checks it.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>You send <code>POST /api/products/add-product</code> with no <code>Authorization</code> header. Which of the two questions fails, and what status do you get?</div>
+    <details><summary>Show answer</summary><div class="a"><p>"Who are you?" — so <strong>401</strong>. The server never gets as far as asking whether you're an ADMIN. Section 12 shows the JSON.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — I know which file does what</span></label>
+</section>
+
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>Stateless: no session, a token every time</h2><span class="lvl core">Core</span><span class="tagline">SessionCreationPolicy.STATELESS, and CSRF off</span></div>
+
+  <p class="refs">lab2-complete · config/SecurityConfig.java · lines 26–31</p>
+  <div class="cmd">http
+        .<span class="at">csrf</span>(csrf -&gt; csrf.<span class="at">disable</span>())
+
+        .<span class="at">sessionManagement</span>(session -&gt;
+                session.<span class="at">sessionCreationPolicy</span>(SessionCreationPolicy.STATELESS)
+        )</div>
+
+  <h3>Sessions — what you're not doing</h3>
+  <p>A classic website remembers you. At login the server creates a <strong>session</strong> — "session 8f3a… belongs to Asha" — keeps it in memory, and hands your browser a cookie, <code>JSESSIONID=8f3a…</code>. The browser sends the cookie on every request by itself, and the server looks the session up.</p>
+
+  <h3>Tokens — what you are doing</h3>
+  <p>Your server remembers nothing about a login. At login it writes down who you are and until when, signs that with a secret only it knows, and hands you the signed text — a <strong>JWT</strong>. You send it in a header on every request: <code>Authorization: Bearer eyJ…</code>. The server checks the signature and believes what the token says. <code>SessionCreationPolicy.STATELESS</code> (line 30) tells Spring Security never to create an <code>HttpSession</code> and never to look in one.</p>
+
+  <table class="grid">
+    <tr><th></th><th>Session</th><th>Your token</th></tr>
+    <tr><td>where the login lives</td><td>in the server's memory</td><td>inside the token the client holds</td></tr>
+    <tr><td>the client sends</td><td>a cookie, automatically</td><td><code>Authorization: Bearer …</code>, which your code adds</td></tr>
+    <tr><td>the server checks</td><td>"is this session id in my table?"</td><td>"is this signature mine, and is it still valid?"</td></tr>
+    <tr><td>logout</td><td>delete the session</td><td>hard — section 14</td></tr>
+    <tr><td>two servers</td><td>must share the session table</td><td>each just needs the secret</td></tr>
+  </table>
+
+  <div class="dothis">
+    <h4>Try it — nothing remembers you</h4>
+    <ol>
+      <li>In Postman, log in (<code>POST /api/auth/login</code>) and look at the response <strong>headers</strong>. There is no <code>Set-Cookie</code>.</li>
+      <li>Straight away, call <code>GET /api/auth/me</code> <em>without</em> the <code>Authorization</code> header. 401 — the login a second ago left no trace on the server. Add the header with your token and it's 200.</li>
+    </ol>
+  </div>
+
+  <h3>Why CSRF is off (line 27)</h3>
+  <p><strong>CSRF</strong> (cross-site request forgery) is an attack on cookies. A page on <code>evil.example</code> submits a form to your bank; your browser attaches the bank's cookie by itself, so the bank sees a logged-in request you never meant to send. Spring Security's CSRF protection blocks that by demanding a second, secret value that the evil page can't know.</p>
+  <p>Your API never reads a cookie to decide who you are. The token travels in a header, and a browser never adds an <code>Authorization</code> header on its own. Nothing to forge, so line 27 turns the protection off. (Move the token into a cookie one day and the question comes back.)</p>
+
+  <div class="cue watch"><p class="cue-k">Stateless means login state</p><p>Your products and users are still in MySQL. "Stateless" only says the server keeps no memory of who logged in. Section 14 shows the one place where your scaffold has to bring a little state back.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>A friend copies your token out of Postman and sends it from their laptop. What does your server see?</div>
+    <details><summary>Show answer</summary><div class="a"><p>A perfectly valid token. It can't tell who is holding it — that's what <strong>bearer</strong> means: whoever bears it is you, until it expires. Treat a token like a password.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 complete — I can say what stateless means</span></label>
+</section>
+
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>The filter chain — where security happens</h2><span class="lvl core">Core</span><span class="tagline">before your controller runs</span></div>
+
+  <div class="cue"><p class="cue-k">Refresher</p><p>A request reaches Tomcat, passes through a list of <strong>filters</strong>, then reaches Spring MVC's <code>DispatcherServlet</code>, which calls your controller. A filter can look at the request, change it, or answer it itself and stop it there. <a href="sb-request-flow.html">B1</a> covers the part after the filters.</p></div>
+
+  <p>Spring Security is one filter that runs a list of its own filters, in a fixed order. Your <code>securityFilterChain</code> bean builds that list: every <code>.csrf(…)</code>, <code>.sessionManagement(…)</code>, <code>.oauth2ResourceServer(…)</code> on <code>http</code> adds, removes or configures a filter.</p>
+  <p class="refs">lab2-complete · config/SecurityConfig.java · lines 84–90</p>
+  <div class="cmd">        .<span class="at">oauth2ResourceServer</span>(oauth2 -&gt; oauth2
+                .<span class="at">jwt</span>(Customizer.<span class="at">withDefaults</span>())
+                .<span class="at">authenticationEntryPoint</span>(authenticationEntryPoint)
+                .<span class="at">accessDeniedHandler</span>(accessDeniedHandler)
+        );
+
+<span class="tg">return</span> http.<span class="at">build</span>();</div>
+  <p><code>.oauth2ResourceServer(…).jwt(…)</code> is the line that adds the token filter. <code>http.build()</code> turns the whole description into the list. A dozen filters end up in it; five decide what happens to your requests:</p>
+
+  <figure class="board">
+    <svg viewBox="0 0 440 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A request with a bearer token passes SecurityContextHolderFilter, BearerTokenAuthenticationFilter (which answers 401 for a bad token), AnonymousAuthenticationFilter, ExceptionTranslationFilter (which turns a denial into 401 or 403) and AuthorizationFilter (which applies your rules), and only then reaches the DispatcherServlet and your controller.">
+      <text x="0" y="16" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">ONE REQUEST, THROUGH YOUR FILTER CHAIN</text>
+      <rect x="0" y="30" width="440" height="50" fill="#101614"/>
+      <text x="14" y="51" font-family="IBM Plex Mono, monospace" font-size="13" fill="#F5C518">GET /api/auth/me</text>
+      <text x="14" y="70" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#B7C4C0">Authorization: Bearer eyJhbGciOiJIUzI1NiJ9…</text>
+      <line x1="40" y1="80" x2="40" y2="98" stroke="#0B5D51" stroke-width="2"/><polygon points="34,96 46,96 40,104" fill="#0B5D51"/>
+
+      <rect x="0" y="104" width="440" height="54" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="14" y="125" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="#0B5D51">1 · SecurityContextHolderFilter</text>
+      <text x="14" y="145" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#0F1A18">starts an empty SecurityContext for this request</text>
+      <line x1="40" y1="158" x2="40" y2="176" stroke="#0B5D51" stroke-width="2"/><polygon points="34,174 46,174 40,182" fill="#0B5D51"/>
+
+      <rect x="0" y="182" width="440" height="94" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="14" y="203" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="#0B5D51">2 · BearerTokenAuthenticationFilter</text>
+      <text x="14" y="223" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#0F1A18">a Bearer header? → your JwtDecoder (section 09)</text>
+      <text x="14" y="241" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#0F1A18">good → an Authentication goes into the context</text>
+      <rect x="14" y="250" width="412" height="20" fill="#F7E9B8"/>
+      <text x="20" y="265" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="#0F1A18">bad, expired or revoked → entry point → 401, stop</text>
+      <line x1="40" y1="276" x2="40" y2="294" stroke="#0B5D51" stroke-width="2"/><polygon points="34,292 46,292 40,300" fill="#0B5D51"/>
+
+      <rect x="0" y="300" width="440" height="54" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="14" y="321" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="#0B5D51">3 · AnonymousAuthenticationFilter</text>
+      <text x="14" y="341" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#0F1A18">still nobody? → mark the request "anonymous"</text>
+      <line x1="40" y1="354" x2="40" y2="372" stroke="#0B5D51" stroke-width="2"/><polygon points="34,370 46,370 40,378" fill="#0B5D51"/>
+
+      <rect x="0" y="378" width="440" height="76" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="14" y="399" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="#0B5D51">4 · ExceptionTranslationFilter</text>
+      <text x="14" y="419" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#0F1A18">catches a "no" from filter 5 and answers it:</text>
+      <rect x="14" y="428" width="412" height="20" fill="#F7E9B8"/>
+      <text x="20" y="443" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="#0F1A18">anonymous → 401 · logged in → 403 (section 12)</text>
+      <line x1="40" y1="454" x2="40" y2="472" stroke="#0B5D51" stroke-width="2"/><polygon points="34,470 46,470 40,478" fill="#0B5D51"/>
+
+      <rect x="0" y="478" width="440" height="54" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="14" y="499" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="#0B5D51">5 · AuthorizationFilter</text>
+      <text x="14" y="519" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#0F1A18">your requestMatchers (section 10): allowed, or throw</text>
+      <line x1="40" y1="532" x2="40" y2="550" stroke="#0B5D51" stroke-width="2"/><polygon points="34,548 46,548 40,556" fill="#0B5D51"/>
+
+      <rect x="0" y="556" width="440" height="40" fill="#E4EEEB" stroke="#0B5D51" stroke-width="1.5"/>
+      <text x="14" y="581" font-family="IBM Plex Mono, monospace" font-size="13" fill="#0F1A18">DispatcherServlet → AuthController</text>
+    </svg>
+    <figcaption>Your controller only runs if every filter let the request through. A bad body never matters when the token is missing.</figcaption>
+  </figure>
+
+  <div class="dothis">
+    <h4>Try it — watch the chain</h4>
+    <ol>
+      <li>Add <code>logging.level.org.springframework.security=DEBUG</code> to <code>application.properties</code> and restart. During startup, one long line begins <code>Will secure any request with filters:</code> — find filters 1 to 5 in it, in that order.</li>
+      <li>Send <code>GET /api/auth/me</code>. The console prints <code>Securing GET /api/auth/me</code>.</li>
+      <li>Change <code>DEBUG</code> to <code>TRACE</code>, restart, send it again: one line per filter, <code>Invoking BearerTokenAuthenticationFilter (…)</code> and so on. Then delete the line — TRACE is very chatty.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>With no token, you <code>POST /api/products/add-product</code> with the body <code>{}</code>, which fails validation. 400 or 401?</div>
+    <details><summary>Show answer</summary><div class="a"><p><strong>401.</strong> The filters run first and turn the request away; your controller, and so <code>@Valid</code>, never runs. (With a STUDENT's token it's 403, for the same reason.)</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 complete — I can name the five filters</span></label>
+</section>
+
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>One login, one request, end to end</h2><span class="lvl core">Core</span><span class="tagline">the whole trip, class by class</span></div>
+
+  <p>Here are the two requests your app is built around, traced through the classes that handle them. Sections 05 to 14 take each row in turn, so you don't need to understand every row yet — just see that each step is in a file you have.</p>
+
+  <h3>A · Logging in</h3>
+  <div class="cmd"><span class="tg">POST /api/auth/login</span>
+<span class="at">Content-Type</span>:<span class="st"> application/json</span>
+
+{ <span class="at">"email"</span>: <span class="st">"asha@example.com"</span>, <span class="at">"password"</span>: <span class="st">"correct-horse-1"</span> }</div>
+  <table class="grid">
+    <tr><th>Step</th><th>What happens, and where</th></tr>
+    <tr><td>1 filters</td><td>No <code>Bearer</code> header, so the request is anonymous. The rule <code>permitAll()</code> for <code>/api/auth/login</code> (SecurityConfig 41–44) lets it through.</td></tr>
+    <tr><td>2 controller</td><td><code>AuthController.login</code> (46–54): <code>@Valid LoginRequest</code>, then <code>authService.login(request)</code>.</td></tr>
+    <tr><td>3 service</td><td><code>AuthService.login</code> (58–70) trims and lowercases the email and calls <code>authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password))</code>.</td></tr>
+    <tr><td>4 manager</td><td>The <code>AuthenticationManager</code> (SecurityBeansConfig 19–25) hands the attempt to a <code>DaoAuthenticationProvider</code> that Spring built for you.</td></tr>
+    <tr><td>5 load user</td><td>It calls <code>CustomUserDetailsService.loadUserByUsername</code> (20–38): the row from <code>users</code>, as a <code>UserDetails</code> holding the BCrypt hash.</td></tr>
+    <tr><td>6 BCrypt</td><td>It calls <code>passwordEncoder.matches(typed, hash)</code> — your <code>BCryptPasswordEncoder</code> (SecurityBeansConfig 14–17). No match: an exception, caught by <code>GlobalExceptionHandler</code> (79–93) → 401 <code>Invalid email or password</code>.</td></tr>
+    <tr><td>7 claims</td><td>A match: <code>JwtService.generateToken</code> (29–50) writes <code>iss</code>, <code>sub</code>, <code>iat</code>, <code>exp</code>, <code>jti</code>, <code>role</code> and a header saying HS256.</td></tr>
+    <tr><td>8 sign</td><td>The <code>JwtEncoder</code> (JwtConfig 37–41) signs them with your secret (JwtConfig 23–35) → <code>eyJhbGciOiJIUzI1NiJ9.eyJ….kzgB…</code>.</td></tr>
+    <tr><td>9 response</td><td>200 <code>AuthResponse</code> (AuthService 82–89): <code>accessToken</code>, <code>tokenType</code> <code>"Bearer"</code>, <code>expiresInSeconds</code> 3600, <code>user</code>.</td></tr>
+  </table>
+
+  <h3>B · A request with the token</h3>
+  <div class="cmd"><span class="tg">GET /api/auth/me</span>
+<span class="at">Authorization</span>:<span class="st"> Bearer eyJhbGciOiJIUzI1NiJ9.eyJ…</span></div>
+  <table class="grid">
+    <tr><th>Step</th><th>What happens, and where</th></tr>
+    <tr><td>1 context</td><td><code>SecurityContextHolderFilter</code>: an empty security context for this request.</td></tr>
+    <tr><td>2 token filter</td><td><code>BearerTokenAuthenticationFilter</code> reads the header and calls your <code>JwtDecoder</code> (JwtConfig 43–62).</td></tr>
+    <tr><td>3 decode</td><td>The decoder checks the HS256 signature with the same secret, then runs the validators: expiry (with 60 seconds' slack), issuer <code>ecommerce-api</code>, and your <code>JwtRevocationValidator</code> (has it been logged out?). Any failure → your entry point → 401 JSON, and the request stops here.</td></tr>
+    <tr><td>4 Authentication</td><td>A converter turns the decoded <code>Jwt</code> into a <code>JwtAuthenticationToken</code>: its name is the <code>sub</code> claim, its authorities come from the token (section 11). It goes into the security context.</td></tr>
+    <tr><td>5 rules</td><td><code>AuthorizationFilter</code>: the first rule that matches <code>GET /api/auth/me</code> is <code>anyRequest().authenticated()</code> (SecurityConfig 81). Authenticated — allowed.</td></tr>
+    <tr><td>6 controller</td><td><code>AuthController.getCurrentUser(Authentication)</code> (56–62) → <code>AuthService.getCurrentUser</code> (102–114) looks up <code>authentication.getName()</code> in <code>users</code> → 200 <code>UserResponse</code>.</td></tr>
+  </table>
+
+  <div class="dothis">
+    <h4>Try it — match the rows</h4>
+    <ol>
+      <li>Run both requests in Postman. Point at the row that produced each part of each response.</li>
+      <li>Change the last character of the token and send B again. 401 — which row stopped it? (Row 3: the signature no longer matches.)</li>
+    </ol>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 complete — I can trace both requests</span></label>
+</section>
+
+<div class="part">Part 2 · Who are you</div>
+
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>Signup — a password you can't read back</h2><span class="lvl core">Core</span><span class="tagline">BCrypt, and why not encryption</span></div>
+
+  <p class="refs">lab2-complete · service/AuthService.java · lines 32–56</p>
+  <div class="cmd"><span class="tg">public</span> UserResponse <span class="at">signup</span>(SignupRequest request) {
+
+    String normalizedEmail = request.<span class="at">getEmail</span>()
+            .<span class="at">trim</span>()
+            .<span class="at">toLowerCase</span>(Locale.ROOT);
+
+    <span class="tg">if</span> (userRepository.<span class="at">existsByEmail</span>(normalizedEmail)) {
+        <span class="tg">throw</span> <span class="tg">new</span> <span class="at">ResponseStatusException</span>(
+                HttpStatus.CONFLICT,
+                <span class="st">"Email is already registered"</span>
+        );
+    }
+
+    User user = <span class="tg">new</span> <span class="at">User</span>();
+    user.<span class="at">setEmail</span>(normalizedEmail);
+    user.<span class="at">setPasswordHash</span>(
+            passwordEncoder.<span class="at">encode</span>(request.<span class="at">getPassword</span>())
+    );
+    user.<span class="at">setFullName</span>(request.<span class="at">getFullName</span>().<span class="at">trim</span>());
+    user.<span class="at">setRole</span>(Role.STUDENT);
+
+    User savedUser = userRepository.<span class="at">save</span>(user);
+
+    <span class="tg">return</span> <span class="at">toUserResponse</span>(savedUser);
+}</div>
+  <div class="mention">
+    <div class="mrow"><b>34–36</b><span>The email is trimmed and lowercased. Login (60–62) and <code>loadUserByUsername</code> do exactly the same, so <code>Asha@Example.com</code> and <code>asha@example.com</code> are one account, not two.</span></div>
+    <div class="mrow"><b>38–43</b><span>Email taken → <code>ResponseStatusException</code> with 409. Read the warning below before you test it.</span></div>
+    <div class="mrow"><b>47–49</b><span>The password is <strong>hashed</strong> before it's stored. Nothing ever stores or logs the original.</span></div>
+    <div class="mrow"><b>51</b><span>Every account is a <code>STUDENT</code>. <code>SignupRequest</code> has no <code>role</code> field, so a <code>"role": "ADMIN"</code> in the JSON is simply ignored — Jackson skips fields it has nowhere to put.</span></div>
+    <div class="mrow"><b>55</b><span>The response is a <code>UserResponse</code>, which has no password field and no hash. (Why a DTO: <a href="sb-good-slice.html">B2</a>.)</span></div>
+  </div>
+
+  <p>The encoder is one bean:</p>
+  <p class="refs">lab2-complete · config/SecurityBeansConfig.java · lines 14–17</p>
+  <div class="cmd"><span class="at">@Bean</span>
+<span class="tg">public</span> PasswordEncoder <span class="at">passwordEncoder</span>() {
+    <span class="tg">return</span> <span class="tg">new</span> <span class="at">BCryptPasswordEncoder</span>();
+}</div>
+
+  <h3>Hashing, not encryption</h3>
+  <p><strong>Encryption</strong> can be undone by whoever has the key. If passwords were encrypted, the server — and anyone who stole its key along with the database — could read every one. A <strong>hash</strong> can't be undone at all. The only thing you can do with it is check a guess: hash the guess the same way and compare. That's all login needs.</p>
+  <p>BCrypt adds two things a plain hash like SHA-256 lacks. A <strong>salt</strong>: random bytes, new for every password, mixed in before hashing — so two people with the same password get different hashes, and a precomputed table of common passwords is useless. And a <strong>cost</strong>: BCrypt is slow on purpose, so an attacker with a stolen database can try far fewer guesses. Both are stored inside the 60-character result:</p>
+  <div class="cmd">$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy
+ 2a      the BCrypt version
+    10   the cost: 2^10 rounds
+       N9qo8uLOickgx2ZMRZoMye                         the salt (22 characters)
+                             IjZAgcfl7p92ldGxad68LJZdL17lhWy   the hash (31 characters)</div>
+
+  <p>The table that holds it:</p>
+  <p class="refs">lab2-complete · entity/User.java · lines 22–43</p>
+  <div class="cmd"><span class="at">@Column</span>(nullable = <span class="tg">false</span>, unique = <span class="tg">true</span>, length = <span class="st">255</span>)
+<span class="tg">private</span> String email;
+
+<span class="at">@Column</span>(name = <span class="st">"password_hash"</span>, nullable = <span class="tg">false</span>, length = <span class="st">255</span>)
+<span class="tg">private</span> String passwordHash;
+
+<span class="at">@Column</span>(name = <span class="st">"full_name"</span>, nullable = <span class="tg">false</span>, length = <span class="st">100</span>)
+<span class="tg">private</span> String fullName;
+
+<span class="at">@Enumerated</span>(EnumType.STRING)
+<span class="at">@Column</span>(nullable = <span class="tg">false</span>, length = <span class="st">20</span>)
+<span class="tg">private</span> Role role;
+
+<span class="at">@Column</span>(name = <span class="st">"created_at"</span>, nullable = <span class="tg">false</span>, updatable = <span class="tg">false</span>)
+<span class="tg">private</span> Instant createdAt;
+
+<span class="at">@PrePersist</span>
+<span class="tg">protected</span> <span class="tg">void</span> <span class="at">onCreate</span>() {
+    <span class="tg">if</span> (createdAt == <span class="tg">null</span>) {
+        createdAt = Instant.<span class="at">now</span>();
+    }
+}</div>
+  <div class="mention">
+    <div class="mrow"><b>@Column(unique …)</b><span>The database also refuses a second row with the same email — a backstop behind the <code>existsByEmail</code> check.</span></div>
+    <div class="mrow"><b>@Enumerated(STRING)</b><span>The <code>role</code> column holds the text <code>STUDENT</code> or <code>ADMIN</code>, not a number. Without it JPA would store the enum's position (0, 1), and adding a role in the middle of <code>Role</code> would silently change everyone's. It's also why you can fix a role with plain SQL in section 11.</span></div>
+    <div class="mrow"><b>@PrePersist</b><span><code>onCreate()</code> runs just before Hibernate inserts the row, so <code>created_at</code> is filled in without <code>AuthService</code> having to remember it. <code>updatable = false</code> keeps it from ever changing.</span></div>
+  </div>
+
+  <div class="dothis">
+    <h4>Try it — look at the hashes</h4>
+    <ol>
+      <li>Sign up two accounts with the <strong>same</strong> password.</li>
+      <li>In MySQL: <code>SELECT email, role, password_hash FROM users;</code> Two different 60-character strings, both starting <code>$2a$10$</code>; the role is the word <code>STUDENT</code>.</li>
+      <li>Sign up a third account — a new email — with <code>"role": "ADMIN"</code> added to the body. It's still <code>STUDENT</code>.</li>
+    </ol>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">The 409 that arrives as a 401</p><p>Sign up the same email twice <em>on your running app</em> and you won't see 409. You'll see 401, <code>Authentication is required…</code>, with <code>"path": "/error"</code>. The service did throw a 409 — but nothing in your <code>@RestControllerAdvice</code> handles <code>ResponseStatusException</code>, so Tomcat forwards the request to Spring Boot's <code>/error</code> page to write the body, and <code>/error</code> isn't on your <code>permitAll()</code> list. The request has no token, so the forward gets your 401. Section 16 has the two ways out.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Two users both choose <code>password123</code>. A leaked dump of <code>users</code> shows both hashes. Can the attacker tell they're the same password?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No. Each hash has its own salt, so the two strings share nothing but the <code>$2a$10$</code> prefix. The attacker has to guess each one separately, slowly.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Why can't your app have a "send me my password" button?</div>
+    <details><summary>Show answer</summary><div class="a"><p>It doesn't have the password, only a hash it can't reverse. The best it can offer is a reset: let the user set a new one.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 complete — I've seen my own hashes</span></label>
+</section>
+
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>Login — AuthenticationManager and UserDetailsService</h2><span class="lvl core">Core</span><span class="tagline">the BCrypt check you never wrote</span></div>
+
+  <p class="refs">lab2-complete · service/AuthService.java · lines 58–80</p>
+  <div class="cmd"><span class="tg">public</span> AuthResponse <span class="at">login</span>(LoginRequest request) {
+
+    String normalizedEmail = request.<span class="at">getEmail</span>()
+            .<span class="at">trim</span>()
+            .<span class="at">toLowerCase</span>(Locale.ROOT);
+
+    Authentication authentication =
+            authenticationManager.<span class="at">authenticate</span>(
+                    <span class="tg">new</span> <span class="at">UsernamePasswordAuthenticationToken</span>(
+                            normalizedEmail,
+                            request.<span class="at">getPassword</span>()
+                    )
+            );
+
+    User user = userRepository.<span class="at">findByEmail</span>(
+            authentication.<span class="at">getName</span>()
+    ).<span class="at">orElseThrow</span>(() -&gt;
+            <span class="tg">new</span> <span class="at">IllegalStateException</span>(
+                    <span class="st">"Authenticated user was not found"</span>
+            )
+    );
+
+    String token = jwtService.<span class="at">generateToken</span>(user);</div>
+  <p>Line 66's <code>UsernamePasswordAuthenticationToken</code> is not a JWT. It's Spring Security's object for "an unchecked login attempt: this name, this password". <code>authenticate</code> either returns a checked, authenticated version of it or throws.</p>
+
+  <h3>Who checks the password</h3>
+  <p class="refs">lab2-complete · config/SecurityBeansConfig.java · lines 19–25</p>
+  <div class="cmd"><span class="at">@Bean</span>
+<span class="tg">public</span> AuthenticationManager <span class="at">authenticationManager</span>(
+        AuthenticationConfiguration configuration)
+        <span class="tg">throws</span> Exception {
+
+    <span class="tg">return</span> configuration.<span class="at">getAuthenticationManager</span>();
+}</div>
+  <p>This bean doesn't build anything itself. It asks Spring Security for the manager it already prepared. And because your app has exactly one <code>UserDetailsService</code> bean and one <code>PasswordEncoder</code> bean, Spring prepared it with a <code>DaoAuthenticationProvider</code> wired to both. That provider does the work:</p>
+  <ol>
+    <li>calls your <code>loadUserByUsername(email)</code>;</li>
+    <li>calls <code>passwordEncoder.matches(typedPassword, storedHash)</code> — BCrypt re-hashes the typed password with the salt from the stored string and compares;</li>
+    <li>returns an authenticated <code>Authentication</code>, or throws <code>BadCredentialsException</code>.</li>
+  </ol>
+  <p class="refs">lab2-complete · service/CustomUserDetailsService.java · lines 20–38</p>
+  <div class="cmd"><span class="at">@Override</span>
+<span class="tg">public</span> UserDetails <span class="at">loadUserByUsername</span>(String email)
+        <span class="tg">throws</span> UsernameNotFoundException {
+
+    String normalizedEmail = email.<span class="at">trim</span>().<span class="at">toLowerCase</span>(Locale.ROOT);
+
+    User user = userRepository.<span class="at">findByEmail</span>(normalizedEmail)
+            .<span class="at">orElseThrow</span>(() -&gt;
+                    <span class="tg">new</span> <span class="at">UsernameNotFoundException</span>(
+                            <span class="st">"Invalid email or password"</span>
+                    )
+            );
+
+    <span class="tg">return</span> org.springframework.security.core.userdetails.User
+            .<span class="at">withUsername</span>(user.<span class="at">getEmail</span>())
+            .<span class="at">password</span>(user.<span class="at">getPasswordHash</span>())
+            .<span class="at">roles</span>(user.<span class="at">getRole</span>().<span class="at">name</span>())
+            .<span class="at">build</span>();
+}</div>
+  <p>Your job in this class is only to translate: from your <code>User</code> entity to Spring's <code>UserDetails</code> — a username, the stored hash, and authorities. <code>.roles("STUDENT")</code> becomes the authority <code>ROLE_STUDENT</code>: Spring adds the <code>ROLE_</code> prefix. Lines 33–37 use the full name <code>org.springframework.security.core.userdetails.User</code> because your own <code>User</code> entity is imported on line 4.</p>
+
+  <h3>The same 401 for both mistakes</h3>
+  <p>An unknown email makes line 28 throw <code>UsernameNotFoundException</code>. The provider doesn't let that through: it turns it into the same <code>BadCredentialsException</code> as a wrong password, and it still runs one BCrypt check on a dummy hash, so a missing account isn't even <em>faster</em> to reject. Both exceptions are thrown inside your controller, so they reach your MVC exception handler — not the security filters:</p>
+  <p class="refs">lab2-complete · exception/GlobalExceptionHandler.java · lines 79–93</p>
+  <div class="cmd"><span class="at">@ExceptionHandler</span>(AuthenticationException.<span class="tg">class</span>)
+<span class="tg">public</span> ResponseEntity&lt;ApiErrorResponse&gt; <span class="at">handleAuthenticationFailure</span>(
+        AuthenticationException exception,
+        HttpServletRequest request) {
+
+    ApiErrorResponse response = ApiErrorResponse.<span class="at">builder</span>()
+            .<span class="at">timestamp</span>(Instant.<span class="at">now</span>())
+            .<span class="at">status</span>(HttpStatus.UNAUTHORIZED.<span class="at">value</span>())
+            .<span class="at">error</span>(HttpStatus.UNAUTHORIZED.<span class="at">getReasonPhrase</span>())
+            .<span class="at">message</span>(<span class="st">"Invalid email or password"</span>)
+            .<span class="at">path</span>(request.<span class="at">getRequestURI</span>())
+            .<span class="at">build</span>();
+
+    <span class="tg">return</span> ResponseEntity.<span class="at">status</span>(HttpStatus.UNAUTHORIZED).<span class="at">body</span>(response);
+}</div>
+  <p>Nobody can use your login to find out which emails have accounts.</p>
+
+  <div class="cue"><p class="cue-k">What login keeps — nothing</p><p>The authenticated <code>Authentication</code> on line 64 holds <code>ROLE_STUDENT</code>. Your code uses it for one thing — <code>authentication.getName()</code> on line 73 — and then drops it. Nothing about this login is remembered on the server. Only the token goes back. Hold on to that for section 11.</p></div>
+
+  <div class="dothis">
+    <h4>Try it — two wrong logins</h4>
+    <p>Log in with a wrong password, then with an email that has no account. Compare the two response bodies: identical, apart from the timestamp.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Where in your code is the line that compares the typed password with the hash?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Nowhere. <code>DaoAuthenticationProvider</code> calls <code>passwordEncoder.matches</code>. You supplied the two beans it needs — <code>CustomUserDetailsService</code> and <code>BCryptPasswordEncoder</code> — and Spring connected them.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Why does a wrong password come back from <code>GlobalExceptionHandler</code>, while a missing token comes back from <code>RestSecurityErrorHandler</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Where the exception happens. <code>authenticate()</code> runs inside your controller, after the filters, so its exception goes to the MVC exception handlers. A missing token is found by the filters, before any controller — so the security handlers answer it (section 12).</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 complete — I know who checks my password</span></label>
+</section>
+
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>Issuing the token — JwtService and JwtEncoder</h2><span class="lvl core">Core</span><span class="tagline">claims in, a signed string out</span></div>
+
+  <p class="refs">lab2-complete · service/JwtService.java · lines 21–50</p>
+  <div class="cmd"><span class="tg">private</span> <span class="tg">final</span> JwtEncoder jwtEncoder;
+
+<span class="at">@Value</span>(<span class="st">"${app.security.jwt.issuer}"</span>)
+<span class="tg">private</span> String issuer;
+
+<span class="at">@Value</span>(<span class="st">"${app.security.jwt.expiration-seconds}"</span>)
+<span class="tg">private</span> <span class="tg">long</span> expirationSeconds;
+
+<span class="tg">public</span> String <span class="at">generateToken</span>(User user) {
+
+    Instant issuedAt = Instant.<span class="at">now</span>();
+    Instant expiresAt = issuedAt.<span class="at">plusSeconds</span>(expirationSeconds);
+
+    JwtClaimsSet claims = JwtClaimsSet.<span class="at">builder</span>()
+            .<span class="at">issuer</span>(issuer)
+            .<span class="at">subject</span>(user.<span class="at">getEmail</span>())
+            .<span class="at">issuedAt</span>(issuedAt)
+            .<span class="at">expiresAt</span>(expiresAt)
+            .<span class="at">id</span>(UUID.<span class="at">randomUUID</span>().<span class="at">toString</span>())
+            .<span class="at">claim</span>(<span class="st">"role"</span>, user.<span class="at">getRole</span>().<span class="at">name</span>())
+            .<span class="at">build</span>();
+
+    JwsHeader header = JwsHeader
+            .<span class="at">with</span>(MacAlgorithm.HS256)
+            .<span class="at">build</span>();
+
+    <span class="tg">return</span> jwtEncoder.<span class="at">encode</span>(
+            JwtEncoderParameters.<span class="at">from</span>(header, claims)
+    ).<span class="at">getTokenValue</span>();
+}</div>
+  <p>A token's contents are <strong>claims</strong>: short named facts. <code>JwtService</code> writes six:</p>
+  <table class="grid">
+    <tr><th>Claim</th><th>Line</th><th>Value</th><th>What it's for</th></tr>
+    <tr><td>iss</td><td>35</td><td><code>ecommerce-api</code></td><td><strong>issuer</strong> — who made it. The decoder insists on this exact value.</td></tr>
+    <tr><td>sub</td><td>36</td><td>the email</td><td><strong>subject</strong> — who it's about. Becomes <code>authentication.getName()</code>.</td></tr>
+    <tr><td>iat</td><td>37</td><td>now</td><td><strong>issued at</strong>.</td></tr>
+    <tr><td>exp</td><td>38</td><td>now + 3600 s</td><td><strong>expires</strong> — after this the decoder refuses it.</td></tr>
+    <tr><td>jti</td><td>39</td><td>a random UUID</td><td><strong>JWT id</strong> — this one token's name. Logout needs it (section 14).</td></tr>
+    <tr><td>role</td><td>40</td><td><code>STUDENT</code> / <code>ADMIN</code></td><td>Your own claim, not a standard one. Section 11 is about who reads it.</td></tr>
+  </table>
+  <p>One standard claim is missing: <code>aud</code>, the <strong>audience</strong> — which app the token is meant for. Section 09 explains why that matters. Lines 43–45 set the header: <code>HS256</code>, HMAC with SHA-256. With HS256 one shared secret both signs and checks a token. That suits a token that only your own app ever makes and checks.</p>
+
+  <h3>The values come from properties</h3>
+  <p class="refs">lab2-complete · application.properties · lines 9–11</p>
+  <div class="cmd"><span class="at">app.security.jwt.issuer</span>=<span class="st">ecommerce-api</span>
+<span class="at">app.security.jwt.expiration-seconds</span>=<span class="st">3600</span>
+<span class="at">app.security.jwt.secret</span>=<span class="st">${JWT_SECRET:dev-only-change-this-secret-key-before-deployment-123}</span></div>
+  <p><code>@Value("${app.security.jwt.issuer}")</code> (JwtService 23) tells Spring: fill this field from the property with that name, and refuse to start if there's no such property. Spring converts the text to the field's type, so <code>expiration-seconds</code> arrives as a <code>long</code>. These keys are your own invention — Spring has no idea what <code>app.security.jwt</code> means, it just copies the text.</p>
+  <p>Line 11 nests one placeholder inside another: <code>${JWT_SECRET:dev-only-…}</code> means "use the environment variable <code>JWT_SECRET</code> if it is set; otherwise this text after the colon". Your laptop gets the default; a real server sets <code>JWT_SECRET</code> and never has the secret in a file anyone can read.</p>
+
+  <h3>The key and the encoder</h3>
+  <p class="refs">lab2-complete · config/JwtConfig.java · lines 23–41</p>
+  <div class="cmd"><span class="at">@Bean</span>
+<span class="tg">public</span> SecretKey <span class="at">jwtSecretKey</span>(
+        <span class="at">@Value</span>(<span class="st">"${app.security.jwt.secret}"</span>) String secret) {
+
+    <span class="tg">byte</span>[] keyBytes = secret.<span class="at">getBytes</span>(StandardCharsets.UTF_8);
+
+    <span class="tg">if</span> (keyBytes.length &lt; <span class="st">32</span>) {
+        <span class="tg">throw</span> <span class="tg">new</span> <span class="at">IllegalStateException</span>(
+                <span class="st">"JWT secret must contain at least 32 bytes"</span>);
+    }
+
+    <span class="tg">return</span> <span class="tg">new</span> <span class="at">SecretKeySpec</span>(keyBytes, <span class="st">"HmacSHA256"</span>);
+}
+
+<span class="at">@Bean</span>
+<span class="tg">public</span> JwtEncoder <span class="at">jwtEncoder</span>(SecretKey jwtSecretKey) {
+    <span class="tg">return</span> <span class="tg">new</span> <span class="at">NimbusJwtEncoder</span>(
+            <span class="tg">new</span> ImmutableSecret&lt;&gt;(jwtSecretKey));
+}</div>
+  <div class="mention">
+    <div class="mrow"><b>29–32</b><span>HS256 needs a key of at least 256 bits — 32 bytes. Too short, and this line stops the app at startup with a clear message, instead of failing at the first login.</span></div>
+    <div class="mrow"><b>34</b><span>The secret's bytes, wrapped as a Java <code>SecretKey</code> for HMAC-SHA256.</span></div>
+    <div class="mrow"><b>39–40</b><span><code>NimbusJwtEncoder</code> is Spring's encoder, built on the Nimbus JOSE library. <code>ImmutableSecret</code> hands it your key as its one and only signing key.</span></div>
+  </div>
+
+  <div class="cue watch"><p class="cue-k">The secret is the whole game</p><p>Anyone who knows your secret can make a token for any email with any role, and your app will believe it. The default on line 11 is labelled <code>dev-only</code> for that reason: everyone who cloned <code>ESD_Session</code> has the same one. Never commit a real secret.</p></div>
+
+  <div class="dothis">
+    <h4>Try it — a key that's too short</h4>
+    <p>Change line 11 to <code>app.security.jwt.secret=short</code> and restart. Read the stack trace down to the last <code>Caused by</code>: <code>JWT secret must contain at least 32 bytes</code>. Put the line back.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>You change the secret and restart. What happens to every token handed out before the change?</div>
+    <details><summary>Show answer</summary><div class="a"><p>All of them fail the signature check — 401 — because the decoder now checks with a different key. Everyone has to log in again. Changing the secret is the bluntest possible "log everyone out".</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 complete — I know what's in my token and why</span></label>
+</section>
+
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>Reading a token by hand</h2><span class="lvl core">Core</span><span class="tagline">header.payload.signature</span></div>
+
+  <p>This is a real token, made exactly the way your <code>JwtService</code> makes them, signed with the default secret from your <code>application.properties</code>:</p>
+  <div class="cmd">eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhc2hhQGV4YW1wbGUuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpc3MiOiJlY29tbWVyY2UtYXBpIiwiZXhwIjoxNzY4NDczMDAwLCJpYXQiOjE3Njg0Njk0MDAsImp0aSI6IjNmOWMyYTcxLTVkNGUtNGI4YS05ZTYxLTBjN2QyYjhmNGExNSJ9.kzgBTWdlBuyEKzuW30Ch6qHR8Ke72qR_dBAU6ja12-A</div>
+  <p>Three pieces joined by dots: <strong>header</strong>.<strong>payload</strong>.<strong>signature</strong>. The first two are JSON, written in <strong>base64url</strong> — ordinary base64 with <code>-</code> and <code>_</code> instead of <code>+</code> and <code>/</code>, and no <code>=</code> padding, so it's safe in a URL or a header. base64url is an <em>encoding</em>, not encryption: anyone can turn it back. Every token your app makes begins <code>eyJhbGciOiJIUzI1NiJ9</code>, because every one has the same header.</p>
+
+  <div class="dothis">
+    <h4>Try it — decode it in the browser console</h4>
+    <p>Open any browser's console (<kbd>F12</kbd>). Paste the first two lines, then try the rest one at a time.</p>
+  </div>
+  <div class="cmd"><span class="tg">const</span> token = <span class="st">"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhc2hhQGV4YW1wbGUuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpc3MiOiJlY29tbWVyY2UtYXBpIiwiZXhwIjoxNzY4NDczMDAwLCJpYXQiOjE3Njg0Njk0MDAsImp0aSI6IjNmOWMyYTcxLTVkNGUtNGI4YS05ZTYxLTBjN2QyYjhmNGExNSJ9.kzgBTWdlBuyEKzuW30Ch6qHR8Ke72qR_dBAU6ja12-A"</span>;
+<span class="tg">const</span> part = (s) =&gt; <span class="tg">JSON</span>.<span class="at">parse</span>(<span class="at">atob</span>(s.<span class="at">replace</span>(/-/g, <span class="st">"+"</span>).<span class="at">replace</span>(/_/g, <span class="st">"/"</span>)));   <span class="cm">// base64url → JSON</span>
+<span class="tg">const</span> [header, payload, signature] = token.<span class="at">split</span>(<span class="st">"."</span>);
+<span class="at">part</span>(header)
+<span class="o">// { alg: "HS256" }</span>
+<span class="at">part</span>(payload)
+<span class="o">// { sub: "asha@example.com", role: "STUDENT", iss: "ecommerce-api", exp: 1768473000, iat: 1768469400, jti: "3f9c2a71-…" }</span>
+<span class="at">part</span>(payload).exp - <span class="at">part</span>(payload).iat
+<span class="o">// 3600</span>
+signature.length
+<span class="o">// 43            (32 bytes of HMAC, in base64url: not JSON, nothing to read)</span></div>
+  <p><code>iat</code> and <code>exp</code> are <strong>seconds since 1970</strong> (UTC) — the JWT standard's way of writing a moment. That's why <code>exp − iat</code> is simply your 3600. In Java, <code>Instant.getEpochSecond()</code> gives the same kind of number. The order of the claims doesn't matter; yours may come out in a different order.</p>
+
+  <h3>Paste your own</h3>
+  <p>Log in from Postman, copy <code>accessToken</code>, and paste it here. This box runs only in your browser and sends nothing anywhere — still, never paste a token from a real system into a website.</p>
+
+  <div class="jwtbox" id="jwtbox">
+    <label class="jwt-k" for="jwt-in">Token</label>
+    <textarea id="jwt-in" rows="4" spellcheck="false" autocomplete="off">eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhc2hhQGV4YW1wbGUuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpc3MiOiJlY29tbWVyY2UtYXBpIiwiZXhwIjoxNzY4NDczMDAwLCJpYXQiOjE3Njg0Njk0MDAsImp0aSI6IjNmOWMyYTcxLTVkNGUtNGI4YS05ZTYxLTBjN2QyYjhmNGExNSJ9.kzgBTWdlBuyEKzuW30Ch6qHR8Ke72qR_dBAU6ja12-A</textarea>
+    <div class="jwt-row">
+      <button type="button" class="jwt-btn" id="jwt-forge">Swap STUDENT ↔ ADMIN, keep the signature</button>
+      <button type="button" class="jwt-btn" id="jwt-copy">Copy the token</button>
+    </div>
+    <div class="jwt-grid">
+      <div><p class="jwt-k">Header</p><pre class="jwt-out" id="jwt-h">—</pre></div>
+      <div><p class="jwt-k">Payload</p><pre class="jwt-out" id="jwt-p">—</pre></div>
+    </div>
+    <p class="jwt-note" id="jwt-life"></p>
+    <p class="jwt-k">Check the signature (HS256)</p>
+    <div class="jwt-row">
+      <input type="text" id="jwt-secret" spellcheck="false" autocomplete="off" value="dev-only-change-this-secret-key-before-deployment-123" aria-label="Secret">
+      <button type="button" class="jwt-btn" id="jwt-check">Check</button>
+    </div>
+    <p class="jwt-note" id="jwt-sig">The default secret from your application.properties line 11. If you set <code>JWT_SECRET</code>, use that instead.</p>
+  </div>
+
+  <h3>What the signature proves — and what it doesn't</h3>
+  <p>The signature is HMAC-SHA256 of the text <code>header.payload</code>, computed with your secret. To check it, the decoder computes it again and compares. So a matching signature proves two things:</p>
+  <ol>
+    <li>whoever made this token knew the secret — your app, or someone who stole the secret;</li>
+    <li>not one character of the header or payload has changed since.</li>
+  </ol>
+  <p>It proves nothing else. It doesn't <strong>hide</strong> anything — you just read the payload without any key, and so can anyone who sees the token. It doesn't say <strong>who is sending</strong> it (section 02's friend). And it doesn't say the token is <strong>still good</strong>: expiry and logout are separate checks, in section 09.</p>
+
+  <div class="dothis">
+    <h4>Try it — forge a token, and watch it fail</h4>
+    <ol>
+      <li>Paste your own STUDENT token in the box above and press <strong>Swap STUDENT ↔ ADMIN</strong>. The payload now says <code>ADMIN</code>; the signature is the old one. Press <strong>Check</strong>: it no longer matches.</li>
+      <li>Copy the edited token into Postman and call <code>GET /api/auth/me</code> with it. 401. Your server did the same check as the button.</li>
+    </ol>
+  </div>
+
+  <div class="stretch-box">
+    <h3>Check a signature with nothing but the console</h3>
+    <p>The box above does this. In the same console as before, after the decode lines:</p>
+    <div class="cmd"><span class="tg">const</span> bytes = (s) =&gt; <span class="tg">new</span> <span class="at">TextEncoder</span>().<span class="at">encode</span>(s);
+<span class="tg">const</span> secret = <span class="st">"dev-only-change-this-secret-key-before-deployment-123"</span>;   <span class="cm">// application.properties line 11</span>
+<span class="tg">const</span> key = <span class="tg">await</span> crypto.subtle.<span class="at">importKey</span>(<span class="st">"raw"</span>, <span class="at">bytes</span>(secret), { name: <span class="st">"HMAC"</span>, hash: <span class="st">"SHA-256"</span> }, <span class="tg">false</span>, [<span class="st">"sign"</span>]);
+<span class="tg">const</span> mac = <span class="tg">new</span> <span class="at">Uint8Array</span>(<span class="tg">await</span> crypto.subtle.<span class="at">sign</span>(<span class="st">"HMAC"</span>, key, <span class="at">bytes</span>(header + <span class="st">"."</span> + payload)));
+<span class="tg">const</span> b64url = (b) =&gt; <span class="at">btoa</span>(<span class="tg">String</span>.<span class="at">fromCharCode</span>(...b)).<span class="at">replace</span>(/\+/g, <span class="st">"-"</span>).<span class="at">replace</span>(/\<span class="cm">//g, "_").replace(/=+$/, "");</span>
+<span class="at">b64url</span>(mac) === signature
+<span class="o">// true</span></div>
+    <p>That's <code>NimbusJwtDecoder</code>'s first check, in six lines. Change one letter of <code>secret</code> and run the last two lines again: <code>false</code>.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Can a React app read the <code>role</code> out of your token?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Yes — anyone can. It may use it to decide what to <em>show</em>, but never to decide what is <em>allowed</em>: the user can edit the JavaScript. Only the server, which checks the signature, decides. (The course's React labs go further and treat the token as opaque.)</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>To save a database lookup, a teammate wants <code>JwtService</code> to put the user's <code>passwordHash</code> in the token. What's wrong with that?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Everyone who sees the token can read the payload — browser history, logs, proxies. Never put anything secret in a claim.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 complete — I've decoded my own token</span></label>
+</section>
+
+<div class="part">Part 3 · What may you do</div>
+
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>Checking a token — JwtDecoder and its validators</h2><span class="lvl core">Core</span><span class="tagline">is the verification complete?</span></div>
+
+  <p class="refs">lab2-complete · config/JwtConfig.java · lines 43–62</p>
+  <div class="cmd"><span class="at">@Bean</span>
+<span class="tg">public</span> JwtDecoder <span class="at">jwtDecoder</span>(
+        SecretKey jwtSecretKey,
+        <span class="at">@Value</span>(<span class="st">"${app.security.jwt.issuer}"</span>) String issuer,
+        JwtRevocationValidator jwtRevocationValidator) {
+
+    NimbusJwtDecoder decoder = NimbusJwtDecoder
+            .<span class="at">withSecretKey</span>(jwtSecretKey)
+            .<span class="at">macAlgorithm</span>(MacAlgorithm.HS256)
+            .<span class="at">build</span>();
+
+    decoder.<span class="at">setJwtValidator</span>(
+            <span class="tg">new</span> DelegatingOAuth2TokenValidator&lt;&gt;(
+                    JwtValidators.<span class="at">createDefaultWithIssuer</span>(issuer),
+                    jwtRevocationValidator
+            )
+    );
+
+    <span class="tg">return</span> decoder;
+}</div>
+  <p><code>BearerTokenAuthenticationFilter</code> finds this bean by type — you never call <code>decode</code> yourself. For every token it does two stages:</p>
+  <ol>
+    <li><strong>Signature</strong> (lines 49–52): parse the three parts; refuse anything not signed with HS256; recompute the HMAC with the same <code>jwtSecretKey</code> the encoder used, and compare. A token with <code>"alg": "none"</code> and no signature is refused here too.</li>
+    <li><strong>Validators</strong> (lines 54–59): only for a token whose signature matched. <code>JwtValidators.createDefaultWithIssuer(issuer)</code> is Spring's standard set — the header's <code>typ</code> (if present), <code>exp</code> and <code>nbf</code> with 60 seconds' slack for clocks that disagree, a check for certificate-bound tokens that yours aren't, and <code>iss</code> must equal <code>ecommerce-api</code>. <code>jwtRevocationValidator</code> is yours: section 14.</li>
+  </ol>
+  <div class="cue watch"><p class="cue-k">setJwtValidator replaces, it doesn't add</p><p>A <code>NimbusJwtDecoder</code> checks expiry by default. Line 54 throws that default away and installs exactly the list you give it. That's why line 56 passes Spring's standard set back in: write <code>new DelegatingOAuth2TokenValidator&lt;&gt;(jwtRevocationValidator)</code> alone, and expired tokens would be accepted.</p></div>
+
+  <h3>The audit: what your scaffold checks</h3>
+  <p>The Lab 2 audit asked: <em>is the token verification complete — signature, audience, issuer, expiry?</em> Here is the honest answer for your code:</p>
+  <table class="grid">
+    <tr><th>Check</th><th>Your scaffold</th><th>How to see it</th></tr>
+    <tr><td>signature</td><td><strong>yes</strong> — line 50, your secret</td><td>edit one character of the payload → 401</td></tr>
+    <tr><td>algorithm</td><td><strong>yes</strong> — line 51 pins HS256</td><td>a token with <code>"alg":"none"</code> → 401</td></tr>
+    <tr><td>expiry</td><td><strong>yes</strong> — line 56, ±60 s</td><td>expired two minutes ago → 401; twenty seconds ago → still 200</td></tr>
+    <tr><td>issuer</td><td><strong>yes</strong> — line 56</td><td>a token with another <code>iss</code> → 401</td></tr>
+    <tr><td>logged out</td><td><strong>yes</strong> — line 57</td><td>after logout → 401 (section 14)</td></tr>
+    <tr><td>audience</td><td><strong>no</strong> — never written, never checked</td><td>a token with <code>"aud": "some-other-app"</code> → 200</td></tr>
+    <tr><td>exp present</td><td><strong>no</strong> — a token with no <code>exp</code> passes</td><td>harmless here: only <code>JwtService</code> can sign, and it always writes one</td></tr>
+  </table>
+
+  <h3>Why audience matters</h3>
+  <p><code>aud</code> answers "which app is this token for?" For your own HS256 tokens the gap is small: only something holding your secret can make a token at all. It grows the day two services share a secret or an issuer — a token issued for one starts working on the other — and it is the whole story with tokens you didn't make. Every website with a "Sign in with Google" button receives genuine, Google-signed tokens for its own visitors. A backend that checks Google's signature and expiry but not <code>aud</code> lets any of those sites log in to it as their users. That's bug 3 in the course's planted-bug bank, and the reason the OAuth2 lab's verifier checks <code>aud</code> on its own line: <a href="oauth-lab.html#s5">OAuth2 lab · §05 Who checks what</a>, and the Spring code in <a href="oauth-lab.html#s11">§11</a>.</p>
+
+  <h3>Even on a public route</h3>
+  <p>The token filter runs <em>before</em> your rules (section 03). If a request carries a <code>Bearer</code> header, the token is checked — even on <code>GET /api/products/get-all</code>, which needs no token at all. An expired token there is a 401, while the same request with no header is a 200.</p>
+
+  <div class="dothis">
+    <h4>Try it — a stale token on an open route</h4>
+    <ol>
+      <li>Send <code>GET /api/products/get-all</code> with a token whose last character you changed. 401.</li>
+      <li>Turn the <code>Authorization</code> header off in Postman and send it again. 200.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>A classmate runs the same <code>lab2-complete</code> code on their laptop, without setting <code>JWT_SECRET</code>. They log in there and send that token to <em>your</em> server. Which check stops it?</div>
+    <details><summary>Show answer</summary><div class="a"><p>None of them. Same default secret, so the signature matches; same issuer; not expired; its <code>jti</code> isn't in your table. Your server accepts it. (<code>/api/auth/me</code> would then fail to find their email in your <code>users</code> table — but a route that trusts the token alone wouldn't.) That's why the secret must be secret, and what <code>aud</code> exists to narrow.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Your token's <code>exp</code> passed 30 seconds ago. Accepted?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Yes. The timestamp check allows 60 seconds of clock difference between machines. Two minutes past <code>exp</code>, it's a 401.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 09 complete — I can answer the audit question</span></label>
+</section>
+
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>The rules, top to bottom</h2><span class="lvl core">Core</span><span class="tagline">requestMatchers: the first match decides</span></div>
+
+  <p class="refs">lab2-complete · config/SecurityConfig.java · lines 38–82</p>
+  <div class="cmd">.<span class="at">authorizeHttpRequests</span>(auth -&gt; auth
+
+        <span class="cm">// Public authentication endpoints</span>
+        .<span class="at">requestMatchers</span>(
+                <span class="st">"/api/auth/signup"</span>,
+                <span class="st">"/api/auth/login"</span>
+        ).<span class="at">permitAll</span>()
+
+        <span class="cm">// Public Swagger UI and OpenAPI documentation</span>
+        .<span class="at">requestMatchers</span>(
+                <span class="st">"/swagger-ui.html"</span>,
+                <span class="st">"/swagger-ui/**"</span>,
+                <span class="st">"/v3/api-docs"</span>,
+                <span class="st">"/v3/api-docs/**"</span>
+        ).<span class="at">permitAll</span>()
+
+        <span class="cm">// Public product catalogue: read-only operations</span>
+        .<span class="at">requestMatchers</span>(
+                HttpMethod.GET,
+                <span class="st">"/api/products/get-all"</span>,
+                <span class="st">"/api/products/get-id/**"</span>,
+                <span class="st">"/api/products/get-category/**"</span>
+        ).<span class="at">permitAll</span>()
+
+        <span class="cm">// Only ADMIN can create products</span>
+        .<span class="at">requestMatchers</span>(
+                HttpMethod.POST,
+                <span class="st">"/api/products/add-product"</span>
+        ).<span class="at">hasRole</span>(<span class="st">"ADMIN"</span>)
+
+        <span class="cm">// Only ADMIN can update products</span>
+        .<span class="at">requestMatchers</span>(
+                HttpMethod.PUT,
+                <span class="st">"/api/products/update/**"</span>
+        ).<span class="at">hasRole</span>(<span class="st">"ADMIN"</span>)
+
+        <span class="cm">// Only ADMIN can delete products</span>
+        .<span class="at">requestMatchers</span>(
+                HttpMethod.DELETE,
+                <span class="st">"/api/products/delete/**"</span>
+        ).<span class="at">hasRole</span>(<span class="st">"ADMIN"</span>)
+
+        <span class="cm">// All remaining endpoints require authentication</span>
+        .<span class="at">anyRequest</span>().<span class="at">authenticated</span>()
+)</div>
+  <p><code>AuthorizationFilter</code> goes down this list for each request and uses the <strong>first rule that matches</strong> the method and path. It doesn't read on. Three kinds of answer:</p>
+  <div class="mention">
+    <div class="mrow"><b>permitAll()</b><span>Anyone, token or not.</span></div>
+    <div class="mrow"><b>authenticated()</b><span>Any valid token, whatever the role.</span></div>
+    <div class="mrow"><b>hasRole("ADMIN")</b><span>A valid token whose authorities include <code>ROLE_ADMIN</code> — section 11.</span></div>
+  </div>
+  <p>Line 81, <code>anyRequest().authenticated()</code>, comes last and catches everything above didn't name. That makes your API <strong>deny by default</strong>: a route someone adds later needs a token until someone deliberately opens it.</p>
+  <p>The <code>HttpMethod</code> matters too. Lines 55–60 open only <code>GET</code> on those paths; a <code>PUT</code> to <code>/api/products/get-all</code> doesn't match them and falls through to line 81.</p>
+
+  <h3>The audit: every route</h3>
+  <p>Product paths are under <code>/api/products/</code>, auth paths under <code>/api/auth/</code>:</p>
+  <table class="grid">
+    <tr><th>Route</th><th>Rule</th><th>No token</th><th>Student</th></tr>
+    <tr><td>POST signup, login</td><td>permitAll, 41–44</td><td>201 / 200</td><td>—</td></tr>
+    <tr><td>Swagger UI, /v3/api-docs</td><td>permitAll, 47–52</td><td>200</td><td>200</td></tr>
+    <tr><td>GET get-all, get-id, get-category</td><td>permitAll, 55–60</td><td>200</td><td>200</td></tr>
+    <tr><td>POST add-product, PUT update, DELETE delete</td><td>hasRole ADMIN, 63–78</td><td>401</td><td>403</td></tr>
+    <tr><td>GET me, POST logout</td><td>authenticated, 81</td><td>401</td><td>200 / 204</td></tr>
+    <tr><td>anything else</td><td>authenticated, 81</td><td>401</td><td>—</td></tr>
+  </table>
+  <p>And an ADMIN on the write routes? Section 11 — the answer will surprise you.</p>
+
+  <div class="cue watch"><p class="cue-k">The shape of a hole</p><p>Because the first match wins, a broad rule placed high up overrides everything below it. A line like <code>.requestMatchers("/api/products/**").permitAll()</code> just after line 44 would open add, update and delete to anyone, however strict lines 63–78 look. That's bug 4 in the course's bug bank: a route that looks guarded and isn't. The test is never "does the config look right" — it's "send the request with no token and see".</p></div>
+
+  <p>One more thing that looks like security and isn't: <code>@Operation(security = {})</code> on signup and login (AuthController 34 and 46) only tells Swagger UI not to draw a padlock there. Lines 41–44 are what actually open them.</p>
+
+  <div class="dothis">
+    <h4>Try it — check your list from section 01</h4>
+    <p>Turn off the <code>Authorization</code> header in Postman and send one request from each row of the table. Do the statuses match, and does your list from section 01 match the "No token" column?</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Why can't you put <code>anyRequest().authenticated()</code> first "to be safe"?</div>
+    <details><summary>Show answer</summary><div class="a"><p>It matches every request, so it would decide every request and no rule after it could ever be reached — signup and login would need a token you can only get by logging in.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b><code>GET /api/products/get-id/5</code> matches line 58 <em>and</em> line 81. Which decides?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Line 58, because it comes first: anyone may read a product.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 complete — I've audited every route</span></label>
+</section>
+
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>Roles in the token — the ROLE_ / SCOPE_ trap</h2><span class="lvl core">Core</span><span class="tagline">who reads the role claim?</span></div>
+
+  <p>Three lines from three places. Each is fine on its own:</p>
+  <p class="refs">lab2-complete · service/JwtService.java · line 40</p>
+  <div class="cmd">.<span class="at">claim</span>(<span class="st">"role"</span>, user.<span class="at">getRole</span>().<span class="at">name</span>())</div>
+  <p class="refs">lab2-complete · config/SecurityConfig.java · lines 63–66</p>
+  <div class="cmd">.<span class="at">requestMatchers</span>(
+        HttpMethod.POST,
+        <span class="st">"/api/products/add-product"</span>
+).<span class="at">hasRole</span>(<span class="st">"ADMIN"</span>)</div>
+  <p class="refs">lab2-complete · config/SecurityConfig.java · lines 84–85</p>
+  <div class="cmd">.<span class="at">oauth2ResourceServer</span>(oauth2 -&gt; oauth2
+        .<span class="at">jwt</span>(Customizer.<span class="at">withDefaults</span>())</div>
+
+  <h3>What hasRole("ADMIN") actually asks</h3>
+  <p>An <strong>authority</strong> is a plain string an <code>Authentication</code> carries, like <code>ROLE_ADMIN</code>. A <strong>role</strong> is just an authority whose name starts with <code>ROLE_</code>. <code>hasRole("ADMIN")</code> means "is the string <code>ROLE_ADMIN</code> among this request's authorities?" — Spring adds the prefix, which is why <code>hasRole("ROLE_ADMIN")</code> stops the app at startup.</p>
+
+  <h3>Where a token request gets its authorities</h3>
+  <p>Not from the database, and not from <code>CustomUserDetailsService</code> — that ran once, at login, and its result was dropped (section 06). On every request the authorities come from the <strong>token</strong>, through a <code>JwtAuthenticationConverter</code>. Line 85, <code>.jwt(Customizer.withDefaults())</code>, configures no converter, and your project defines none, so Spring uses its default. The default follows OAuth2's convention: it reads a claim called <code>scope</code> (or <code>scp</code>), splits it on spaces, and prefixes each word with <code>SCOPE_</code>. A token with <code>"scope": "products:write"</code> would give the authority <code>SCOPE_products:write</code>.</p>
+  <p>Your token has no <code>scope</code> claim. It has <code>role</code>, and nothing reads <code>role</code>:</p>
+  <table class="grid">
+    <tr><th>Piece</th><th>What it does</th></tr>
+    <tr><td>JwtService line 40</td><td>writes <code>"role": "ADMIN"</code></td></tr>
+    <tr><td>the default converter</td><td>reads only <code>scope</code> / <code>scp</code>, makes <code>SCOPE_…</code></td></tr>
+    <tr><td>the authorities you get</td><td><code>FACTOR_BEARER</code> — Spring Security 7's note that you signed in with a bearer token — and nothing else</td></tr>
+    <tr><td>hasRole("ADMIN") wants</td><td><code>ROLE_ADMIN</code></td></tr>
+    <tr><td>result</td><td><strong>403 for every write — STUDENT and ADMIN alike</strong></td></tr>
+  </table>
+  <p>As your scaffold stands, no token it can issue passes lines 63–78. If you never tested a write as an ADMIN, you'd never have noticed: the STUDENT's 403 looks exactly right.</p>
+
+  <div class="dothis">
+    <h4>Try it — see the 403, then see why</h4>
+    <ol>
+      <li>Make yourself an ADMIN in MySQL — signup never will: <code>UPDATE users SET role = 'ADMIN' WHERE email = 'you@example.com';</code></li>
+      <li>Log in <strong>again</strong> (your old token still says STUDENT). Paste the new token in section 08's box: <code>"role": "ADMIN"</code>.</li>
+      <li><code>POST /api/products/add-product</code> with it and a valid product body. <strong>403.</strong></li>
+      <li>Ask Spring what it sees. In <code>AuthController.getCurrentUser</code>, add as the first line:<br><code>authentication.getAuthorities().forEach(a -&gt; System.out.println(a.getAuthority()));</code><br>Restart, log in, call <code>/api/auth/me</code>. The console prints one line: <code>FACTOR_BEARER</code>. No <code>ROLE_ADMIN</code> anywhere.</li>
+    </ol>
+  </div>
+
+  <h3>The one bean that connects them</h3>
+  <p>Tell the converter which claim holds the roles, and which prefix to give them. A new file next to your other config classes:</p>
+  <div class="cmd"><span class="tg">package</span> com.esd.ecommerce.config;
+
+<span class="tg">import</span> org.springframework.context.annotation.Bean;
+<span class="tg">import</span> org.springframework.context.annotation.Configuration;
+<span class="tg">import</span> org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+<span class="tg">import</span> org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+
+<span class="at">@Configuration</span>
+<span class="tg">public</span> <span class="tg">class</span> RoleClaimConfig {
+
+    <span class="at">@Bean</span>
+    <span class="tg">public</span> JwtAuthenticationConverter <span class="at">jwtAuthenticationConverter</span>() {
+        JwtGrantedAuthoritiesConverter roles = <span class="tg">new</span> <span class="at">JwtGrantedAuthoritiesConverter</span>();
+        roles.<span class="at">setAuthoritiesClaimName</span>(<span class="st">"role"</span>);   <span class="cm">// the claim JwtService writes</span>
+        roles.<span class="at">setAuthorityPrefix</span>(<span class="st">"ROLE_"</span>);       <span class="cm">// "ADMIN" -&gt; "ROLE_ADMIN", what hasRole("ADMIN") wants</span>
+
+        JwtAuthenticationConverter converter = <span class="tg">new</span> <span class="at">JwtAuthenticationConverter</span>();
+        converter.<span class="at">setJwtGrantedAuthoritiesConverter</span>(roles);
+        <span class="tg">return</span> converter;
+    }
+}</div>
+  <p>You don't touch <code>SecurityConfig</code>. When the resource server sets itself up, it looks for a <code>JwtAuthenticationConverter</code> bean and uses it in place of its default. Restart, log in as your ADMIN, and the same <code>POST</code> is a <strong>201</strong>. Your <code>println</code> now prints <code>ROLE_ADMIN</code> as well as <code>FACTOR_BEARER</code>. A STUDENT still gets 403.</p>
+
+  <div class="cue"><p class="cue-k">The token wins until it expires</p><p>With the converter in place, the role comes from the token, not the database. Demote someone in MySQL and their existing token keeps working as ADMIN until its <code>exp</code> — up to an hour. A role change really takes effect at the next login (or after logout, section 14).</p></div>
+
+  <p>Spring can also write the same rule on a method, as <code>@PreAuthorize("hasRole('ADMIN')")</code>; your scaffold keeps every rule in <code>SecurityConfig</code>, which is easier to audit in one place.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>With <code>RoleClaimConfig</code> in place, would <code>.hasAuthority("ADMIN")</code> let an ADMIN through?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No. <code>hasAuthority</code> compares the exact string, and the authority is <code>ROLE_ADMIN</code>. You'd need <code>hasAuthority("ROLE_ADMIN")</code> — or keep <code>hasRole("ADMIN")</code>, which adds the prefix for you.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Instead of the new bean, a teammate changes line 40 to <code>.claim("scope", user.getRole().name())</code>. Does <code>hasRole("ADMIN")</code> pass now?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Still no. The default converter reads <code>scope</code> now, but it makes <code>SCOPE_ADMIN</code>. <code>hasAuthority("SCOPE_ADMIN")</code> would pass; <code>hasRole("ADMIN")</code> wants <code>ROLE_ADMIN</code>. The prefix is the trap.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 complete — I know where my authorities come from</span></label>
+</section>
+
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>401 or 403, as JSON</h2><span class="lvl core">Core</span><span class="tagline">the entry point and the access-denied handler</span></div>
+
+  <p class="refs">lab2-complete · config/RestSecurityErrorHandler.java · lines 25–64</p>
+  <div class="cmd"><span class="at">@Bean</span>
+<span class="tg">public</span> AuthenticationEntryPoint <span class="at">authenticationEntryPoint</span>() {
+    <span class="tg">return</span> (request, response, exception) -&gt;
+            <span class="at">writeError</span>(
+                    request,
+                    response,
+                    HttpStatus.UNAUTHORIZED,
+                    <span class="st">"Authentication is required. Please provide a valid JWT token."</span>
+            );
+}
+
+<span class="at">@Bean</span>
+<span class="tg">public</span> AccessDeniedHandler <span class="at">accessDeniedHandler</span>() {
+    <span class="tg">return</span> (request, response, exception) -&gt;
+            <span class="at">writeError</span>(
+                    request,
+                    response,
+                    HttpStatus.FORBIDDEN,
+                    <span class="st">"You do not have permission to access this resource."</span>
+            );
+}
+
+<span class="tg">private</span> <span class="tg">void</span> <span class="at">writeError</span>(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        HttpStatus status,
+        String message) <span class="tg">throws</span> IOException {
+
+    ApiErrorResponse error = ApiErrorResponse.<span class="at">builder</span>()
+            .<span class="at">timestamp</span>(Instant.<span class="at">now</span>())
+            .<span class="at">status</span>(status.<span class="at">value</span>())
+            .<span class="at">error</span>(status.<span class="at">getReasonPhrase</span>())
+            .<span class="at">message</span>(message)
+            .<span class="at">path</span>(request.<span class="at">getRequestURI</span>())
+            .<span class="at">build</span>();
+
+    response.<span class="at">setStatus</span>(status.<span class="at">value</span>());
+    response.<span class="at">setContentType</span>(MediaType.APPLICATION_JSON_VALUE);
+    objectMapper.<span class="at">writeValue</span>(response.<span class="at">getOutputStream</span>(), error);
+}</div>
+  <p>Two beans, two jobs. An <code>AuthenticationEntryPoint</code> is what Spring Security calls when it needs the client to authenticate — your answer is a 401. An <code>AccessDeniedHandler</code> is what it calls when an authenticated user isn't allowed — a 403. Both of yours write the same <code>ApiErrorResponse</code> shape as your <code>GlobalExceptionHandler</code>, so a client sees one error format everywhere.</p>
+  <div class="cue"><p class="cue-k">On Boot 3</p><p>Line 12 of this file imports <code>tools.jackson.databind.ObjectMapper</code> — Jackson 3, which Spring Boot 4 uses. On Boot 3 the same class is <code>com.fasterxml.jackson.databind.ObjectMapper</code>.</p></div>
+
+  <p>They're wired in twice:</p>
+  <p class="refs">lab2-complete · config/SecurityConfig.java · lines 33–36</p>
+  <div class="cmd">.<span class="at">exceptionHandling</span>(exceptions -&gt; exceptions
+        .<span class="at">authenticationEntryPoint</span>(authenticationEntryPoint)
+        .<span class="at">accessDeniedHandler</span>(accessDeniedHandler)
+)</div>
+  <p>Lines 33–36 are for <code>ExceptionTranslationFilter</code> (filter 4). Lines 86–87 are for the resource server's own token filter, which answers a bad token itself before filter 4 is ever reached. Without line 86, a bad token would get the resource server's default: a 401 with an <em>empty</em> body and a <code>WWW-Authenticate: Bearer error="invalid_token", …</code> header. Correct by the standard, but not your JSON.</p>
+
+  <table class="grid">
+    <tr><th>Situation</th><th>Who notices</th><th>Who answers</th></tr>
+    <tr><td>no token, protected route</td><td>filter 5 says no; filter 4 sees "anonymous"</td><td>entry point → 401</td></tr>
+    <tr><td>bad, expired or logged-out token, any route</td><td>filter 2, the decoder fails</td><td>entry point → 401</td></tr>
+    <tr><td>valid STUDENT token, ADMIN route</td><td>filter 5 says no; filter 4 sees a user</td><td>access-denied handler → 403</td></tr>
+    <tr><td>wrong password at login</td><td><code>authenticate()</code>, inside the controller</td><td><code>GlobalExceptionHandler</code> → 401 (section 06)</td></tr>
+  </table>
+
+  <p>What arrives:</p>
+  <div class="cmd"><span class="tg">HTTP/1.1 401</span>
+<span class="at">Content-Type</span>:<span class="st"> application/json</span>
+
+{
+  <span class="at">"timestamp"</span>: <span class="st">"…"</span>,
+  <span class="at">"status"</span>: <span class="st">401</span>,
+  <span class="at">"error"</span>: <span class="st">"Unauthorized"</span>,
+  <span class="at">"message"</span>: <span class="st">"Authentication is required. Please provide a valid JWT token."</span>,
+  <span class="at">"path"</span>: <span class="st">"/api/products/add-product"</span>,
+  <span class="at">"validationErrors"</span>: <span class="tg">null</span>
+}</div>
+  <div class="cmd"><span class="tg">HTTP/1.1 403</span>
+<span class="at">Content-Type</span>:<span class="st"> application/json</span>
+
+{
+  <span class="at">"timestamp"</span>: <span class="st">"…"</span>,
+  <span class="at">"status"</span>: <span class="st">403</span>,
+  <span class="at">"error"</span>: <span class="st">"Forbidden"</span>,
+  <span class="at">"message"</span>: <span class="st">"You do not have permission to access this resource."</span>,
+  <span class="at">"path"</span>: <span class="st">"/api/products/add-product"</span>,
+  <span class="at">"validationErrors"</span>: <span class="tg">null</span>
+}</div>
+  <p>(Your keys may come out in another order. <code>validationErrors</code> is only filled in by <code>GlobalExceptionHandler</code>'s 400 — <a href="sb-good-slice.html">B2</a>.)</p>
+
+  <h3>Why every 401 says the same thing</h3>
+  <p>No token, expired, forged, logged out: one message. That's deliberate — it tells an attacker nothing about which check they failed. The reason exists, though. It's in the <code>exception</code> your lambda receives on line 27 and then ignores.</p>
+  <div class="dothis">
+    <h4>Try it — make the 401 say why (then undo it)</h4>
+    <ol>
+      <li>On line 32, replace the message string with <code>exception.getMessage()</code>. Restart.</li>
+      <li>Call <code>/api/auth/me</code> with no token: <code>Full authentication is required to access this resource</code>. With a token you edited: <code>… Invalid signature</code>. With a logged-out token (section 14): <code>… Token has been revoked</code>. With an expired one: <code>… Jwt expired at …</code>.</li>
+      <li>Put the fixed message back. The detail belongs in your log, not in the response.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>A STUDENT sends <code>DELETE /api/products/delete/3</code> with an <em>expired</em> token. 401 or 403?</div>
+    <details><summary>Show answer</summary><div class="a"><p>401. The token filter rejects the token before any rule is looked at; the role is never considered.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Why does the access-denied handler never run for a request with no token?</div>
+    <details><summary>Show answer</summary><div class="a"><p>When filter 5 says no, filter 4 checks who was asking. Anonymous means "we don't know who you are yet", so it calls the entry point (401). Only a real user who isn't allowed gets the access-denied handler (403).</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 12 complete — I can predict 401 or 403</span></label>
+</section>
+
+<section id="s13">
+  <div class="shead"><span class="chip">13</span><h2>Who is calling — the current user</h2><span class="lvl core">Core</span><span class="tagline">identity comes from the verified token</span></div>
+
+  <p class="refs">lab2-complete · controller/AuthController.java · lines 56–74</p>
+  <div class="cmd"><span class="at">@GetMapping</span>(<span class="st">"/me"</span>)
+<span class="tg">public</span> ResponseEntity&lt;UserResponse&gt; <span class="at">getCurrentUser</span>(
+        Authentication authentication) {
+
+    UserResponse response = authService.<span class="at">getCurrentUser</span>(authentication);
+    <span class="tg">return</span> ResponseEntity.<span class="at">ok</span>(response);
+}
+
+<span class="at">@PostMapping</span>(<span class="st">"/logout"</span>)
+<span class="tg">public</span> ResponseEntity&lt;Void&gt; <span class="at">logout</span>(
+        <span class="at">@AuthenticationPrincipal</span> Jwt jwt) {
+
+    tokenRevocationService.<span class="at">revokeToken</span>(
+            jwt.<span class="at">getId</span>(),
+            jwt.<span class="at">getExpiresAt</span>()
+    );
+
+    <span class="tg">return</span> ResponseEntity.<span class="at">noContent</span>().<span class="at">build</span>();
+}</div>
+  <p>Neither method takes an id, an email or a body. Spring MVC fills both parameters from the security context that filter 2 filled:</p>
+  <div class="mention">
+    <div class="mrow"><b>Authentication</b><span>The <code>JwtAuthenticationToken</code> for this request. <code>getName()</code> is the token's <code>sub</code> — the email. <code>getAuthorities()</code> is section 11's list.</span></div>
+    <div class="mrow"><b>@AuthenticationPrincipal Jwt</b><span>The decoded token itself: <code>getId()</code> is <code>jti</code>, <code>getExpiresAt()</code> is <code>exp</code>, <code>getSubject()</code> is <code>sub</code>, and <code>getClaimAsString("role")</code> reads any other claim.</span></div>
+  </div>
+  <p class="refs">lab2-complete · service/AuthService.java · lines 102–114</p>
+  <div class="cmd"><span class="tg">public</span> UserResponse <span class="at">getCurrentUser</span>(Authentication authentication) {
+    String email = authentication.<span class="at">getName</span>();
+
+    User user = userRepository.<span class="at">findByEmail</span>(email)
+            .<span class="at">orElseThrow</span>(() -&gt;
+                    <span class="tg">new</span> <span class="at">ResponseStatusException</span>(
+                            HttpStatus.NOT_FOUND,
+                            <span class="st">"Authenticated user was not found"</span>
+                    )
+            );
+
+    <span class="tg">return</span> <span class="at">toUserResponse</span>(user);
+}</div>
+  <p>The token holds only the email and the role, so <code>/me</code> still reads the database for the name, id and <code>createdAt</code>.</p>
+
+  <h3>The audit question: where does identity come from now?</h3>
+  <p>From the <strong>verified token</strong> — never from the request body, the URL or a query parameter. So <code>/me</code> needs no parameters, and nobody can ask it about someone else. Carry that into any feature: "my orders" would be <code>GET /api/orders/mine</code>, reading the email from <code>Authentication</code>, never <code>?userId=7</code>. The request gets smaller, and the bug "act on someone else's behalf" can't be written.</p>
+
+  <div class="dothis">
+    <h4>Try it — one URL, two answers</h4>
+    <p>Call <code>GET /api/auth/me</code> with two different users' tokens. Same URL, same empty body, two different people. Everything that told them apart was in the header.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>To "make it flexible", a teammate adds <code>@RequestParam String email</code> to <code>/me</code> and looks that email up. What's wrong?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Anyone with any valid token can now read anyone's profile. The token proves who is asking; the parameter lets them claim to be someone else. Identity must come from <code>Authentication</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 13 complete — identity comes from the token</span></label>
+</section>
+
+<section id="s14">
+  <div class="shead"><span class="chip">14</span><h2>Logout, when the token is the session</h2><span class="lvl core">Core</span><span class="tagline">revoked_tokens and JwtRevocationValidator</span></div>
+
+  <p>Section 02's table said logout is hard. Here's why: your server keeps nothing about a login, so there is nothing to delete. A token stays valid until its <code>exp</code>, wherever a copy of it is. Deleting it in the browser is not logging out — a copy in Postman, a log file or a friend's laptop still works.</p>
+  <p>Your scaffold's answer is a <strong>denylist</strong>: remember the tokens that have been logged out, and refuse them. Logout itself is section 13's second method — <code>revokeToken(jwt.getId(), jwt.getExpiresAt())</code>. Because <code>/api/auth/logout</code> needs a valid token (SecurityConfig 81), you can only log out a token you actually hold.</p>
+  <p class="refs">lab2-complete · service/TokenRevocationService.java · lines 18–52</p>
+  <div class="cmd"><span class="at">@Transactional</span>(readOnly = <span class="tg">true</span>)
+<span class="tg">public</span> <span class="tg">boolean</span> <span class="at">isRevoked</span>(String jti) {
+    <span class="tg">if</span> (jti == <span class="tg">null</span> || jti.<span class="at">isBlank</span>()) {
+        <span class="tg">return</span> <span class="tg">false</span>;
+    }
+
+    <span class="tg">return</span> revokedTokenRepository.<span class="at">existsByJti</span>(jti);
+}
+
+<span class="at">@Transactional</span>
+<span class="tg">public</span> <span class="tg">void</span> <span class="at">revokeToken</span>(String jti, Instant expiresAt) {
+    <span class="tg">if</span> (jti == <span class="tg">null</span> || jti.<span class="at">isBlank</span>()) {
+        <span class="tg">throw</span> <span class="tg">new</span> <span class="at">IllegalArgumentException</span>(
+                <span class="st">"JWT ID (jti) is required to revoke a token"</span>);
+    }
+
+    <span class="tg">if</span> (expiresAt == <span class="tg">null</span>) {
+        <span class="tg">throw</span> <span class="tg">new</span> <span class="at">IllegalArgumentException</span>(
+                <span class="st">"Token expiration time is required"</span>);
+    }
+
+    Instant now = Instant.<span class="at">now</span>();
+
+    <span class="cm">// Remove old revocation records that are no longer needed.</span>
+    revokedTokenRepository.<span class="at">deleteByExpiresAtBefore</span>(now);
+
+    <span class="cm">// Avoid inserting the same token ID more than once.</span>
+    <span class="tg">if</span> (!revokedTokenRepository.<span class="at">existsByJti</span>(jti)) {
+        RevokedToken revokedToken = <span class="tg">new</span> <span class="at">RevokedToken</span>();
+        revokedToken.<span class="at">setJti</span>(jti);
+        revokedToken.<span class="at">setExpiresAt</span>(expiresAt);
+
+        revokedTokenRepository.<span class="at">save</span>(revokedToken);
+    }
+}</div>
+  <div class="mention">
+    <div class="mrow"><b>@Transactional</b><span>Lines 42 and 50 are two writes — delete the old rows, insert the new one — run as one transaction: both happen, or, if an unchecked exception escapes, neither. <a href="sb-good-slice.html">B2</a> covers transactions properly.</span></div>
+    <div class="mrow"><b>readOnly = true</b><span>On <code>isRevoked</code>: a promise that this method only reads, so Hibernate skips checking for changes to save.</span></div>
+    <div class="mrow"><b>line 42</b><span>A row whose token has expired anyway is useless — the expiry check would refuse that token already. Each logout clears them out, so the table stays small.</span></div>
+    <div class="mrow"><b>line 45</b><span>Logging out the same token twice inserts one row, not two.</span></div>
+  </div>
+  <p class="refs">lab2-complete · entity/RevokedToken.java · lines 28–42</p>
+  <div class="cmd"><span class="at">@Column</span>(name = <span class="st">"jti"</span>, nullable = <span class="tg">false</span>, unique = <span class="tg">true</span>, length = <span class="st">36</span>)
+<span class="tg">private</span> String jti;
+
+<span class="at">@Column</span>(name = <span class="st">"expires_at"</span>, nullable = <span class="tg">false</span>)
+<span class="tg">private</span> Instant expiresAt;
+
+<span class="at">@Column</span>(name = <span class="st">"revoked_at"</span>, nullable = <span class="tg">false</span>, updatable = <span class="tg">false</span>)
+<span class="tg">private</span> Instant revokedAt;
+
+<span class="at">@PrePersist</span>
+<span class="tg">protected</span> <span class="tg">void</span> <span class="at">onCreate</span>() {
+    <span class="tg">if</span> (revokedAt == <span class="tg">null</span>) {
+        revokedAt = Instant.<span class="at">now</span>();
+    }
+}</div>
+  <p><code>jti</code> is 36 characters because it's a UUID. <code>expires_at</code> is the token's own <code>exp</code>, kept so line 42 knows when the row can go. <code>@PrePersist</code> fills <code>revoked_at</code> just before the insert, as it fills <code>created_at</code> in <code>User</code>.</p>
+  <p>And on every request, inside the decoder (JwtConfig line 57):</p>
+  <p class="refs">lab2-complete · config/JwtRevocationValidator.java · lines 19–32</p>
+  <div class="cmd"><span class="at">@Override</span>
+<span class="tg">public</span> OAuth2TokenValidatorResult <span class="at">validate</span>(Jwt jwt) {
+    String jti = jwt.<span class="at">getClaimAsString</span>(<span class="st">"jti"</span>);
+
+    <span class="tg">if</span> (jti == <span class="tg">null</span> || jti.<span class="at">isBlank</span>()) {
+        <span class="tg">return</span> <span class="at">invalidToken</span>(<span class="st">"Token is missing its unique ID"</span>);
+    }
+
+    <span class="tg">if</span> (tokenRevocationService.<span class="at">isRevoked</span>(jti)) {
+        <span class="tg">return</span> <span class="at">invalidToken</span>(<span class="st">"Token has been revoked"</span>);
+    }
+
+    <span class="tg">return</span> OAuth2TokenValidatorResult.<span class="at">success</span>();
+}</div>
+  <p>An <code>OAuth2TokenValidator&lt;Jwt&gt;</code> looks at a decoded token and says success or failure. A failure makes the decoder throw, the token filter answers 401, and the request stops. It runs only after the signature matched, so a forged token never costs a database query.</p>
+
+  <h3>The price</h3>
+  <p>Every request that carries a token now runs one <code>SELECT</code> on <code>revoked_tokens</code> — even <code>GET get-all</code>, which doesn't need a token at all. Your "stateless" API got one small table of state back. The usual ways to keep that cost down are short token lifetimes (a smaller window, a smaller table) and, in bigger systems, a long-lived <strong>refresh token</strong> used only to fetch new short-lived ones; your scaffold has neither, just the one-hour token and the table.</p>
+  <p>Revoking is by <code>jti</code>, not by user: logging out on your laptop leaves your phone's token working.</p>
+
+  <div class="dothis">
+    <h4>Try it — log out for real</h4>
+    <ol>
+      <li>Log in; <code>GET /api/auth/me</code> → 200.</li>
+      <li><code>POST /api/auth/logout</code> with the same token → 204. In MySQL: <code>SELECT * FROM revoked_tokens;</code> — your token's <code>jti</code>.</li>
+      <li><code>/api/auth/me</code> with the same token → 401. <code>GET /api/products/get-all</code> with it → also 401 (section 09).</li>
+      <li>Log in twice to get two tokens. Log one out. The other still works.</li>
+      <li>Watch the console while you send any request with a token: <code>show-sql</code> is on in your <code>application.properties</code>, so you see the <code>select</code> on <code>revoked_tokens</code> every time.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Why does <code>revokeToken</code> need the token's expiry time as well as its id?</div>
+    <details><summary>Show answer</summary><div class="a"><p>To know when the row can be deleted. After <code>exp</code>, the timestamp check refuses the token by itself, so keeping its row would only make the table — and every lookup — bigger.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>A token is stolen. The owner logs out from their own copy. Is the thief locked out?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Yes — both copies are the same token, with the same <code>jti</code>, and that <code>jti</code> is now in the table. Without the table, the thief would have it until <code>exp</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 14 complete — I've logged out for real</span></label>
+</section>
+
+<div class="part">Part 4 · From here</div>
+
+<section id="s15">
+  <div class="shead"><span class="chip">15</span><h2>Using this in your contract backend</h2><span class="lvl core">Core</span><span class="tagline">a pointer, not a build</span></div>
+
+  <p>Level B of the backend contract — signup, login, <code>/api/users/me</code>, logout, the 401 rules — is accounts on a JWT, and your Lab 2 security is the worked example. Most of it carries over: the stateless chain, BCrypt with <code>AuthenticationManager</code>, <code>JwtEncoder</code> and <code>JwtDecoder</code>, a <code>jti</code> on a denylist, JSON from an entry point and an access-denied handler. What the contract sets differently is in <a href="api-contract.html#s12">API contract · §12 Level B</a>: other paths (<code>GET /api/users/me</code>), other response field names (<code>expiresIn</code>), fixed messages that must match word for word (<code>Authentication required</code>, <code>Access denied</code>), and its <code>ApiError</code> shape (<a href="api-contract.html#s6">§06</a>, <a href="api-contract.html#s10">§10</a>).</p>
+  <p>Two things from this page will matter there. ADMIN-only writes (<a href="api-contract.html#s13">§13, level C</a>) need <code>ROLE_ADMIN</code> to come out of the token — section 11. And a duplicate signup must reach the client as a 409 — section 16's <code>/error</code> row. The suite tells you how far you are: <code>npm run conformance -- http://localhost:8080 --level B</code>.</p>
+
+  <div class="cue"><p class="cue-k">Not on this page</p><p><strong>CORS.</strong> When a React app on <code>localhost:5173</code> calls your API on <code>localhost:8080</code>, the browser treats them as different origins and asks your server's permission first, with a preflight <code>OPTIONS</code> request that carries no token. Spring Security has to answer it before your rules turn it away for having no token — a <code>cors(…)</code> setting on the same <code>http</code> you've been reading. Your Lab 2 scaffold has none, because nothing called it from a browser. It's taught in <a href="react-lab4.html#s10">React Lab 4 · §10 CORS — what the browser checks</a> and <a href="react-lab4.html#s11">§11 CORS in Spring Boot</a>.</p><p><strong>Google sign-in.</strong> Checking a token you <em>didn't</em> make — Google's RS256 ID token, with its <code>aud</code> — is <a href="oauth-lab.html#s4">OAuth2 lab · §04</a>, <a href="oauth-lab.html#s5">§05</a> and <a href="oauth-lab.html#s11">§11</a>.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 15 complete — I know where my contract backend picks this up</span></label>
+</section>
+
+<section id="s16">
+  <div class="shead"><span class="chip">16</span><h2>When it goes wrong</h2><span class="lvl ref">Reference</span><span class="tagline">the symptom, and what it means</span></div>
+
+  <table class="grid long-key">
+    <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>403 on add / update / delete, even logged in as an ADMIN</td><td>Nothing turns the <code>role</code> claim into <code>ROLE_ADMIN</code>. Section 11's converter bean. Also check you logged in <em>after</em> changing the role.</td></tr>
+    <tr><td>401 on <code>GET /api/products/get-all</code>, which is public</td><td>Postman is still sending an old or edited token in <code>Authorization</code>. A bad token is refused on every route (section 09). Turn the header off.</td></tr>
+    <tr><td>Duplicate signup returns 401 <code>Authentication is required…</code> with <code>"path": "/error"</code></td><td>The 409 <code>ResponseStatusException</code> isn't handled by your <code>@RestControllerAdvice</code>, so Tomcat forwards to <code>/error</code>, which needs a token. Either handle that exception in the advice so it never reaches <code>/error</code> (<a href="sb-good-slice.html">B2</a>), or add <code>"/error"</code> to a <code>permitAll()</code> list.</td></tr>
+    <tr><td>App won't start: <code>JWT secret must contain at least 32 bytes</code></td><td><code>app.security.jwt.secret</code> — or your <code>JWT_SECRET</code> environment variable — is shorter than 32 bytes (section 07).</td></tr>
+    <tr><td>App won't start: <code>ROLE_ADMIN should not start with ROLE_ since ROLE_ is automatically prepended…</code></td><td>You wrote <code>hasRole("ROLE_ADMIN")</code>. Write <code>hasRole("ADMIN")</code>.</td></tr>
+    <tr><td>Every token is 401 after a restart</td><td>The secret changed between runs — a different <code>JWT_SECRET</code>, or an edited line 11 — so old signatures no longer match. Log in again.</td></tr>
+    <tr><td>Login is 401 <code>Invalid email or password</code> for a user you inserted by hand in MySQL; the log warns <code>Encoded password does not look like BCrypt</code></td><td>The <code>password_hash</code> column holds the plain password. BCrypt can only match a BCrypt hash. Create users through <code>/api/auth/signup</code>, then change the role with SQL.</td></tr>
+    <tr><td>The token still works after "logging out" in the client</td><td>Only <code>POST /api/auth/logout</code> logs a token out on the server (section 14).</td></tr>
+    <tr><td>401 on everything, with a token that looks fine</td><td>Is the header exactly <code>Authorization: Bearer &lt;token&gt;</code> — one space, no quotes, no line break? In Postman's Authorization tab, choose <em>Bearer Token</em> and paste the token alone.</td></tr>
+  </table>
+
+  <div class="cue"><p class="cue-k">How to find out why, generally</p><p>Turn on <code>logging.level.org.springframework.security=DEBUG</code> (section 03) and read the lines around your request, or use section 12's temporary <code>exception.getMessage()</code> trick. Then remove both.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 16 read</span></label>
+</section>
+
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+  <div class="gloss">
+    <div class="grow"><b>authentication</b><span>Finding out who is asking. Fails with 401.</span></div>
+    <div class="grow"><b>authorization</b><span>Deciding whether they may do this. Fails with 403.</span></div>
+    <div class="grow"><b>Authentication</b><span>Spring's object for "who is asking": a name, authorities, and the principal (for a token request, the decoded <code>Jwt</code>).</span></div>
+    <div class="grow"><b>authority</b><span>A string an <code>Authentication</code> carries. Rules check for them.</span></div>
+    <div class="grow"><b>AuthenticationManager</b><span>Takes a login attempt and returns it checked, or throws. Yours delegates to a <code>DaoAuthenticationProvider</code>.</span></div>
+    <div class="grow"><b>base64url</b><span>base64 with <code>-</code> and <code>_</code>, no padding. An encoding anyone can reverse.</span></div>
+    <div class="grow"><b>BCrypt</b><span>A slow, salted password hash. 60 characters, starting <code>$2a$10$</code> in your app.</span></div>
+    <div class="grow"><b>bearer token</b><span>A token that works for whoever holds it.</span></div>
+    <div class="grow"><b>claim</b><span>One named fact in a token's payload: <code>sub</code>, <code>exp</code>, <code>role</code>…</span></div>
+    <div class="grow"><b>CSRF</b><span>An attack that rides on cookies a browser sends automatically. Not a risk for a header token; off in your app.</span></div>
+    <div class="grow"><b>denylist</b><span>A list of tokens to refuse though they're otherwise valid. Your <code>revoked_tokens</code>.</span></div>
+    <div class="grow"><b>entry point</b><span>What Spring Security calls when the client must authenticate. Yours writes a 401 JSON.</span></div>
+    <div class="grow"><b>filter chain</b><span>The ordered filters every request passes before your controller.</span></div>
+    <div class="grow"><b>hash</b><span>A one-way function: easy to compute, impossible to reverse.</span></div>
+    <div class="grow"><b>HS256</b><span>HMAC with SHA-256. One shared secret signs and checks.</span></div>
+    <div class="grow"><b>iss, sub, aud</b><span>Issuer (who made it), subject (who it's about), audience (which app it's for).</span></div>
+    <div class="grow"><b>iat, exp, nbf</b><span>Issued at, expires, not before — seconds since 1970, UTC.</span></div>
+    <div class="grow"><b>jti</b><span>A token's own unique id. What logout puts on the denylist.</span></div>
+    <div class="grow"><b>JWT</b><span>JSON Web Token: header.payload.signature.</span></div>
+    <div class="grow"><b>JwtAuthenticationConverter</b><span>Turns a decoded <code>Jwt</code> into an <code>Authentication</code>, including its authorities.</span></div>
+    <div class="grow"><b>JwtDecoder / JwtEncoder</b><span>Checks a token string and decodes it / signs claims into a token string.</span></div>
+    <div class="grow"><b>resource server</b><span>OAuth2's word for an API that accepts bearer tokens.</span></div>
+    <div class="grow"><b>role</b><span>An authority whose name starts with <code>ROLE_</code>. <code>hasRole("X")</code> checks for <code>ROLE_X</code>.</span></div>
+    <div class="grow"><b>salt</b><span>Random bytes mixed into each password before hashing, stored with the hash.</span></div>
+    <div class="grow"><b>SecurityContext</b><span>Where the current request's <code>Authentication</code> is kept while it's handled.</span></div>
+    <div class="grow"><b>stateless</b><span>The server keeps no memory of logins; every request proves itself.</span></div>
+    <div class="grow"><b>UserDetailsService</b><span>Loads a user by name for login. Yours is <code>CustomUserDetailsService</code>.</span></div>
+    <div class="grow"><b>validator</b><span>One check the decoder runs on a token whose signature matched.</span></div>
+  </div>
+</section>
+
+<div class="finish">
+  <h2>How to know you're ready</h2>
+  <p>You understand your Lab 2 security if you can do all of these <em>without looking anything up</em>:</p>
+  <ol>
+    <li>Say what 401 and 403 each mean, and predict which one a given request gets.</li>
+    <li>Explain why your server keeps no session, and why that makes CSRF protection unnecessary here.</li>
+    <li>Name the five filters that matter, in order, and say which one answers a bad token.</li>
+    <li>Trace a login from <code>AuthController</code> to the signed token, naming the class that compares the password.</li>
+    <li>Say why a BCrypt hash can't be reversed, and why the same password hashes differently twice.</li>
+    <li>Decode your own token by hand and name every claim in it.</li>
+    <li>Say what the signature proves and what it doesn't.</li>
+    <li>List what your decoder checks — and say honestly that it doesn't check <code>aud</code>, and why that would matter.</li>
+    <li>Explain why <code>hasRole("ADMIN")</code> fails for an ADMIN as shipped, and what one bean fixes it.</li>
+    <li>Say where <code>/me</code> gets the user from, and why it takes no parameters.</li>
+    <li>Explain why logging out a JWT needs a table, and what it costs.</li>
+  </ol>
+
+  <h2 style="margin-top:30px;font-size:20px">Your token card</h2>
+  <div class="cmd">header    {"alg":"HS256"}                     → always eyJhbGciOiJIUzI1NiJ9
+iss       ecommerce-api                       checked: JwtValidators.createDefaultWithIssuer
+sub       the email                           → authentication.getName()
+iat, exp  seconds since 1970, exp−iat = 3600  checked: ±60 s
+jti       a UUID                              checked: JwtRevocationValidator (revoked_tokens)
+role      STUDENT / ADMIN                     read by: nothing — unless you add the converter
+aud       —                                   not written, not checked
+signature HMAC-SHA256(header.payload, secret) checked: NimbusJwtDecoder, HS256 only</div>
+
+  <h2 style="margin-top:24px;font-size:20px">Status card</h2>
+  <div class="cmd">no token, protected route        401  entry point            "Authentication is required…"
+bad / expired / revoked token    401  entry point            (same — on public routes too)
+valid token, wrong role          403  access-denied handler  "You do not have permission…"
+wrong password / unknown email   401  GlobalExceptionHandler "Invalid email or password"
+duplicate signup (real server)   401  via /error             — section 16</div>
+
+  <h2 style="margin-top:24px;font-size:20px">Where to look card</h2>
+  <div class="cmd">which routes need what        config/SecurityConfig          lines 38–82
+no session, no CSRF           config/SecurityConfig          lines 26–31
+password hashing              config/SecurityBeansConfig     lines 14–17
+loading a user at login       service/CustomUserDetailsService
+what goes in the token        service/JwtService             lines 34–41
+secret, encoder, decoder      config/JwtConfig
+the 401 / 403 bodies          config/RestSecurityErrorHandler
+logout                        service/TokenRevocationService + config/JwtRevocationValidator</div>
+</div>
+
+<style>
+.jwtbox{border:1px solid var(--ink);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.jwt-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px;display:block}
+.jwtbox textarea,.jwtbox input[type=text]{width:100%;font-family:var(--mono);font-size:12.5px;line-height:1.5;border:1px solid var(--line);background:#FAFCFB;color:var(--ink);padding:8px 10px;word-break:break-all;resize:vertical}
+.jwtbox textarea:focus-visible,.jwtbox input:focus-visible{outline:3px solid var(--signal);outline-offset:1px}
+.jwt-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 14px}
+.jwt-row input[type=text]{flex:1 1 220px;width:auto}
+.jwt-btn{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;background:var(--dark);color:var(--paper);border:1px solid var(--dark);padding:7px 11px;cursor:pointer}
+.jwt-btn:hover{color:var(--signal)}
+.jwt-btn:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+.jwt-grid{display:grid;grid-template-columns:1fr 1.6fr;gap:12px}
+.jwt-out{font-family:var(--mono);font-size:12.5px;line-height:1.6;background:var(--dark);color:#DDE3E0;padding:10px 12px;margin:0;white-space:pre-wrap;word-break:break-all;min-height:44px}
+.jwt-note{font-size:14px;color:#2B3936;margin:10px 0 0}
+.jwt-note.bad{color:#9A2E1C;font-weight:600}
+.jwt-note.ok{color:var(--teal);font-weight:600}
+.jwt-note + .jwt-k{margin-top:16px}
+@media (max-width:640px){.jwt-grid{grid-template-columns:1fr}}
+</style>
+<script>
+(function(){
+  var box=document.getElementById('jwtbox'); if(!box) return;
+  var input=document.getElementById('jwt-in'), outH=document.getElementById('jwt-h'), outP=document.getElementById('jwt-p');
+  var life=document.getElementById('jwt-life'), sig=document.getElementById('jwt-sig'), secret=document.getElementById('jwt-secret');
+  function fromB64url(s){
+    var b=s.replace(/-/g,'+').replace(/_/g,'/'); while(b.length%4) b+='=';
+    var bin=atob(b), bytes=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+  function toB64url(bytes){
+    var bin=''; for(var i=0;i<bytes.length;i++) bin+=String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function parts(){
+    var t=input.value.trim().replace(/^Bearer\s+/i,'');
+    var p=t.split('.');
+    if(p.length!==3) throw new Error('A JWT has three parts separated by dots; this has '+p.length+'.');
+    return {raw:t, h:p[0], p:p[1], s:p[2], header:JSON.parse(fromB64url(p[0])), payload:JSON.parse(fromB64url(p[1]))};
+  }
+  function setNote(el,text,cls){ el.textContent=text; el.className='jwt-note'+(cls?' '+cls:''); }
+  function render(){
+    try{
+      var t=parts();
+      outH.textContent=JSON.stringify(t.header,null,2);
+      outP.textContent=JSON.stringify(t.payload,null,2);
+      var exp=t.payload.exp, iat=t.payload.iat, msg='';
+      if(typeof exp==='number' && typeof iat==='number') msg='exp − iat = '+(exp-iat)+' seconds. ';
+      if(typeof exp==='number'){
+        var left=Math.round(exp-Date.now()/1000);
+        msg+= left>0 ? 'exp is '+Math.ceil(left/60)+' minute(s) away: the server would still accept it (if nothing else is wrong).'
+                     : 'exp has passed: the server would refuse this token.';
+      } else msg+='No exp claim.';
+      setNote(life,msg,'');
+    }catch(e){
+      outH.textContent='—'; outP.textContent='—';
+      setNote(life,'Can’t read that: '+e.message,'bad');
+    }
+  }
+  input.addEventListener('input',function(){ render(); setNote(sig,'Press Check to compare the signature.',''); });
+  document.getElementById('jwt-forge').addEventListener('click',function(){
+    try{
+      var t=parts(); var pl=t.payload;
+      pl.role = pl.role==='ADMIN' ? 'STUDENT' : 'ADMIN';
+      input.value=t.h+'.'+toB64url(new TextEncoder().encode(JSON.stringify(pl)))+'.'+t.s;
+      render(); setNote(sig,'Payload edited, signature unchanged. Press Check.','');
+    }catch(e){ setNote(life,'Can’t edit that: '+e.message,'bad'); }
+  });
+  document.getElementById('jwt-copy').addEventListener('click',function(){
+    var v=input.value.trim();
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(v).then(function(){ setNote(sig,'Token copied.',''); },function(){}); }
+    else { input.select(); try{ document.execCommand('copy'); setNote(sig,'Token copied.',''); }catch(e){} }
+  });
+  document.getElementById('jwt-check').addEventListener('click',function(){
+    var t; try{ t=parts(); }catch(e){ setNote(sig,e.message,'bad'); return; }
+    if(t.header.alg!=='HS256'){ setNote(sig,'This header says alg "'+t.header.alg+'". Your decoder only accepts HS256 — refused before any key is used.','bad'); return; }
+    if(!(window.crypto&&crypto.subtle)){ setNote(sig,'This browser can’t run the check here. Use the console snippet below instead.','bad'); return; }
+    var enc=new TextEncoder();
+    crypto.subtle.importKey('raw',enc.encode(secret.value),{name:'HMAC',hash:'SHA-256'},false,['sign'])
+      .then(function(key){ return crypto.subtle.sign('HMAC',key,enc.encode(t.h+'.'+t.p)); })
+      .then(function(mac){
+        var ok=toB64url(new Uint8Array(mac))===t.s;
+        setNote(sig, ok ? 'Signature matches: made with this secret, and not changed since.'
+                        : 'Signature does NOT match: a different secret, or the header or payload was changed. Your server would answer 401.', ok?'ok':'bad');
+      })
+      .catch(function(e){ setNote(sig,'Check failed: '+e.message,'bad'); });
+  });
+  render();
+})();
+</script>
+
+<footer>M.Tech CSE · ESD · Spring Boot<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+</div>
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ---- */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  /* ---- progress: CORE sections drive the bar; stretch boxes are tracked separately.
+         Both are remembered in this browser, so they survive a reload. ---- */
+  function load(key){ try{ return JSON.parse(localStorage.getItem(key)||'[]'); }catch(err){ return []; } }
+  function save(key,list){ try{ localStorage.setItem(key,JSON.stringify(list.map(function(c){return c.checked}))); }catch(err){} }
+  var KEY='esd-sb-security-progress', SKEY='esd-sb-security-stretch';
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var extras=[].slice.call(document.querySelectorAll('.chk-s'));
+  var saved=load(KEY), savedS=load(SKEY);
+  checks.forEach(function(c,i){ if(saved[i]) c.checked=true; });
+  extras.forEach(function(c,i){ if(savedS[i]) c.checked=true; });
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=["Core first, in order. Keep your Lab 2 project open beside this page.", "Good start. Every section starts from lines you already have.", "Past halfway. Next: what the token is allowed to do.", "Nearly there.", "Core done. The stretch boxes, or your contract backend — section 15."];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    var s=extras.filter(function(c){return c.checked}).length;
+    msg.textContent=(n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))])+(s?'  ·  stretch: '+s+' / '+extras.length:'');
+    save(KEY,checks); save(SKEY,extras);
+  }
+  checks.concat(extras).forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^[$>]\s?/,'').trimEnd()}).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>

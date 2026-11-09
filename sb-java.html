@@ -1,0 +1,1950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Java that Spring code leans on — Spring Boot</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#101614">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Condensed:wght@600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+.cue.work{border-left-color:var(--ink);background:var(--surface)}
+.cue.work .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.tg{color:var(--term-green)}
+.at{color:var(--signal)}
+.st{color:#B7C4C0}
+.tx{color:#FFFFFF}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 182px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+.quiz .a .cmd{margin-top:4px}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 168px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+/* ---- additions for the lab docs ---- */
+.cue.react{border-left-color:var(--term-green);background:var(--dark);color:#DDE3E0}
+.cue.react .cue-k{color:var(--term-green)}
+.cue.react code{background:#22302D;color:var(--term-green)}
+.cue.react strong{color:#FFF}
+.refs{font-family:var(--mono);font-size:12px;color:var(--muted);margin:-6px 0 16px;max-width:70ch}
+.refs a{color:var(--teal);font-weight:600}
+.part{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper);background:var(--ink);display:inline-block;padding:5px 10px;margin:64px 0 -28px}
+.toc .rpart{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);padding:10px 16px 6px;border-bottom:1px solid var(--line);background:var(--teal-soft);font-weight:600}
+table.grid{border-collapse:collapse;width:100%;max-width:70ch;background:var(--surface);border:1px solid var(--ink);margin:0 0 16px;font-size:14.5px}
+table.grid th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;text-align:left;color:var(--muted);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--ink)}
+table.grid td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.grid tr:last-child td{border-bottom:0}
+table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--teal);font-weight:600;white-space:nowrap}
+
+/* ---- core / stretch ---- */
+.lvl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:3px 7px;align-self:center;white-space:nowrap}
+.lvl.core{background:var(--ink);color:var(--signal)}
+.lvl.stretch{border:1px dashed var(--teal);color:var(--teal)}
+.lvl.ref{border:1px solid var(--muted);color:var(--muted)}
+.rrow .rl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:600;flex:0 0 auto;border:1px dashed var(--teal);padding:1px 6px;align-self:center}
+.rrow .rl.ref{color:var(--muted);border:1px solid var(--muted)}
+.rrow.is-extra .rw{color:var(--muted)}
+.stretch-box{border:1px dashed var(--teal);background:rgba(255,255,255,.55);padding:14px 16px 4px;margin:8px 0 18px}
+.stretch-box::before{content:"Stretch — optional. Do it if you can, and ask about it any time.";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600;margin-bottom:10px}
+.stretch-box h3:first-of-type{margin-top:0}
+/* tables whose first column holds long text (error messages): even, wrapping columns */
+table.grid.long-key{table-layout:fixed}
+table.grid.long-key td:first-child{white-space:normal;width:42%;overflow-wrap:anywhere}
+table.grid.long-key th:first-child{width:42%}
+.legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 0;font-size:14px;color:#2B3936}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+  table.grid td:first-child{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> Spring Boot · B0 · Self-paced</p>
+  <h1>The Java<br>Spring code <em>leans on</em></h1>
+  <p class="lede">Your Spring Boot code can look like a new language: an <code>@</code> on every other line, <code>&lt;Product, Long&gt;</code>, <code>() -&gt;</code>, <code>::</code>. It is Java 17, the same Java as Assignment 1, using a few features that A1 met once and Spring uses everywhere. This page takes the lines you wrote in the two Spring Boot labs and explains the Java in each one. Then the four Spring Boot manuals can be about Spring.</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">14</span> core</div>
+      <div class="tracker-msg" id="msg">Core first, in order. Keep your lab project open beside this page.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill" style="width: 0%;"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p><strong>The labs are done and submitted.</strong> This page explains the Java inside the code you already wrote, and connects it to Assignment 1. There is nothing to build and nothing to hand in.</p>
+  <p><strong>It is optional preparation for the four Spring Boot manuals</strong> (B1–B4). They explain what Spring does with your code. This one explains the Java underneath, so that when B1 says "Spring reads <code>@Service</code>", or B2 says "throw a <code>ProductNotFoundException</code>", the Java part is already familiar. Where Spring takes over, this page stops and says which manual carries on.</p>
+  <p><strong>Keep your own lab project open in IntelliJ</strong>, as it was at the end of Lab 2, and your Assignment 1 project too. Every section starts from lines you wrote. Missing a step? Clone <a href="https://github.com/sivasomanath2502/ESD_Session" target="_blank" rel="noopener">ESD_Session</a> and run <code>git switch --detach lab2-complete</code> (or <code>lab1-complete</code>) — that is the shared reference.</p>
+  <p><strong>Core and stretch.</strong> <span class="lvl core">Core</span> is the page itself, and reads in one sitting. <span class="lvl stretch">Stretch</span> boxes go one step further, always about your own code. Skip them freely.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — do the core sections in order; stretch is extra</div>
+  <div class="rpart">Part 1 · Start here</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">How to use this page</span></a>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">One file of yours, read as Java</span></a>
+  <div class="rpart">Part 2 · The shape of the code</div>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">Packages and imports</span></a>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">Annotations — notes someone else reads</span></a>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">Lombok — the code you didn't type</span></a>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">Interfaces and generics</span></a>
+  <div class="rpart">Part 3 · Passing code around</div>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">Optional — a product, or none</span></a>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">Lambdas and method references</span></a>
+  <a class="rrow" href="#s9"><span class="rt">09</span><span class="rw">Streams</span></a>
+  <a class="rrow" href="#s10"><span class="rt">10</span><span class="rw">Exceptions</span></a>
+  <div class="rpart">Part 4 · The values in your fields</div>
+  <a class="rrow" href="#s11"><span class="rt">11</span><span class="rw">Long, Integer and BigDecimal</span></a>
+  <a class="rrow" href="#s12"><span class="rt">12</span><span class="rw">Instant and enums</span></a>
+  <a class="rrow" href="#s13"><span class="rt">13</span><span class="rw">equals, hashCode and toString</span></a>
+  <div class="rpart">Part 5 · Onward</div>
+  <a class="rrow" href="#s14"><span class="rt">14</span><span class="rw">Where you'll use this</span></a>
+  <a class="rrow is-extra" href="#s15"><span class="rt">15</span><span class="rw">When it goes wrong</span><span class="rl ref">reference</span></a>
+  <a class="rrow is-extra" href="#s16"><span class="rt">16</span><span class="rw">Small things in your code</span><span class="rl">stretch</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; reference cards</span></a>
+</nav>
+
+<div class="part">Part 1 · Start here</div>
+
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>How to use this page</h2><span class="lvl core">Core</span><span class="tagline">jshell, one-file programs, and the captions</span></div>
+
+  <h3>What you need</h3>
+  <div class="mention">
+    <div class="mrow"><b>JDK 17</b><span>The one your lab project uses. It comes with <code>jshell</code> and <code>javap</code>, the two tools this page uses.</span></div>
+    <div class="mrow"><b>Your lab project</b><span>Open in IntelliJ, at the end of Lab 2. Every lab file named on this page is under <code>src/main/java/com/esd/ecommerce/</code>.</span></div>
+    <div class="mrow"><b>Your A1 project</b><span>The Library Catalogue. Several sections compare your <code>Book</code> with your <code>Product</code>.</span></div>
+  </div>
+
+  <h3>One-liners: jshell</h3>
+  <p><code>jshell</code> runs Java one line at a time and shows the value of each line. Start it from any terminal:</p>
+  <div class="cmd"><span class="p">$</span> jshell
+<span class="o">|  Welcome to JShell -- Version 17…</span>
+<span class="o">jshell&gt; "  Laptop ".trim()</span>
+<span class="o">$1 ==&gt; "Laptop"</span>
+<span class="o">jshell&gt; /exit</span>
+<span class="o">|  Goodbye</span></div>
+  <p>On this page, jshell lines are written like the block below. The grey part after <code>//</code> is what jshell prints after <code>==&gt;</code>. The <em>Copy</em> button leaves the grey parts out, so you can paste a whole block into jshell.</p>
+  <div class="cmd"><span class="st">"  Laptop "</span>.<span class="at">trim</span>()       <span class="o">// "Laptop"</span>
+<span class="st">"Laptop"</span>.<span class="at">length</span>()        <span class="o">// 6</span></div>
+  <p>jshell imports <code>java.util</code>, <code>java.util.function</code>, <code>java.util.stream</code> and <code>java.math</code> for you. For <code>java.time</code>, type <code>import java.time.*</code> first.</p>
+
+  <h3>Whole files: java Name.java</h3>
+  <p>Longer snippets are complete programs. Their first line is a comment with the file name, like <code>// Pipeline.java</code>. Save the snippet under that name and run it. Since Java 11, <code>java</code> compiles and runs a single file in one step:</p>
+  <div class="cmd"><span class="p">$</span> java Pipeline.java</div>
+  <p>Every program on this page was compiled for Java 17 and run, and every printed line it shows is what it really printed.</p>
+
+  <h3>The captions under your code</h3>
+  <p>When a block quotes your lab code, a caption under it says where it is: the tag, the path under <code>src/main/java/com/esd/ecommerce/</code>, and the line numbers in IntelliJ. Like this one:</p>
+  <div class="cmd"><span class="at">@SpringBootApplication</span>
+<span class="tg">public</span> <span class="tg">class</span> EcommerceApplication {</div>
+  <p class="refs">lab2-complete · EcommerceApplication.java · lines 6–7</p>
+  <p>The tag is the state of the shared reference repository. If your own project differs a little, that's fine — the Java is the same.</p>
+
+  <div class="cue"><p class="cue-k">If jshell or javap is "not found"</p><p>The JDK's tools aren't on your <code>PATH</code>. IntelliJ shows which JDK your project uses under <em>File → Project Structure → SDKs</em>, with its folder. The tools are in that folder's <code>bin</code>. Run them from there, or add that <code>bin</code> to your <code>PATH</code>.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — jshell runs</span></label>
+</section>
+
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>One file of yours, read as Java</h2><span class="lvl core">Core</span><span class="tagline">ProductService, piece by piece</span></div>
+
+  <p>Here is the start of your <code>ProductService</code> from Lab 2, exactly as you have it. Don't try to explain it yet. Just notice how much of it isn't "business logic" at all.</p>
+  <div class="cmd"><span class="tg">package</span> com.esd.ecommerce.service;
+
+<span class="tg">import</span> com.esd.ecommerce.dto.ProductRequest;
+<span class="tg">import</span> com.esd.ecommerce.dto.ProductResponse;
+<span class="tg">import</span> com.esd.ecommerce.entity.Product;
+<span class="tg">import</span> com.esd.ecommerce.exception.ProductNotFoundException;
+<span class="tg">import</span> com.esd.ecommerce.repository.ProductRepository;
+<span class="tg">import</span> lombok.RequiredArgsConstructor;
+<span class="tg">import</span> org.springframework.stereotype.Service;
+
+<span class="tg">import</span> java.util.List;
+
+<span class="at">@Service</span>
+<span class="at">@RequiredArgsConstructor</span>
+<span class="tg">public</span> <span class="tg">class</span> ProductService {
+
+    <span class="tg">private</span> <span class="tg">final</span> ProductRepository productRepository;
+
+    <span class="tg">public</span> List&lt;ProductResponse&gt; <span class="at">getAllProducts</span>() {
+        <span class="tg">return</span> productRepository.<span class="at">findAll</span>()
+                .<span class="at">stream</span>()
+                .<span class="at">map</span>(<span class="tg">this</span>::toProductResponse)
+                .<span class="at">toList</span>();
+    }
+
+    <span class="tg">public</span> ProductResponse <span class="at">getProductById</span>(Long id) {
+        Product product = productRepository.<span class="at">findById</span>(id)
+                .<span class="at">orElseThrow</span>(() -&gt; <span class="tg">new</span> <span class="at">ProductNotFoundException</span>(id));
+
+        <span class="tg">return</span> <span class="at">toProductResponse</span>(product);
+    }</div>
+  <p class="refs">lab2-complete · service/ProductService.java · lines 2–32</p>
+  <p>And the method at the bottom of the same file:</p>
+  <div class="cmd"><span class="tg">private</span> ProductResponse <span class="at">toProductResponse</span>(Product product) {
+    <span class="tg">return</span> ProductResponse.<span class="at">builder</span>()
+            .<span class="at">id</span>(product.<span class="at">getId</span>())
+            .<span class="at">name</span>(product.<span class="at">getName</span>())
+            .<span class="at">description</span>(product.<span class="at">getDescription</span>())
+            .<span class="at">price</span>(product.<span class="at">getPrice</span>())
+            .<span class="at">category</span>(product.<span class="at">getCategory</span>())
+            .<span class="at">stock</span>(product.<span class="at">getStock</span>())
+            .<span class="at">build</span>();
+}</div>
+  <p class="refs">lab2-complete · service/ProductService.java · lines 76–85</p>
+
+  <h3>Piece by piece</h3>
+  <ol>
+    <li><strong><code>package …</code> and <code>import …</code></strong> — where this class lives, and the short names it uses. Section 03.</li>
+    <li><strong><code>@Service</code>, <code>@RequiredArgsConstructor</code></strong> — annotations: notes for someone else to read. <code>@Service</code> is read by Spring when the app runs; <code>@RequiredArgsConstructor</code> by Lombok while it compiles. Sections 04 and 05.</li>
+    <li><strong><code>private final ProductRepository productRepository;</code></strong> — a field whose type is an interface, set once by a constructor you never typed. Sections 05 and 06.</li>
+    <li><strong><code>List&lt;ProductResponse&gt;</code></strong> — a generic type: a list that may only hold <code>ProductResponse</code>s. Section 06.</li>
+    <li><strong><code>findById(id)</code></strong> — returns an <code>Optional&lt;Product&gt;</code>: a product, or nothing. Section 07.</li>
+    <li><strong><code>.orElseThrow(() -&gt; new ProductNotFoundException(id))</code></strong> — a lambda that makes your own unchecked exception, only if it's needed. Sections 07, 08 and 10.</li>
+    <li><strong><code>.stream().map(this::toProductResponse).toList()</code></strong> — a stream, with a method reference. Sections 08 and 09.</li>
+    <li><strong><code>ProductResponse.builder() … .build()</code></strong> — a builder that Lombok wrote. Section 05.</li>
+    <li><strong><code>Long id</code>, <code>product.getPrice()</code></strong> — a <code>Long</code> rather than a <code>long</code>, and a price that is a <code>BigDecimal</code>. Section 11.</li>
+  </ol>
+
+  <h3>The rest of your project</h3>
+  <p>Every other file is built from the same pieces, plus two more: <code>Instant</code> and enums (section 12). One thing is missing everywhere: no class in your lab has <code>equals</code> or <code>toString</code>, though your A1 <code>Book</code> did (section 13).</p>
+  <table class="grid long-key">
+    <tr><th>Your file</th><th>The Java in it</th></tr>
+    <tr><td>entity/Product.java</td><td>annotations, Lombok, <code>Long</code>, <code>Integer</code>, <code>BigDecimal</code> — 04, 05, 11</td></tr>
+    <tr><td>entity/User.java, Role.java</td><td><code>Instant</code>, an enum — 12</td></tr>
+    <tr><td>repository/*.java</td><td>interfaces, generics, <code>Optional</code> — 06, 07</td></tr>
+    <tr><td>dto/*.java</td><td>Lombok's <code>@Builder</code> — 05</td></tr>
+    <tr><td>exception/*.java</td><td>your own <code>RuntimeException</code>, a lambda in <code>forEach</code> — 08, 10</td></tr>
+    <tr><td>config/SecurityConfig.java</td><td>lambdas, one after another — 08</td></tr>
+    <tr><td>config/RestSecurityErrorHandler.java</td><td>a lambda as an object, a checked exception — 08, 10</td></tr>
+    <tr><td>service/JwtService.java</td><td><code>Instant</code>, a builder someone else wrote — 05, 12</td></tr>
+  </table>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 complete</span></label>
+</section>
+
+<div class="part">Part 2 · The shape of the code</div>
+
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>Packages and imports</h2><span class="lvl core">Core</span><span class="tagline">the first lines of every file</span></div>
+
+  <div class="cmd"><span class="tg">package</span> com.esd.ecommerce.entity;
+
+<span class="tg">import</span> jakarta.persistence.*;
+<span class="tg">import</span> lombok.*;
+
+<span class="tg">import</span> java.math.BigDecimal;</div>
+  <p class="refs">lab2-complete · entity/Product.java · lines 1–6</p>
+
+  <h3>package: the class's full name</h3>
+  <p><code>package com.esd.ecommerce.entity;</code> makes the class's full name <code>com.esd.ecommerce.entity.Product</code>. The folder path matches it: <code>src/main/java/com/esd/ecommerce/entity/Product.java</code>. Keep the two in step. IntelliJ flags a file whose folder doesn't match its package, and <em>Refactor → Move</em> changes both for you.</p>
+  <p>Your project has one package per layer — <code>config</code>, <code>controller</code>, <code>dto</code>, <code>entity</code>, <code>exception</code>, <code>repository</code>, <code>service</code> — all inside <code>com.esd.ecommerce</code>, where <code>EcommerceApplication</code> sits. Why the application class has to sit at the top: <a href="sb-request-flow.html">B1</a>.</p>
+  <p>One more rule ties files to classes: a <code>public</code> class must be in a file with its name. Put <code>public class Product</code> in a file called anything else and the compiler stops:</p>
+  <div class="cmd"><span class="o">Wrong.java:1: error: class Product is public, should be declared in a file named Product.java</span></div>
+
+  <h3>import: short names</h3>
+  <div class="mention">
+    <div class="mrow"><b>import java.math.BigDecimal;</b><span>One class. You can now write <code>BigDecimal</code> instead of <code>java.math.BigDecimal</code>.</span></div>
+    <div class="mrow"><b>import lombok.*;</b><span>Every class in the package <code>lombok</code> — but not in packages inside it. <code>jakarta.persistence.*</code> brings <code>Entity</code>, <code>Id</code>, <code>Table</code> and the rest.</span></div>
+    <div class="mrow"><b>no import at all</b><span><code>java.lang</code> is always imported. That's why no file of yours imports <code>String</code>, <code>Long</code>, <code>RuntimeException</code> or <code>IllegalStateException</code>.</span></div>
+    <div class="mrow"><b>import static</b><span>Your A1 tests start with <code>import static org.junit.jupiter.api.Assertions.assertEquals;</code>. A static import brings in one static method, so you can write <code>assertEquals(…)</code> instead of <code>Assertions.assertEquals(…)</code>.</span></div>
+  </div>
+  <p>Forget an import and the compiler can't find the short name:</p>
+  <div class="cmd"><span class="o">NoImp.java:2: error: cannot find symbol</span>
+<span class="o">    private BigDecimal price;</span>
+<span class="o">            ^</span>
+<span class="o">  symbol:   class BigDecimal</span>
+<span class="o">  location: class NoImp</span></div>
+
+  <h3>Two classes called User</h3>
+  <p>Your project has two classes with the same short name: your entity <code>com.esd.ecommerce.entity.User</code>, and Spring Security's <code>org.springframework.security.core.userdetails.User</code>. A file can import only one of them by its short name. <code>CustomUserDetailsService</code> imports your entity (line 4), so where it needs Spring's class it writes the full name:</p>
+  <div class="cmd"><span class="tg">return</span> org.springframework.security.core.userdetails.User
+        .<span class="at">withUsername</span>(user.<span class="at">getEmail</span>())
+        .<span class="at">password</span>(user.<span class="at">getPasswordHash</span>())
+        .<span class="at">roles</span>(user.<span class="at">getRole</span>().<span class="at">name</span>())
+        .<span class="at">build</span>();</div>
+  <p class="refs">lab2-complete · service/CustomUserDetailsService.java · lines 33–37</p>
+
+  <div class="dothis">
+    <h4>Try it — on your project</h4>
+    <ol>
+      <li>In <code>CustomUserDetailsService.java</code>, line 33, delete <code>org.springframework.security.core.userdetails.</code> so the line reads <code>return User</code>.</li>
+      <li>IntelliJ underlines <code>withUsername</code> in red. <code>User</code> now means your entity, which has no such method. A compile (<code>./mvnw -q compile</code>; on Windows <code>mvnw.cmd -q compile</code>) says the same: <code>cannot find symbol … method withUsername(String) … location: class User</code>.</li>
+      <li>Undo (<kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>Z</kbd>).</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b><code>ProductNotFoundException.java</code> has no imports at all, yet it extends <code>RuntimeException</code>. Why does it compile?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>RuntimeException</code> is in <code>java.lang</code>, which every file imports automatically.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b><code>ProductController.java</code> has <code>import org.springframework.web.bind.annotation.*;</code>. Which of these does that import cover: <code>GetMapping</code>, <code>PathVariable</code>, <code>ResponseEntity</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>GetMapping</code> and <code>PathVariable</code> — they are in that package. <code>ResponseEntity</code> is in <code>org.springframework.http</code>, which is why the file imports it separately (line 10).</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 complete</span></label>
+</section>
+
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>Annotations — notes someone else reads</h2><span class="lvl core">Core</span><span class="tagline">the one idea to carry into Spring</span></div>
+
+  <div class="cmd"><span class="at">@Entity</span>
+<span class="at">@Table</span>(name = <span class="st">"products"</span>)
+<span class="at">@Getter</span>
+<span class="at">@Setter</span>
+<span class="at">@NoArgsConstructor</span>
+<span class="at">@AllArgsConstructor</span>
+<span class="tg">public</span> <span class="tg">class</span> Product {
+
+    <span class="at">@Id</span>
+    <span class="at">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+    <span class="tg">private</span> Long id;</div>
+  <p class="refs">lab2-complete · entity/Product.java · lines 8–18</p>
+
+  <p>Eight annotations in eleven lines. An <strong>annotation</strong> is a note attached to a class, a field, a method or a parameter. On its own it does nothing: no code runs because a note is there. <strong>Something else reads the note and acts on it.</strong> In your project there are three kinds of reader, at two different times.</p>
+
+  <table class="grid">
+    <tr><th>Who reads it</th><th>When</th><th>In your code</th></tr>
+    <tr><td>the compiler</td><td>while compiling</td><td><code>@Override</code> — "check that this really overrides something" (<code>CustomUserDetailsService</code>, line 20)</td></tr>
+    <tr><td>Lombok</td><td>while compiling, inside the compiler</td><td><code>@Getter</code>, <code>@Setter</code>, <code>@NoArgsConstructor</code>, <code>@AllArgsConstructor</code>, <code>@Builder</code>, <code>@RequiredArgsConstructor</code> — "write this code for me"</td></tr>
+    <tr><td>Spring and its libraries</td><td>while your app runs</td><td><code>@Service</code>, <code>@RestController</code>, <code>@GetMapping</code>, <code>@Value</code>; Hibernate reads <code>@Entity</code>, <code>@Id</code>, <code>@Table</code>; the validator reads <code>@NotBlank</code>, <code>@Size</code></td></tr>
+  </table>
+
+  <figure class="board">
+    <svg viewBox="0 0 600 452" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Four stages. 1: you type Product.java with annotations. 2: javac compiles it; the compiler reads Override, and Lombok reads Getter and the others and writes methods into the class; both kinds of note are then dropped. 3: Product.class holds the methods Lombok wrote and keeps Entity, Table and Id. 4: when the app runs, Spring and Hibernate find the kept notes and act." style="max-width:600px;margin:0 auto">
+      <text x="0" y="16" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="14" fill="#0F1A18">WHO READS AN ANNOTATION, AND WHEN</text>
+      <rect x="0" y="32" width="600" height="66" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="14" y="54" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="#0B5D51">1 · You type Product.java</text>
+      <text x="14" y="80" font-family="IBM Plex Mono, monospace" font-size="13" fill="#0F1A18">@Entity @Table @Id   @Getter @Setter @NoArgsConstructor …</text>
+      <line x1="300" y1="98" x2="300" y2="116" stroke="#0B5D51" stroke-width="2"/><polygon points="294,112 306,112 300,122" fill="#0B5D51"/>
+      <rect x="0" y="124" width="600" height="112" fill="#E4EEEB" stroke="#0B5D51" stroke-width="2"/>
+      <text x="14" y="146" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="#0B5D51">2 · javac compiles it</text>
+      <text x="14" y="170" font-family="IBM Plex Sans, sans-serif" font-size="14" fill="#0F1A18">The compiler reads @Override and checks it.</text>
+      <text x="14" y="192" font-family="IBM Plex Sans, sans-serif" font-size="14" fill="#0F1A18">Lombok, running inside the compiler, reads @Getter and the rest, and</text>
+      <text x="14" y="212" font-family="IBM Plex Sans, sans-serif" font-size="14" fill="#0F1A18">writes the getters, setters and constructors into the class.</text>
+      <text x="14" y="230" font-family="IBM Plex Mono, monospace" font-size="12" fill="#8A6D08">Then both kinds of note are thrown away. Retention: SOURCE.</text>
+      <line x1="300" y1="236" x2="300" y2="254" stroke="#0B5D51" stroke-width="2"/><polygon points="294,250 306,250 300,260" fill="#0B5D51"/>
+      <rect x="0" y="262" width="600" height="76" fill="#101614"/>
+      <text x="14" y="284" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="#F5C518">3 · Product.class — what is left</text>
+      <text x="14" y="308" font-family="IBM Plex Mono, monospace" font-size="13" fill="#DDE3E0">getId() … setStock(…)  Product()  Product(id, …)</text>
+      <text x="14" y="328" font-family="IBM Plex Mono, monospace" font-size="13" fill="#7FD1B9">@Entity @Table @Id kept. No @Getter, no @Override.</text>
+      <line x1="300" y1="338" x2="300" y2="356" stroke="#0B5D51" stroke-width="2"/><polygon points="294,352 306,352 300,362" fill="#0B5D51"/>
+      <rect x="0" y="364" width="600" height="86" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="14" y="386" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="#0B5D51">4 · Your app runs</text>
+      <text x="14" y="410" font-family="IBM Plex Sans, sans-serif" font-size="14" fill="#0F1A18">Spring and Hibernate look through your classes, find @Entity, @Service,</text>
+      <text x="14" y="430" font-family="IBM Plex Sans, sans-serif" font-size="14" fill="#0F1A18">@GetMapping … and act on them. Retention: RUNTIME.</text>
+    </svg>
+    <figcaption>A note does nothing. Its reader does something — and each reader works at a different time.</figcaption>
+  </figure>
+
+  <h3>Retention: how long a note is kept</h3>
+  <p>Every annotation type says how long its notes survive, with <code>@Retention</code>. <code>SOURCE</code> notes are read during compiling and then dropped; they are not in the <code>.class</code> file at all. <code>@Override</code> and every Lombok annotation are <code>SOURCE</code>. <code>RUNTIME</code> notes are written into the <code>.class</code> file and can still be read while the program runs. Spring's and JPA's annotations are <code>RUNTIME</code>, because Spring reads them only when your app starts. (There is a third, <code>CLASS</code> — kept in the file but not readable at run time. It's the default, and none of your annotations use it.) So when you meet a new annotation, ask two questions: <strong>who reads it, and when?</strong> The answer tells you what it can and can't do.</p>
+
+  <h3>Reading the syntax</h3>
+  <p>Every form you wrote, with an example from your project:</p>
+  <div class="mention">
+    <div class="mrow"><b>@Getter</b><span>No values. The note itself is the message.</span></div>
+    <div class="mrow"><b>@Table(name = "products")</b><span>A named value. <code>@Column(name = "full_name", nullable = false, length = 100)</code> in <code>User.java</code> sets three.</span></div>
+    <div class="mrow"><b>@GetMapping("/get-all")</b><span>One value with no name. That sets the element called <code>value</code>. Same for <code>@Value("${app.security.jwt.issuer}")</code>.</span></div>
+    <div class="mrow"><b>strategy = GenerationType.IDENTITY</b><span>A value can be an enum constant (section 12)…</span></div>
+    <div class="mrow"><b>@ExceptionHandler(<wbr>ProductNotFoundException.class)</b><span>…a class (section 16)…</span></div>
+    <div class="mrow"><b>@Operation(security = {})</b><span>…an array — here an empty one (<code>AuthController</code>, line 34)…</span></div>
+    <div class="mrow"><b>security = @SecurityRequirement(…)</b><span>…or another annotation (<code>OpenApiConfig</code>, lines 11–13).</span></div>
+    <div class="mrow"><b>@PathVariable Long id</b><span>On a parameter. <code>@Valid @RequestBody ProductRequest request</code> puts two notes on one parameter.</span></div>
+    <div class="mrow"><b>@Builder.Default</b><span>An annotation declared inside another one: <code>Default</code> lives inside <code>Builder</code> (section 05).</span></div>
+  </div>
+  <p>Values must be known when the code compiles: text, numbers, enum constants, classes. That is why a setting from <code>application.properties</code> arrives as the text <code>"${app.security.jwt.issuer}"</code> — a placeholder that Spring fills in when the app starts (<a href="sb-request-flow.html">B1</a>).</p>
+
+  <div class="dothis">
+    <h4>Try it — on your project: who reads it?</h4>
+    <ol>
+      <li>In <code>Product.java</code>, hold <kbd>Ctrl</kbd> (<kbd>Cmd</kbd> on a Mac) and click <code>@Getter</code>. IntelliJ opens Lombok's source. Above <code>public @interface Getter</code> you'll find <code>@Retention(RetentionPolicy.SOURCE)</code>.</li>
+      <li>Go back (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>←</kbd>, <kbd>Cmd</kbd>+<kbd>[</kbd> on a Mac) and do the same on <code>@Entity</code>: <code>@Retention(RUNTIME)</code>.</li>
+      <li>Now <code>@Service</code> in <code>ProductService.java</code>: <code>RUNTIME</code>, and it carries a note of its own, <code>@Component</code>. What that means to Spring is <a href="sb-request-flow.html">B1</a>'s job.</li>
+    </ol>
+  </div>
+
+  <div class="dothis">
+    <h4>Try it — the compiler as reader</h4>
+    <p>Your A1 <code>Book</code> overrode <code>toString</code>. Here is a <code>Book</code> where it's misspelt, with a lower-case <code>s</code>. Run it:</p>
+  </div>
+  <div class="cmd"><span class="cm">// Shelf.java</span>
+<span class="tg">public</span> <span class="tg">class</span> Shelf {
+    <span class="tg">public</span> <span class="tg">static</span> <span class="tg">void</span> <span class="at">main</span>(String[] args) {
+        System.out.<span class="at">println</span>(<span class="tg">new</span> <span class="at">Book</span>(<span class="st">"9780134685991"</span>, <span class="st">"Effective Java"</span>));   <span class="o">// Book@5ca881b5</span>
+    }
+}
+
+<span class="tg">class</span> Book {
+    <span class="tg">private</span> <span class="tg">final</span> String isbn;
+    <span class="tg">private</span> <span class="tg">final</span> String title;
+
+    <span class="at">Book</span>(String isbn, String title) {
+        <span class="tg">this</span>.isbn = isbn;
+        <span class="tg">this</span>.title = title;
+    }
+
+    <span class="tg">public</span> String <span class="at">tostring</span>() {            <span class="cm">// lower-case s: a brand-new method, not an override</span>
+        <span class="tg">return</span> isbn + <span class="st">" "</span> + title;
+    }
+}</div>
+  <p>It compiles, runs, and prints <code>Book@</code> and a number (yours will differ) — the default <code>toString</code>, because <code>tostring</code> overrides nothing. Now add <code>@Override</code> on the line above <code>public String tostring()</code> and run it again:</p>
+  <div class="cmd"><span class="p">$</span> java Shelf.java
+<span class="o">Shelf.java:16: error: method does not override or implement a method from a supertype</span>
+<span class="o">    @Override</span>
+<span class="o">    ^</span>
+<span class="o">1 error</span></div>
+  <p>That's the whole job of <code>@Override</code>: a note to the compiler that turns a silent mistake into an error. Fix the spelling to <code>toString</code> and it prints <code>9780134685991 Effective Java</code>.</p>
+
+  <div class="stretch-box">
+    <h3>Be Spring for a minute</h3>
+    <p>How can a note on a method make that method answer a URL? Here is the idea in 30 lines of plain Java. It invents an annotation <code>@Get</code>, puts it on two methods, then does what Spring does at start-up: looks through the class for notes, and calls the methods that have one.</p>
+    <div class="cmd"><span class="cm">// MiniSpring.java</span>
+<span class="tg">import</span> java.lang.annotation.*;
+<span class="tg">import</span> java.lang.reflect.Method;
+<span class="tg">import</span> java.util.*;
+
+<span class="tg">public</span> <span class="tg">class</span> MiniSpring {
+    <span class="tg">public</span> <span class="tg">static</span> <span class="tg">void</span> <span class="at">main</span>(String[] args) <span class="tg">throws</span> Exception {
+        Object controller = <span class="tg">new</span> <span class="at">ProductController</span>();
+        Map&lt;String, Method&gt; routes = <span class="tg">new</span> TreeMap&lt;&gt;();
+        <span class="tg">for</span> (Method m : ProductController.<span class="tg">class</span>.<span class="at">getDeclaredMethods</span>()) {
+            Get get = m.<span class="at">getAnnotation</span>(Get.<span class="tg">class</span>);        <span class="cm">// read the note, if there is one</span>
+            <span class="tg">if</span> (get != <span class="tg">null</span>) {
+                routes.<span class="at">put</span>(get.<span class="at">value</span>(), m);
+            }
+        }
+        <span class="tg">for</span> (String path : routes.<span class="at">keySet</span>()) {
+            System.out.<span class="at">println</span>(path + <span class="st">" -&gt; "</span> + routes.<span class="at">get</span>(path).<span class="at">invoke</span>(controller));
+        }
+        <span class="o">// /api/products/count -&gt; 3</span>
+        <span class="o">// /api/products/get-all -&gt; [Laptop, Wireless Mouse, Mechanical Keyboard]</span>
+    }
+}
+
+<span class="at">@Retention</span>(RetentionPolicy.RUNTIME)     <span class="cm">// try SOURCE here</span>
+<span class="at">@Target</span>(ElementType.METHOD)
+<span class="at">@interface</span> Get {
+    String <span class="at">value</span>();
+}
+
+<span class="tg">class</span> ProductController {
+    <span class="at">@Get</span>(<span class="st">"/api/products/get-all"</span>)
+    <span class="tg">public</span> String <span class="at">getAll</span>() { <span class="tg">return</span> <span class="st">"[Laptop, Wireless Mouse, Mechanical Keyboard]"</span>; }
+
+    <span class="at">@Get</span>(<span class="st">"/api/products/count"</span>)
+    <span class="tg">public</span> String <span class="at">count</span>() { <span class="tg">return</span> <span class="st">"3"</span>; }
+
+    <span class="tg">public</span> String <span class="at">helper</span>() { <span class="tg">return</span> <span class="st">"no note, so never called"</span>; }
+}</div>
+    <p>Change <code>RUNTIME</code> to <code>SOURCE</code> and run it again: it prints nothing. The notes were dropped while compiling, so at run time there is nothing to find. That is why every Spring annotation is <code>RUNTIME</code>. Spring's real version is far bigger, but the idea is this one; <a href="sb-request-flow.html">B1</a> shows what it does with <code>@GetMapping</code>.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>You delete <code>@Service</code> from <code>ProductService</code>. Does the project still compile?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Yes. Nothing reads <code>@Service</code> while compiling. Spring reads it when the app starts, so that is when you'd find out — <a href="sb-request-flow.html">B1</a> shows what Spring says.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b><code>@Getter</code> has <code>SOURCE</code> retention, so it's gone from <code>Product.class</code>. Then why does <code>getName()</code> still work when the app runs?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Lombok wrote a real <code>getName()</code> method into the class while compiling. The note is gone; the code it caused is not. Section 05 shows that code.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 complete — who reads it, and when</span></label>
+</section>
+
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>Lombok — the code you didn't type</h2><span class="lvl core">Core</span><span class="tagline">what each annotation writes</span></div>
+
+  <div class="cmd">&lt;<span class="tg">annotationProcessorPaths</span>&gt;
+    &lt;<span class="tg">path</span>&gt;
+        &lt;<span class="tg">groupId</span>&gt;org.projectlombok&lt;/<span class="tg">groupId</span>&gt;
+        &lt;<span class="tg">artifactId</span>&gt;lombok&lt;/<span class="tg">artifactId</span>&gt;
+    &lt;/<span class="tg">path</span>&gt;
+&lt;/<span class="tg">annotationProcessorPaths</span>&gt;</div>
+  <p class="refs">lab2-complete · pom.xml · lines 105–110</p>
+  <p>That part of your <code>pom.xml</code> plugs Lombok into the compiler as an <strong>annotation processor</strong>: a program the compiler runs while compiling, which may read annotations and change the class being compiled. Lombok reads its own annotations and writes ordinary Java methods into your class. You never see that code, but it's there in the <code>.class</code> file, exactly as if you'd typed it.</p>
+
+  <h3>@Getter, @Setter and the two constructors</h3>
+  <p>Your <code>Product</code> (section 04) has four Lombok notes and six fields, and not one method. Here is the same class with, by hand, what those four notes write:</p>
+  <div class="cmd"><span class="cm">// PlainProduct.java — Product, with what Lombok writes typed out by hand</span>
+<span class="tg">import</span> java.math.BigDecimal;
+
+<span class="tg">public</span> <span class="tg">class</span> PlainProduct {
+    <span class="tg">public</span> <span class="tg">static</span> <span class="tg">void</span> <span class="at">main</span>(String[] args) {
+        Product mouse = <span class="tg">new</span> <span class="at">Product</span>();                    <span class="cm">// @NoArgsConstructor</span>
+        mouse.<span class="at">setName</span>(<span class="st">"Wireless Mouse"</span>);                  <span class="cm">// @Setter</span>
+        mouse.<span class="at">setPrice</span>(<span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">"1200.00"</span>));
+        System.out.<span class="at">println</span>(mouse.<span class="at">getName</span>() + <span class="st">" "</span> + mouse.<span class="at">getPrice</span>());   <span class="o">// Wireless Mouse 1200.00</span>
+        System.out.<span class="at">println</span>(mouse.<span class="at">getId</span>());                <span class="o">// null</span>
+
+        Product laptop = <span class="tg">new</span> <span class="at">Product</span>(<span class="st">1L</span>, <span class="st">"Laptop"</span>, <span class="st">"15-inch laptop for everyday use"</span>,
+                <span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">"65000.00"</span>), <span class="st">"Electronics"</span>, <span class="st">10</span>);         <span class="cm">// @AllArgsConstructor</span>
+        System.out.<span class="at">println</span>(laptop.<span class="at">getName</span>());             <span class="o">// Laptop</span>
+
+        Product oops = <span class="tg">new</span> <span class="at">Product</span>(<span class="st">1L</span>, <span class="st">"15-inch laptop for everyday use"</span>, <span class="st">"Laptop"</span>,
+                <span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">"65000.00"</span>), <span class="st">"Electronics"</span>, <span class="st">10</span>);         <span class="cm">// name and description swapped</span>
+        System.out.<span class="at">println</span>(oops.<span class="at">getName</span>());               <span class="o">// 15-inch laptop for everyday use</span>
+    }
+}
+
+<span class="tg">class</span> Product {
+    <span class="tg">private</span> Long id;
+    <span class="tg">private</span> String name;
+    <span class="tg">private</span> String description;
+    <span class="tg">private</span> BigDecimal price;
+    <span class="tg">private</span> String category;
+    <span class="tg">private</span> Integer stock;
+
+    <span class="cm">// @NoArgsConstructor</span>
+    <span class="tg">public</span> <span class="at">Product</span>() {
+    }
+
+    <span class="cm">// @AllArgsConstructor: one parameter per field, in the order the fields are declared</span>
+    <span class="tg">public</span> <span class="at">Product</span>(Long id, String name, String description,
+                   BigDecimal price, String category, Integer stock) {
+        <span class="tg">this</span>.id = id;
+        <span class="tg">this</span>.name = name;
+        <span class="tg">this</span>.description = description;
+        <span class="tg">this</span>.price = price;
+        <span class="tg">this</span>.category = category;
+        <span class="tg">this</span>.stock = stock;
+    }
+
+    <span class="cm">// @Getter: one getter per field</span>
+    <span class="tg">public</span> Long <span class="at">getId</span>() { <span class="tg">return</span> id; }
+    <span class="tg">public</span> String <span class="at">getName</span>() { <span class="tg">return</span> name; }
+    <span class="tg">public</span> String <span class="at">getDescription</span>() { <span class="tg">return</span> description; }
+    <span class="tg">public</span> BigDecimal <span class="at">getPrice</span>() { <span class="tg">return</span> price; }
+    <span class="tg">public</span> String <span class="at">getCategory</span>() { <span class="tg">return</span> category; }
+    <span class="tg">public</span> Integer <span class="at">getStock</span>() { <span class="tg">return</span> stock; }
+
+    <span class="cm">// @Setter: one setter per field</span>
+    <span class="tg">public</span> <span class="tg">void</span> <span class="at">setId</span>(Long id) { <span class="tg">this</span>.id = id; }
+    <span class="tg">public</span> <span class="tg">void</span> <span class="at">setName</span>(String name) { <span class="tg">this</span>.name = name; }
+    <span class="tg">public</span> <span class="tg">void</span> <span class="at">setDescription</span>(String description) { <span class="tg">this</span>.description = description; }
+    <span class="tg">public</span> <span class="tg">void</span> <span class="at">setPrice</span>(BigDecimal price) { <span class="tg">this</span>.price = price; }
+    <span class="tg">public</span> <span class="tg">void</span> <span class="at">setCategory</span>(String category) { <span class="tg">this</span>.category = category; }
+    <span class="tg">public</span> <span class="tg">void</span> <span class="at">setStock</span>(Integer stock) { <span class="tg">this</span>.stock = stock; }
+}</div>
+  <p>Forty-odd lines for four annotations. That saving is the whole reason Lombok exists. Compare A1, where you wrote the getters yourself and, on purpose, no setters: a <code>Book</code> could not change after it was made.</p>
+  <div class="cue watch"><p class="cue-k">The all-args constructor follows the field order</p><p>The parameters of <code>@AllArgsConstructor</code> are the fields, in the order you declared them. <code>name</code> and <code>description</code> are both <code>String</code>, so passing them the wrong way round compiles without a murmur — see <code>oops</code> above. Reorder the fields in the class and every call quietly changes meaning. A builder, next, avoids this: every value is passed by name.</p></div>
+
+  <h3>@Builder</h3>
+  <div class="cmd"><span class="at">@Getter</span>
+<span class="at">@Setter</span>
+<span class="at">@NoArgsConstructor</span>
+<span class="at">@AllArgsConstructor</span>
+<span class="at">@Builder</span>
+<span class="tg">public</span> <span class="tg">class</span> ProductResponse {
+
+    <span class="tg">private</span> Long id;
+    <span class="tg">private</span> String name;
+    <span class="tg">private</span> String description;
+    <span class="tg">private</span> BigDecimal price;
+    <span class="tg">private</span> String category;
+    <span class="tg">private</span> Integer stock;
+}</div>
+  <p class="refs">lab2-complete · dto/ProductResponse.java · lines 12–25</p>
+  <p><code>@Builder</code> writes a small helper class, <code>ProductResponseBuilder</code>, inside <code>ProductResponse</code>, plus a static method <code>builder()</code> that hands you a new one. Here it is by hand, cut down to three of the six fields:</p>
+  <div class="cmd"><span class="cm">// PlainBuilder.java — what @Builder writes, for three of ProductResponse's fields</span>
+<span class="tg">import</span> java.math.BigDecimal;
+
+<span class="tg">public</span> <span class="tg">class</span> PlainBuilder {
+    <span class="tg">public</span> <span class="tg">static</span> <span class="tg">void</span> <span class="at">main</span>(String[] args) {
+        ProductResponse r = ProductResponse.<span class="at">builder</span>()
+                .<span class="at">id</span>(<span class="st">3L</span>)
+                .<span class="at">name</span>(<span class="st">"Mechanical Keyboard"</span>)
+                .<span class="at">price</span>(<span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">"3500.00"</span>))
+                .<span class="at">build</span>();
+        System.out.<span class="at">println</span>(r.<span class="at">getName</span>() + <span class="st">" "</span> + r.<span class="at">getPrice</span>());   <span class="o">// Mechanical Keyboard 3500.00</span>
+
+        ProductResponse partial = ProductResponse.<span class="at">builder</span>().<span class="at">name</span>(<span class="st">"Laptop"</span>).<span class="at">build</span>();
+        System.out.<span class="at">println</span>(partial.<span class="at">getId</span>());                    <span class="o">// null</span>
+    }
+}
+
+<span class="tg">class</span> ProductResponse {
+    <span class="tg">private</span> Long id;
+    <span class="tg">private</span> String name;
+    <span class="tg">private</span> BigDecimal price;
+
+    <span class="tg">public</span> <span class="at">ProductResponse</span>(Long id, String name, BigDecimal price) {   <span class="cm">// @AllArgsConstructor</span>
+        <span class="tg">this</span>.id = id;
+        <span class="tg">this</span>.name = name;
+        <span class="tg">this</span>.price = price;
+    }
+
+    <span class="tg">public</span> Long <span class="at">getId</span>() { <span class="tg">return</span> id; }                       <span class="cm">// @Getter</span>
+    <span class="tg">public</span> String <span class="at">getName</span>() { <span class="tg">return</span> name; }
+    <span class="tg">public</span> BigDecimal <span class="at">getPrice</span>() { <span class="tg">return</span> price; }
+
+    <span class="tg">public</span> <span class="tg">static</span> ProductResponseBuilder <span class="at">builder</span>() {         <span class="cm">// @Builder: the way in</span>
+        <span class="tg">return</span> <span class="tg">new</span> <span class="at">ProductResponseBuilder</span>();
+    }
+
+    <span class="tg">public</span> <span class="tg">static</span> <span class="tg">class</span> ProductResponseBuilder {             <span class="cm">// @Builder: the builder itself</span>
+        <span class="tg">private</span> Long id;
+        <span class="tg">private</span> String name;
+        <span class="tg">private</span> BigDecimal price;
+
+        <span class="tg">public</span> ProductResponseBuilder <span class="at">id</span>(Long id) { <span class="tg">this</span>.id = id; <span class="tg">return</span> <span class="tg">this</span>; }
+        <span class="tg">public</span> ProductResponseBuilder <span class="at">name</span>(String name) { <span class="tg">this</span>.name = name; <span class="tg">return</span> <span class="tg">this</span>; }
+        <span class="tg">public</span> ProductResponseBuilder <span class="at">price</span>(BigDecimal price) { <span class="tg">this</span>.price = price; <span class="tg">return</span> <span class="tg">this</span>; }
+
+        <span class="tg">public</span> ProductResponse <span class="at">build</span>() {
+            <span class="tg">return</span> <span class="tg">new</span> <span class="at">ProductResponse</span>(id, name, price);     <span class="cm">// calls the all-args constructor</span>
+        }
+    }
+}</div>
+  <p>Two things make the chain in your <code>toProductResponse</code> work. Each setter-like method ends with <code>return this</code>, so the next <code>.name(…)</code> is called on the same builder. And <code>build()</code> passes everything to the all-args constructor. A field you don't set stays <code>null</code>, like <code>partial.getId()</code>.</p>
+  <p>You'll meet builders that nobody generated, too. <code>JwtClaimsSet.builder() … .build()</code> in <code>JwtService</code>, and <code>User.withUsername(…) … .build()</code> in section 03, are Spring's own builder classes, written by hand. Same shape, same reading.</p>
+  <div class="cue watch"><p class="cue-k">Why your DTOs carry both constructors</p><p><code>build()</code> needs an all-args constructor. <code>@Builder</code> alone would make one — but not once you've asked for a different constructor, such as <code>@NoArgsConstructor</code>. That's why <code>ProductResponse</code>, <code>UserResponse</code>, <code>AuthResponse</code> and <code>ApiErrorResponse</code> have <code>@NoArgsConstructor</code>, <code>@AllArgsConstructor</code> and <code>@Builder</code> together. Remove <code>@AllArgsConstructor</code> and the compiler reports, at the <code>@Builder</code> line, <code>constructor ProductResponse in class ProductResponse cannot be applied to given types</code>. Why something wants the no-argument one as well: <a href="sb-request-flow.html">B1</a>.</p></div>
+  <div class="cmd"><span class="at">@Builder.Default</span>
+<span class="tg">private</span> String tokenType = <span class="st">"Bearer"</span>;</div>
+  <p class="refs">lab2-complete · dto/AuthResponse.java · lines 19–20</p>
+  <p>A builder starts every field empty, so on its own it would ignore <code>= "Bearer"</code> and leave <code>tokenType</code> as <code>null</code>. <code>@Builder.Default</code> tells Lombok to start the builder's field at that value instead. (Your <code>AuthService.login</code> also sets <code>.tokenType("Bearer")</code> explicitly, line 84, so either way the token type is <code>Bearer</code>.)</p>
+
+  <h3>@RequiredArgsConstructor</h3>
+  <p>Lab 1 and Lab 2 got the repository into <code>ProductService</code> in two different ways:</p>
+  <div class="cmd"><span class="at">@Service</span>
+<span class="tg">public</span> <span class="tg">class</span> ProductService {
+
+    <span class="at">@Autowired</span>
+    <span class="tg">private</span> ProductRepository productRepository;</div>
+  <p class="refs">lab1-complete · service/ProductService.java · lines 10–14</p>
+  <div class="cmd"><span class="at">@Service</span>
+<span class="at">@RequiredArgsConstructor</span>
+<span class="tg">public</span> <span class="tg">class</span> ProductService {
+
+    <span class="tg">private</span> <span class="tg">final</span> ProductRepository productRepository;</div>
+  <p class="refs">lab2-complete · service/ProductService.java · lines 14–18</p>
+  <p>The Java difference is the word <code>final</code>. A <code>final</code> field must be given its value exactly once, by the time the constructor finishes. <code>@RequiredArgsConstructor</code> writes a constructor with one parameter for each <code>final</code> field. By hand, with a stand-in repository so it runs on its own:</p>
+  <div class="cmd"><span class="cm">// PlainService.java — the constructor @RequiredArgsConstructor writes</span>
+<span class="tg">import</span> java.util.List;
+
+<span class="tg">public</span> <span class="tg">class</span> PlainService {
+    <span class="tg">public</span> <span class="tg">static</span> <span class="tg">void</span> <span class="at">main</span>(String[] args) {
+        ProductRepository repo = <span class="tg">new</span> <span class="at">FakeProductRepository</span>();
+        ProductService service = <span class="tg">new</span> <span class="at">ProductService</span>(repo);     <span class="cm">// in your app, Spring makes this call</span>
+        System.out.<span class="at">println</span>(service.<span class="at">getAllProducts</span>());          <span class="o">// [Laptop, Wireless Mouse]</span>
+    }
+}
+
+<span class="tg">interface</span> ProductRepository {
+    List&lt;String&gt; <span class="at">findAll</span>();
+}
+
+<span class="tg">class</span> FakeProductRepository <span class="tg">implements</span> ProductRepository {
+    <span class="tg">public</span> List&lt;String&gt; <span class="at">findAll</span>() { <span class="tg">return</span> List.<span class="at">of</span>(<span class="st">"Laptop"</span>, <span class="st">"Wireless Mouse"</span>); }
+}
+
+<span class="tg">class</span> ProductService {
+    <span class="tg">private</span> <span class="tg">final</span> ProductRepository productRepository;
+
+    <span class="cm">// @RequiredArgsConstructor: one parameter for each final field</span>
+    <span class="tg">public</span> <span class="at">ProductService</span>(ProductRepository productRepository) {
+        <span class="tg">this</span>.productRepository = productRepository;
+    }
+
+    <span class="tg">public</span> List&lt;String&gt; <span class="at">getAllProducts</span>() {
+        <span class="tg">return</span> productRepository.<span class="at">findAll</span>();
+    }
+}</div>
+  <p>Lab 1's field can't be <code>final</code>: <code>@Autowired</code> on a field means Spring sets it <em>after</em> the object is built. Both ways work. Which one Spring recommends, and why, is <a href="sb-request-flow.html">B1</a>'s topic; this page only needs the Java: <code>final</code> plus a constructor.</p>
+
+  <h3>The whole set</h3>
+  <table class="grid long-key">
+    <tr><th>Annotation</th><th>What it writes</th><th>Where you used it</th></tr>
+    <tr><td>@Getter</td><td><code>getX()</code> for each field</td><td><code>Product</code>, <code>User</code>, every DTO</td></tr>
+    <tr><td>@Setter</td><td><code>setX(value)</code> for each non-final field</td><td><code>Product</code>, <code>User</code>, every DTO</td></tr>
+    <tr><td>@NoArgsConstructor</td><td><code>Product()</code></td><td><code>Product</code>, <code>User</code>, every DTO</td></tr>
+    <tr><td>@AllArgsConstructor</td><td><code>Product(id, name, …)</code>, in field order</td><td><code>Product</code>, the response DTOs</td></tr>
+    <tr><td>@Builder</td><td><code>builder()</code>, a nested <code>…Builder</code> class, <code>build()</code></td><td><code>ProductResponse</code>, <code>UserResponse</code>, <code>AuthResponse</code>, <code>ApiErrorResponse</code></td></tr>
+    <tr><td>@Builder.Default</td><td>the builder starts that field at its initial value</td><td><code>AuthResponse.tokenType</code></td></tr>
+    <tr><td>@RequiredArgsConstructor</td><td>a constructor for the <code>final</code> fields</td><td>every service and controller, and three classes in <code>config/</code></td></tr>
+  </table>
+  <p>Notice what's missing: none of these writes <code>equals</code>, <code>hashCode</code> or <code>toString</code>. Section 13 shows what that means for your <code>Product</code>.</p>
+  <h3>Records, in one paragraph</h3>
+  <p>Java 17 also has <strong>records</strong> — <code>record ProductResponse(Long id, String name, …) {}</code> — which write a constructor, accessors named <code>name()</code> rather than <code>getName()</code>, and <code>equals</code>, <code>hashCode</code> and <code>toString</code>, with every field <code>final</code>. Your lab has none. A record can't change and has no no-argument constructor, so it can't be a JPA entity like <code>Product</code>; Lombok on an ordinary class works for both entities and DTOs, which is the choice the lab made.</p>
+
+  <div class="dothis">
+    <h4>Try it — on your project: see the methods Lombok wrote</h4>
+    <p>In your project folder, compile, then list what's inside <code>Product.class</code>:</p>
+    <div class="cmd"><span class="p">$</span> ./mvnw -q compile
+<span class="p">$</span> javap -p -cp target/classes com.esd.ecommerce.entity.Product</div>
+    <p>(On Windows: <code>mvnw.cmd -q compile</code>.) You'll see the six private fields, six <code>get…</code> methods, six <code>set…</code> methods and two constructors — none of which are in <code>Product.java</code>. Try <code>com.esd.ecommerce.dto.ProductResponse</code> too, and look for <code>builder()</code> and the nested <code>ProductResponse$ProductResponseBuilder</code>.</p>
+  </div>
+  <div class="dothis">
+    <h4>Try it — on your project: remove one note</h4>
+    <ol>
+      <li>Delete <code>@RequiredArgsConstructor</code> from <code>ProductService.java</code> (line 15) and run <code>./mvnw -q compile</code>.</li>
+      <li>Read the error, reported at the field: <code>variable productRepository not initialized in the default constructor</code>. A <code>final</code> field, and nothing to give it a value.</li>
+      <li>Undo, and compile again.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b><code>ProductRequest</code> has <code>@Getter</code>, <code>@Setter</code> and <code>@NoArgsConstructor</code>, but no <code>@Builder</code>. Can you write <code>ProductRequest.builder()</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No. Without <code>@Builder</code> there is no <code>builder()</code> method, and the compiler says <code>cannot find symbol</code>. You don't need one: your code never builds a request. The JSON library builds it from the request body, with the no-argument constructor and the setters (<a href="sb-request-flow.html">B1</a>).</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Put <code>@RequiredArgsConstructor</code> on Lab 1's <code>ProductService</code>, where the field isn't <code>final</code>. What constructor do you get?</div>
+    <details><summary>Show answer</summary><div class="a"><p>One with no parameters. "Required" means the <code>final</code> fields, and there are none. The field would still be filled by <code>@Autowired</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 complete — javap shows Lombok's methods</span></label>
+</section>
+
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>Interfaces and generics</h2><span class="lvl core">Core</span><span class="tagline">JpaRepository&lt;Product, Long&gt;</span></div>
+
+  <div class="cmd"><span class="at">@Repository</span>
+<span class="tg">public</span> <span class="tg">interface</span> ProductRepository <span class="tg">extends</span> JpaRepository&lt;Product,Long&gt; {
+
+    <span class="tg">public</span> List&lt;Product&gt; <span class="at">findByCategory</span>(String category);
+}</div>
+  <p class="refs">lab2-complete · repository/ProductRepository.java · lines 9–13</p>
+
+  <p>An <strong>interface</strong> is a list of methods with no bodies: a promise of what an object can do, without saying how. <code>ProductRepository</code> declares one method of its own, <code>findByCategory</code>. Through <code>extends JpaRepository&lt;Product,Long&gt;</code> it inherits a whole list more — <code>findAll</code>, <code>findById</code>, <code>save</code>, <code>delete</code> — which is why <code>ProductService</code> can call them.</p>
+  <p>Nobody in your project writes a class that <em>implements</em> <code>ProductRepository</code>. Spring Data writes one when the app starts, and works out <code>findByCategory</code> from its name. That's <a href="sb-request-flow.html">B1</a>. The Java to understand here is the <code>&lt;Product,Long&gt;</code>.</p>
+
+  <h3>Generics: blanks that you fill in</h3>
+  <p><code>JpaRepository</code> is declared as <code>JpaRepository&lt;T, ID&gt;</code>. <code>T</code> and <code>ID</code> are <strong>type parameters</strong> — blanks. Writing <code>JpaRepository&lt;Product, Long&gt;</code> fills them: <code>T</code> is <code>Product</code>, <code>ID</code> is <code>Long</code>. So <code>findById(ID id)</code> becomes <code>findById(Long id)</code> and returns <code>Optional&lt;Product&gt;</code>; <code>findAll()</code> returns <code>List&lt;Product&gt;</code>. The compiler then checks every call against those types.</p>
+  <p>Your A1 <code>Catalogue</code> was a repository you wrote by hand: a <code>HashMap</code> keyed by ISBN, with <code>addBook</code> and <code>findByIsbn</code>. Here is the same idea shaped like <code>JpaRepository</code> — a generic interface, a <code>BookRepository</code> that fills in the blanks, and an in-memory class that implements it:</p>
+  <div class="cmd"><span class="cm">// MiniRepository.java</span>
+<span class="tg">import</span> java.util.*;
+
+<span class="tg">public</span> <span class="tg">class</span> MiniRepository {
+    <span class="tg">public</span> <span class="tg">static</span> <span class="tg">void</span> <span class="at">main</span>(String[] args) {
+        BookRepository books = <span class="tg">new</span> <span class="at">InMemoryBookRepository</span>();
+        books.<span class="at">save</span>(<span class="tg">new</span> <span class="at">Book</span>(<span class="st">"9780134685991"</span>, <span class="st">"Effective Java"</span>));
+        books.<span class="at">save</span>(<span class="tg">new</span> <span class="at">Book</span>(<span class="st">"9780132350884"</span>, <span class="st">"Clean Code"</span>));
+
+        System.out.<span class="at">println</span>(books.<span class="at">findAll</span>().<span class="at">size</span>());              <span class="o">// 2</span>
+        System.out.<span class="at">println</span>(books.<span class="at">findById</span>(<span class="st">"9780132350884"</span>));     <span class="o">// Optional[Clean Code]</span>
+        System.out.<span class="at">println</span>(books.<span class="at">findById</span>(<span class="st">"0000000000000"</span>));     <span class="o">// Optional.empty</span>
+    }
+}
+
+<span class="tg">interface</span> Repository&lt;T, ID&gt; {            <span class="cm">// T and ID are blanks</span>
+    List&lt;T&gt; <span class="at">findAll</span>();
+    Optional&lt;T&gt; <span class="at">findById</span>(ID id);
+    T <span class="at">save</span>(T item);
+}
+
+<span class="tg">interface</span> BookRepository <span class="tg">extends</span> Repository&lt;Book, String&gt; {   <span class="cm">// like ProductRepository extends JpaRepository&lt;Product, Long&gt;</span>
+}
+
+<span class="tg">class</span> InMemoryBookRepository <span class="tg">implements</span> BookRepository {      <span class="cm">// you write this one; Spring Data writes yours</span>
+    <span class="tg">private</span> <span class="tg">final</span> Map&lt;String, Book&gt; books = <span class="tg">new</span> HashMap&lt;&gt;();   <span class="cm">// A1's map, keyed by ISBN</span>
+
+    <span class="at">@Override</span>
+    <span class="tg">public</span> List&lt;Book&gt; <span class="at">findAll</span>() { <span class="tg">return</span> <span class="tg">new</span> ArrayList&lt;&gt;(books.<span class="at">values</span>()); }
+
+    <span class="at">@Override</span>
+    <span class="tg">public</span> Optional&lt;Book&gt; <span class="at">findById</span>(String isbn) { <span class="tg">return</span> Optional.<span class="at">ofNullable</span>(books.<span class="at">get</span>(isbn)); }
+
+    <span class="at">@Override</span>
+    <span class="tg">public</span> Book <span class="at">save</span>(Book book) { books.<span class="at">put</span>(book.<span class="at">getIsbn</span>(), book); <span class="tg">return</span> book; }
+}
+
+<span class="tg">class</span> Book {
+    <span class="tg">private</span> <span class="tg">final</span> String isbn;
+    <span class="tg">private</span> <span class="tg">final</span> String title;
+
+    <span class="at">Book</span>(String isbn, String title) { <span class="tg">this</span>.isbn = isbn; <span class="tg">this</span>.title = title; }
+
+    String <span class="at">getIsbn</span>() { <span class="tg">return</span> isbn; }
+
+    <span class="at">@Override</span>
+    <span class="tg">public</span> String <span class="at">toString</span>() { <span class="tg">return</span> title; }
+}</div>
+  <p>With <code>T = Book</code> and <code>ID = String</code>, <code>findById</code> takes a <code>String</code> and returns <code>Optional&lt;Book&gt;</code>. A1 asked <code>findByIsbn</code> to throw when the book was missing; a repository returns an empty <code>Optional</code> and lets the caller decide. Section 07 is about that.</p>
+
+  <h3>The generic types in your code</h3>
+  <div class="mention">
+    <div class="mrow"><b>Optional&lt;User&gt; findByEmail(…)</b><span>You declared this in <code>UserRepository</code> (line 13): "maybe a <code>User</code>".</span></div>
+    <div class="mrow"><b>ResponseEntity&lt;List&lt;ProductResponse&gt;&gt;</b><span>Read it inside out: a list of product responses, wrapped in an HTTP response (<code>ProductController</code>, line 23).</span></div>
+    <div class="mrow"><b>ResponseEntity&lt;Void&gt;</b><span>A response with no body (<code>deleteProduct</code>, line 67). <code>Void</code> is the class that stands for "no value".</span></div>
+    <div class="mrow"><b>ResponseEntity&lt;?&gt;</b><span>Lab 1's <code>getProductById</code> (line 26): "some type, not saying which". One branch's body was a <code>String</code>, the other's a <code>Product</code>.</span></div>
+    <div class="mrow"><b>new LinkedHashMap&lt;&gt;()</b><span>The diamond <code>&lt;&gt;</code>: the type arguments are copied from the left-hand side, <code>Map&lt;String, String&gt;</code> (<code>GlobalExceptionHandler</code>, line 42).</span></div>
+    <div class="mrow"><b>OAuth2TokenValidator&lt;Jwt&gt;</b><span>A generic interface implemented for one type: <code>JwtRevocationValidator</code> (line 15) validates <code>Jwt</code>s.</span></div>
+  </div>
+
+  <h3>Interfaces you implement, and interfaces you return</h3>
+  <div class="cmd"><span class="tg">public</span> <span class="tg">class</span> CustomUserDetailsService <span class="tg">implements</span> UserDetailsService {
+
+    <span class="tg">private</span> <span class="tg">final</span> UserRepository userRepository;
+
+    <span class="at">@Override</span>
+    <span class="tg">public</span> UserDetails <span class="at">loadUserByUsername</span>(String email)
+            <span class="tg">throws</span> UsernameNotFoundException {</div>
+  <p class="refs">lab2-complete · service/CustomUserDetailsService.java · lines 16–22</p>
+  <p><code>implements UserDetailsService</code> is a promise to provide that interface's one method; <code>@Override</code> asks the compiler to check you did (section 04). Spring Security only knows the interface. It calls <code>loadUserByUsername</code> without knowing your class exists (<a href="sb-security.html">B3</a>).</p>
+  <div class="cmd"><span class="at">@Bean</span>
+<span class="tg">public</span> PasswordEncoder <span class="at">passwordEncoder</span>() {
+    <span class="tg">return</span> <span class="tg">new</span> <span class="at">BCryptPasswordEncoder</span>();
+}</div>
+  <p class="refs">lab2-complete · config/SecurityBeansConfig.java · lines 14–17</p>
+  <p>The other direction: the return type is the interface <code>PasswordEncoder</code>; the object is one class that implements it. Code that asks for a <code>PasswordEncoder</code> works with any implementation — the same reason <code>ProductService</code> holds a <code>ProductRepository</code>, not a particular class.</p>
+
+  <div class="dothis">
+    <h4>Try it — in jshell: the compiler checks the blanks</h4>
+  </div>
+  <div class="cmd">List&lt;String&gt; names = <span class="tg">new</span> ArrayList&lt;&gt;();
+names.<span class="at">add</span>(<span class="st">"Laptop"</span>)             <span class="o">// true</span>
+names.<span class="at">add</span>(<span class="st">42</span>)                   <span class="o">// error: incompatible types: int cannot be converted to java.lang.String</span>
+Map&lt;String, Integer&gt; stock = <span class="tg">new</span> HashMap&lt;&gt;();
+stock.<span class="at">put</span>(<span class="st">"Laptop"</span>, <span class="st">10</span>)         <span class="o">// null</span>
+stock.<span class="at">get</span>(<span class="st">"Laptop"</span>)             <span class="o">// 10</span></div>
+  <p><code>put</code> returns the value the key had before — <code>null</code> the first time. A1's <code>totalCopies</code> and <code>availableCopies</code> were maps exactly like <code>stock</code>.</p>
+  <div class="dothis">
+    <h4>Try it — on your project: follow the blanks</h4>
+    <p>In <code>ProductRepository.java</code>, <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>-click <code>JpaRepository</code>. Its declaration reads <code>JpaRepository&lt;T, ID&gt;</code>. Keep clicking the interfaces it extends until you reach <code>CrudRepository</code>, and find <code>Optional&lt;T&gt; findById(ID id);</code> — the method your service calls, with your types in the blanks.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Does <code>productRepository.findById("7")</code> compile?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No. <code>ID</code> is <code>Long</code>, so the compiler says <code>incompatible types: String cannot be converted to Long</code>. Your controller gets a <code>Long id</code> from the URL, which is why the types line up (<a href="sb-request-flow.html">B1</a>).</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Why does <code>ProductRepository.java</code> declare only <code>findByCategory</code>, when the service also calls <code>findAll</code>, <code>findById</code>, <code>save</code> and <code>delete</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Those four are inherited from <code>JpaRepository&lt;Product, Long&gt;</code> and the interfaces it extends. You only declare the methods it doesn't already have.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 complete</span></label>
+</section>
+
+<div class="part">Part 3 · Passing code around</div>
+
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>Optional — a product, or none</h2><span class="lvl core">Core</span><span class="tagline">orElse(null) and orElseThrow</span></div>
+
+  <p>Lab 1 and Lab 2 handled a missing product in two different ways. Lab 1:</p>
+  <div class="cmd"><span class="tg">public</span> Product <span class="at">getProductById</span>(Long id) {
+    <span class="tg">return</span> productRepository.<span class="at">findById</span>(id).<span class="at">orElse</span>(<span class="tg">null</span>);
+}</div>
+  <p class="refs">lab1-complete · service/ProductService.java · lines 20–22</p>
+  <div class="cmd"><span class="at">@GetMapping</span>(<span class="st">"/get/{id}"</span>)
+<span class="tg">public</span> ResponseEntity&lt;?&gt; <span class="at">getProductById</span>(<span class="at">@PathVariable</span> Long id) {
+
+    Product product = productService.<span class="at">getProductById</span>(id);
+
+    <span class="tg">if</span> (product == <span class="tg">null</span>) {
+        <span class="tg">return</span> ResponseEntity.<span class="at">status</span>(HttpStatus.NOT_FOUND)
+                .<span class="at">body</span>(<span class="st">"Product with ID "</span> + id + <span class="st">" not found"</span>);
+    }
+
+    <span class="tg">return</span> ResponseEntity.<span class="at">ok</span>(product);
+}</div>
+  <p class="refs">lab1-complete · controller/ProductController.java · lines 25–36</p>
+  <p>Lab 2:</p>
+  <div class="cmd"><span class="tg">public</span> ProductResponse <span class="at">getProductById</span>(Long id) {
+    Product product = productRepository.<span class="at">findById</span>(id)
+            .<span class="at">orElseThrow</span>(() -&gt; <span class="tg">new</span> <span class="at">ProductNotFoundException</span>(id));
+
+    <span class="tg">return</span> <span class="at">toProductResponse</span>(product);
+}</div>
+  <p class="refs">lab2-complete · service/ProductService.java · lines 27–32</p>
+
+  <h3>A box with a product in it, or an empty box</h3>
+  <p><code>findById</code> doesn't return a <code>Product</code>. It returns an <code>Optional&lt;Product&gt;</code>: a box that holds one product, or is empty. The type itself says "this might be missing", so you have to decide what to do before you can get the product out. Your code uses two ways to open the box:</p>
+  <div class="mention">
+    <div class="mrow"><b>orElse(null)</b><span>The product, or <code>null</code> if the box is empty. Lab 1 then checked for <code>null</code> in the controller.</span></div>
+    <div class="mrow"><b>orElseThrow(() -&gt; …)</b><span>The product, or throw the exception the lambda makes. Lab 2's <code>getProductById</code> either returns a real product or throws — it never returns <code>null</code>.</span></div>
+  </div>
+  <p>Lab 2 is A1's rule, applied: <em>"Never return <code>null</code> to mean 'not found'. Throw the exception instead."</em> Both labs work. Lab 1 checks in the controller and writes the 404 there; Lab 2 throws at the point where the product is missing, and one handler turns every <code>ProductNotFoundException</code> into a 404 — that handler is <a href="sb-good-slice.html">B2</a>. <code>Optional</code> has more methods (<code>map</code>, <code>ifPresent</code>); your lab code uses just these two.</p>
+
+  <div class="dothis">
+    <h4>Try it — in jshell</h4>
+  </div>
+  <div class="cmd">Optional&lt;String&gt; found = Optional.<span class="at">of</span>(<span class="st">"Laptop"</span>);
+Optional&lt;String&gt; missing = Optional.<span class="at">empty</span>();
+found.<span class="at">orElse</span>(<span class="tg">null</span>)                                                       <span class="o">// "Laptop"</span>
+missing.<span class="at">orElse</span>(<span class="tg">null</span>)                                                     <span class="o">// null</span>
+found.<span class="at">orElseThrow</span>(() -&gt; <span class="tg">new</span> <span class="at">IllegalArgumentException</span>(<span class="st">"no such product"</span>))     <span class="o">// "Laptop"</span>
+missing.<span class="at">orElseThrow</span>(() -&gt; <span class="tg">new</span> <span class="at">IllegalArgumentException</span>(<span class="st">"no such product"</span>))   <span class="o">// throws IllegalArgumentException: no such product</span></div>
+
+  <h3>Why a lambda, and not just the exception?</h3>
+  <p><code>orElseThrow</code> doesn't take an exception. It takes a <em>recipe</em> for one — a lambda (section 08) — and follows the recipe only if the box is empty. When the product is there, no exception object is ever made. This program shows it:</p>
+  <div class="cmd"><span class="cm">// Lazy.java</span>
+<span class="tg">import</span> java.util.Optional;
+
+<span class="tg">public</span> <span class="tg">class</span> Lazy {
+    <span class="tg">public</span> <span class="tg">static</span> <span class="tg">void</span> <span class="at">main</span>(String[] args) {
+        Optional&lt;String&gt; found = Optional.<span class="at">of</span>(<span class="st">"Laptop"</span>);
+        Optional&lt;String&gt; missing = Optional.<span class="at">empty</span>();
+
+        System.out.<span class="at">println</span>(found.<span class="at">orElseThrow</span>(() -&gt; <span class="at">make</span>(<span class="st">"found"</span>)));     <span class="o">// Laptop</span>
+        <span class="tg">try</span> {
+            missing.<span class="at">orElseThrow</span>(() -&gt; <span class="at">make</span>(<span class="st">"missing"</span>));
+        } <span class="tg">catch</span> (IllegalStateException e) {
+            System.out.<span class="at">println</span>(<span class="st">"caught: "</span> + e.<span class="at">getMessage</span>());
+        }
+        <span class="o">// making the exception for missing</span>
+        <span class="o">// caught: missing</span>
+    }
+
+    <span class="tg">static</span> IllegalStateException <span class="at">make</span>(String which) {
+        System.out.<span class="at">println</span>(<span class="st">"making the exception for "</span> + which);
+        <span class="tg">return</span> <span class="tg">new</span> <span class="at">IllegalStateException</span>(which);
+    }
+}</div>
+  <p>"making the exception for found" is never printed. The same shape shows up in <code>AuthService.login</code>, on the <code>Optional&lt;User&gt;</code> you declared yourself:</p>
+  <div class="cmd">User user = userRepository.<span class="at">findByEmail</span>(
+        authentication.<span class="at">getName</span>()
+).<span class="at">orElseThrow</span>(() -&gt;
+        <span class="tg">new</span> <span class="at">IllegalStateException</span>(
+                <span class="st">"Authenticated user was not found"</span>
+        )
+);</div>
+  <p class="refs">lab2-complete · service/AuthService.java · lines 72–78</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>With Lab 1's service, what does <code>productService.getProductById(99L).getName()</code> do when there is no product 99?</div>
+    <details><summary>Show answer</summary><div class="a"><p>It throws a <code>NullPointerException</code>: <code>getProductById</code> returned <code>null</code>, and you can't call a method on <code>null</code>. That's why Lab 1's controller checks for <code>null</code> first, and why Lab 2 throws a named exception instead.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Does <code>.orElseThrow(new ProductNotFoundException(id))</code> — no <code>() -&gt;</code> — compile?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No. <code>orElseThrow</code> wants a recipe (a <code>Supplier</code>), not an exception: <code>method orElseThrow in class Optional&lt;T&gt; cannot be applied to given types … ProductNotFoundException cannot be converted to Supplier&lt;? extends X&gt;</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 complete</span></label>
+</section>
+
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>Lambdas and method references</h2><span class="lvl core">Core</span><span class="tagline">() -&gt;, x -&gt; and ::</span></div>
+
+  <p>Every arrow and double colon in your project, with what it is:</p>
+  <table class="grid long-key">
+    <tr><th>Your line</th><th>It is a…</th><th>whose one method</th></tr>
+    <tr><td>() -&gt; new ProductNotFoundException(id)</td><td><code>Supplier</code> — <code>ProductService</code>, line 29</td><td>takes nothing, returns the exception</td></tr>
+    <tr><td>this::toProductResponse</td><td><code>Function&lt;Product, ProductResponse&gt;</code> — line 23</td><td>takes a <code>Product</code>, returns a <code>ProductResponse</code></td></tr>
+    <tr><td>error -&gt; validationErrors.putIfAbsent(…)</td><td><code>Consumer</code> — <code>GlobalExceptionHandler</code>, line 44</td><td>takes one field error, returns nothing</td></tr>
+    <tr><td>csrf -&gt; csrf.disable()</td><td><code>Customizer</code> — <code>SecurityConfig</code>, line 27</td><td>takes Spring's CSRF settings object, changes it</td></tr>
+    <tr><td>(request, response, exception) -&gt; writeError(…)</td><td><code>AuthenticationEntryPoint</code> — <code>RestSecurityErrorHandler</code>, line 27</td><td>takes three things, writes an error response</td></tr>
+    <tr><td>() -&gt; new Book("978013468599", …)</td><td>JUnit's <code>Executable</code> — A1's <code>BookTest</code>, line 25</td><td>takes nothing; JUnit runs it and checks it throws</td></tr>
+    <tr><td>Book::getTitle</td><td><code>Function&lt;Book, String&gt;</code> — A1's <code>searchByAuthor</code></td><td>takes a <code>Book</code>, returns its title</td></tr>
+  </table>
+
+  <h3>A lambda is an object with one method</h3>
+  <p>Each type in the middle column is an interface with exactly <strong>one</strong> abstract method — a <strong>functional interface</strong>. A <strong>lambda</strong> is a short way to write an object that implements it: you give only the parameters and the body, and the interface supplies everything else — the method's name, its parameter types, its return type. That's why <code>error -&gt; …</code> needs no type: the interface already says it's a <code>FieldError</code>.</p>
+  <p>Here is one comparator from A1 written three ways. All three are the same object:</p>
+  <div class="cmd"><span class="cm">// ThreeWays.java</span>
+<span class="tg">import</span> java.util.*;
+
+<span class="tg">public</span> <span class="tg">class</span> ThreeWays {
+    <span class="tg">public</span> <span class="tg">static</span> <span class="tg">void</span> <span class="at">main</span>(String[] args) {
+        List&lt;Book&gt; books = <span class="tg">new</span> ArrayList&lt;&gt;(List.<span class="at">of</span>(
+                <span class="tg">new</span> <span class="at">Book</span>(<span class="st">"Java Puzzlers"</span>), <span class="tg">new</span> <span class="at">Book</span>(<span class="st">"Clean Code"</span>), <span class="tg">new</span> <span class="at">Book</span>(<span class="st">"Effective Java"</span>)));
+
+        <span class="cm">// 1. A class written out in full, with no name (an anonymous class)</span>
+        Comparator&lt;Book&gt; byTitle1 = <span class="tg">new</span> Comparator&lt;Book&gt;() {
+            <span class="at">@Override</span>
+            <span class="tg">public</span> <span class="tg">int</span> <span class="at">compare</span>(Book a, Book b) {
+                <span class="tg">return</span> a.<span class="at">getTitle</span>().<span class="at">compareTo</span>(b.<span class="at">getTitle</span>());
+            }
+        };
+
+        <span class="cm">// 2. A lambda: only the parameters and the body</span>
+        Comparator&lt;Book&gt; byTitle2 = (a, b) -&gt; a.<span class="at">getTitle</span>().<span class="at">compareTo</span>(b.<span class="at">getTitle</span>());
+
+        <span class="cm">// 3. A method reference, passed to Comparator.comparing — what A1 asked for</span>
+        Comparator&lt;Book&gt; byTitle3 = Comparator.<span class="at">comparing</span>(Book::getTitle);
+
+        books.<span class="at">sort</span>(byTitle1);
+        System.out.<span class="at">println</span>(books);   <span class="o">// [Clean Code, Effective Java, Java Puzzlers]</span>
+        books.<span class="at">sort</span>(byTitle2.<span class="at">reversed</span>());
+        System.out.<span class="at">println</span>(books);   <span class="o">// [Java Puzzlers, Effective Java, Clean Code]</span>
+        books.<span class="at">sort</span>(byTitle3);
+        System.out.<span class="at">println</span>(books);   <span class="o">// [Clean Code, Effective Java, Java Puzzlers]</span>
+    }
+}
+
+<span class="tg">class</span> Book {
+    <span class="tg">private</span> <span class="tg">final</span> String title;
+    <span class="at">Book</span>(String title) { <span class="tg">this</span>.title = title; }
+    String <span class="at">getTitle</span>() { <span class="tg">return</span> title; }
+    <span class="at">@Override</span> <span class="tg">public</span> String <span class="at">toString</span>() { <span class="tg">return</span> title; }
+}</div>
+  <p>The shapes you'll see: <code>() -&gt; value</code> (no parameters), <code>x -&gt; value</code> (one), <code>(a, b) -&gt; value</code> (two or more), and <code>x -&gt; { statements; }</code> when the body needs more than one line.</p>
+
+  <h3>Method references: a lambda that only calls one method</h3>
+  <p>When a lambda does nothing but call one method, you can name the method instead. Your code has two kinds:</p>
+  <div class="mention">
+    <div class="mrow"><b>this::toProductResponse</b><span>"call <code>toProductResponse</code> on this object" — the same as <code>product -&gt; this.toProductResponse(product)</code>.</span></div>
+    <div class="mrow"><b>Book::getTitle</b><span>"call <code>getTitle</code> on whichever book you're given" — the same as <code>book -&gt; book.getTitle()</code>.</span></div>
+  </div>
+
+  <h3>A lambda can use the variables around it</h3>
+  <p><code>() -&gt; new ProductNotFoundException(id)</code> uses <code>id</code>, the method's parameter. A lambda may read local variables like this, with one rule: they must not change after they're set — they must be <strong>effectively final</strong>.</p>
+  <div class="dothis">
+    <h4>Try it — on your project</h4>
+    <ol>
+      <li>In <code>ProductService.getProductById</code>, add <code>id = id + 1;</code> as the first line inside the method (before line 28).</li>
+      <li>IntelliJ underlines the <code>id</code> inside the lambda: <code>local variables referenced from a lambda expression must be final or effectively final</code>.</li>
+      <li>Undo.</li>
+    </ol>
+  </div>
+
+  <h3>The lambdas in SecurityConfig</h3>
+  <div class="cmd">http
+        .<span class="at">csrf</span>(csrf -&gt; csrf.<span class="at">disable</span>())
+
+        .<span class="at">sessionManagement</span>(session -&gt;
+                session.<span class="at">sessionCreationPolicy</span>(SessionCreationPolicy.STATELESS)
+        )</div>
+  <p class="refs">lab2-complete · config/SecurityConfig.java · lines 26–31</p>
+  <p>Each method takes a lambda, and <code>http</code> calls it, handing it an object that holds one group of settings. Your lambda changes those settings. Each method returns <code>http</code> again, so the next call can follow — the same <code>return this</code> as a builder. Here is that shape with toy settings, in plain Java:</p>
+  <div class="cmd"><span class="cm">// LambdaConfig.java — the shape of SecurityConfig, with toy settings</span>
+<span class="tg">import</span> java.util.function.Consumer;
+
+<span class="tg">public</span> <span class="tg">class</span> LambdaConfig {
+    <span class="tg">public</span> <span class="tg">static</span> <span class="tg">void</span> <span class="at">main</span>(String[] args) {
+        Http http = <span class="tg">new</span> <span class="at">Http</span>();
+        http
+                .<span class="at">csrf</span>(csrf -&gt; csrf.<span class="at">disable</span>())
+                .<span class="at">sessionManagement</span>(session -&gt; session.<span class="at">policy</span>(<span class="st">"STATELESS"</span>));
+        System.out.<span class="at">println</span>(http);    <span class="o">// csrf on: false, sessions: STATELESS</span>
+    }
+}
+
+<span class="tg">class</span> CsrfSettings {
+    <span class="tg">boolean</span> on = <span class="tg">true</span>;
+    <span class="tg">void</span> <span class="at">disable</span>() { on = <span class="tg">false</span>; }
+}
+
+<span class="tg">class</span> SessionSettings {
+    String policy = <span class="st">"IF_REQUIRED"</span>;
+    <span class="tg">void</span> <span class="at">policy</span>(String p) { policy = p; }
+}
+
+<span class="tg">class</span> Http {
+    <span class="tg">private</span> <span class="tg">final</span> CsrfSettings csrf = <span class="tg">new</span> <span class="at">CsrfSettings</span>();
+    <span class="tg">private</span> <span class="tg">final</span> SessionSettings sessions = <span class="tg">new</span> <span class="at">SessionSettings</span>();
+
+    Http <span class="at">csrf</span>(Consumer&lt;CsrfSettings&gt; customizer) {
+        customizer.<span class="at">accept</span>(csrf);     <span class="cm">// Http calls YOUR lambda, with its settings object</span>
+        <span class="tg">return</span> <span class="tg">this</span>;                 <span class="cm">// so the next call can chain</span>
+    }
+
+    Http <span class="at">sessionManagement</span>(Consumer&lt;SessionSettings&gt; customizer) {
+        customizer.<span class="at">accept</span>(sessions);
+        <span class="tg">return</span> <span class="tg">this</span>;
+    }
+
+    <span class="at">@Override</span>
+    <span class="tg">public</span> String <span class="at">toString</span>() { <span class="tg">return</span> <span class="st">"csrf on: "</span> + csrf.on + <span class="st">", sessions: "</span> + sessions.policy; }
+}</div>
+  <p>Spring's <code>HttpSecurity</code> works the same way, with Spring's own <code>Customizer</code> interface in place of <code>Consumer</code>. What those settings mean, and why yours are what they are, is <a href="sb-security.html">B3</a>. <code>Customizer.withDefaults()</code> (line 85) is a ready-made lambda that changes nothing: "keep the defaults".</p>
+
+  <h3>A method that returns a lambda</h3>
+  <div class="cmd"><span class="at">@Bean</span>
+<span class="tg">public</span> AuthenticationEntryPoint <span class="at">authenticationEntryPoint</span>() {
+    <span class="tg">return</span> (request, response, exception) -&gt;
+            <span class="at">writeError</span>(
+                    request,
+                    response,
+                    HttpStatus.UNAUTHORIZED,
+                    <span class="st">"Authentication is required. Please provide a valid JWT token."</span>
+            );
+}</div>
+  <p class="refs">lab2-complete · config/RestSecurityErrorHandler.java · lines 25–34</p>
+  <p>The return type is <code>AuthenticationEntryPoint</code>, an interface with one method, <code>commence(request, response, authException)</code>. The lambda <em>is</em> that method's body. Nothing runs when this method returns; Spring Security calls the lambda later, whenever a request needs a 401 (<a href="sb-security.html">B3</a>).</p>
+
+  <div class="dothis">
+    <h4>Try it — in jshell</h4>
+  </div>
+  <div class="cmd">Function&lt;String, Integer&gt; length = s -&gt; s.<span class="at">length</span>();
+length.<span class="at">apply</span>(<span class="st">"Laptop"</span>)                   <span class="o">// 6</span>
+Function&lt;String, Integer&gt; length2 = String::length;
+length2.<span class="at">apply</span>(<span class="st">"Wireless Mouse"</span>)          <span class="o">// 14</span>
+Supplier&lt;RuntimeException&gt; recipe = () -&gt; <span class="tg">new</span> <span class="at">IllegalStateException</span>(<span class="st">"not found"</span>);
+recipe.<span class="at">get</span>().<span class="at">getMessage</span>()                <span class="o">// "not found"</span></div>
+  <p><code>apply</code> and <code>get</code> are the one method of <code>Function</code> and <code>Supplier</code>. Calling it runs your lambda.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Can <code>.orElseThrow(() -&gt; new ProductNotFoundException(id))</code> be shortened to <code>.orElseThrow(ProductNotFoundException::new)</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No. A <code>Supplier</code>'s method takes no arguments, and your exception's only constructor needs an <code>id</code>. The compiler says <code>incompatible types: invalid constructor reference … required: Long, found: no arguments</code>.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Write <code>.map(this::toProductResponse)</code> with a lambda instead.</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>.map(product -&gt; this.toProductResponse(product))</code>, or just <code>.map(product -&gt; toProductResponse(product))</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 complete</span></label>
+</section>
+
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>Streams</h2><span class="lvl core">Core</span><span class="tagline">.stream().map(…).toList()</span></div>
+
+  <div class="cmd"><span class="tg">public</span> List&lt;ProductResponse&gt; <span class="at">getProductsByCategory</span>(String category) {
+    <span class="tg">return</span> productRepository.<span class="at">findByCategory</span>(category)
+            .<span class="at">stream</span>()
+            .<span class="at">map</span>(<span class="tg">this</span>::toProductResponse)
+            .<span class="at">toList</span>();
+}</div>
+  <p class="refs">lab2-complete · service/ProductService.java · lines 69–74</p>
+  <p>And what A1 asked of <code>searchByAuthor</code>:</p>
+  <div class="cmd"><span class="cm">/**
+ * Finds books whose author contains {@code name}, ignoring upper/lower case.
+ * For example "bloch" matches "Joshua Bloch".
+ *
+ * &lt;p&gt;Use a stream: filter, then sorted(Comparator.comparing(Book::getTitle)), then toList().
+ *
+ * @return matching books sorted by title; an empty list if none match
+ */</span>
+<span class="tg">public</span> List&lt;Book&gt; <span class="at">searchByAuthor</span>(String name) {</div>
+  <p class="refs">A1 starter · Catalogue.java · lines 38–46</p>
+
+  <h3>A pipeline: a start, some steps, an end</h3>
+  <div class="mention">
+    <div class="mrow"><b>.stream()</b><span>The start: the list's items, one after another.</span></div>
+    <div class="mrow"><b>.map(f)</b><span>A step: turn each item into something else, with the function you pass. Your services turn each <code>Product</code> into a <code>ProductResponse</code>.</span></div>
+    <div class="mrow"><b>.filter(test)</b><span>A step: keep only the items that pass the test. A1's author search.</span></div>
+    <div class="mrow"><b>.sorted(comparator)</b><span>A step: put them in order. A1's sort by title.</span></div>
+    <div class="mrow"><b>.toList()</b><span>The end: collect what's left into a new list. Nothing runs until the end is called.</span></div>
+  </div>
+  <p>Every step takes a lambda or a method reference (section 08) and returns a new stream, so the steps chain. Nothing changes the original list.</p>
+  <div class="cmd"><span class="cm">// Pipeline.java</span>
+<span class="tg">import</span> java.math.BigDecimal;
+<span class="tg">import</span> java.util.*;
+
+<span class="tg">public</span> <span class="tg">class</span> Pipeline {
+    <span class="tg">public</span> <span class="tg">static</span> <span class="tg">void</span> <span class="at">main</span>(String[] args) {
+        ProductService service = <span class="tg">new</span> <span class="at">ProductService</span>();
+        System.out.<span class="at">println</span>(service.<span class="at">getAllProducts</span>());
+        <span class="o">// [Laptop (65000.00), Wireless Mouse (1200.00), Mechanical Keyboard (3500.00)]</span>
+        System.out.<span class="at">println</span>(service.<span class="at">accessoryNames</span>());     <span class="o">// [Mechanical Keyboard, Wireless Mouse]</span>
+        System.out.<span class="at">println</span>(service.<span class="at">getAllProductsByHand</span>().<span class="at">equals</span>(service.<span class="at">getAllProducts</span>()));   <span class="o">// true</span>
+    }
+}
+
+<span class="tg">class</span> ProductService {
+    <span class="tg">private</span> <span class="tg">final</span> List&lt;Product&gt; products = List.<span class="at">of</span>(
+            <span class="tg">new</span> <span class="at">Product</span>(<span class="st">"Laptop"</span>, <span class="st">"Electronics"</span>, <span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">"65000.00"</span>)),
+            <span class="tg">new</span> <span class="at">Product</span>(<span class="st">"Wireless Mouse"</span>, <span class="st">"Accessories"</span>, <span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">"1200.00"</span>)),
+            <span class="tg">new</span> <span class="at">Product</span>(<span class="st">"Mechanical Keyboard"</span>, <span class="st">"Accessories"</span>, <span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">"3500.00"</span>)));
+
+    <span class="cm">// the shape of your getAllProducts(): every product, turned into something else</span>
+    List&lt;String&gt; <span class="at">getAllProducts</span>() {
+        <span class="tg">return</span> products.<span class="at">stream</span>()
+                .<span class="at">map</span>(<span class="tg">this</span>::toLabel)
+                .<span class="at">toList</span>();
+    }
+
+    <span class="cm">// the shape of A1's searchByAuthor(): keep some, sort them, collect</span>
+    List&lt;String&gt; <span class="at">accessoryNames</span>() {
+        <span class="tg">return</span> products.<span class="at">stream</span>()
+                .<span class="at">filter</span>(p -&gt; p.<span class="at">getCategory</span>().<span class="at">equals</span>(<span class="st">"Accessories"</span>))
+                .<span class="at">sorted</span>(Comparator.<span class="at">comparing</span>(Product::getName))
+                .<span class="at">map</span>(Product::getName)
+                .<span class="at">toList</span>();
+    }
+
+    <span class="cm">// getAllProducts() again, as a loop</span>
+    List&lt;String&gt; <span class="at">getAllProductsByHand</span>() {
+        List&lt;String&gt; result = <span class="tg">new</span> ArrayList&lt;&gt;();
+        <span class="tg">for</span> (Product p : products) {
+            result.<span class="at">add</span>(<span class="at">toLabel</span>(p));
+        }
+        <span class="tg">return</span> result;
+    }
+
+    <span class="tg">private</span> String <span class="at">toLabel</span>(Product p) {
+        <span class="tg">return</span> p.<span class="at">getName</span>() + <span class="st">" ("</span> + p.<span class="at">getPrice</span>() + <span class="st">")"</span>;
+    }
+}
+
+<span class="tg">class</span> Product {
+    <span class="tg">private</span> <span class="tg">final</span> String name;
+    <span class="tg">private</span> <span class="tg">final</span> String category;
+    <span class="tg">private</span> <span class="tg">final</span> BigDecimal price;
+
+    <span class="at">Product</span>(String name, String category, BigDecimal price) {
+        <span class="tg">this</span>.name = name;
+        <span class="tg">this</span>.category = category;
+        <span class="tg">this</span>.price = price;
+    }
+
+    String <span class="at">getName</span>() { <span class="tg">return</span> name; }
+    String <span class="at">getCategory</span>() { <span class="tg">return</span> category; }
+    BigDecimal <span class="at">getPrice</span>() { <span class="tg">return</span> price; }
+}</div>
+  <p>A stream and a loop do the same work. A stream says <em>what</em> you want — "each product as a label" — and leaves out the bookkeeping of an empty list and <code>add</code>.</p>
+  <div class="cue watch"><p class="cue-k">The list from toList() can't be changed</p><p><code>toList()</code> returns a list you can read but not change. <code>add</code> or <code>remove</code> on it throws <code>UnsupportedOperationException</code>. If you need to change it, copy it first: <code>new ArrayList&lt;&gt;(list)</code>.</p></div>
+  <p>One more thing about <code>getProductsByCategory</code>: the <em>choosing</em> happens in the database, inside <code>findByCategory</code>, not in a <code>filter</code>. The stream only converts the rows that came back. <a href="sb-request-flow.html">B1</a> shows the SQL. And <code>forEach</code> in <code>GlobalExceptionHandler</code> (line 44) isn't a stream at all: a list's own <code>forEach</code> runs your lambda once per item.</p>
+
+  <div class="dothis">
+    <h4>Try it — in jshell</h4>
+  </div>
+  <div class="cmd">List&lt;String&gt; names = Stream.<span class="at">of</span>(<span class="st">"Laptop"</span>, <span class="st">"Mouse"</span>).<span class="at">toList</span>();
+names.<span class="at">add</span>(<span class="st">"Keyboard"</span>)                     <span class="o">// throws UnsupportedOperationException</span>
+Stream.<span class="at">of</span>(<span class="st">"mouse"</span>, <span class="st">"laptop"</span>).<span class="at">map</span>(String::toUpperCase).<span class="at">sorted</span>().<span class="at">toList</span>()   <span class="o">// [LAPTOP, MOUSE]</span></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Leave out <code>.toList()</code> in <code>getAllProducts</code>. What happens?</div>
+    <details><summary>Show answer</summary><div class="a"><p>It doesn't compile. Without the end, the expression is still a <code>Stream</code>, not a <code>List</code>: <code>incompatible types: no instance(s) of type variable(s) R exist so that Stream&lt;R&gt; conforms to List&lt;…&gt;</code>. And nothing would have run anyway — a stream does no work until its end is called.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 09 complete</span></label>
+</section>
+
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>Exceptions</h2><span class="lvl core">Core</span><span class="tagline">why yours extend RuntimeException</span></div>
+
+  <div class="cmd"><span class="tg">public</span> <span class="tg">class</span> ProductNotFoundException <span class="tg">extends</span> RuntimeException {
+
+    <span class="tg">public</span> <span class="at">ProductNotFoundException</span>(Long id) {
+        <span class="tg">super</span>(<span class="st">"Product with ID "</span> + id + <span class="st">" not found"</span>);
+    }
+}</div>
+  <p class="refs">lab2-complete · exception/ProductNotFoundException.java · lines 4–9</p>
+  <div class="cmd"><span class="tg">public</span> <span class="tg">class</span> BookNotFoundException <span class="tg">extends</span> RuntimeException {
+
+    <span class="tg">public</span> <span class="at">BookNotFoundException</span>(String isbn) {
+        <span class="tg">super</span>(<span class="st">"No book with ISBN "</span> + isbn);
+    }
+}</div>
+  <p class="refs">A1 starter · BookNotFoundException.java · lines 4–9</p>
+  <p>The same class, twice. A custom exception is usually just this: a name that says what went wrong, and a constructor that builds the message and hands it to <code>super</code>. <code>getMessage()</code> returns that message later.</p>
+
+  <h3>Checked and unchecked</h3>
+  <div class="cmd">Throwable
+├── Error                          the JVM itself is in trouble — don't catch these
+└── Exception                      CHECKED: catch it, or declare it with "throws"
+    ├── IOException                   ← your writeError(…) declares this
+    └── RuntimeException           UNCHECKED: no such rule
+        ├── IllegalArgumentException  ← A1's Book constructor; TokenRevocationService
+        ├── IllegalStateException     ← JwtConfig; AuthService.login; A1's returnCopy
+        ├── UnsupportedOperationException   ← A1's "TODO" starter methods
+        ├── ProductNotFoundException  ← yours
+        └── BookNotFoundException …   ← A1's three</div>
+  <p>For a <strong>checked</strong> exception, the compiler insists: a method that can throw one must either catch it or say so with <code>throws</code>. An <strong>unchecked</strong> exception — <code>RuntimeException</code> and everything under it — has no such rule. Forget the rule for a checked one and the compiler stops:</p>
+  <div class="cmd"><span class="o">Chk.java:5: error: unreported exception IOException; must be caught or declared to be thrown</span>
+<span class="o">        writeError("/api/auth/me");</span>
+<span class="o">                  ^</span></div>
+
+  <h3>Why yours are unchecked</h3>
+  <p><code>ProductNotFoundException</code> is thrown in the service, deep inside a request. Something near the top — not the service, not the controller — turns it into a 404 response (<a href="sb-good-slice.html">B2</a>). Because it's unchecked, it can travel up through the controller with no <code>throws</code> on any method in between. Spring's exceptions in your code are unchecked for the same reason: <code>ResponseStatusException</code> in <code>AuthService</code>, and <code>UsernameNotFoundException</code>. Spring's transactions also undo their changes on an unchecked exception, by default (<a href="sb-good-slice.html">B2</a>).</p>
+  <div class="cmd"><span class="cm">// NotFound.java</span>
+<span class="tg">public</span> <span class="tg">class</span> NotFound {
+    <span class="tg">public</span> <span class="tg">static</span> <span class="tg">void</span> <span class="at">main</span>(String[] args) {
+        <span class="tg">try</span> {
+            <span class="at">findProduct</span>(<span class="st">99L</span>);
+        } <span class="tg">catch</span> (ProductNotFoundException e) {
+            System.out.<span class="at">println</span>(e.<span class="at">getMessage</span>());   <span class="o">// Product with ID 99 not found</span>
+        }
+        <span class="at">findProduct</span>(<span class="st">99L</span>);                         <span class="cm">// not caught this time</span>
+        <span class="o">// Exception in thread "main" ProductNotFoundException: Product with ID 99 not found</span>
+    }
+
+    <span class="tg">static</span> String <span class="at">findProduct</span>(Long id) {          <span class="cm">// no "throws" needed: it's unchecked</span>
+        <span class="tg">throw</span> <span class="tg">new</span> <span class="at">ProductNotFoundException</span>(id);
+    }
+}
+
+<span class="tg">class</span> ProductNotFoundException <span class="tg">extends</span> RuntimeException {   <span class="cm">// the same as yours</span>
+    <span class="tg">public</span> <span class="at">ProductNotFoundException</span>(Long id) {
+        <span class="tg">super</span>(<span class="st">"Product with ID "</span> + id + <span class="st">" not found"</span>);
+    }
+}</div>
+  <p>The second call isn't caught, so the program stops with the exception's class and message, followed by a list of <code>at …</code> lines showing where it was thrown. Reading those lines is <a href="sb-testing.html">B4</a>. In your app, nothing crashes: the handler from <a href="sb-good-slice.html">B2</a> catches it first.</p>
+
+  <h3>The checked exceptions in your code</h3>
+  <div class="cmd"><span class="at">@Bean</span>
+<span class="tg">public</span> SecurityFilterChain <span class="at">securityFilterChain</span>(HttpSecurity http)
+        <span class="tg">throws</span> Exception {</div>
+  <p class="refs">lab2-complete · config/SecurityConfig.java · lines 22–24</p>
+  <p><code>throws Exception</code> is there because something the method calls on <code>http</code> is declared <code>throws Exception</code>, and the method passes it on rather than catching it. <code>SecurityBeansConfig.authenticationManager</code> (line 22) does the same.</p>
+  <div class="cmd"><span class="tg">private</span> <span class="tg">void</span> <span class="at">writeError</span>(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        HttpStatus status,
+        String message) <span class="tg">throws</span> IOException {</div>
+  <p class="refs">lab2-complete · config/RestSecurityErrorHandler.java · lines 47–51</p>
+  <p><code>response.getOutputStream()</code>, inside <code>writeError</code>, is declared <code>throws IOException</code>. And here is a subtle point: <code>writeError</code> is called from inside the lambda in section 08. A lambda may throw a checked exception only if its interface's one method declares it. <code>AuthenticationEntryPoint.commence</code> is declared <code>throws IOException, ServletException</code>, so this compiles. With an interface whose method declares nothing, it wouldn't:</p>
+  <div class="cmd"><span class="cm">// LambdaThrows.java</span>
+<span class="tg">import</span> java.io.IOException;
+
+<span class="tg">public</span> <span class="tg">class</span> LambdaThrows {
+    <span class="tg">interface</span> ErrorWriter {                          <span class="cm">// like AuthenticationEntryPoint: its method declares IOException</span>
+        <span class="tg">void</span> <span class="at">write</span>(String path) <span class="tg">throws</span> IOException;
+    }
+
+    <span class="tg">static</span> <span class="tg">void</span> <span class="at">writeError</span>(String path) <span class="tg">throws</span> IOException {
+        System.out.<span class="at">println</span>(<span class="st">"401 for "</span> + path);
+    }
+
+    <span class="tg">public</span> <span class="tg">static</span> <span class="tg">void</span> <span class="at">main</span>(String[] args) <span class="tg">throws</span> IOException {
+        ErrorWriter entryPoint = path -&gt; <span class="at">writeError</span>(path);   <span class="cm">// fine: write() may throw IOException</span>
+        entryPoint.<span class="at">write</span>(<span class="st">"/api/auth/me"</span>);                    <span class="o">// 401 for /api/auth/me</span>
+
+        <span class="cm">// Runnable's run() declares nothing, so this line would not compile:</span>
+        <span class="cm">// Runnable r = () -&gt; writeError("/x");    // error: unreported exception IOException; …</span>
+    }
+}</div>
+
+  <h3>IllegalArgumentException or IllegalStateException?</h3>
+  <p>Both are Java's own, and your code uses both. <code>IllegalArgumentException</code> means "you passed me something wrong" — A1's <code>Book</code> constructor rejecting a 12-digit ISBN, <code>revokeToken</code> rejecting a blank token id. <code>IllegalStateException</code> means "the program is in a state where this shouldn't happen" — <code>login</code> finding no user right after that user was authenticated, or <code>JwtConfig</code> refusing to start with a secret shorter than 32 bytes:</p>
+  <div class="cmd"><span class="tg">if</span> (keyBytes.length &lt; <span class="st">32</span>) {
+    <span class="tg">throw</span> <span class="tg">new</span> <span class="at">IllegalStateException</span>(
+            <span class="st">"JWT secret must contain at least 32 bytes"</span>);
+}</div>
+  <p class="refs">lab2-complete · config/JwtConfig.java · lines 29–32</p>
+
+  <div class="dothis">
+    <h4>Try it — on your project</h4>
+    <ol>
+      <li>In <code>SecurityConfig.java</code>, delete <code>throws Exception</code> (line 24, leaving the <code>{</code>). IntelliJ underlines the call that can throw it: <code>unreported exception Exception; must be caught or declared to be thrown</code>.</li>
+      <li>Undo.</li>
+      <li>Then run <code>NotFound.java</code> above and read the last lines it prints.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b><code>loadUserByUsername</code> says <code>throws UsernameNotFoundException</code> (<code>CustomUserDetailsService</code>, line 22). Is <code>UsernameNotFoundException</code> checked?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No — it extends <code>AuthenticationException</code>, which extends <code>RuntimeException</code>. You may list an unchecked exception in <code>throws</code>; it changes nothing for the compiler and tells the reader what to expect. Here it repeats what <code>UserDetailsService</code> declares.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>What would change if <code>ProductNotFoundException</code> extended <code>Exception</code> instead?</div>
+    <details><summary>Show answer</summary><div class="a"><p>It would become checked. Every method that throws it or passes it on — <code>getProductById</code>, <code>updateProduct</code>, <code>deleteProduct</code>, and the controller methods that call them — would need <code>throws ProductNotFoundException</code>, or the compiler stops with <code>unreported exception ProductNotFoundException; must be caught or declared to be thrown</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 complete</span></label>
+</section>
+
+<div class="part">Part 4 · The values in your fields</div>
+
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>Long, Integer and BigDecimal</h2><span class="lvl core">Core</span><span class="tagline">the types of Product's fields</span></div>
+
+  <div class="cmd"><span class="at">@Id</span>
+<span class="at">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+<span class="tg">private</span> Long id;
+
+<span class="tg">private</span> String name;
+
+<span class="tg">private</span> String description;
+
+<span class="tg">private</span> BigDecimal price;
+
+<span class="tg">private</span> String category;
+
+<span class="tg">private</span> Integer stock;</div>
+  <p class="refs">lab2-complete · entity/Product.java · lines 16–28</p>
+
+  <h3>Long and Integer, not long and int</h3>
+  <p><code>long</code> and <code>int</code> are plain numbers. <code>Long</code> and <code>Integer</code> are their <strong>wrapper</strong> classes: objects that hold a number, and that can also be <code>null</code>. Java converts between the two for you — <em>boxing</em> and <em>unboxing</em> — so you rarely notice. Your fields use the wrappers because "no value" is a real state for them:</p>
+  <ul>
+    <li><code>id</code> is <code>null</code> until the product is saved and the database gives it a number (<code>PlainProduct</code> in section 05 printed <code>null</code>; <a href="sb-request-flow.html">B1</a> shows the save).</li>
+    <li>A field nothing has set is <code>null</code> if it's an <code>Integer</code>, but <code>0</code> if it's an <code>int</code>. So only an <code>Integer stock</code> can tell "the request had no stock" from "stock is zero" — which is what <code>@NotNull</code> on <code>ProductRequest.stock</code> needs (below; <a href="sb-good-slice.html">B2</a>).</li>
+  </ul>
+  <div class="cmd"><span class="at">@NotNull</span>(message = <span class="st">"Product price is required"</span>)
+<span class="at">@DecimalMin</span>(value = <span class="st">"0.01"</span>, message = <span class="st">"Product price must be greater than zero"</span>)
+<span class="tg">private</span> BigDecimal price;
+
+<span class="at">@NotBlank</span>(message = <span class="st">"Product category is required"</span>)
+<span class="at">@Size</span>(max = <span class="st">100</span>, message = <span class="st">"Product category must not exceed 100 characters"</span>)
+<span class="tg">private</span> String category;
+
+<span class="at">@NotNull</span>(message = <span class="st">"Product stock is required"</span>)
+<span class="at">@PositiveOrZero</span>(message = <span class="st">"Product stock cannot be negative"</span>)
+<span class="tg">private</span> Integer stock;</div>
+  <p class="refs">lab2-complete · dto/ProductRequest.java · lines 27–37</p>
+
+  <div class="dothis">
+    <h4>Try it — in jshell</h4>
+  </div>
+  <div class="cmd"><span class="tg">class</span> Item { <span class="tg">int</span> count; Integer stock; }
+<span class="tg">new</span> <span class="at">Item</span>().count            <span class="o">// 0</span>
+<span class="tg">new</span> <span class="at">Item</span>().stock            <span class="o">// null</span>
+Integer stock = <span class="tg">null</span>;
+<span class="tg">int</span> s = stock;              <span class="o">// throws NullPointerException</span>
+Long a = <span class="st">127L</span>, b = <span class="st">127L</span>;
+a == b                      <span class="o">// true</span>
+Long c = <span class="st">128L</span>, d = <span class="st">128L</span>;
+c == d                      <span class="o">// false</span>
+c.<span class="at">equals</span>(d)                 <span class="o">// true</span></div>
+  <div class="cue watch"><p class="cue-k">Compare Long with equals, never ==</p><p><code>==</code> on two <code>Long</code>s asks "the same object?", not "the same number?". Java shares one object for each small number (−128 to 127), so <code>==</code> seems to work in a quick test with ids 1, 2, 3 — and then fails at id 128. Use <code>a.equals(b)</code>. And unboxing a <code>null</code> — <code>int s = stock</code> — throws a <code>NullPointerException</code>.</p></div>
+
+  <h3>BigDecimal for money</h3>
+  <p>A <code>double</code> stores numbers in binary, and most decimal fractions, like <code>0.1</code>, have no exact binary form. For prices that's not acceptable. <code>BigDecimal</code> stores decimal digits exactly. Your database agrees:</p>
+  <div class="cmd">price <span class="tg">DECIMAL</span>(<span class="st">10</span>, <span class="st">2</span>) <span class="tg">NOT</span> <span class="tg">NULL</span>,</div>
+  <p class="refs">lab2-complete · database/lab1_setup.sql · line 9</p>
+  <div class="cmd"><span class="st">0.1</span> + <span class="st">0.2</span>                                             <span class="o">// 0.30000000000000004</span>
+<span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">"0.10"</span>).<span class="at">add</span>(<span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">"0.20"</span>))    <span class="o">// 0.30</span>
+<span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">0.1</span>)                                   <span class="o">// 0.1000000000000000055511151231257827021181583404541015625</span>
+BigDecimal price = <span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">"1200.00"</span>);
+price.<span class="at">add</span>(BigDecimal.ONE)                             <span class="o">// 1201.00</span>
+price                                                 <span class="o">// 1200.00</span>
+<span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">"65000.00"</span>).<span class="at">equals</span>(<span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">"65000"</span>))      <span class="o">// false</span>
+<span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">"65000.00"</span>).<span class="at">compareTo</span>(<span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">"65000"</span>))   <span class="o">// 0</span></div>
+  <div class="mention">
+    <div class="mrow"><b>new BigDecimal("0.10")</b><span>Make one from text, so it is exactly what you wrote. <code>new BigDecimal(0.1)</code> keeps the <code>double</code>'s error. That's also why <code>@DecimalMin(value = "0.01")</code> takes its limit as text.</span></div>
+    <div class="mrow"><b>price.add(…)</b><span>Returns a <strong>new</strong> number. <code>price</code> itself never changes, like a <code>String</code>.</span></div>
+    <div class="mrow"><b>equals vs compareTo</b><span><code>equals</code> also compares the number of decimal places, so <code>65000.00</code> and <code>65000</code> are not equal. <code>compareTo</code> compares the value: <code>0</code> means the same amount. Prices from your database have two places; a price typed into JSON may have none.</span></div>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Why is <code>ProductRequest.stock</code> an <code>Integer</code> with <code>@NotNull</code>, and not an <code>int</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>An <code>int</code> field that nothing sets is <code>0</code>, so a request with no stock would look like "stock is 0" and <code>@NotNull</code> could never fail. An <code>Integer</code> stays <code>null</code>, so the missing value can be caught.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Are <code>new BigDecimal("3500.00")</code> and <code>new BigDecimal("3500.0")</code> equal?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Not by <code>equals</code> — two decimal places against one. By <code>compareTo</code>, yes: it returns <code>0</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 complete</span></label>
+</section>
+
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>Instant and enums</h2><span class="lvl core">Core</span><span class="tagline">a moment in time, and a fixed set of choices</span></div>
+
+  <div class="cmd">Instant issuedAt = Instant.<span class="at">now</span>();
+Instant expiresAt = issuedAt.<span class="at">plusSeconds</span>(expirationSeconds);</div>
+  <p class="refs">lab2-complete · service/JwtService.java · lines 31–32</p>
+  <div class="cmd"><span class="at">@Column</span>(name = <span class="st">"created_at"</span>, nullable = <span class="tg">false</span>, updatable = <span class="tg">false</span>)
+<span class="tg">private</span> Instant createdAt;
+
+<span class="at">@PrePersist</span>
+<span class="tg">protected</span> <span class="tg">void</span> <span class="at">onCreate</span>() {
+    <span class="tg">if</span> (createdAt == <span class="tg">null</span>) {
+        createdAt = Instant.<span class="at">now</span>();
+    }
+}</div>
+  <p class="refs">lab2-complete · entity/User.java · lines 35–43</p>
+
+  <h3>Instant: one moment, the same everywhere</h3>
+  <p>An <code>Instant</code> is a single moment on the timeline, counted in UTC. It prints in a standard form ending in <code>Z</code> (for UTC). It has no time zone to get wrong: two servers in two countries agree on it. Your code uses it for every timestamp — when a user was created, when a token was issued and when it expires, when an error happened (<code>ApiErrorResponse.timestamp</code>). The other kind, <code>LocalDateTime</code>, has no zone at all, so "10:00" could mean any 10:00 on Earth. (A1's <code>Year.now().getValue()</code> came from the same package, <code>java.time</code>.)</p>
+  <div class="dothis">
+    <h4>Try it — in jshell</h4>
+  </div>
+  <div class="cmd"><span class="tg">import</span> java.time.*
+Instant start = Instant.<span class="at">ofEpochSecond</span>(<span class="st">0</span>);
+start                             <span class="o">// 1970-01-01T00:00:00Z</span>
+Instant later = start.<span class="at">plusSeconds</span>(<span class="st">3600</span>);
+later                             <span class="o">// 1970-01-01T01:00:00Z</span>
+start                             <span class="o">// 1970-01-01T00:00:00Z</span>
+later.<span class="at">isBefore</span>(start)             <span class="o">// false</span>
+later.<span class="at">getEpochSecond</span>()            <span class="o">// 3600</span></div>
+  <p>Three things to take from this. <code>plusSeconds</code> returns a <strong>new</strong> <code>Instant</code> and leaves <code>start</code> alone — that's why <code>JwtService</code> has two variables, <code>issuedAt</code> and <code>expiresAt</code>. <code>isBefore</code> compares two moments; your <code>deleteByExpiresAtBefore(Instant)</code> asks the database the same question. And an <code>Instant</code> is, underneath, a count of seconds since the start of 1970 — exactly how a JWT stores <code>iat</code> and <code>exp</code> (<a href="sb-security.html">B3</a>). Try <code>Instant.now()</code> too: it prints the current moment in UTC.</p>
+
+  <h3>Enums: a fixed set of choices</h3>
+  <div class="cmd"><span class="tg">public</span> <span class="tg">enum</span> Role {
+    STUDENT,
+    ADMIN
+}</div>
+  <p class="refs">lab2-complete · entity/Role.java · lines 3–6</p>
+  <p>An <code>enum</code> is a class with a fixed list of objects, one per name, each made once, the first time the enum is used. A <code>Role</code> can only be <code>Role.STUDENT</code> or <code>Role.ADMIN</code>; a typo like <code>Role.ADMN</code> doesn't compile, where the text <code>"ADMN"</code> would. Your code turns a role into text with <code>name()</code> — <code>user.getRole().name()</code> in <code>JwtService</code> (line 40) and <code>CustomUserDetailsService</code> (line 36). How the database stores it (<code>@Enumerated(EnumType.STRING)</code> in <code>User.java</code>) is <a href="sb-request-flow.html">B1</a>; what Spring does with the text is <a href="sb-security.html">B3</a>.</p>
+  <p>You use several of Spring's enums too: <code>HttpStatus</code>, <code>SessionCreationPolicy</code>, <code>GenerationType</code>, <code>MacAlgorithm</code>. An enum constant can carry values of its own — <code>HttpStatus.NOT_FOUND.value()</code> is <code>404</code>, and <code>.getReasonPhrase()</code> is <code>"Not Found"</code> (<code>GlobalExceptionHandler</code>, lines 28–29). Here is that shape in plain Java:</p>
+  <div class="cmd"><span class="cm">// Enums.java</span>
+<span class="tg">public</span> <span class="tg">class</span> Enums {
+    <span class="tg">public</span> <span class="tg">static</span> <span class="tg">void</span> <span class="at">main</span>(String[] args) {
+        Role role = Role.STUDENT;
+        System.out.<span class="at">println</span>(role.<span class="at">name</span>());                  <span class="o">// STUDENT</span>
+        System.out.<span class="at">println</span>(role == Role.STUDENT);         <span class="o">// true</span>
+        System.out.<span class="at">println</span>(Role.<span class="at">valueOf</span>(<span class="st">"ADMIN"</span>));        <span class="o">// ADMIN</span>
+        System.out.<span class="at">println</span>(Status.NOT_FOUND.<span class="at">value</span>() + <span class="st">" "</span> + Status.NOT_FOUND.<span class="at">getReasonPhrase</span>());   <span class="o">// 404 Not Found</span>
+        System.out.<span class="at">println</span>(Role.<span class="at">valueOf</span>(<span class="st">"admin"</span>));
+        <span class="o">// Exception in thread "main" java.lang.IllegalArgumentException: No enum constant Role.admin</span>
+    }
+}
+
+<span class="tg">enum</span> Role { STUDENT, ADMIN }     <span class="cm">// the same as yours</span>
+
+<span class="tg">enum</span> Status {                    <span class="cm">// the shape of Spring's HttpStatus: each constant carries values</span>
+    <span class="at">OK</span>(<span class="st">200</span>, <span class="st">"OK"</span>),
+    <span class="at">NOT_FOUND</span>(<span class="st">404</span>, <span class="st">"Not Found"</span>);
+
+    <span class="tg">private</span> <span class="tg">final</span> <span class="tg">int</span> value;
+    <span class="tg">private</span> <span class="tg">final</span> String reasonPhrase;
+
+    <span class="at">Status</span>(<span class="tg">int</span> value, String reasonPhrase) {
+        <span class="tg">this</span>.value = value;
+        <span class="tg">this</span>.reasonPhrase = reasonPhrase;
+    }
+
+    <span class="tg">public</span> <span class="tg">int</span> <span class="at">value</span>() { <span class="tg">return</span> value; }
+    <span class="tg">public</span> String <span class="at">getReasonPhrase</span>() { <span class="tg">return</span> reasonPhrase; }
+}</div>
+  <p><code>==</code> is safe on enums, unlike on <code>Long</code>: there is only ever one <code>Role.STUDENT</code> object. <code>valueOf</code> turns text back into a constant, and is exact about case.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>After <code>Instant expiresAt = issuedAt.plusSeconds(3600);</code>, has <code>issuedAt</code> changed?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No. <code>Instant</code> can't change; <code>plusSeconds</code> returns a new one. Same for <code>BigDecimal</code> and <code>String</code>.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Why is <code>role</code> an enum and not a <code>String</code> field holding <code>"STUDENT"</code> or <code>"ADMIN"</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>An enum can only hold one of its constants, and the compiler checks every use. A <code>String</code> would accept <code>"Admin"</code>, <code>"ADMN"</code> or anything else, and you'd find out only when something went wrong.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 12 complete</span></label>
+</section>
+
+<section id="s13">
+  <div class="shead"><span class="chip">13</span><h2>equals, hashCode and toString</h2><span class="lvl core">Core</span><span class="tagline">A1's Book did; your Product doesn't</span></div>
+
+  <div class="cmd"><span class="at">@Test</span>
+<span class="tg">void</span> <span class="at">booksWithTheSameIsbnAreEqual</span>() {
+    Book a = <span class="tg">new</span> <span class="at">Book</span>(<span class="st">"9780134685991"</span>, <span class="st">"Effective Java"</span>, <span class="st">"Joshua Bloch"</span>, <span class="st">2018</span>);
+    Book b = <span class="tg">new</span> <span class="at">Book</span>(<span class="st">"9780134685991"</span>, <span class="st">"Effective Java, 3rd edition"</span>, <span class="st">"J. Bloch"</span>, <span class="st">2017</span>);
+
+    <span class="at">assertEquals</span>(a, b);
+    <span class="at">assertEquals</span>(a.<span class="at">hashCode</span>(), b.<span class="at">hashCode</span>());
+}</div>
+  <p class="refs">A1 starter · BookTest.java · lines 34–41</p>
+  <p>In A1 you overrode <code>equals</code> and <code>hashCode</code> on the ISBN, so two <code>Book</code> objects for the same book count as the same — and <code>toString</code>, so a book prints as something readable. Your lab's <code>Product</code> has none of the three, and section 05's table showed why: <code>@Getter</code>, <code>@Setter</code> and the constructor annotations don't write them. Without them, Java uses the versions from <code>Object</code>: <code>equals</code> means "the very same object", and <code>toString</code> prints the class name and a number.</p>
+  <div class="cmd"><span class="cm">// SameOrNot.java</span>
+<span class="tg">import</span> java.util.*;
+
+<span class="tg">public</span> <span class="tg">class</span> SameOrNot {
+    <span class="tg">public</span> <span class="tg">static</span> <span class="tg">void</span> <span class="at">main</span>(String[] args) {
+        Book a = <span class="tg">new</span> <span class="at">Book</span>(<span class="st">"9780134685991"</span>, <span class="st">"Effective Java"</span>);
+        Book b = <span class="tg">new</span> <span class="at">Book</span>(<span class="st">"9780134685991"</span>, <span class="st">"Effective Java, 3rd edition"</span>);
+        System.out.<span class="at">println</span>(a.<span class="at">equals</span>(b));                           <span class="o">// true</span>
+        System.out.<span class="at">println</span>(<span class="tg">new</span> HashSet&lt;&gt;(List.<span class="at">of</span>(a, b)).<span class="at">size</span>());   <span class="o">// 1</span>
+        System.out.<span class="at">println</span>(a);                                     <span class="o">// 9780134685991 Effective Java</span>
+
+        Product p = <span class="tg">new</span> <span class="at">Product</span>(<span class="st">1L</span>);
+        Product q = <span class="tg">new</span> <span class="at">Product</span>(<span class="st">1L</span>);
+        System.out.<span class="at">println</span>(p.<span class="at">equals</span>(q));                           <span class="o">// false</span>
+        System.out.<span class="at">println</span>(<span class="tg">new</span> HashSet&lt;&gt;(List.<span class="at">of</span>(p, q)).<span class="at">size</span>());   <span class="o">// 2</span>
+        System.out.<span class="at">println</span>(p);                                     <span class="o">// Product@7a81197d</span>
+    }
+}
+
+<span class="tg">class</span> Book {                      <span class="cm">// the A1 way: same ISBN, same book</span>
+    <span class="tg">private</span> <span class="tg">final</span> String isbn;
+    <span class="tg">private</span> <span class="tg">final</span> String title;
+
+    <span class="at">Book</span>(String isbn, String title) { <span class="tg">this</span>.isbn = isbn; <span class="tg">this</span>.title = title; }
+
+    <span class="at">@Override</span>
+    <span class="tg">public</span> <span class="tg">boolean</span> <span class="at">equals</span>(Object o) {
+        <span class="tg">if</span> (<span class="tg">this</span> == o) <span class="tg">return</span> <span class="tg">true</span>;
+        <span class="tg">if</span> (!(o <span class="tg">instanceof</span> Book)) <span class="tg">return</span> <span class="tg">false</span>;
+        Book other = (Book) o;
+        <span class="tg">return</span> isbn.<span class="at">equals</span>(other.isbn);
+    }
+
+    <span class="at">@Override</span>
+    <span class="tg">public</span> <span class="tg">int</span> <span class="at">hashCode</span>() { <span class="tg">return</span> isbn.<span class="at">hashCode</span>(); }
+
+    <span class="at">@Override</span>
+    <span class="tg">public</span> String <span class="at">toString</span>() { <span class="tg">return</span> isbn + <span class="st">" "</span> + title; }
+}
+
+<span class="tg">class</span> Product {                   <span class="cm">// like yours: no equals, hashCode or toString</span>
+    <span class="tg">private</span> <span class="tg">final</span> Long id;
+    <span class="at">Product</span>(Long id) { <span class="tg">this</span>.id = id; }
+}</div>
+  <p>The number after <code>Product@</code> differs on every run. In your app, the same thing happens if you print a product: <code>System.out.println(product)</code> shows <code>com.esd.ecommerce.entity.Product@</code> and a number.</p>
+
+  <h3>Why equals needs hashCode</h3>
+  <p>A <code>HashMap</code> or <code>HashSet</code> finds things in two steps: first it uses <code>hashCode()</code> to pick a bucket, then it uses <code>equals</code> inside that bucket. So two objects that are <code>equals</code> must have the same <code>hashCode</code>, or the set looks in the wrong bucket and never compares them. A1's three maps were keyed by the ISBN <code>String</code>, which already gets both right — that's what made the ISBN a good key.</p>
+  <div class="dothis">
+    <h4>Try it</h4>
+    <p>In <code>SameOrNot.java</code>, delete <code>Book</code>'s <code>hashCode</code> method (both lines) and run it again. <code>a.equals(b)</code> is still <code>true</code>, but the set now holds <strong>2</strong> books: they landed in different buckets.</p>
+  </div>
+
+  <div class="stretch-box">
+    <h3>Should Product have equals?</h3>
+    <p>Your lab code never needed it: it never compares two products or puts them in a set. If you ever add it, the obvious choice — compare <code>id</code> — has a catch. Before a product is saved, its <code>id</code> is <code>null</code>, so every unsaved product would equal every other one. And once saved, its <code>id</code> changes from <code>null</code> to a number, which changes its <code>hashCode</code> while it may already be inside a set. The usual answers: compare <code>id</code> only when it isn't <code>null</code>, or compare a value that never changes and is unique, the way A1 used the ISBN. Lombok's <code>@Data</code> and <code>@EqualsAndHashCode</code> compare <em>every</em> field, which makes this worse — a common reason to put <code>@Getter</code> and <code>@Setter</code> on an entity instead, as your lab does.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Your A1 <code>Catalogue</code> kept books in <code>Map&lt;String, Book&gt;</code>, keyed by ISBN. Did it rely on <code>Book.equals</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>No — the keys were the ISBN <code>String</code>s, and a map only uses the <em>key's</em> <code>equals</code> and <code>hashCode</code>. <code>Book.equals</code> mattered in the tests, in <code>assertEquals(a, b)</code> and <code>assertEquals(List.of(effectiveJava, javaPuzzlers), …)</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 13 complete</span></label>
+</section>
+
+<div class="part">Part 5 · Onward</div>
+
+<section id="s14">
+  <div class="shead"><span class="chip">14</span><h2>Where you'll use this</h2><span class="lvl core">Core</span><span class="tagline">the next four manuals</span></div>
+
+  <p>Each idea on this page comes back in the Spring Boot manuals, where Spring does something with it:</p>
+  <table class="grid">
+    <tr><th>The Java</th><th>What Spring does with it</th><th>Manual</th></tr>
+    <tr><td>RUNTIME annotations (04)</td><td>finds <code>@Service</code>, <code>@Entity</code>, <code>@GetMapping</code> and acts on them</td><td><a href="sb-request-flow.html">B1 · From request to row</a></td></tr>
+    <tr><td>final + constructor (05)</td><td>calls your constructor with the objects it needs</td><td><a href="sb-request-flow.html">B1</a></td></tr>
+    <tr><td>interfaces, generics (06)</td><td>writes the class behind <code>ProductRepository</code>; derived queries</td><td><a href="sb-request-flow.html">B1</a></td></tr>
+    <tr><td>builders, Optional (05, 07)</td><td>entity → response mapping; one error shape for "not found"</td><td><a href="sb-good-slice.html">B2 · A slice you can defend</a></td></tr>
+    <tr><td>RuntimeException (10)</td><td>turns your exceptions into 400/404/409 responses; rolls back transactions</td><td><a href="sb-good-slice.html">B2</a></td></tr>
+    <tr><td>Integer, BigDecimal (11)</td><td>validates <code>@NotNull</code>, <code>@DecimalMin</code>, <code>@PositiveOrZero</code></td><td><a href="sb-good-slice.html">B2</a></td></tr>
+    <tr><td>lambdas (08)</td><td>the rules in <code>SecurityConfig</code>; the JSON 401 and 403</td><td><a href="sb-security.html">B3 · Who are you</a></td></tr>
+    <tr><td>Instant, enums (12)</td><td>token issue and expiry times; roles</td><td><a href="sb-security.html">B3</a></td></tr>
+    <tr><td>exceptions, equals (10, 13)</td><td>reading a stack trace; comparing what a test got with what it expected</td><td><a href="sb-testing.html">B4 · Prove it works</a></td></tr>
+  </table>
+
+  <div class="cue"><p class="cue-k">Using this in your contract backend</p><p>Your own backend for the <a href="api-contract.html">course API contract</a> is built from the same Java: an entity with Lombok, a repository interface with your entity and its id in the blanks, an <code>Optional</code> opened with <code>orElseThrow</code> and your own unchecked exception, builders for responses, <code>Instant</code> for timestamps, an enum for roles. The rules for what it must do are in the contract; the four manuals take you through the Spring parts.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 14 read</span></label>
+</section>
+
+<section id="s15">
+  <div class="shead"><span class="chip">15</span><h2>When it goes wrong</h2><span class="lvl ref">Reference</span><span class="tagline">the message, and what it means</span></div>
+
+  <table class="grid long-key">
+    <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>method does not override or implement a method from a supertype</td><td><code>@Override</code> on a method whose name or parameters don't match the one you meant — often a spelling slip like <code>tostring</code> (04).</td></tr>
+    <tr><td>variable productRepository not initialized in the default constructor</td><td>A <code>final</code> field and no constructor that sets it: <code>@RequiredArgsConstructor</code> is missing (05).</td></tr>
+    <tr><td>constructor ProductResponse in class ProductResponse cannot be applied to given types (at @Builder)</td><td><code>@Builder</code> with <code>@NoArgsConstructor</code> but no <code>@AllArgsConstructor</code> (05).</td></tr>
+    <tr><td>cannot find symbol … method getName() / method builder()</td><td>Lombok didn't run, or that annotation isn't on the class. Compile with <code>./mvnw -q compile</code> to check the project itself; if that works and only IntelliJ complains, accept IntelliJ's offer to enable annotation processing (05).</td></tr>
+    <tr><td>cannot find symbol … class BigDecimal</td><td>A missing import (03).</td></tr>
+    <tr><td>cannot find symbol … method withUsername(String) … location: class User</td><td>The short name means a different class from the one you meant — two classes called <code>User</code> (03).</td></tr>
+    <tr><td>incompatible types: String cannot be converted to Long</td><td>A value of the wrong type in a generic blank, e.g. <code>findById("7")</code> (06).</td></tr>
+    <tr><td>cannot be applied to given types … cannot be converted to Supplier</td><td>You passed an exception to <code>orElseThrow</code>, not a lambda that makes one (07).</td></tr>
+    <tr><td>local variables referenced from a lambda expression must be final or effectively final</td><td>A lambda uses a variable that is changed somewhere in the method (08).</td></tr>
+    <tr><td>incompatible types: invalid constructor reference</td><td><code>X::new</code> where the interface's method has different parameters from <code>X</code>'s constructor (08).</td></tr>
+    <tr><td>Stream&lt;R&gt; conforms to List&lt;…&gt;</td><td>A stream with no end: <code>.toList()</code> is missing (09).</td></tr>
+    <tr><td>UnsupportedOperationException (no message)</td><td><code>add</code> or <code>remove</code> on a list from <code>toList()</code> or <code>List.of</code> (09).</td></tr>
+    <tr><td>unreported exception …; must be caught or declared to be thrown</td><td>A checked exception with no <code>catch</code> and no <code>throws</code> — or inside a lambda whose interface doesn't allow it (10).</td></tr>
+    <tr><td>NullPointerException: Cannot invoke "java.lang.Integer.intValue()"</td><td>Unboxing a <code>null</code> <code>Integer</code> into an <code>int</code> (11).</td></tr>
+    <tr><td>Two equal-looking Longs are not ==</td><td>Use <code>equals</code>; <code>==</code> compares objects (11).</td></tr>
+    <tr><td>Two prices are the same amount but not equals</td><td>Different numbers of decimal places. Use <code>compareTo(…) == 0</code> (11).</td></tr>
+    <tr><td>IllegalArgumentException: No enum constant Role.admin</td><td><code>valueOf</code> is exact about case (12).</td></tr>
+    <tr><td>Product@7a81197d printed</td><td>The class has no <code>toString</code> (13).</td></tr>
+    <tr><td>class Product is public, should be declared in a file named Product.java</td><td>The file name and the public class's name differ (03).</td></tr>
+  </table>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 15 read</span></label>
+</section>
+
+<section id="s16">
+  <div class="shead"><span class="chip">16</span><h2>Small things in your code</h2><span class="lvl stretch">Stretch</span><span class="tagline">lines you may have wondered about</span></div>
+
+  <div class="mention">
+    <div class="mrow"><b>EcommerceApplication.class</b><span>A <strong>class literal</strong>: a value that stands for the class itself. <code>SpringApplication.run(EcommerceApplication.class, args)</code> hands Spring your main class; <code>@ExceptionHandler(ProductNotFoundException.class)</code> names an exception type; A1's <code>assertThrows(IllegalArgumentException.class, …)</code> does the same.</span></div>
+    <div class="mrow"><b>requestMatchers("/api/auth/signup", "/api/auth/login")</b><span><strong>Varargs</strong>: the method is declared with <code>String... patterns</code>, so it takes any number of strings, which arrive as an array (<code>SecurityConfig</code>, lines 41–44).</span></div>
+    <div class="mrow"><b>toLowerCase(Locale.ROOT)</b><span>Lower-case letters the same way on every computer. With the computer's own language, a Turkish machine turns <code>"TITLE"</code> into <code>"tıtle"</code>, with a dotless <code>ı</code>, and an email lookup would miss (<code>AuthService</code>, line 36).</span></div>
+    <div class="mrow"><b>UUID.randomUUID().toString()</b><span>A random id, always 36 characters — which is why <code>RevokedToken.jti</code> is <code>length = 36</code> (<code>JwtService</code>, line 39; <code>RevokedToken</code>, line 28).</span></div>
+    <div class="mrow"><b>secret.getBytes(StandardCharsets.UTF_8)</b><span>The secret as bytes. The 32 in "at least 32 bytes" counts bytes, not characters: <code>é</code> is one character but two bytes (<code>JwtConfig</code>, line 27).</span></div>
+    <div class="mrow"><b>ResponseEntity.ok(…)</b><span>A static method that builds a ready-made object, and <code>ResponseEntity.status(…).body(…)</code> is a short builder chain (05). What the statuses mean: <a href="sb-request-flow.html">B1</a>.</span></div>
+    <div class="mrow"><b>public List&lt;Product&gt; findByCategory(…)</b><span>Methods in an interface are public anyway, so the <code>public</code> in <code>ProductRepository</code> (line 12) is allowed and changes nothing. <code>UserRepository</code> leaves it out.</span></div>
+    <div class="mrow"><b>protected void onCreate()</b><span><code>protected</code>: visible to the class, its package and its subclasses, but not to everyone. It's called by Hibernate just before a new row is saved (<code>@PrePersist</code>; <a href="sb-request-flow.html">B1</a>).</span></div>
+  </div>
+  <div class="dothis">
+    <h4>Try it — in jshell</h4>
+  </div>
+  <div class="cmd"><span class="st">"TITLE"</span>.<span class="at">toLowerCase</span>(Locale.<span class="at">forLanguageTag</span>(<span class="st">"tr"</span>)).<span class="at">equals</span>(<span class="st">"title"</span>)   <span class="o">// false</span>
+<span class="st">"TITLE"</span>.<span class="at">toLowerCase</span>(Locale.ROOT)                                    <span class="o">// "title"</span>
+UUID.<span class="at">randomUUID</span>().<span class="at">toString</span>().<span class="at">length</span>()                               <span class="o">// 36</span>
+<span class="st">"é"</span>.<span class="at">length</span>()                                                        <span class="o">// 1</span>
+<span class="st">"é"</span>.<span class="at">getBytes</span>(java.nio.charset.StandardCharsets.UTF_8).length         <span class="o">// 2</span></div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 16 read (stretch)</span></label>
+</section>
+
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+  <div class="gloss">
+    <div class="grow"><b>annotation</b><span>A note on a class, field, method or parameter, starting with <code>@</code>. Does nothing itself; something reads it.</span></div>
+    <div class="grow"><b>annotation processor</b><span>A program the compiler runs while compiling, which reads annotations and may add code. Lombok is one.</span></div>
+    <div class="grow"><b>boxing / unboxing</b><span>Java converting <code>long</code> ↔ <code>Long</code>, <code>int</code> ↔ <code>Integer</code> for you. Unboxing <code>null</code> throws.</span></div>
+    <div class="grow"><b>builder</b><span>A helper object you set values on by name, one call at a time, then <code>build()</code>. Each call returns the builder.</span></div>
+    <div class="grow"><b>checked exception</b><span>An <code>Exception</code> that isn't a <code>RuntimeException</code>. The compiler makes you catch it or declare it.</span></div>
+    <div class="grow"><b>class literal</b><span><code>Product.class</code> — a value standing for the class itself.</span></div>
+    <div class="grow"><b>diamond</b><span><code>new HashMap&lt;&gt;()</code>: the type arguments are taken from the left-hand side.</span></div>
+    <div class="grow"><b>effectively final</b><span>A local variable that is never changed after it's set. The only kind a lambda may use.</span></div>
+    <div class="grow"><b>enum</b><span>A class with a fixed set of named objects, such as <code>Role.STUDENT</code>, <code>Role.ADMIN</code>.</span></div>
+    <div class="grow"><b>functional interface</b><span>An interface with exactly one abstract method. A lambda is an object of one.</span></div>
+    <div class="grow"><b>generic type</b><span>A type with blanks: <code>List&lt;T&gt;</code>, <code>JpaRepository&lt;T, ID&gt;</code>.</span></div>
+    <div class="grow"><b>Instant</b><span>A single moment in time, in UTC. Can't change; <code>plusSeconds</code> returns a new one.</span></div>
+    <div class="grow"><b>interface</b><span>A list of methods without bodies — what an object can do, not how.</span></div>
+    <div class="grow"><b>lambda</b><span><code>(params) -&gt; body</code>: a short way to write an object of a functional interface.</span></div>
+    <div class="grow"><b>method reference</b><span><code>Book::getTitle</code>, <code>this::toProductResponse</code>: a lambda that only calls one method.</span></div>
+    <div class="grow"><b>Optional</b><span>A box holding one value or nothing. Opened with <code>orElse</code>, <code>orElseThrow</code>.</span></div>
+    <div class="grow"><b>package</b><span>A class's family name, like <code>com.esd.ecommerce.entity</code>. Matches its folder.</span></div>
+    <div class="grow"><b>record</b><span>A Java class that writes its own constructor, accessors, <code>equals</code>, <code>hashCode</code>, <code>toString</code>. Not used in your lab.</span></div>
+    <div class="grow"><b>retention</b><span>How long an annotation is kept: <code>SOURCE</code> (dropped by the compiler), <code>CLASS</code>, or <code>RUNTIME</code> (readable while running).</span></div>
+    <div class="grow"><b>scale</b><span>A <code>BigDecimal</code>'s number of decimal places. <code>equals</code> compares it; <code>compareTo</code> doesn't.</span></div>
+    <div class="grow"><b>stream</b><span>A pipeline over a collection: a start, steps like <code>map</code> and <code>filter</code>, and an end like <code>toList</code>.</span></div>
+    <div class="grow"><b>type parameter / argument</b><span>The blank (<code>T</code>) and what fills it (<code>Product</code>).</span></div>
+    <div class="grow"><b>unchecked exception</b><span>A <code>RuntimeException</code> or one of its subclasses. No catch-or-declare rule.</span></div>
+    <div class="grow"><b>varargs</b><span><code>String... patterns</code>: any number of arguments, received as an array.</span></div>
+    <div class="grow"><b>wrapper type</b><span><code>Long</code>, <code>Integer</code>: an object holding a number, which can also be <code>null</code>.</span></div>
+  </div>
+</section>
+
+<div class="finish">
+  <h2>How to know you're ready</h2>
+  <p>You're ready for the Spring Boot manuals if you can do these <em>without looking anything up</em>:</p>
+  <ol>
+    <li>Say who reads <code>@Override</code>, <code>@Getter</code> and <code>@Service</code>, and when — and what retention has to do with it.</li>
+    <li>Write by hand what <code>@Getter</code>, <code>@Setter</code>, <code>@NoArgsConstructor</code> and <code>@AllArgsConstructor</code> give <code>Product</code>, and what <code>@RequiredArgsConstructor</code> gives <code>ProductService</code>.</li>
+    <li>Explain what each builder method returns, and why <code>build()</code> needs an all-args constructor.</li>
+    <li>Read <code>JpaRepository&lt;Product, Long&gt;</code> and say what <code>findById</code> takes and returns.</li>
+    <li>Explain Lab 1's <code>orElse(null)</code> and Lab 2's <code>orElseThrow(() -&gt; new ProductNotFoundException(id))</code>, and why the second takes a lambda.</li>
+    <li>Rewrite <code>.stream().map(this::toProductResponse).toList()</code> with a lambda, and then as a loop.</li>
+    <li>Say why <code>ProductNotFoundException</code> extends <code>RuntimeException</code>, and why <code>securityFilterChain</code> says <code>throws Exception</code>.</li>
+    <li>Say why <code>price</code> is a <code>BigDecimal</code>, <code>id</code> a <code>Long</code>, <code>createdAt</code> an <code>Instant</code> and <code>role</code> an enum.</li>
+    <li>Say why two <code>Product</code>s with the same id aren't <code>equals</code>, and what A1's <code>Book</code> did differently.</li>
+  </ol>
+
+  <h2 style="margin-top:30px;font-size:20px">Lombok card</h2>
+  <div class="cmd"><span class="at">@Getter</span>                    <span class="cm">// getX() for every field</span>
+<span class="at">@Setter</span>                    <span class="cm">// setX(v) for every non-final field</span>
+<span class="at">@NoArgsConstructor</span>         <span class="cm">// Product()</span>
+<span class="at">@AllArgsConstructor</span>        <span class="cm">// Product(id, name, …) — in field order</span>
+<span class="at">@Builder</span>                   <span class="cm">// Product.builder().name("…").build() — needs an all-args constructor</span>
+<span class="at">@Builder.Default</span>           <span class="cm">// the builder starts this field at its initial value</span>
+<span class="at">@RequiredArgsConstructor</span>   <span class="cm">// a constructor for the final fields</span>
+<span class="cm">// none of these writes equals, hashCode or toString</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Lambdas card</h2>
+  <div class="cmd">() -&gt; <span class="tg">new</span> <span class="at">ProductNotFoundException</span>(id)    <span class="cm">// Supplier: nothing in, a value out</span>
+product -&gt; <span class="at">toProductResponse</span>(product)     <span class="cm">// Function: one in, one out</span>
+<span class="tg">this</span>::toProductResponse                   <span class="cm">// the same, as a method reference</span>
+Book::getTitle                            <span class="cm">// book -&gt; book.getTitle()</span>
+error -&gt; map.<span class="at">putIfAbsent</span>(…)               <span class="cm">// Consumer: one in, nothing out</span>
+(request, response, ex) -&gt; <span class="at">writeError</span>(…)  <span class="cm">// any one-method interface</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Optional and streams card</h2>
+  <div class="cmd">repo.<span class="at">findById</span>(id).<span class="at">orElse</span>(<span class="tg">null</span>)                       <span class="cm">// the product, or null</span>
+repo.<span class="at">findById</span>(id).<span class="at">orElseThrow</span>(() -&gt; <span class="tg">new</span> <span class="at">X</span>(id))       <span class="cm">// the product, or throw</span>
+list.<span class="at">stream</span>().<span class="at">map</span>(f).<span class="at">toList</span>()                        <span class="cm">// convert each item</span>
+list.<span class="at">stream</span>().<span class="at">filter</span>(test).<span class="at">sorted</span>(cmp).<span class="at">toList</span>()      <span class="cm">// keep some, sort them</span>
+Comparator.<span class="at">comparing</span>(Book::getTitle)                 <span class="cm">// sort by a getter</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Values card</h2>
+  <div class="cmd">Long id                          <span class="cm">// null until saved; compare with equals, not ==</span>
+Integer stock                    <span class="cm">// null = "not given"; int would be 0</span>
+<span class="tg">new</span> <span class="at">BigDecimal</span>(<span class="st">"1200.00"</span>)        <span class="cm">// from text; compare amounts with compareTo</span>
+Instant.<span class="at">now</span>()                    <span class="cm">// a moment in UTC; plusSeconds returns a new one</span>
+Role.STUDENT.<span class="at">name</span>()              <span class="cm">// "STUDENT"; == is safe on enums</span></div>
+</div>
+
+<footer>M.Tech CSE · ESD · Spring Boot<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+</div>
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ---- */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  /* ---- progress: CORE sections drive the bar; stretch boxes are tracked separately.
+         Both are remembered in this browser, so they survive a reload. ---- */
+  function load(key){ try{ return JSON.parse(localStorage.getItem(key)||'[]'); }catch(err){ return []; } }
+  function save(key,list){ try{ localStorage.setItem(key,JSON.stringify(list.map(function(c){return c.checked}))); }catch(err){} }
+  var KEY='esd-sb-java-progress', SKEY='esd-sb-java-stretch';
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var extras=[].slice.call(document.querySelectorAll('.chk-s'));
+  var saved=load(KEY), savedS=load(SKEY);
+  checks.forEach(function(c,i){ if(saved[i]) c.checked=true; });
+  extras.forEach(function(c,i){ if(savedS[i]) c.checked=true; });
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=["Core first, in order. Keep your lab project open beside this page.", "Good start. Every snippet runs in jshell or as one file.", "Past halfway. Next: the values in your fields.", "Nearly there.", "Core done. B1 picks up from here — sb-request-flow.html."];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    var s=extras.filter(function(c){return c.checked}).length;
+    msg.textContent=(n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))])+(s?'  ·  stretch: '+s+' / '+extras.length:'');
+    save(KEY,checks); save(SKEY,extras);
+  }
+  checks.concat(extras).forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^[$>]\s?/,'').trimEnd()}).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>

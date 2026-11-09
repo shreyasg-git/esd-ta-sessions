@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A slice you can defend — Spring Boot</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#101614">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Condensed:wght@600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+.cue.work{border-left-color:var(--ink);background:var(--surface)}
+.cue.work .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.tg{color:var(--term-green)}
+.at{color:var(--signal)}
+.st{color:#B7C4C0}
+.tx{color:#FFFFFF}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 182px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+.quiz .a .cmd{margin-top:4px}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 168px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+/* ---- additions for the lab docs ---- */
+.cue.react{border-left-color:var(--term-green);background:var(--dark);color:#DDE3E0}
+.cue.react .cue-k{color:var(--term-green)}
+.cue.react code{background:#22302D;color:var(--term-green)}
+.cue.react strong{color:#FFF}
+.refs{font-family:var(--mono);font-size:12px;color:var(--muted);margin:-6px 0 16px;max-width:70ch}
+.refs a{color:var(--teal);font-weight:600}
+.part{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper);background:var(--ink);display:inline-block;padding:5px 10px;margin:64px 0 -28px}
+.toc .rpart{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);padding:10px 16px 6px;border-bottom:1px solid var(--line);background:var(--teal-soft);font-weight:600}
+table.grid{border-collapse:collapse;width:100%;max-width:70ch;background:var(--surface);border:1px solid var(--ink);margin:0 0 16px;font-size:14.5px}
+table.grid th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;text-align:left;color:var(--muted);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--ink)}
+table.grid td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.grid tr:last-child td{border-bottom:0}
+table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--teal);font-weight:600;white-space:nowrap}
+
+/* ---- core / stretch ---- */
+.lvl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:3px 7px;align-self:center;white-space:nowrap}
+.lvl.core{background:var(--ink);color:var(--signal)}
+.lvl.stretch{border:1px dashed var(--teal);color:var(--teal)}
+.lvl.ref{border:1px solid var(--muted);color:var(--muted)}
+.rrow .rl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:600;flex:0 0 auto;border:1px dashed var(--teal);padding:1px 6px;align-self:center}
+.rrow .rl.ref{color:var(--muted);border:1px solid var(--muted)}
+.rrow.is-extra .rw{color:var(--muted)}
+.stretch-box{border:1px dashed var(--teal);background:rgba(255,255,255,.55);padding:14px 16px 4px;margin:8px 0 18px}
+.stretch-box::before{content:"Stretch — optional. Do it if you can, and ask about it any time.";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600;margin-bottom:10px}
+.stretch-box h3:first-of-type{margin-top:0}
+/* tables whose first column holds long text (error messages): even, wrapping columns */
+table.grid.long-key{table-layout:fixed}
+table.grid.long-key td:first-child{white-space:normal;width:42%;overflow-wrap:anywhere}
+table.grid.long-key th:first-child{width:42%}
+.legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 0;font-size:14px;color:#2B3936}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+  table.grid td:first-child{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> Spring Boot · B2 · Self-paced</p>
+  <h1>A slice you<br>can <em>defend</em></h1>
+  <p class="lede">Spring Boot Lab 2 changed your Product app in two halves. One half is login: tokens, roles, who may do what. This page is the other half — the request and response DTOs, the validation rules, one error shape for every failure, delete, and find-by-category. For every piece you'll be able to say what it does in <em>this</em> slice, show it working, and say what breaks without it. That is what defending a slice means.</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">11</span> core</div>
+      <div class="tracker-msg" id="msg">Core first, in order — every section starts from lines in your own Lab 2 project.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill" style="width: 0%;"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p><strong>The lab is done and submitted.</strong> There is nothing to hand in here. This page explains the code you wrote in Lab 2 — or the code an AI wrote with you — so that you can read every line of it and say why it is there.</p>
+  <p><strong>Keep your own Lab 2 project open.</strong> Every section starts from lines in it. The reference version is the tag <code>lab2-complete</code> in the shared <code>ESD_Session</code> repository; the line numbers on this page are from that tag, and file paths are under <code>src/main/java/com/esd/ecommerce/</code>. If your project looks different, or you missed a step, clone the reference and compare:</p>
+  <div class="cmd"><span class="p">$</span> git clone https://github.com/sivasomanath2502/ESD_Session.git
+<span class="p">$</span> cd ESD_Session
+<span class="p">$</span> git switch --detach lab2-complete</div>
+  <p><strong>"Try it" boxes are short pokes</strong> on your running app: send a request, read the answer, break one line, put it back. Section 01 sets them up.</p>
+  <p><strong>What lives on other pages.</strong> Login, tokens, roles and the 401/403 bodies: <a href="sb-security.html">Who are you, and what may you do</a>. Lombok, <code>Optional</code>, streams and exceptions as plain Java: <a href="sb-java.html">The Java that Spring code leans on</a>. Layers, injection, entities and the SQL Hibernate prints: <a href="sb-request-flow.html">From request to row</a>. Tests, logs and the debugger: <a href="sb-testing.html">Prove it works</a>.</p>
+  <p><strong>Core and reference.</strong> <span class="lvl core">Core</span> sections are the explanation, in order. <span class="lvl ref">Reference</span> is for when something goes wrong. One <span class="lvl stretch">Stretch</span> box near the end names what this slice doesn't need yet.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — in order; each section starts from lines in your project</div>
+  <div class="rpart">Part 1 · What changed</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">What Lab 2 changed, besides login</span></a>
+  <div class="rpart">Part 2 · Data in, data out</div>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">Two DTOs, and what each one earns</span></a>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">Mapping by hand</span></a>
+  <div class="rpart">Part 3 · Rules on the body</div>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">The rules on ProductRequest</span></a>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">@Valid — checked before your method runs</span></a>
+  <div class="rpart">Part 4 · One shape for every failure</div>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">ProductNotFoundException</span></a>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">GlobalExceptionHandler and ApiErrorResponse</span></a>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">Which status for which failure</span></a>
+  <div class="rpart">Part 5 · The two new endpoints</div>
+  <a class="rrow" href="#s9"><span class="rt">09</span><span class="rw">Delete, and find by category</span></a>
+  <div class="rpart">Part 6 · Defend it</div>
+  <a class="rrow" href="#s10"><span class="rt">10</span><span class="rw">Audit your own slice</span></a>
+  <a class="rrow" href="#s11"><span class="rt">11</span><span class="rw">Using this in your contract backend</span></a>
+  <a class="rrow is-extra" href="#s12"><span class="rt">12</span><span class="rw">When it goes wrong</span><span class="rl ref">reference</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; reference cards</span></a>
+</nav>
+
+<div class="part">Part 1 · What changed</div>
+
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>What Lab 2 changed, besides login</h2><span class="lvl core">Core</span><span class="tagline">lab1-complete → lab2-complete</span></div>
+
+  <p>Between the tags <code>lab1-complete</code> and <code>lab2-complete</code>, 31 files changed. About half of them are login — everything in <code>config/</code>, <code>AuthController</code>, <code>AuthService</code>, <code>JwtService</code>, <code>User</code>, <code>Role</code>, <code>RevokedToken</code> — and they belong to <a href="sb-security.html">sb-security</a>. These are the rest, and they are this page:</p>
+
+  <table class="grid long-key">
+    <tr><th>File</th><th>What changed → section</th></tr>
+    <tr><td>pom.xml</td><td>added <code>spring-boot-starter-validation</code> → 04</td></tr>
+    <tr><td>dto/<wbr>ProductRequest</td><td>new — what a client may send, with rules → 02, 04</td></tr>
+    <tr><td>dto/<wbr>ProductResponse</td><td>new — what the API sends back → 02, 03</td></tr>
+    <tr><td>dto/<wbr>ApiErrorResponse</td><td>new — the one error body → 07</td></tr>
+    <tr><td>exception/<wbr>ProductNotFoundException</td><td>new — "no such product" as an exception → 06</td></tr>
+    <tr><td>exception/<wbr>GlobalExceptionHandler</td><td>new — turns exceptions into an <code>ApiErrorResponse</code> → 07, 08</td></tr>
+    <tr><td>repository/<wbr>ProductRepository</td><td>added <code>findByCategory</code> → 09</td></tr>
+    <tr><td>service/<wbr>ProductService</td><td>DTOs in and out, <code>toProductResponse</code>, <code>orElseThrow</code>, delete looks first, <code>getProductsByCategory</code> → 03, 06, 09</td></tr>
+    <tr><td>controller/<wbr>ProductController</td><td>DTOs, <code>@Valid</code>, <code>/get/{id}</code> renamed <code>/get-id/{id}</code>, new <code>/get-category/{category}</code>, delete answers 204 → 05, 06, 09</td></tr>
+  </table>
+
+  <p>One more change runs through both halves: the <code>@Autowired</code> fields became <code>private final</code> fields with Lombok's <code>@RequiredArgsConstructor</code>. That is constructor injection. <a href="sb-request-flow.html">From request to row</a> explains why it's the better default, and <a href="sb-java.html">sb-java</a> shows the constructor Lombok writes for you.</p>
+  <p>To see the changes line by line yourself, in your clone of the reference:</p>
+  <div class="cmd"><span class="p">$</span> git diff lab1-complete lab2-complete -- src/main/java/com/esd/ecommerce/dto/ProductRequest.java
+<span class="p">$</span> git diff lab1-complete lab2-complete -- src/main/java/com/esd/ecommerce/service/ProductService.java</div>
+
+  <h3>The one question this page asks</h3>
+  <p>Lab 2 was AI-assisted, so a lot of this structure arrived ready-made. A structure you can't explain is one you can't defend, and one you can't fix when it breaks. So every section asks the same thing of each piece: <strong>what does it do in this slice?</strong> Name it, show it, or cut it. Section 10 turns that into a checklist for your own project.</p>
+
+  <h3>Set up for the pokes</h3>
+  <p>In your <code>SecurityConfig</code>, reading products is public and writing them needs an ADMIN:</p>
+  <p class="refs">Your code · lab2-complete · config/SecurityConfig.java · lines 62–78</p>
+  <div class="cmd"><span class="cm">// Only ADMIN can create products</span>
+.<span class="at">requestMatchers</span>(
+        HttpMethod.POST,
+        <span class="st">"/api/products/add-product"</span>
+).<span class="at">hasRole</span>(<span class="st">"ADMIN"</span>)
+
+<span class="cm">// Only ADMIN can update products</span>
+.<span class="at">requestMatchers</span>(
+        HttpMethod.PUT,
+        <span class="st">"/api/products/update/**"</span>
+).<span class="at">hasRole</span>(<span class="st">"ADMIN"</span>)
+
+<span class="cm">// Only ADMIN can delete products</span>
+.<span class="at">requestMatchers</span>(
+        HttpMethod.DELETE,
+        <span class="st">"/api/products/delete/**"</span>
+).<span class="at">hasRole</span>(<span class="st">"ADMIN"</span>)</div>
+  <p>Those rules run in the security filters, before Spring even reads the body. So a write with no token is a <strong>401</strong>, whatever you send — <code>{}</code> included. And on the <code>lab2-complete</code> reference, even a token for an ADMIN account gets a <strong>403</strong> on these routes: the role inside the token doesn't reach Spring the way <code>hasRole</code> expects. Why, and the proper fix, is <a href="sb-security.html">sb-security</a>'s job.</p>
+  <p>For the pokes on this page, add <strong>one temporary rule</strong> at the top of the rules, restart the app, and take it out when you're done:</p>
+  <p class="refs">Your code · config/SecurityConfig.java · after line 38 — temporary</p>
+  <div class="cmd">.<span class="at">authorizeHttpRequests</span>(auth -&gt; auth
+
+        <span class="cm">// TEMPORARY, for the pokes in the B2 manual. Remove when done.</span>
+        .<span class="at">requestMatchers</span>(<span class="st">"/api/products/**"</span>, <span class="st">"/error"</span>).<span class="at">permitAll</span>()
+
+        <span class="cm">// Public authentication endpoints</span>
+        .<span class="at">requestMatchers</span>(</div>
+  <div class="cue watch"><p class="cue-k">Take it out afterwards</p><p>While that line is in, anyone can add, change and delete products with no token at all. It goes <em>first</em> because the rules are checked top to bottom and the first match wins (<a href="sb-security.html">sb-security</a> explains the order). <code>"/error"</code> is in it for a reason you'll meet in section 08.</p></div>
+
+  <div class="dothis">
+    <h4>Try it — before and after the temporary rule</h4>
+    <ol>
+      <li>Start the app. Read one product — this works with or without the rule.</li>
+      <li>Send an empty body to <code>add-product</code> without the rule: <strong>401</strong>.</li>
+      <li>Add the rule, restart, send the same request: now a <strong>400</strong> listing four missing fields. That's the validation you'll read about in sections 04–07.</li>
+    </ol>
+  </div>
+  <div class="cmd"><span class="p">$</span> curl -i localhost:8080/api/products/get-id/1
+<span class="o">HTTP/1.1 200</span>
+<span class="o">Content-Type: application/json</span>
+<span class="o">{"category":"Electronics","description":"15-inch laptop for everyday use","id":1,"name":"Laptop","price":65000.00,"stock":10}</span>
+<span class="p">$</span> curl -i -X POST localhost:8080/api/products/add-product \
+<span class="p">&gt;</span>   -H "Content-Type: application/json" -d '{}'
+<span class="o">HTTP/1.1 401</span>
+<span class="o">Content-Type: application/json</span>
+<span class="o">{"error":"Unauthorized","message":"Authentication is required. Please provide a valid JWT token.","path":"/api/products/add-product","status":401,"timestamp":"2026-01-15T09:30:00.481203Z","validationErrors":null}</span></div>
+  <p>If your seed rows have different ids (because you deleted and re-added some), use an id from <code>/api/products/get-all</code>. Headers other than <code>Content-Type</code> are left out of the outputs on this page.</p>
+  <div class="cue"><p class="cue-k">On Windows</p><p>In PowerShell, type <code>curl.exe</code>, not <code>curl</code> (plain <code>curl</code> there is a different command). Quoting JSON on the Windows command line is painful: for anything with a body, Postman is easier — Body → raw → JSON. Every poke on this page works the same in Postman.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 complete — I know which files changed, and my pokes work</span></label>
+</section>
+
+<div class="part">Part 2 · Data in, data out</div>
+
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>Two DTOs, and what each one earns</h2><span class="lvl core">Core</span><span class="tagline">ProductRequest, ProductResponse</span></div>
+
+  <p>In Lab 1, the entity went in and the entity came out:</p>
+  <p class="refs">Your code · lab1-complete · controller/ProductController.java · lines 38–44</p>
+  <div class="cmd"><span class="at">@PostMapping</span>(<span class="st">"/add-product"</span>)
+<span class="tg">public</span> ResponseEntity&lt;Product&gt; <span class="at">addProduct</span>(<span class="at">@RequestBody</span> Product product) {
+
+    Product savedProduct = productService.<span class="at">addProduct</span>(product);
+
+    <span class="tg">return</span> ResponseEntity.<span class="at">status</span>(HttpStatus.CREATED).<span class="at">body</span>(savedProduct);
+}</div>
+  <p>In Lab 2, a <strong>request DTO</strong> comes in and a <strong>response DTO</strong> goes out. DTO means <em>data transfer object</em>: a plain class whose only job is to be the shape of some JSON.</p>
+  <p class="refs">Your code · lab2-complete · controller/ProductController.java · lines 46–53</p>
+  <div class="cmd"><span class="at">@PostMapping</span>(<span class="st">"/add-product"</span>)
+<span class="tg">public</span> ResponseEntity&lt;ProductResponse&gt; <span class="at">addProduct</span>(
+        <span class="at">@Valid</span> <span class="at">@RequestBody</span> ProductRequest request) {
+
+    ProductResponse savedProduct = productService.<span class="at">addProduct</span>(request);
+
+    <span class="tg">return</span> ResponseEntity.<span class="at">status</span>(HttpStatus.CREATED).<span class="at">body</span>(savedProduct);
+}</div>
+  <p class="refs">Your code · lab2-complete · dto/ProductResponse.java · lines 12–25</p>
+  <div class="cmd"><span class="at">@Getter</span>
+<span class="at">@Setter</span>
+<span class="at">@NoArgsConstructor</span>
+<span class="at">@AllArgsConstructor</span>
+<span class="at">@Builder</span>
+<span class="tg">public</span> <span class="tg">class</span> ProductResponse {
+
+    <span class="tg">private</span> Long id;
+    <span class="tg">private</span> String name;
+    <span class="tg">private</span> String description;
+    <span class="tg">private</span> BigDecimal price;
+    <span class="tg">private</span> String category;
+    <span class="tg">private</span> Integer stock;
+}</div>
+  <p>Put the three classes side by side and they look almost the same:</p>
+  <table class="grid">
+    <tr><th>Class</th><th>id</th><th>name, description, price, category, stock</th></tr>
+    <tr><td>Product</td><td>yes — the database assigns it</td><td>yes</td></tr>
+    <tr><td>ProductRequest</td><td><strong>no</strong></td><td>yes, with rules (section 04)</td></tr>
+    <tr><td>ProductResponse</td><td>yes</td><td>yes</td></tr>
+  </table>
+  <p>So why three classes? Each DTO has to earn its place. Here's what each one earns, shown on your own code.</p>
+
+  <h3>The request DTO: the client doesn't choose the id</h3>
+  <p>Lab 1's <code>add-product</code> accepted a whole <code>Product</code> — id included. Spring Data's <code>save()</code> looks at the id: <code>null</code> means a new row, so it inserts; an id means "this one already exists", so it updates that row instead. With Lab 1's code, this request didn't add anything. It replaced the laptop:</p>
+  <div class="cmd"><span class="p">$</span> curl -i -X POST localhost:8080/api/products/add-product \
+<span class="p">&gt;</span>   -H "Content-Type: application/json" \
+<span class="p">&gt;</span>   -d '{"id":1,"name":"Overwritten","description":"x","price":1.00,"category":"Junk","stock":0}'
+<span class="o">HTTP/1.1 201</span>
+<span class="o">Content-Type: application/json</span>
+<span class="o">{"category":"Junk","description":"x","id":1,"name":"Overwritten","price":1.00,"stock":0}</span></div>
+  <p>A <strong>201 Created</strong> — for a product that was not created. Product 1 is now "Overwritten" and the table still has three rows. This is called <strong>over-posting</strong> (or mass assignment): the client sets a field you never meant it to set.</p>
+  <p><code>ProductRequest</code> has no <code>id</code> field. Jackson, the library that turns JSON into objects, ignores JSON fields that have nowhere to go — so in Lab 2 the same request is a new product with a new id, and the laptop is untouched. For updates, the id comes from the URL (<code>/update/{id}</code>), never from the body.</p>
+  <div class="dothis">
+    <h4>Try it — send an id</h4>
+    <p>With the temporary rule in, send the request above to your Lab 2 app. You get 201 with a <em>new</em> id. Then read <code>/api/products/get-id/1</code>: still the laptop. (If you still have your Lab 1 project, or a clone at <code>lab1-complete</code>, you can see the overwrite there — Lab 1 has no security, so no rule is needed.)</p>
+  </div>
+
+  <h3>The response DTO: a promise that doesn't follow the table</h3>
+  <p><code>ProductResponse</code> looks like a copy of <code>Product</code>. It earns its place the day the two differ — and your project already has that day, on the login side. The <code>User</code> entity holds the password hash:</p>
+  <p class="refs">Your code · lab2-complete · entity/User.java · lines 18–26</p>
+  <div class="cmd"><span class="at">@Id</span>
+<span class="at">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+<span class="tg">private</span> Long id;
+
+<span class="at">@Column</span>(nullable = <span class="tg">false</span>, unique = <span class="tg">true</span>, length = <span class="st">255</span>)
+<span class="tg">private</span> String email;
+
+<span class="at">@Column</span>(name = <span class="st">"password_hash"</span>, nullable = <span class="tg">false</span>, length = <span class="st">255</span>)
+<span class="tg">private</span> String passwordHash;</div>
+  <p>Signup doesn't answer with the <code>User</code>. It copies five fields into a <code>UserResponse</code>, and <code>passwordHash</code> isn't one of them:</p>
+  <p class="refs">Your code · lab2-complete · service/AuthService.java · lines 92–100</p>
+  <div class="cmd"><span class="tg">private</span> UserResponse <span class="at">toUserResponse</span>(User user) {
+    <span class="tg">return</span> UserResponse.<span class="at">builder</span>()
+            .<span class="at">id</span>(user.<span class="at">getId</span>())
+            .<span class="at">email</span>(user.<span class="at">getEmail</span>())
+            .<span class="at">fullName</span>(user.<span class="at">getFullName</span>())
+            .<span class="at">role</span>(user.<span class="at">getRole</span>())
+            .<span class="at">createdAt</span>(user.<span class="at">getCreatedAt</span>())
+            .<span class="at">build</span>();
+}</div>
+  <p>Jackson writes every property it can read from the object you return. Return the <code>User</code> itself and the hash is in the JSON, for anyone who signs up. Return a <code>UserResponse</code> and it can't be: the field doesn't exist. (What the hash is, and why it must stay private, is <a href="sb-security.html">sb-security</a>.)</p>
+  <p>For products nothing is secret <em>yet</em>. But the day <code>Product</code> gains a field for the shop's own use — a supplier's price, an internal note — Lab 1's code would send it to every client the moment you added it. Lab 2 sends exactly what <code>toProductResponse</code> copies, no more.</p>
+  <div class="dothis">
+    <h4>Try it — a field the client never sees</h4>
+    <ol>
+      <li>Sign up a user (<code>POST /api/auth/signup</code> with <code>email</code>, <code>password</code>, <code>fullName</code>). The answer has <code>createdAt</code>, <code>email</code>, <code>fullName</code>, <code>id</code>, <code>role</code> — no hash.</li>
+      <li>Add <code>private String supplierNote;</code> to <code>Product</code> and restart. <code>ddl-auto=update</code> adds a column for it. Read <code>/api/products/get-id/1</code>: still the same six fields.</li>
+      <li>Remove the field again. The new column stays in MySQL until you drop it; it does no harm.</li>
+    </ol>
+  </div>
+  <div class="cue"><p class="cue-k">The keys come out in alphabetical order</p><p>Spring Boot 4's JSON library, Jackson 3, sorts properties by name unless told otherwise; Spring Boot 3 kept the order of the fields. A JSON object has no order, so nothing should depend on it. Every output on this page is what Boot 4 prints.</p></div>
+
+  <h3>What it costs</h3>
+  <p>Two more classes and a mapping method. Where the request, the response and the entity really are identical and nothing will ever be private, a DTO is a choice, not a must. Here the request already differs (no id), and the response is a promise you'd rather not tie to the table — so both earn their keep.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>A classmate's <code>ProductRequest</code> has a <code>private Long id;</code> "in case it's needed". With Lab 2's service, what can a client do with it?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Nothing yet: <code>addProduct</code> builds a fresh <code>Product</code> and copies five fields, never the id. But no requirement asks for that field, so cut it. The day someone copies it across — or swaps the hand-written mapping for a library that copies every matching name — you're back to Lab 1's overwrite.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>The shop decides clients shouldn't see <code>stock</code>. Which classes change, and which must not?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>ProductResponse</code> loses the field and <code>toProductResponse</code> loses the line. <code>Product</code> keeps it (the shop still stores stock) and so does <code>ProductRequest</code> (an admin still sets it). One API change, one place — that's the response DTO earning its place.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 complete — I can say what each DTO earns</span></label>
+</section>
+
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>Mapping by hand</h2><span class="lvl core">Core</span><span class="tagline">entity ↔ DTO in the service</span></div>
+
+  <p>Something has to copy fields between the DTOs and the entity. In your project that's the service, by hand. One method goes entity → response:</p>
+  <p class="refs">Your code · lab2-complete · service/ProductService.java · lines 76–85</p>
+  <div class="cmd"><span class="tg">private</span> ProductResponse <span class="at">toProductResponse</span>(Product product) {
+    <span class="tg">return</span> ProductResponse.<span class="at">builder</span>()
+            .<span class="at">id</span>(product.<span class="at">getId</span>())
+            .<span class="at">name</span>(product.<span class="at">getName</span>())
+            .<span class="at">description</span>(product.<span class="at">getDescription</span>())
+            .<span class="at">price</span>(product.<span class="at">getPrice</span>())
+            .<span class="at">category</span>(product.<span class="at">getCategory</span>())
+            .<span class="at">stock</span>(product.<span class="at">getStock</span>())
+            .<span class="at">build</span>();
+}</div>
+  <p><code>builder()</code> exists because of Lombok's <code>@Builder</code> on <code>ProductResponse</code> (<a href="sb-java.html">sb-java</a> shows what it generates). Every method that returns products goes through this one, so it's the single place that decides what a client sees. For a list, each entity goes through it in turn:</p>
+  <p class="refs">Your code · lab2-complete · service/ProductService.java · lines 20–25</p>
+  <div class="cmd"><span class="tg">public</span> List&lt;ProductResponse&gt; <span class="at">getAllProducts</span>() {
+    <span class="tg">return</span> productRepository.<span class="at">findAll</span>()
+            .<span class="at">stream</span>()
+            .<span class="at">map</span>(<span class="tg">this</span>::toProductResponse)
+            .<span class="at">toList</span>();
+}</div>
+  <p>(<code>.stream().map(this::toProductResponse).toList()</code> is plain Java — streams and method references are in <a href="sb-java.html">sb-java</a>.)</p>
+
+  <h3>Request → entity, in addProduct</h3>
+  <p class="refs">Your code · lab2-complete · service/ProductService.java · lines 34–45</p>
+  <div class="cmd"><span class="tg">public</span> ProductResponse <span class="at">addProduct</span>(ProductRequest request) {
+    Product product = <span class="tg">new</span> <span class="at">Product</span>();
+    product.<span class="at">setName</span>(request.<span class="at">getName</span>().<span class="at">trim</span>());
+    product.<span class="at">setDescription</span>(request.<span class="at">getDescription</span>());
+    product.<span class="at">setPrice</span>(request.<span class="at">getPrice</span>());
+    product.<span class="at">setCategory</span>(request.<span class="at">getCategory</span>().<span class="at">trim</span>());
+    product.<span class="at">setStock</span>(request.<span class="at">getStock</span>());
+
+    Product savedProduct = productRepository.<span class="at">save</span>(product);
+
+    <span class="tg">return</span> <span class="at">toProductResponse</span>(savedProduct);
+}</div>
+  <ul>
+    <li><strong>A new <code>Product</code>, five setters, no id.</strong> The database assigns the id when <code>save</code> inserts the row, and <code>save</code> hands back the entity with it filled in — which is what goes into the response.</li>
+    <li><strong><code>.trim()</code> on name and category, not on description.</strong> <code>"  Desk Lamp  "</code> is stored as <code>"Desk Lamp"</code>; a description keeps its spaces. A name can't trim down to <code>""</code>, because a blank name was already refused (section 04).</li>
+    <li><strong>The line numbers matter later.</strong> Line 36 is the first line that touches the request. Section 05 breaks it on purpose.</li>
+  </ul>
+
+  <h3>updateProduct replaces every field</h3>
+  <p class="refs">Your code · lab2-complete · service/ProductService.java · lines 47–60</p>
+  <div class="cmd"><span class="tg">public</span> ProductResponse <span class="at">updateProduct</span>(Long id, ProductRequest request) {
+    Product existingProduct = productRepository.<span class="at">findById</span>(id)
+            .<span class="at">orElseThrow</span>(() -&gt; <span class="tg">new</span> <span class="at">ProductNotFoundException</span>(id));
+
+    existingProduct.<span class="at">setName</span>(request.<span class="at">getName</span>().<span class="at">trim</span>());
+    existingProduct.<span class="at">setDescription</span>(request.<span class="at">getDescription</span>());
+    existingProduct.<span class="at">setPrice</span>(request.<span class="at">getPrice</span>());
+    existingProduct.<span class="at">setCategory</span>(request.<span class="at">getCategory</span>().<span class="at">trim</span>());
+    existingProduct.<span class="at">setStock</span>(request.<span class="at">getStock</span>());
+
+    Product updatedProduct = productRepository.<span class="at">save</span>(existingProduct);
+
+    <span class="tg">return</span> <span class="at">toProductResponse</span>(updatedProduct);
+}</div>
+  <p>All five fields are copied, every time. Leave <code>description</code> out of a <code>PUT</code> and the product's description becomes <code>null</code>. That's what <code>PUT</code> means: send the whole thing, and it replaces the whole thing. (<code>orElseThrow</code> is section 06.)</p>
+
+  <h3>Why by hand?</h3>
+  <p>Six fields, all visible, and the compiler checks every name. Libraries such as MapStruct generate this code for you; they pay off with dozens of DTOs, and they hide the one decision you most want to see — which fields cross the line. For one entity and two DTOs, hand-written is the clearer choice.</p>
+
+  <div class="dothis">
+    <h4>Try it — trim, and a full replacement</h4>
+    <ol>
+      <li>With the temporary rule in, add a product with padded text. The answer has <code>"name":"Desk Lamp"</code> and <code>"category":"Lighting"</code>, while the description keeps its spaces.</li>
+      <li>Update product 1 without a description. The answer has <code>"description":null</code>. Send it again with the description to put it back.</li>
+    </ol>
+  </div>
+  <div class="cmd"><span class="p">$</span> curl -i -X POST localhost:8080/api/products/add-product \
+<span class="p">&gt;</span>   -H "Content-Type: application/json" \
+<span class="p">&gt;</span>   -d '{"name":"  Desk Lamp  ","description":"  LED  ","price":1499.00,"category":"  Lighting ","stock":12}'
+<span class="o">HTTP/1.1 201</span>
+<span class="o">Content-Type: application/json</span>
+<span class="o">{"category":"Lighting","description":"  LED  ","id":4,"name":"Desk Lamp","price":1499.00,"stock":12}</span>
+<span class="p">$</span> curl -i -X PUT localhost:8080/api/products/update/1 \
+<span class="p">&gt;</span>   -H "Content-Type: application/json" \
+<span class="p">&gt;</span>   -d '{"name":"Laptop","price":65000.00,"category":"Electronics","stock":10}'
+<span class="o">HTTP/1.1 200</span>
+<span class="o">Content-Type: application/json</span>
+<span class="o">{"category":"Electronics","description":null,"id":1,"name":"Laptop","price":65000.00,"stock":10}</span></div>
+  <p>Your new product's id may not be 4 — MySQL keeps counting from the highest id it has ever handed out.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>The shop adds <code>private BigDecimal costPrice;</code> to <code>Product</code> for its own accounts. Which of the service's methods must change so that clients never see it?</div>
+    <details><summary>Show answer</summary><div class="a"><p>None. <code>toProductResponse</code> copies six named fields; a seventh is simply never copied. If admins should be able to <em>set</em> it, it goes into <code>ProductRequest</code> and into the setters in <code>addProduct</code> and <code>updateProduct</code> — and still not into the response.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 complete — I can trace every field from JSON to row and back</span></label>
+</section>
+
+<div class="part">Part 3 · Rules on the body</div>
+
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>The rules on ProductRequest</h2><span class="lvl core">Core</span><span class="tagline">Bean Validation</span></div>
+
+  <p>Lab 2 added one dependency for this half:</p>
+  <p class="refs">Your code · lab2-complete · pom.xml · lines 80–84</p>
+  <div class="cmd"><span class="cm">&lt;!-- Request validation --&gt;</span>
+&lt;<span class="tg">dependency</span>&gt;
+    &lt;<span class="tg">groupId</span>&gt;org.springframework.boot&lt;/<span class="tg">groupId</span>&gt;
+    &lt;<span class="tg">artifactId</span>&gt;spring-boot-starter-validation&lt;/<span class="tg">artifactId</span>&gt;
+&lt;/<span class="tg">dependency</span>&gt;</div>
+  <p>It brings <strong>Hibernate Validator</strong>, the library that reads the annotations below and checks an object against them. (It shares a name with Hibernate, the database library, and nothing else — it never touches the database.) The annotations themselves are the standard <strong>Bean Validation</strong> ones, in <code>jakarta.validation.constraints</code>. Lab 1 had no rules at all: whatever arrived went straight to the database.</p>
+  <p class="refs">Your code · lab2-complete · dto/ProductRequest.java · lines 15–38</p>
+  <div class="cmd"><span class="at">@Getter</span>
+<span class="at">@Setter</span>
+<span class="at">@NoArgsConstructor</span>
+<span class="tg">public</span> <span class="tg">class</span> ProductRequest {
+
+    <span class="at">@NotBlank</span>(message = <span class="st">"Product name is required"</span>)
+    <span class="at">@Size</span>(max = <span class="st">255</span>, message = <span class="st">"Product name must not exceed 255 characters"</span>)
+    <span class="tg">private</span> String name;
+
+    <span class="at">@Size</span>(max = <span class="st">2000</span>, message = <span class="st">"Description must not exceed 2000 characters"</span>)
+    <span class="tg">private</span> String description;
+
+    <span class="at">@NotNull</span>(message = <span class="st">"Product price is required"</span>)
+    <span class="at">@DecimalMin</span>(value = <span class="st">"0.01"</span>, message = <span class="st">"Product price must be greater than zero"</span>)
+    <span class="tg">private</span> BigDecimal price;
+
+    <span class="at">@NotBlank</span>(message = <span class="st">"Product category is required"</span>)
+    <span class="at">@Size</span>(max = <span class="st">100</span>, message = <span class="st">"Product category must not exceed 100 characters"</span>)
+    <span class="tg">private</span> String category;
+
+    <span class="at">@NotNull</span>(message = <span class="st">"Product stock is required"</span>)
+    <span class="at">@PositiveOrZero</span>(message = <span class="st">"Product stock cannot be negative"</span>)
+    <span class="tg">private</span> Integer stock;
+}</div>
+  <p><code>@NoArgsConstructor</code> and <code>@Setter</code> are there for Jackson: it makes an empty <code>ProductRequest</code>, then calls a setter for each JSON field it finds.</p>
+
+  <table class="grid">
+    <tr><th>Rule · on</th><th>Passes</th><th>Fails</th></tr>
+    <tr><td>@NotBlank<br><span style="font-weight:400;color:var(--muted)">name, category</span></td><td><code>"Laptop"</code>, <code>" x "</code></td><td><code>null</code>, <code>""</code>, <code>"   "</code></td></tr>
+    <tr><td>@NotNull<br><span style="font-weight:400;color:var(--muted)">price, stock</span></td><td>anything that isn't null — even <code>""</code></td><td><code>null</code></td></tr>
+    <tr><td>@Size(max = n)<br><span style="font-weight:400;color:var(--muted)">name 255, description 2000, category 100</span></td><td>up to n characters; <code>null</code></td><td>n + 1 characters or more</td></tr>
+    <tr><td>@DecimalMin("0.01")<br><span style="font-weight:400;color:var(--muted)">price</span></td><td>0.01 and up; <code>null</code></td><td>0, −5, 0.001</td></tr>
+    <tr><td>@PositiveOrZero<br><span style="font-weight:400;color:var(--muted)">stock</span></td><td>0 and up; <code>null</code></td><td>−1</td></tr>
+  </table>
+
+  <h3>Null passes almost everything</h3>
+  <p>Every rule except <code>@NotNull</code>, <code>@NotBlank</code> and <code>@NotEmpty</code> counts <code>null</code> as valid. "Is it there?" and "is it good?" are separate questions, asked by separate annotations. That's why <code>price</code> has two: <code>@NotNull</code> asks whether it's there, <code>@DecimalMin</code> whether it's more than zero. With only <code>@DecimalMin</code>, leaving the price out would pass. And <code>description</code> has only <code>@Size</code>, so leaving it out is fine — it's the one optional field.</p>
+  <table class="grid">
+    <tr><th>Value</th><th>@NotNull</th><th>@NotEmpty</th><th>@NotBlank</th></tr>
+    <tr><td>null</td><td>fails</td><td>fails</td><td>fails</td></tr>
+    <tr><td>""</td><td>passes</td><td>fails</td><td>fails</td></tr>
+    <tr><td>"   "</td><td>passes</td><td>passes</td><td>fails</td></tr>
+  </table>
+
+  <h3>Others you'll meet</h3>
+  <div class="mention">
+    <div class="mrow"><b>@Positive</b><span>More than zero. For money, <code>@DecimalMin("0.01")</code> is stricter: <code>@Positive</code> accepts 0.001.</span></div>
+    <div class="mrow"><b>@Min / @Max</b><span>Whole-number bounds, such as <code>@Min(1) @Max(6)</code> for credits.</span></div>
+    <div class="mrow"><b>@Email</b><span>Looks like an email address. Your <code>SignupRequest</code> uses it.</span></div>
+    <div class="mrow"><b>@Pattern(regexp = …)</b><span>Matches a regular expression — a product code, a course code.</span></div>
+    <div class="mrow"><b>@NotEmpty</b><span>Not null and not empty: for lists as well as strings.</span></div>
+  </div>
+  <p>The <code>message = "…"</code> on each rule is the text the client gets back (section 07). Leave it out and Hibernate Validator uses its own default sentence, in your computer's language.</p>
+
+  <h3>The rules are a promise about the table, too</h3>
+  <p>The rules say what the API accepts. The columns say what MySQL will store. They should agree. With the table from the lab's SQL script (<code>database/lab1_setup.sql</code>), they don't:</p>
+  <table class="grid">
+    <tr><th>Field</th><th>ProductRequest allows</th><th>The lab's table holds</th></tr>
+    <tr><td>name</td><td>255 characters</td><td>VARCHAR(100)</td></tr>
+    <tr><td>description</td><td>2000 characters</td><td>VARCHAR(500)</td></tr>
+    <tr><td>category</td><td>100 characters</td><td>VARCHAR(50)</td></tr>
+  </table>
+  <p>A 150-character name passes every rule, reaches the <code>INSERT</code>, and MySQL refuses it. The client gets a <strong>500</strong> for what was really bad input — the server's error page for the client's mistake. Make the rule match the column and the same request becomes a <strong>400</strong> with a message.</p>
+  <div class="dothis">
+    <h4>Try it — a name the rule allows and the column doesn't</h4>
+    <ol>
+      <li>In the MySQL client, run <code>DESCRIBE products;</code> and read your own column sizes. (If Hibernate created your table rather than the script, the text columns are likely all 255 — then it's <code>description</code> that disagrees.)</li>
+      <li>With the temporary rule in, send a 150-character name. You get a 500, and the app's log shows a <code>DataIntegrityViolationException</code> whose cause says <code>Data too long for column 'name'</code>.</li>
+      <li>Change the rule to <code>@Size(max = 100, message = "Product name must not exceed 100 characters")</code> — the message too — and restart. The same request is now a 400 with that message. It's your code: keeping the fix is fine.</li>
+    </ol>
+  </div>
+  <div class="cmd"><span class="o">mysql&gt; DESCRIBE products;</span>
+<span class="o">+-------------+---------------+------+-----+---------+----------------+</span>
+<span class="o">| Field       | Type          | Null | Key | Default | Extra          |</span>
+<span class="o">+-------------+---------------+------+-----+---------+----------------+</span>
+<span class="o">| id          | bigint        | NO   | PRI | NULL    | auto_increment |</span>
+<span class="o">| name        | varchar(100)  | NO   |     | NULL    |                |</span>
+<span class="o">| description | varchar(500)  | YES  |     | NULL    |                |</span>
+<span class="o">| price       | decimal(10,2) | NO   |     | NULL    |                |</span>
+<span class="o">| category    | varchar(50)   | YES  |     | NULL    |                |</span>
+<span class="o">| stock       | int           | NO   |     | NULL    |                |</span>
+<span class="o">+-------------+---------------+------+-----+---------+----------------+</span>
+<span class="p">$</span> NAME=$(printf 'n%.0s' {1..150})
+<span class="p">$</span> curl -i -X POST localhost:8080/api/products/add-product \
+<span class="p">&gt;</span>   -H "Content-Type: application/json" \
+<span class="p">&gt;</span>   -d "{\"name\":\"$NAME\",\"price\":10,\"category\":\"Lighting\",\"stock\":1}"
+<span class="o">HTTP/1.1 500</span>
+<span class="o">Content-Type: application/json</span>
+<span class="o">{"timestamp":"2026-01-15T09:30:00.481+00:00","status":500,"error":"Internal Server Error","path":"/api/products/add-product"}</span></div>
+  <p>That last body isn't your <code>ApiErrorResponse</code> — it's Spring Boot's own. Section 08 explains where it comes from.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Which fields can a client leave out of an <code>add-product</code> body and still get a 201?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Only <code>description</code>. It has no <code>@NotNull</code> or <code>@NotBlank</code>, and <code>@Size</code> lets <code>null</code> through. The other four each have a "must be there" rule.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Why does <code>price</code> use <code>@NotNull</code> and not <code>@NotBlank</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>@NotBlank</code> is about characters — "not just spaces" — so it's for strings. A <code>BigDecimal</code> has no spaces to be blank with; the only way for it to be missing is <code>null</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 complete — I can name the rule behind every annotation</span></label>
+</section>
+
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>@Valid — checked before your method runs</h2><span class="lvl core">Core</span><span class="tagline">who reads the annotations, and when</span></div>
+
+  <p>The annotations on <code>ProductRequest</code> are labels. Nothing reads them until something asks. In your controller, <code>@Valid</code> is the ask — on both methods that take a body:</p>
+  <p class="refs">Your code · lab2-complete · controller/ProductController.java · lines 46–64</p>
+  <div class="cmd"><span class="at">@PostMapping</span>(<span class="st">"/add-product"</span>)
+<span class="tg">public</span> ResponseEntity&lt;ProductResponse&gt; <span class="at">addProduct</span>(
+        <span class="at">@Valid</span> <span class="at">@RequestBody</span> ProductRequest request) {
+
+    ProductResponse savedProduct = productService.<span class="at">addProduct</span>(request);
+
+    <span class="tg">return</span> ResponseEntity.<span class="at">status</span>(HttpStatus.CREATED).<span class="at">body</span>(savedProduct);
+}
+
+<span class="at">@PutMapping</span>(<span class="st">"/update/{id}"</span>)
+<span class="tg">public</span> ResponseEntity&lt;ProductResponse&gt; <span class="at">updateProduct</span>(
+        <span class="at">@PathVariable</span> Long id,
+        <span class="at">@Valid</span> <span class="at">@RequestBody</span> ProductRequest request) {
+
+    ProductResponse updatedProduct =
+            productService.<span class="at">updateProduct</span>(id, request);
+
+    <span class="tg">return</span> ResponseEntity.<span class="at">ok</span>(updatedProduct);
+}</div>
+  <p><code>@Valid</code> tells Spring: after you've built this object from the JSON, check it against its rules <em>before</em> you call me. For a <code>POST</code> to <code>add-product</code>, this is the order things happen in:</p>
+  <ol>
+    <li>The <strong>security filters</strong> check the token and the role. Refused → 401 or 403, and nothing below runs.</li>
+    <li>Spring <strong>finds the method</strong> from the path and the HTTP method.</li>
+    <li><strong>Jackson reads the JSON</strong> into a new <code>ProductRequest</code>. Names must match exactly; a JSON field with nowhere to go is ignored, and a missing field stays <code>null</code>. If the body isn't JSON, has a value of the wrong type (<code>"price": "abc"</code>) or isn't there at all, Spring throws <code>HttpMessageNotReadableException</code>.</li>
+    <li><strong><code>@Valid</code></strong>: the validator checks every rule on that object and collects <em>every</em> failure. If there are any, Spring throws <code>MethodArgumentNotValidException</code>, carrying all of them.</li>
+    <li>Only now does <strong><code>addProduct</code> run</strong> — with a request that's known to be complete.</li>
+  </ol>
+  <p>Two things follow that you can see from outside. Your method never has to check for nulls. And the body is checked <em>before</em> the method looks anything up: <code>PUT /update/999</code> with <code>{}</code> is a 400 (bad body), not a 404 (no product 999), because the lookup is inside the method that never ran. Section 08 draws the whole sequence.</p>
+
+  <h3>Without @Valid</h3>
+  <div class="dothis">
+    <h4>Try it — take @Valid off, once</h4>
+    <ol>
+      <li>Remove <code>@Valid</code> from <code>addProduct</code> only. Restart, and send <code>{}</code> (temporary rule in).</li>
+      <li>You get a 500. Read the app's log — the first line of the exception and the first line that is in <em>your</em> code:</li>
+    </ol>
+    <div class="cmd">java.lang.NullPointerException: Cannot invoke "String.trim()" because the return value of "com.esd.ecommerce.dto.ProductRequest.getName()" is null
+	at com.esd.ecommerce.service.ProductService.addProduct(ProductService.java:36)</div>
+    <ol start="3">
+      <li>Put <code>@Valid</code> back and restart.</li>
+    </ol>
+  </div>
+  <p>The rules were still on the class; nobody checked them. The request went straight into the service, and the first line that touched a missing field — line 36, <code>request.getName().trim()</code> — crashed. Java's message even names the method that returned <code>null</code>. (Reading stack traces properly is in <a href="sb-testing.html">sb-testing</a>.)</p>
+  <p>Lab 1 had no rules at all. With the lab's table, <code>{}</code> reached the <code>INSERT</code> and MySQL refused it, because <code>name</code> is <code>NOT NULL</code> — also a 500. Either way, the client's bad input became the server's error. That is the most common bug in generated slices: "missing validation" — a 500 where a 400 belongs.</p>
+  <div class="cue watch"><p class="cue-k">@Valid goes on every body</p><p>Check <code>PUT</code> as well as <code>POST</code> in your own project. Generated controllers often have it on one and not the other, and nothing warns you: the missing one just lets anything through. Your reference has both.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>You send <code>PUT /api/products/update/999</code> with <code>{}</code>. Product 999 doesn't exist. 400 or 404?</div>
+    <details><summary>Show answer</summary><div class="a"><p>400. Validation happens before <code>updateProduct</code> is called, and the "does 999 exist?" check is inside it. Send a valid body to the same URL and you get the 404.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>You send a valid product but spell the field <code>"Price"</code>. What comes back?</div>
+    <details><summary>Show answer</summary><div class="a"><p>A 400 with <code>"price": "Product price is required"</code>. Jackson matches names exactly, so <code>"Price"</code> has nowhere to go and is ignored; <code>price</code> stays <code>null</code>, and <code>@NotNull</code> catches it. The message is right — the field you meant really is missing.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 complete — I can say what runs before addProduct's first line</span></label>
+</section>
+
+<div class="part">Part 4 · One shape for every failure</div>
+
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>Product<wbr>NotFound<wbr>Exception</h2><span class="lvl core">Core</span><span class="tagline">a failure with its own name</span></div>
+
+  <p>Lab 1 said "not found" with a <code>null</code>. The service returned it:</p>
+  <p class="refs">Your code · lab1-complete · service/ProductService.java · lines 20–22</p>
+  <div class="cmd"><span class="tg">public</span> Product <span class="at">getProductById</span>(Long id) {
+    <span class="tg">return</span> productRepository.<span class="at">findById</span>(id).<span class="at">orElse</span>(<span class="tg">null</span>);
+}</div>
+  <p>…and the controller had to check for it, and answer with a bare string:</p>
+  <p class="refs">Your code · lab1-complete · controller/ProductController.java · lines 25–36</p>
+  <div class="cmd"><span class="at">@GetMapping</span>(<span class="st">"/get/{id}"</span>)
+<span class="tg">public</span> ResponseEntity&lt;?&gt; <span class="at">getProductById</span>(<span class="at">@PathVariable</span> Long id) {
+
+    Product product = productService.<span class="at">getProductById</span>(id);
+
+    <span class="tg">if</span> (product == <span class="tg">null</span>) {
+        <span class="tg">return</span> ResponseEntity.<span class="at">status</span>(HttpStatus.NOT_FOUND)
+                .<span class="at">body</span>(<span class="st">"Product with ID "</span> + id + <span class="st">" not found"</span>);
+    }
+
+    <span class="tg">return</span> ResponseEntity.<span class="at">ok</span>(product);
+}</div>
+  <p>Lab 2 gives the failure a name of its own:</p>
+  <p class="refs">Your code · lab2-complete · exception/ProductNotFoundException.java · lines 4–9</p>
+  <div class="cmd"><span class="tg">public</span> <span class="tg">class</span> ProductNotFoundException <span class="tg">extends</span> RuntimeException {
+
+    <span class="tg">public</span> <span class="at">ProductNotFoundException</span>(Long id) {
+        <span class="tg">super</span>(<span class="st">"Product with ID "</span> + id + <span class="st">" not found"</span>);
+    }
+}</div>
+  <p>The service throws it, and the controller is left with only the happy path:</p>
+  <p class="refs">Your code · lab2-complete · service/ProductService.java · lines 27–32 · controller/ProductController.java · lines 28–34</p>
+  <div class="cmd"><span class="tg">public</span> ProductResponse <span class="at">getProductById</span>(Long id) {
+    Product product = productRepository.<span class="at">findById</span>(id)
+            .<span class="at">orElseThrow</span>(() -&gt; <span class="tg">new</span> <span class="at">ProductNotFoundException</span>(id));
+
+    <span class="tg">return</span> <span class="at">toProductResponse</span>(product);
+}
+
+<span class="at">@GetMapping</span>(<span class="st">"/get-id/{id}"</span>)
+<span class="tg">public</span> ResponseEntity&lt;ProductResponse&gt; <span class="at">getProductById</span>(
+        <span class="at">@PathVariable</span> Long id) {
+
+    ProductResponse product = productService.<span class="at">getProductById</span>(id);
+    <span class="tg">return</span> ResponseEntity.<span class="at">ok</span>(product);
+}</div>
+  <p>Three things changed, and each one earns something:</p>
+  <ul>
+    <li><strong>The decision moved to where the lookup is.</strong> <code>getProductById</code>, <code>updateProduct</code> and <code>deleteProduct</code> all need "product <var>id</var> must exist"; each says it in one line, with the same exception and the same message. Nobody can forget a <code>null</code> check, because there is no <code>null</code>.</li>
+    <li><strong>The controller method only returns success.</strong> When the product is missing, the method doesn't return at all — the exception leaves it. That's why <code>ResponseEntity&lt;?&gt;</code> could become <code>ResponseEntity&lt;ProductResponse&gt;</code>: there's no second kind of body any more.</li>
+    <li><strong>The client gets JSON in the error shape</strong>, not a bare string. Section 07 is where the exception becomes that JSON.</li>
+  </ul>
+  <p><code>extends RuntimeException</code> makes it <em>unchecked</em>, so it passes up through the service and the controller without a <code>throws</code> clause on every method. Checked and unchecked exceptions are in <a href="sb-java.html">sb-java</a>. <code>orElseThrow</code> takes a function that makes the exception — it's only called when the <code>Optional</code> is empty; <code>Optional</code> is in <a href="sb-java.html">sb-java</a> too.</p>
+
+  <div class="dothis">
+    <h4>Try it — no token needed</h4>
+    <p>Reads are public, so this works with or without the temporary rule:</p>
+    <div class="cmd"><span class="p">$</span> curl -i localhost:8080/api/products/get-id/99
+<span class="o">HTTP/1.1 404</span>
+<span class="o">Content-Type: application/json</span>
+<span class="o">{"error":"Not Found","message":"Product with ID 99 not found","path":"/api/products/get-id/99","status":404,"timestamp":"2026-01-15T09:30:00.481203Z","validationErrors":null}</span></div>
+    <p>Lab 1's answer to <code>/api/products/get/99</code> was the plain text <code>Product with ID 99 not found</code>. And in Lab 2, that old path answers <strong>401</strong>: it was renamed to <code>/get-id/{id}</code>, and a path that no rule names falls to the last rule — "any other request needs a token". If an old Postman request suddenly says 401, check the path.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Why is the exception thrown in the service and not in the controller?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Because "find product <var>id</var>" happens in the service, and three service methods need the same rule. The controller only knows it asked for a product; it shouldn't have to know what "missing" looks like inside the service.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 complete — I can say why null became an exception</span></label>
+</section>
+
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>GlobalExceptionHandler and ApiErrorResponse</h2><span class="lvl core">Core</span><span class="tagline">one place, one shape</span></div>
+
+  <p>Two exceptions from section 05 and one from section 06 are thrown somewhere in Spring or your service. This class is where they become answers:</p>
+  <p class="refs">Your code · lab2-complete · exception/GlobalExceptionHandler.java · lines 18–77 (the fourth handler left out)</p>
+  <div class="cmd"><span class="at">@RestControllerAdvice</span>
+<span class="tg">public</span> <span class="tg">class</span> GlobalExceptionHandler {
+
+    <span class="at">@ExceptionHandler</span>(ProductNotFoundException.<span class="tg">class</span>)
+    <span class="tg">public</span> ResponseEntity&lt;ApiErrorResponse&gt; <span class="at">handleProductNotFound</span>(
+            ProductNotFoundException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse response = ApiErrorResponse.<span class="at">builder</span>()
+                .<span class="at">timestamp</span>(Instant.<span class="at">now</span>())
+                .<span class="at">status</span>(HttpStatus.NOT_FOUND.<span class="at">value</span>())
+                .<span class="at">error</span>(HttpStatus.NOT_FOUND.<span class="at">getReasonPhrase</span>())
+                .<span class="at">message</span>(exception.<span class="at">getMessage</span>())
+                .<span class="at">path</span>(request.<span class="at">getRequestURI</span>())
+                .<span class="at">build</span>();
+
+        <span class="tg">return</span> ResponseEntity.<span class="at">status</span>(HttpStatus.NOT_FOUND).<span class="at">body</span>(response);
+    }
+
+    <span class="at">@ExceptionHandler</span>(MethodArgumentNotValidException.<span class="tg">class</span>)
+    <span class="tg">public</span> ResponseEntity&lt;ApiErrorResponse&gt; <span class="at">handleValidationErrors</span>(
+            MethodArgumentNotValidException exception,
+            HttpServletRequest request) {
+
+        Map&lt;String, String&gt; validationErrors = <span class="tg">new</span> LinkedHashMap&lt;&gt;();
+
+        exception.<span class="at">getBindingResult</span>().<span class="at">getFieldErrors</span>().<span class="at">forEach</span>(error -&gt;
+                validationErrors.<span class="at">putIfAbsent</span>(
+                        error.<span class="at">getField</span>(),
+                        error.<span class="at">getDefaultMessage</span>()
+                )
+        );
+
+        ApiErrorResponse response = ApiErrorResponse.<span class="at">builder</span>()
+                .<span class="at">timestamp</span>(Instant.<span class="at">now</span>())
+                .<span class="at">status</span>(HttpStatus.BAD_REQUEST.<span class="at">value</span>())
+                .<span class="at">error</span>(HttpStatus.BAD_REQUEST.<span class="at">getReasonPhrase</span>())
+                .<span class="at">message</span>(<span class="st">"Request validation failed"</span>)
+                .<span class="at">path</span>(request.<span class="at">getRequestURI</span>())
+                .<span class="at">validationErrors</span>(validationErrors)
+                .<span class="at">build</span>();
+
+        <span class="tg">return</span> ResponseEntity.<span class="at">status</span>(HttpStatus.BAD_REQUEST).<span class="at">body</span>(response);
+    }
+
+    <span class="at">@ExceptionHandler</span>(HttpMessageNotReadableException.<span class="tg">class</span>)
+    <span class="tg">public</span> ResponseEntity&lt;ApiErrorResponse&gt; <span class="at">handleInvalidRequestBody</span>(
+            HttpMessageNotReadableException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse response = ApiErrorResponse.<span class="at">builder</span>()
+                .<span class="at">timestamp</span>(Instant.<span class="at">now</span>())
+                .<span class="at">status</span>(HttpStatus.BAD_REQUEST.<span class="at">value</span>())
+                .<span class="at">error</span>(HttpStatus.BAD_REQUEST.<span class="at">getReasonPhrase</span>())
+                .<span class="at">message</span>(<span class="st">"Request body is missing or invalid"</span>)
+                .<span class="at">path</span>(request.<span class="at">getRequestURI</span>())
+                .<span class="at">build</span>();
+
+        <span class="tg">return</span> ResponseEntity.<span class="at">status</span>(HttpStatus.BAD_REQUEST).<span class="at">body</span>(response);
+    }
+
+    <span class="cm">// lines 79–93: handleAuthenticationFailure, for a failed login — see sb-security</span>
+}</div>
+
+  <h3>How it's wired</h3>
+  <ul>
+    <li><strong><code>@RestControllerAdvice</code></strong> makes the class a component that Spring finds at startup, like your controllers. From then on, whenever a controller method — or anything it calls — throws, Spring looks in this class for a method whose <code>@ExceptionHandler</code> type matches the exception, calls it, and sends what it returns as the response.</li>
+    <li><strong>"Rest"</strong> means the same as in <code>@RestController</code>: the returned object is the response body, written as JSON.</li>
+    <li><strong>The parameters</strong> are whatever the method asks for: here the exception itself, and the <code>HttpServletRequest</code> so the body can say which path failed.</li>
+    <li><strong>The status is set on the <code>ResponseEntity</code></strong>. The <code>status</code> field inside the body is just a copy for the client to read; the HTTP status line comes from <code>ResponseEntity.status(…)</code>.</li>
+  </ul>
+
+  <h3>One shape, every time</h3>
+  <p class="refs">Your code · lab2-complete · dto/ApiErrorResponse.java · lines 13–31</p>
+  <div class="cmd"><span class="at">@Getter</span>
+<span class="at">@Setter</span>
+<span class="at">@NoArgsConstructor</span>
+<span class="at">@AllArgsConstructor</span>
+<span class="at">@Builder</span>
+<span class="tg">public</span> <span class="tg">class</span> ApiErrorResponse {
+
+    <span class="tg">private</span> Instant timestamp;
+
+    <span class="tg">private</span> <span class="tg">int</span> status;
+
+    <span class="tg">private</span> String error;
+
+    <span class="tg">private</span> String message;
+
+    <span class="tg">private</span> String path;
+
+    <span class="tg">private</span> Map&lt;String, String&gt; validationErrors;
+}</div>
+  <table class="grid">
+    <tr><th>Field</th><th>Comes from</th><th>Example</th></tr>
+    <tr><td>timestamp</td><td><code>Instant.now()</code> — a moment in UTC, written ending in <code>Z</code></td><td><code>"2026-01-15T09:30:00.481203Z"</code></td></tr>
+    <tr><td>status</td><td><code>HttpStatus.NOT_FOUND.value()</code></td><td><code>404</code></td></tr>
+    <tr><td>error</td><td><code>getReasonPhrase()</code> — the standard name of the status</td><td><code>"Not Found"</code>, <code>"Bad Request"</code></td></tr>
+    <tr><td>message</td><td>the exception's text for 404; a fixed sentence for the two 400s</td><td><code>"Product with ID 99 not found"</code></td></tr>
+    <tr><td>path</td><td><code>request.getRequestURI()</code></td><td><code>"/api/products/get-id/99"</code></td></tr>
+    <tr><td>validationErrors</td><td>field → message, only for validation failures</td><td><code>{"price": "Product price is required"}</code>, else <code>null</code></td></tr>
+  </table>
+  <p>Here is a validation failure — the answer to <code>{}</code>:</p>
+  <div class="cmd">{
+  <span class="at">"error"</span>: <span class="st">"Bad Request"</span>,
+  <span class="at">"message"</span>: <span class="st">"Request validation failed"</span>,
+  <span class="at">"path"</span>: <span class="st">"/api/products/add-product"</span>,
+  <span class="at">"status"</span>: <span class="st">400</span>,
+  <span class="at">"timestamp"</span>: <span class="st">"2026-01-15T09:30:00.481203Z"</span>,
+  <span class="at">"validationErrors"</span>: {
+    <span class="at">"name"</span>: <span class="st">"Product name is required"</span>,
+    <span class="at">"price"</span>: <span class="st">"Product price is required"</span>,
+    <span class="at">"category"</span>: <span class="st">"Product category is required"</span>,
+    <span class="at">"stock"</span>: <span class="st">"Product stock is required"</span>
+  }
+}</div>
+  <p>Four entries: the four fields with a "must be there" rule. <code>description</code> isn't in the map, because nothing is wrong with leaving it out. The order of the four can differ from run to run.</p>
+
+  <h3>The map, line by line</h3>
+  <ul>
+    <li><code>getBindingResult().getFieldErrors()</code> is every rule that failed, one entry per failure, each with the field name and your <code>message</code>.</li>
+    <li>A field can break two rules at once: a name of 300 spaces is both blank and too long. <code>putIfAbsent</code> keeps the <em>first</em> message for a field and ignores the rest, so the client gets one message per field. Which of the two comes first isn't fixed — don't write a client that depends on it.</li>
+    <li><code>LinkedHashMap</code> keeps entries in the order they were added, instead of a <code>HashMap</code>'s jumbled order.</li>
+  </ul>
+
+  <h3>"validationErrors": null is still there</h3>
+  <p>The 404 and the unreadable-body 400 never set <code>validationErrors</code>, and the JSON still has the key, with <code>null</code>. Jackson writes null fields unless you tell it not to. So a client can count on the same six keys in every error. The 401 and 403 bodies from your security layer are built from the same <code>ApiErrorResponse</code> class, and so is the fourth handler in this file, for a failed login — both in <a href="sb-security.html">sb-security</a>.</p>
+
+  <div class="dothis">
+    <h4>Try it — three bad bodies</h4>
+    <p>With the temporary rule in, send each of these to <code>add-product</code> and read the <code>message</code> and <code>validationErrors</code>:</p>
+    <ol>
+      <li><code>{}</code> — 400, <code>"Request validation failed"</code>, four entries.</li>
+      <li><code>{"name":"Lamp",}</code> (a trailing comma, so not JSON) — 400, <code>"Request body is missing or invalid"</code>, <code>"validationErrors":null</code>.</li>
+      <li>A full product with <code>"price":"abc"</code> — the same: the body can't become a <code>ProductRequest</code>, so validation never runs.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Why does every error use the same six keys, even when some are <code>null</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>So a client needs one piece of code to show any error: read <code>message</code>, and if <code>validationErrors</code> isn't null, put each entry next to its field. Lab 1's not-found was a bare string, so a client had to guess whether it was getting a product, a string, or something else.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>A handler builds the body with <code>.status(404)</code> but returns <code>ResponseEntity.status(HttpStatus.OK)</code>. What does the client see?</div>
+    <details><summary>Show answer</summary><div class="a"><p>An HTTP <strong>200</strong> whose body says <code>"status": 404</code>. The status line comes from the <code>ResponseEntity</code>; the field is just text. Most clients check the real status first, so they'd treat it as success. Both come from the same <code>HttpStatus</code> constant in your handlers so that this can't happen.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 complete — I can read every field of an error body</span></label>
+</section>
+
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>Which status for which failure</h2><span class="lvl core">Core</span><span class="tagline">400, 404, 409, 500 — and what falls through</span></div>
+
+  <p>Your <code>GlobalExceptionHandler</code> knows three exceptions: <code>ProductNotFoundException</code> → 404, <code>MethodArgumentNotValidException</code> → 400, <code>HttpMessageNotReadableException</code> → 400. Every other failure falls through to Spring. First, what each status is <em>for</em>:</p>
+
+  <table class="grid">
+    <tr><th>Status</th><th>Means</th><th>In your Product app</th></tr>
+    <tr><td>400 Bad Request</td><td>The request itself is wrong, and the client can fix it.</td><td>a rule broken; not JSON; a wrong type; no body; an id that isn't a number</td></tr>
+    <tr><td>401 Unauthorized</td><td>Who are you? No token, or a bad one.</td><td>a write with no token (<a href="sb-security.html">sb-security</a>)</td></tr>
+    <tr><td>403 Forbidden</td><td>I know who you are; you may not.</td><td>a write without the ADMIN role (<a href="sb-security.html">sb-security</a>)</td></tr>
+    <tr><td>404 Not Found</td><td>There's no such thing.</td><td>no product with that id</td></tr>
+    <tr><td>405 Method Not Allowed</td><td>That path exists, but not with that method.</td><td><code>GET /api/products/add-product</code></td></tr>
+    <tr><td>409 Conflict</td><td>The request is fine, but it clashes with what's already stored — a duplicate of something that must be unique, a seat that's already taken.</td><td>none yet: no product field has to be unique</td></tr>
+    <tr><td>415 Unsupported Media Type</td><td>The body isn't in a format this endpoint reads.</td><td>a body sent without <code>Content-Type: application/json</code></td></tr>
+    <tr><td>500 Internal Server Error</td><td>The server failed. The client can't fix it by changing the request.</td><td>anything nobody planned for</td></tr>
+  </table>
+  <div class="cue"><p class="cue-k">The rule of thumb</p><p>4xx: the client should change the request. 5xx: someone should change the server. So a 500 for bad input is always a bug on the server — like the 150-character name in section 04. And a 409 is not a 400: the request was well-formed, the <em>data</em> said no.</p></div>
+
+  <h3>What your app answers today</h3>
+  <p>With the temporary rule in, here is every failure you can trigger on the Product routes, and who answers it:</p>
+  <table class="grid">
+    <tr><th>You send</th><th>Status</th><th>Who answers, with what</th></tr>
+    <tr><td>{} (rules broken)</td><td>400</td><td>your handler: ApiErrorResponse with validationErrors</td></tr>
+    <tr><td>broken JSON, "price":"abc", no body</td><td>400</td><td>your handler: "Request body is missing or invalid"</td></tr>
+    <tr><td>/get-id/99, /update/99, /delete/99</td><td>404</td><td>your handler: "Product with ID 99 not found"</td></tr>
+    <tr><td>/get-id/abc</td><td>400</td><td>Spring: Spring Boot's default body</td></tr>
+    <tr><td>a body as text/plain</td><td>415</td><td>Spring: Spring Boot's default body</td></tr>
+    <tr><td>GET /add-product</td><td>405</td><td>Spring: Spring Boot's default body, and an <code>Allow: POST</code> header</td></tr>
+    <tr><td>a 150-character name</td><td>500</td><td>Spring: Spring Boot's default body — nobody planned this one</td></tr>
+  </table>
+
+  <figure class="board">
+    <svg viewBox="0 0 780 374" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A POST to add-product passes six steps: security, finding the method, reading the path id, reading the JSON, validation, and your method. Each step has its own exit. Security exits with 401 or 403. Finding the method exits with 405, Spring's own. The path id exits with 400, Spring's own. Reading the JSON exits with 415, Spring's own, or 400 from your handler. Validation exits with 400 from your handler. Your method exits with 404 from your handler, or 500 for anything else, Spring's own.">
+      <text x="0" y="16" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">WHERE EACH FAILURE STOPS A REQUEST — IN ORDER</text>
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" font-weight="600" fill="#0B5D51">
+        <rect x="0" y="34" width="118" height="58" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+        <rect x="132" y="34" width="118" height="58" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+        <rect x="264" y="34" width="118" height="58" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+        <rect x="396" y="34" width="118" height="58" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+        <rect x="528" y="34" width="118" height="58" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+        <rect x="660" y="34" width="118" height="58" fill="#101614" stroke="#101614" stroke-width="2"/>
+        <text x="10" y="56">1 · SECURITY</text>
+        <text x="142" y="56">2 · FIND METHOD</text>
+        <text x="274" y="56">3 · PATH ID</text>
+        <text x="406" y="56">4 · READ JSON</text>
+        <text x="538" y="56">5 · @Valid</text>
+        <text x="670" y="56" fill="#F5C518">6 · YOUR CODE</text>
+      </g>
+      <g font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="#0F1A18">
+        <text x="10" y="78">token, role</text>
+        <text x="142" y="78">path + method</text>
+        <text x="274" y="78">"abc" → Long?</text>
+        <text x="406" y="78">JSON → object</text>
+        <text x="538" y="78">every rule</text>
+        <text x="670" y="78" fill="#DDE3E0">controller, service</text>
+      </g>
+      <g stroke="#0B5D51" stroke-width="2">
+        <line x1="118" y1="63" x2="130" y2="63"/><line x1="250" y1="63" x2="262" y2="63"/>
+        <line x1="382" y1="63" x2="394" y2="63"/><line x1="514" y1="63" x2="526" y2="63"/>
+        <line x1="646" y1="63" x2="658" y2="63"/>
+        <line x1="59" y1="92" x2="59" y2="120"/><line x1="191" y1="92" x2="191" y2="120"/>
+        <line x1="323" y1="92" x2="323" y2="120"/><line x1="455" y1="92" x2="455" y2="120"/>
+        <line x1="587" y1="92" x2="587" y2="120"/><line x1="719" y1="92" x2="719" y2="120"/>
+        <line x1="455" y1="186" x2="455" y2="200" stroke-dasharray="3 3"/>
+        <line x1="719" y1="186" x2="719" y2="200" stroke-dasharray="3 3"/>
+      </g>
+      <!-- exits: security (dashed), Spring's own (yellow), your handler (teal) -->
+      <rect x="0" y="120" width="118" height="66" fill="#FFFFFF" stroke="#5A6B67" stroke-width="1.5" stroke-dasharray="5 3"/>
+      <rect x="132" y="120" width="118" height="66" fill="#F7E9B8" stroke="#8A6D08" stroke-width="1.5"/>
+      <rect x="264" y="120" width="118" height="66" fill="#F7E9B8" stroke="#8A6D08" stroke-width="1.5"/>
+      <rect x="396" y="120" width="118" height="66" fill="#F7E9B8" stroke="#8A6D08" stroke-width="1.5"/>
+      <rect x="396" y="200" width="118" height="78" fill="#E4EEEB" stroke="#0B5D51" stroke-width="1.5"/>
+      <rect x="528" y="120" width="118" height="66" fill="#E4EEEB" stroke="#0B5D51" stroke-width="1.5"/>
+      <rect x="660" y="120" width="118" height="66" fill="#E4EEEB" stroke="#0B5D51" stroke-width="1.5"/>
+      <rect x="660" y="200" width="118" height="78" fill="#F7E9B8" stroke="#8A6D08" stroke-width="1.5"/>
+      <g font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="18" fill="#0F1A18">
+        <text x="10" y="144">401 · 403</text>
+        <text x="142" y="144">405</text>
+        <text x="274" y="144">400</text>
+        <text x="406" y="144">415</text>
+        <text x="406" y="224">400</text>
+        <text x="538" y="144">400</text>
+        <text x="670" y="144">404</text>
+        <text x="670" y="224">500</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="10" fill="#0F1A18">
+        <text x="10" y="162">no token / role</text>
+        <text x="142" y="162">wrong method</text>
+        <text x="274" y="162">id not a number</text>
+        <text x="406" y="162">bad Content-Type</text>
+        <text x="406" y="242">bad JSON, wrong</text>
+        <text x="406" y="254">type, no body</text>
+        <text x="538" y="162">a rule broken</text>
+        <text x="670" y="162">ProductNotFound</text>
+        <text x="670" y="242">anything else</text>
+      </g>
+      <g font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="#5A6B67">
+        <text x="10" y="178">security layer</text>
+        <text x="142" y="178">Spring's own</text>
+        <text x="274" y="178">Spring's own</text>
+        <text x="406" y="178">Spring's own</text>
+        <text x="538" y="178">your handler</text>
+        <text x="670" y="178">your handler</text>
+        <text x="406" y="270">your handler</text>
+        <text x="670" y="258">Spring's own</text>
+      </g>
+      <!-- legend -->
+      <rect x="0" y="302" width="14" height="14" fill="#E4EEEB" stroke="#0B5D51" stroke-width="1.5"/>
+      <text x="22" y="314" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#0F1A18">your GlobalExceptionHandler → an ApiErrorResponse</text>
+      <rect x="0" y="326" width="14" height="14" fill="#F7E9B8" stroke="#8A6D08" stroke-width="1.5"/>
+      <text x="22" y="338" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#0F1A18">Spring's own → forwarded to /error → Spring Boot's default body (a 401 instead, without a token)</text>
+      <rect x="0" y="350" width="14" height="14" fill="#FFFFFF" stroke="#5A6B67" stroke-width="1.5" stroke-dasharray="4 2"/>
+      <text x="22" y="362" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#0F1A18">the security filters → an ApiErrorResponse from RestSecurityErrorHandler (sb-security)</text>
+    </svg>
+    <figcaption>Only a request that gets past all six steps reaches 200, 201 or 204. The first exit it meets is its answer.</figcaption>
+  </figure>
+
+  <h3>Falling through: Spring Boot's default body</h3>
+  <p>When an exception isn't handled by your advice, Spring either knows a status for it (400 for an id that isn't a number, 415, 405) or doesn't (500). Either way it makes the answer the same way: it <strong>forwards the request to <code>/error</code></strong>, a built-in endpoint that writes Spring Boot's default body:</p>
+  <div class="cmd">{
+  <span class="at">"timestamp"</span>: <span class="st">"2026-01-15T09:30:00.481+00:00"</span>,
+  <span class="at">"status"</span>: <span class="st">400</span>,
+  <span class="at">"error"</span>: <span class="st">"Bad Request"</span>,
+  <span class="at">"path"</span>: <span class="st">"/api/products/get-id/abc"</span>
+}</div>
+  <p>Not your shape: no <code>message</code>, no <code>validationErrors</code>. Spring Boot leaves the message out on purpose — for a 500 it would be the exception's text, which can carry SQL, class names, file paths. The details go to the app's log instead, and that's where you look.</p>
+
+  <h3>The 401 that isn't about your token</h3>
+  <p>Now take the temporary rule out and send <code>/api/products/get-id/abc</code> with no token. <code>get-id</code> is public, yet you get a 401:</p>
+  <div class="cmd"><span class="p">$</span> curl -i localhost:8080/api/products/get-id/abc
+<span class="o">HTTP/1.1 401</span>
+<span class="o">Content-Type: application/json</span>
+<span class="o">{"error":"Unauthorized","message":"Authentication is required. Please provide a valid JWT token.","path":"/error","status":401,"timestamp":"2026-01-15T09:30:00.481203Z","validationErrors":null}</span></div>
+  <p>Look at the <code>path</code>: <strong><code>/error</code></strong>. The request was public, Spring raised its 400 and forwarded to <code>/error</code> — and the forward went through the security filters again. <code>/error</code> isn't in your rules, so it fell to "any other request needs a token", and with no token the forward was refused. The 401 hides the real 400. With a valid token of any role, the same request shows the 400; that's why the temporary rule opens <code>/error</code> as well. A failure your handler answers — <code>/get-id/99</code> — never forwards, so it's a clean 404 with or without a token.</p>
+  <p>The same happens to an exception that carries its own status but that your handler doesn't know. Signing up twice with the same email throws a <code>ResponseStatusException</code> with 409 CONFLICT in <code>AuthService</code>; nothing in <code>GlobalExceptionHandler</code> handles it, so Spring forwards to <code>/error</code>, and a real server answers <strong>401</strong> with <code>"path":"/error"</code> instead of the 409. (<a href="sb-security.html">sb-security</a> walks through that one.)</p>
+  <p>Two ways to make these answers yours: handle more exceptions in <code>GlobalExceptionHandler</code>, so fewer fall through; and permit <code>/error</code> in <code>SecurityConfig</code>, so the ones that still do aren't masked. Section 11 points to the list the contract expects.</p>
+
+  <div class="dothis">
+    <h4>Try it — every row of the table</h4>
+    <ol>
+      <li>With the temporary rule in: <code>/get-id/abc</code> (400, Spring Boot's body); <code>add-product</code> with <code>-H "Content-Type: text/plain" -d 'Desk Lamp'</code> (415); <code>curl -i localhost:8080/api/products/add-product</code> — a GET (405, and an <code>Allow: POST</code> header).</li>
+      <li>Take the rule out, restart, and send <code>/get-id/abc</code> again: 401, with <code>"path":"/error"</code>. Then <code>/get-id/99</code>: still a clean 404.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>A client sends a 150-character name and gets a 500. Whose mistake is the request, whose bug is the 500, and what should the answer be?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The request is the client's mistake; the 500 is the server's bug, because the server knew its limit and didn't say so. The answer should be a 400 with <code>"name": "…must not exceed 100 characters"</code> — a rule that matches the column (section 04).</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>With no token, why is <code>/get-id/99</code> a 404 but <code>/get-id/abc</code> a 401?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>/get-id/99</code> throws <code>ProductNotFoundException</code>, your handler answers inside the request, and the request was public. <code>/get-id/abc</code> fails on a conversion your handler doesn't know, so Spring forwards to <code>/error</code>, which your rules don't permit — and a request without a token is refused there.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 complete — I can predict the status and body for any failure</span></label>
+</section>
+
+<div class="part">Part 5 · The two new endpoints</div>
+
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>Delete, and find by category</h2><span class="lvl core">Core</span><span class="tagline">204, and an empty list that's still an answer</span></div>
+
+  <h3>Delete looks first</h3>
+  <p>Your <code>lab1-complete</code> code already had a delete:</p>
+  <p class="refs">Your code · lab1-complete · service/ProductService.java · lines 45–47 · controller/ProductController.java · lines 61–67</p>
+  <div class="cmd"><span class="tg">public</span> <span class="tg">void</span> <span class="at">deleteProduct</span>(Long id) {
+    productRepository.<span class="at">deleteById</span>(id);
+}
+
+<span class="at">@DeleteMapping</span>(<span class="st">"/delete/{id}"</span>)
+<span class="tg">public</span> ResponseEntity&lt;String&gt; <span class="at">deleteProduct</span>(<span class="at">@PathVariable</span> Long id) {
+
+    productService.<span class="at">deleteProduct</span>(id);
+
+    <span class="tg">return</span> ResponseEntity.<span class="at">ok</span>(<span class="st">"Product with ID "</span> + id + <span class="st">" deleted successfully"</span>);
+}</div>
+  <p>Spring Data's <code>deleteById</code> looks the row up and deletes it if it's there. If it isn't, it does nothing — no error. So Lab 1 answered <code>200 Product with ID 99 deleted successfully</code> for a product that never existed. Lab 2 looks first, so a missing product is a 404 like everywhere else:</p>
+  <p class="refs">Your code · lab2-complete · service/ProductService.java · lines 62–67 · controller/ProductController.java · lines 66–72</p>
+  <div class="cmd"><span class="tg">public</span> <span class="tg">void</span> <span class="at">deleteProduct</span>(Long id) {
+    Product product = productRepository.<span class="at">findById</span>(id)
+            .<span class="at">orElseThrow</span>(() -&gt; <span class="tg">new</span> <span class="at">ProductNotFoundException</span>(id));
+
+    productRepository.<span class="at">delete</span>(product);
+}
+
+<span class="at">@DeleteMapping</span>(<span class="st">"/delete/{id}"</span>)
+<span class="tg">public</span> ResponseEntity&lt;Void&gt; <span class="at">deleteProduct</span>(<span class="at">@PathVariable</span> Long id) {
+
+    productService.<span class="at">deleteProduct</span>(id);
+
+    <span class="tg">return</span> ResponseEntity.<span class="at">noContent</span>().<span class="at">build</span>();
+}</div>
+  <p><code>noContent()</code> is <strong>204 No Content</strong>: it worked, and there is nothing to say. <code>ResponseEntity&lt;Void&gt;</code> makes that a promise — this method can't return a body. The client already knows which id it deleted, so a message would add nothing. (A 200 with a body is legal HTTP too; the contract uses 204.)</p>
+  <p>Delete twice and you get 204, then 404. The product is gone either way — the second request changes nothing. That's what "idempotent" means for <code>DELETE</code>; <a href="sb-request-flow.html">From request to row</a> explains it for every method.</p>
+
+  <div class="dothis">
+    <h4>Try it — delete, and delete again</h4>
+    <ol>
+      <li>With the temporary rule in, delete product 3: <code>curl -i -X DELETE localhost:8080/api/products/delete/3</code> — <code>HTTP/1.1 204</code> and no body at all.</li>
+      <li>Send it again: 404, <code>"Product with ID 3 not found"</code>. Read <code>/get-id/3</code>: 404 too.</li>
+      <li>Put the keyboard back with an <code>add-product</code> request. It gets a new id — MySQL keeps counting rather than filling the gap.</li>
+    </ol>
+  </div>
+
+  <h3>Find by category</h3>
+  <p class="refs">Your code · lab2-complete · repository/ProductRepository.java · line 12 · service/ProductService.java · lines 69–74 · controller/ProductController.java · lines 36–44</p>
+  <div class="cmd"><span class="tg">public</span> List&lt;Product&gt; <span class="at">findByCategory</span>(String category);
+
+<span class="tg">public</span> List&lt;ProductResponse&gt; <span class="at">getProductsByCategory</span>(String category) {
+    <span class="tg">return</span> productRepository.<span class="at">findByCategory</span>(category)
+            .<span class="at">stream</span>()
+            .<span class="at">map</span>(<span class="tg">this</span>::toProductResponse)
+            .<span class="at">toList</span>();
+}
+
+<span class="at">@GetMapping</span>(<span class="st">"/get-category/{category}"</span>)
+<span class="tg">public</span> ResponseEntity&lt;List&lt;ProductResponse&gt;&gt; <span class="at">getProductByCategory</span>(
+        <span class="at">@PathVariable</span> String category) {
+
+    List&lt;ProductResponse&gt; products =
+            productService.<span class="at">getProductsByCategory</span>(category);
+
+    <span class="tg">return</span> ResponseEntity.<span class="at">ok</span>(products);
+}</div>
+  <p>There's no query written anywhere. Spring Data reads the method's <em>name</em> when the app starts: <code>findBy</code> means "a query that returns rows", and <code>Category</code> is a field of <code>Product</code>, so the condition is "<code>category</code> equals the argument". The return type, <code>List&lt;Product&gt;</code>, says "every match". With <code>spring.jpa.show-sql=true</code> and <code>format_sql=true</code> in your <code>application.properties</code>, the log shows the one SELECT each call sends:</p>
+  <div class="cmd"><span class="cm">-- printed once per GET /api/products/get-category/Accessories</span>
+<span class="tg">select</span>
+    p1_0.id,
+    p1_0.category,
+    p1_0.description,
+    p1_0.name,
+    p1_0.price,
+    p1_0.stock
+<span class="tg">from</span>
+    products p1_0
+<span class="tg">where</span>
+    p1_0.category=?</div>
+  <p><code>p1_0</code> is Hibernate's short name for the <code>products</code> table in this query, and <code>?</code> is where your argument goes — sent separately from the SQL, never pasted into it. A name Spring Data can't turn into a query — a typo such as <code>findByCategry</code> — fails when the repository is created, so the app stops at startup with an error that names the method, instead of failing at the first request. The general rules for these names are in <a href="sb-request-flow.html">From request to row</a>. Three things about this endpoint:</p>
+  <ul>
+    <li><strong>No match is <code>200 []</code>, not 404.</strong> 404 means "no such resource", and this one exists — it's a list, and the list is empty. A filter that matches nothing has still answered the question. (The contract does the same: an unknown department is <code>200 []</code>.)</li>
+    <li><strong>A category with a space goes into the URL encoded</strong>: <code>/get-category/Home%20Office</code>. Spring decodes it before your method sees it, so <code>category</code> is <code>"Home Office"</code>. Postman and browsers encode for you; with curl, type the <code>%20</code>.</li>
+    <li><strong>Whether case matters is the database's decision, not Spring's.</strong> Spring sends <code>p1_0.category=?</code>. MySQL's default comparison ignores case, so <code>/get-category/electronics</code> usually finds <code>Electronics</code> there; H2, the database tests often run on, doesn't. If case shouldn't matter, say so in the name — <code>findByCategoryIgnoreCase</code> — instead of relying on the database.</li>
+  </ul>
+  <div class="cmd"><span class="p">$</span> curl -i localhost:8080/api/products/get-category/Accessories
+<span class="o">HTTP/1.1 200</span>
+<span class="o">Content-Type: application/json</span>
+<span class="o">[{"category":"Accessories","description":"Ergonomic wireless mouse","id":2,"name":"Wireless Mouse","price":1200.00,"stock":25},{"category":"Accessories","description":"RGB mechanical keyboard","id":3,"name":"Mechanical Keyboard","price":3500.00,"stock":15}]</span>
+<span class="p">$</span> curl -i localhost:8080/api/products/get-category/Toys
+<span class="o">HTTP/1.1 200</span>
+<span class="o">Content-Type: application/json</span>
+<span class="o">[]</span></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Why does Lab 2's delete call <code>findById</code> before <code>delete</code>, when <code>deleteById</code> is one line?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Because <code>deleteById</code> is silent when the id doesn't exist, so the API can't tell the client. Looking first turns "nothing there" into a <code>ProductNotFoundException</code>, and so a 404 — the same answer get and update give.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>A teammate wants <code>/get-category/Toys</code> to return 404 "No products in category Toys". What would a client lose?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The difference between "your request was wrong" and "your request was fine, the answer is none". A client showing a list would now have to treat one 404 as "show an empty list" and every other 404 as an error. <code>200 []</code> needs no special case.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 09 complete — I can explain 204, and why an empty list is a 200</span></label>
+</section>
+
+<div class="part">Part 6 · Defend it</div>
+
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>Audit your own slice</h2><span class="lvl core">Core</span><span class="tagline">name what it does, or cut it</span></div>
+
+  <p>Open your own project's <code>dto/</code> and <code>exception/</code> folders, <code>ProductRequest</code>, and <code>ProductController</code>. For every element, you should be able to fill in this row: what it earns in this slice, and how you'd show it.</p>
+  <table class="grid long-key">
+    <tr><th>Element</th><th>Earned by</th><th>Show it with</th></tr>
+    <tr><td>ProductRequest</td><td>The client mustn't set the id; the rules belong on input, not on the table's class.</td><td>a POST with <code>"id":1</code> (02)</td></tr>
+    <tr><td>ProductResponse + toProductResponse</td><td>What clients see is decided in one place, not by whatever the entity holds.</td><td>a new entity field that doesn't appear (02)</td></tr>
+    <tr><td>each rule on a field</td><td>A rule the data really has: required, a range, a length that fits the column.</td><td>a value that breaks it, and the 400 (04)</td></tr>
+    <tr><td>@Valid</td><td>Makes the rules run at all.</td><td>take it off, send <code>{}</code>, read the 500 (05)</td></tr>
+    <tr><td>ProductNotFoundException</td><td>One named failure, said once, mapped to 404.</td><td><code>/get-id/99</code> (06)</td></tr>
+    <tr><td>each @ExceptionHandler</td><td>An exception that would otherwise get the wrong status or the wrong shape.</td><td>trigger that exception (07, 08)</td></tr>
+    <tr><td>ApiErrorResponse</td><td>One shape for every failure, so one piece of client code reads them all.</td><td>two different errors, same six keys (07)</td></tr>
+    <tr><td>spring-boot-starter-validation</td><td>Without it there's no validator to run the rules.</td><td>it's the reason <code>@Valid</code> does anything (04)</td></tr>
+  </table>
+  <p>If you can't fill a row, either you've found something to learn, or something to cut.</p>
+
+  <h3>Smells to look for in a generated slice</h3>
+  <ul>
+    <li>An entity returned from any endpoint — search the controllers for <code>ResponseEntity&lt;Product&gt;</code> or <code>List&lt;Product&gt;</code>.</li>
+    <li><code>@Valid</code> on <code>POST</code> but not on <code>PUT</code>.</li>
+    <li>Rules that don't match the columns, or rules nobody asked for ("name must be at least 3 characters" — says who?).</li>
+    <li>A handler that answers 200 with an error message in the body.</li>
+    <li>An <code>@ExceptionHandler(Exception.class)</code> that copies <code>ex.getMessage()</code> into the response — it can send SQL and class names to the client. A catch-all should send a fixed message and log the details.</li>
+    <li><code>ResponseEntity&lt;?&gt;</code> or <code>ResponseEntity&lt;Object&gt;</code> where one body type would do.</li>
+    <li>A <code>try</code>/<code>catch</code> in the controller that swallows an exception your advice should answer.</li>
+    <li>DTO fields that nothing sends or reads; mapper classes for conversions that never happen.</li>
+    <li>Annotations nobody on the team can explain — the box below names a few that generated code likes to add.</li>
+  </ul>
+
+  <div class="dothis">
+    <h4>Try it — cut one thing</h4>
+    <p>On a new branch (<code>git switch -c audit</code>), remove one element you think isn't earned. Restart and poke the endpoints it touches. If nothing changes anywhere, it wasn't earned — keep it cut. If something breaks, you've just found what it was for. Switch back to your main branch afterwards.</p>
+  </div>
+
+  <div class="stretch-box">
+  <h3>What this slice doesn't need yet</h3>
+  <p>Generated code often adds these. In the Product slice none of them is earned — you'll meet each when its reason arrives:</p>
+  <ul>
+    <li><strong><code>@ManyToOne</code> and lazy loading</strong> — when one entity points at another (a review of a product, an enrollment in a course), and with them the "N+1 queries" problem when a list touches the relation row by row.</li>
+    <li><strong><code>@Version</code></strong> — when two people may change the same row at the same moment: two buyers, one item left in stock.</li>
+    <li><strong><code>Pageable</code></strong> — when a list grows too long to send at once. The contract says "no pagination", so not there either.</li>
+  </ul>
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Stretch read — I can say why each of these isn't earned here</span></label>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 complete — I can defend every file in my dto/ and exception/ folders</span></label>
+</section>
+
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>Using this in your contract backend</h2><span class="lvl core">Core</span><span class="tagline">a pointer, not a build</span></div>
+
+  <p>Your <code>ApiErrorResponse</code> is most of the contract's <code>ApiError</code> already. What changes when you grow your Lab 2 project into the contract backend:</p>
+  <ul>
+    <li><strong>The names and one message.</strong> The map is called <code>fieldErrors</code> (present in every error, <code>null</code> when it isn't a validation failure), and a validation failure's message is exactly <code>Validation failed</code>. The contract fixes a few other messages word for word too.</li>
+    <li><strong>Nothing falls through.</strong> Every failure in section 08's table — including the id that isn't a number, the 405, an unknown path and the 500 — answers in the contract's shape, and so do the 401 and 403.</li>
+    <li><strong>409s arrive.</strong> Enrolling checks a fixed list of rules in a fixed order: 404, then three different 409s, each with its own message. The pattern is the one you've just read: one exception per meaning, one handler per exception.</li>
+  </ul>
+  <p>The rules, the exact messages and the order are in the contract doc: <a href="api-contract.html#s10">§10 One error shape for everything</a> and <a href="api-contract.html#s13">§13 Level C — enrollments, admin and the 409 rules</a>. The error-shape checks are part of conformance level A, so <code>npm run conformance -- http://localhost:8080 --level A</code> in <code>esd-labs/api-contract</code> tells you how close your shape is.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 complete — I know where the contract's error rules are</span></label>
+</section>
+
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>When it goes wrong</h2><span class="lvl ref">Reference</span><span class="tagline">the answer, and what it means</span></div>
+
+  <table class="grid long-key">
+    <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>401 "Authentication is required…" on add-product, update or delete</td><td>No token, and writes are ADMIN-only. Add the temporary rule (01) or log in (<a href="sb-security.html">sb-security</a>).</td></tr>
+    <tr><td>403 "You do not have permission…" with a token for an ADMIN account</td><td>On <code>lab2-complete</code> the role in the token doesn't reach Spring as <code>hasRole</code> expects — <a href="sb-security.html">sb-security</a>. Use the temporary rule for these pokes.</td></tr>
+    <tr><td>401 on GET /api/products/get/1</td><td>The path is <code>/get-id/{id}</code> since Lab 2; the old one has no rule, so it needs a token (06).</td></tr>
+    <tr><td>401 with "path": "/error"</td><td>A failure your handler doesn't answer was forwarded to <code>/error</code>, which your rules don't permit — <code>/get-id/abc</code>, or a second signup with the same email (a 409 underneath). Send a token, or open <code>/error</code> (08).</td></tr>
+    <tr><td>415 Unsupported Media Type</td><td>No <code>Content-Type: application/json</code>. In Postman: Body → raw → JSON.</td></tr>
+    <tr><td>400 "Request body is missing or invalid"</td><td>The body isn't JSON (a trailing comma, a missing quote, cut off), a value has the wrong type (<code>"price":"abc"</code>), or there's no body (05).</td></tr>
+    <tr><td>400 "Product price is required", but you sent a price</td><td>The field's name doesn't match: <code>"Price"</code> or <code>"cost"</code> is ignored, so <code>price</code> is null (05).</td></tr>
+    <tr><td>500, log: NullPointerException … ProductRequest.getName() is null</td><td><code>@Valid</code> is missing on that controller method (05).</td></tr>
+    <tr><td>500, log: DataIntegrityViolationException … Data too long for column</td><td>A <code>@Size</code> is larger than the column (04).</td></tr>
+    <tr><td>500 or 400 with only timestamp, status, error, path</td><td>Spring Boot's default body: your handler doesn't know that exception (08). The details are in the app's log.</td></tr>
+    <tr><td>{} gives a 500, not a 400</td><td><code>@Valid</code> is missing, or <code>spring-boot-starter-validation</code> isn't in <code>pom.xml</code> (reload Maven after adding it) — without it there's no validator, even if the annotations compile (04, 05).</td></tr>
+    <tr><td>200 [] from /get-category/… for a category you can see in the table</td><td>Spelling, case, or a space that wasn't encoded as <code>%20</code> (09).</td></tr>
+    <tr><td>Delete answers 200 "deleted successfully" for an id that doesn't exist</td><td>You're running Lab 1's delete (09).</td></tr>
+  </table>
+
+  <div class="cue"><p class="cue-k">How to read a failure, generally</p><p>Read the status first, then the body's <code>path</code> and <code>message</code>, then — for any 500 — the app's log: the first line of the exception, and the first <code>at com.esd.ecommerce…</code> line below it. That line is in your code, and it's where to look. More in <a href="sb-testing.html">sb-testing</a>.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 12 read</span></label>
+</section>
+
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+  <div class="gloss">
+    <div class="grow"><b>@ExceptionHandler</b><span>Marks a method that answers one kind of exception. Spring calls it when that exception leaves a controller.</span></div>
+    <div class="grow"><b>@RestControllerAdvice</b><span>A class of <code>@ExceptionHandler</code> methods that apply to every controller; what they return is the response body.</span></div>
+    <div class="grow"><b>@Valid</b><span>On a <code>@RequestBody</code> parameter: check the object against its rules before the method runs.</span></div>
+    <div class="grow"><b>204 No Content</b><span>Success with nothing to send back. What your delete answers.</span></div>
+    <div class="grow"><b>409 Conflict</b><span>A well-formed request that clashes with what's stored: a duplicate, a full course.</span></div>
+    <div class="grow"><b>415</b><span>Unsupported Media Type: the body isn't in a format the endpoint reads — usually a missing <code>Content-Type</code>.</span></div>
+    <div class="grow"><b>ApiErrorResponse</b><span>Your one error body: timestamp, status, error, message, path, validationErrors.</span></div>
+    <div class="grow"><b>Bean Validation</b><span>The standard set of rule annotations (<code>jakarta.validation.constraints</code>). Hibernate Validator is the library that checks them.</span></div>
+    <div class="grow"><b>DTO</b><span>Data transfer object: a plain class that is the shape of some JSON. A request DTO comes in, a response DTO goes out.</span></div>
+    <div class="grow"><b>/error</b><span>Spring Boot's built-in error endpoint. Exceptions your advice doesn't handle are forwarded there and get the default body.</span></div>
+    <div class="grow"><b>HttpMessageNotReadable­Exception</b><span>The body couldn't become your object: not JSON, a wrong type, or no body.</span></div>
+    <div class="grow"><b>idempotent</b><span>Sending it twice leaves things as sending it once does. <code>DELETE</code> is: the second one finds nothing to delete.</span></div>
+    <div class="grow"><b>mapping</b><span>Copying fields between an entity and a DTO. Yours is by hand, in the service.</span></div>
+    <div class="grow"><b>MethodArgumentNotValid­Exception</b><span>What <code>@Valid</code> throws when rules fail. It carries every failed field.</span></div>
+    <div class="grow"><b>over-posting</b><span>A client setting a field you never meant it to set, because the request was bound to the entity. Also called mass assignment.</span></div>
+    <div class="grow"><b>reason phrase</b><span>The standard name of a status: "Not Found", "Bad Request". <code>getReasonPhrase()</code>.</span></div>
+    <div class="grow"><b>unchecked exception</b><span>A <code>RuntimeException</code> or subclass: no <code>throws</code> clause needed on the way up.</span></div>
+  </div>
+</section>
+
+<div class="finish">
+  <h2>How to know you're ready</h2>
+  <p>You understand this half of Lab 2 if you can do all of these <em>with your project open and nothing else</em>:</p>
+  <ol>
+    <li>Say why <code>ProductRequest</code> has no id, and what Lab 1's code did with one.</li>
+    <li>Say what <code>UserResponse</code> protects, and what <code>ProductResponse</code> would protect the day <code>Product</code> gains a private field.</li>
+    <li>Name the rule behind every annotation on <code>ProductRequest</code>, and say why <code>price</code> needs two.</li>
+    <li>List, in order, what runs before the first line of <code>addProduct</code>.</li>
+    <li>Predict the status and body for <code>{}</code>, broken JSON, <code>/get-id/99</code>, <code>/get-id/abc</code> and a 150-character name.</li>
+    <li>Explain why <code>/get-id/abc</code> without a token says 401, with <code>"path": "/error"</code>.</li>
+    <li>Explain why Lab 2's delete looks the product up first, and why it answers 204.</li>
+    <li>For every file in your <code>dto/</code> and <code>exception/</code> folders, say what it earns in this slice.</li>
+  </ol>
+
+  <h2 style="margin-top:30px;font-size:20px">Rules card</h2>
+  <div class="cmd"><span class="at">@NotNull</span>              <span class="cm">// not null — any type</span>
+<span class="at">@NotEmpty</span>             <span class="cm">// not null, not ""            (strings, lists)</span>
+<span class="at">@NotBlank</span>             <span class="cm">// not null, not "", not "   " (strings)</span>
+<span class="at">@Size</span>(max = <span class="st">100</span>)      <span class="cm">// length; null passes</span>
+<span class="at">@DecimalMin</span>(<span class="st">"0.01"</span>)   <span class="cm">// at least 0.01; null passes</span>
+<span class="at">@Positive</span>  <span class="at">@PositiveOrZero</span>  <span class="at">@Min</span>(<span class="st">1</span>)  <span class="at">@Max</span>(<span class="st">6</span>)  <span class="at">@Email</span>  <span class="at">@Pattern</span>(regexp = <span class="st">"..."</span>)
+
+<span class="at">@Valid</span> <span class="at">@RequestBody</span> ProductRequest request   <span class="cm">// makes the rules run, before the method</span></div>
+
+  <h2 style="margin-top:24px;font-size:20px">Errors card — who answers what</h2>
+  <div class="cmd">ProductNotFoundException                 404  your handler
+MethodArgumentNotValidException          400  your handler, with validationErrors
+HttpMessageNotReadableException          400  your handler
+MethodArgumentTypeMismatchException      400  Spring's own   (/get-id/abc)
+HttpMediaTypeNotSupportedException       415  Spring's own   (no Content-Type: application/json)
+HttpRequestMethodNotSupportedException   405  Spring's own   (GET on add-product)
+anything else                            500  Spring's own   (read the log)</div>
+
+  <h2 style="margin-top:24px;font-size:20px">Status card</h2>
+  <div class="cmd">400  the request is wrong — the client can fix it
+401  who are you?  (no token, or a bad one)
+403  I know you; you may not
+404  no such thing
+405  that path, not that method
+409  a fine request that clashes with what's stored
+415  not a body this endpoint reads
+500  the server failed — fix the server</div>
+</div>
+
+<footer>M.Tech CSE · ESD · Spring Boot<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+</div>
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ---- */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  /* ---- progress: CORE sections drive the bar; stretch boxes are tracked separately.
+         Both are remembered in this browser, so they survive a reload. ---- */
+  function load(key){ try{ return JSON.parse(localStorage.getItem(key)||'[]'); }catch(err){ return []; } }
+  function save(key,list){ try{ localStorage.setItem(key,JSON.stringify(list.map(function(c){return c.checked}))); }catch(err){} }
+  var KEY='esd-sb-good-slice-progress', SKEY='esd-sb-good-slice-stretch';
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var extras=[].slice.call(document.querySelectorAll('.chk-s'));
+  var saved=load(KEY), savedS=load(SKEY);
+  checks.forEach(function(c,i){ if(saved[i]) c.checked=true; });
+  extras.forEach(function(c,i){ if(savedS[i]) c.checked=true; });
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=["Core first, in order — every section starts from lines in your own Lab 2 project.", "Good start. Keep your Lab 2 project open beside this page.", "Past halfway — the error handling is next.", "Nearly there. Then audit your own slice.", "Core done. Take the temporary rule out of SecurityConfig if it's still in."];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    var s=extras.filter(function(c){return c.checked}).length;
+    msg.textContent=(n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))])+(s?'  ·  stretch: '+s+' / '+extras.length:'');
+    save(KEY,checks); save(SKEY,extras);
+  }
+  checks.concat(extras).forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^[$>]\s?/,'').trimEnd()}).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>

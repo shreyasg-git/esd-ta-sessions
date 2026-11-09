@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From request to row — Spring Boot</title>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#101614">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Condensed:wght@600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;--red:#E06C4F;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 110px;position:relative}
+
+.masthead{padding:52px 0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(38px,8.5vw,74px);line-height:.92;letter-spacing:-.015em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin:0 0 24px;color:#2B3936}
+
+.tracker{position:sticky;top:0;z-index:60;margin:24px 0 0;background:var(--dark);color:var(--paper);border:1px solid var(--dark)}
+.tracker-top{display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+.tracker-count{font-family:var(--cond);font-weight:700;font-size:21px;text-transform:uppercase;white-space:nowrap}
+.tracker-count b{color:var(--signal)}
+.tracker-msg{font-family:var(--mono);font-size:11.5px;color:#9DB0AB;flex:1;min-width:150px}
+.bar{height:5px;background:var(--dark-2)}
+.bar-fill{height:100%;width:0;background:var(--signal);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-fill.done{background:var(--term-green)}
+
+.toc{border:1px solid var(--ink);background:var(--surface);margin-top:24px}
+.tochead{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:11px 16px 8px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:baseline;text-decoration:none;color:inherit}
+.rrow:last-child{border-bottom:0}
+.rrow:hover{background:var(--teal-soft)}
+.rrow:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.rt{font-family:var(--mono);font-size:12px;color:var(--teal);flex:0 0 30px;font-weight:600}
+.rw{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15.5px;flex:1;line-height:1.25}
+
+section{margin-top:52px;scroll-margin-top:74px}
+.shead{display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;flex-wrap:wrap}
+.shead .chip{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.shead h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,4.4vw,34px);line-height:1.04;margin:0;flex:1}
+.shead .tagline{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.shead h2 .anch{font-family:var(--mono);font-size:.5em;font-weight:400;color:var(--line);text-decoration:none;margin-left:10px;vertical-align:middle;opacity:0;transition:opacity .15s,color .15s}
+.shead:hover h2 .anch,.shead h2 .anch:focus-visible{opacity:1}
+.shead h2 .anch:hover{color:var(--teal)}
+.shead h2 .anch:focus-visible{outline:2px solid var(--signal);outline-offset:2px;color:var(--teal)}
+:target .shead{border-bottom-color:var(--signal)}
+@media (hover:none){.shead h2 .anch{opacity:.45}}
+
+h3{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:19px;letter-spacing:.02em;margin:28px 0 10px}
+h3:first-child{margin-top:0}
+p{margin:0 0 12px;max-width:70ch}
+ul,ol{padding-left:20px;margin:0 0 14px;max-width:70ch}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-size:.87em;background:var(--teal-soft);padding:1px 5px;border-radius:2px;word-break:break-word}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;padding:1px 5px;background:var(--surface)}
+
+.cue{border-left:4px solid var(--teal);background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:70ch}
+.cue-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 6px}
+.cue p{margin:0 0 8px;font-size:15.5px}
+.cue p:last-child{margin:0}
+.cue.watch{border-left-color:var(--signal)}
+.cue.watch .cue-k{color:#8A6D08}
+.cue.calm{border-left-color:var(--ink);background:var(--teal-soft)}
+.cue.calm .cue-k{color:var(--ink)}
+.cue.work{border-left-color:var(--ink);background:var(--surface)}
+.cue.work .cue-k{color:var(--ink)}
+
+.cmd{position:relative;background:var(--dark);color:#DDE3E0;font-family:var(--mono);font-size:13.5px;line-height:1.75;padding:14px 54px 14px 16px;margin:0 0 14px;overflow-x:auto;white-space:pre}
+.p{color:var(--term-green);user-select:none}
+.cm{color:#8896A0}
+.o{color:#B7C4C0}
+.rr{color:var(--red)}
+.gg{color:var(--term-green)}
+.tg{color:var(--term-green)}
+.at{color:var(--signal)}
+.st{color:#B7C4C0}
+.tx{color:#FFFFFF}
+.copy{position:absolute;top:8px;right:8px;background:var(--dark-2);color:#9DB0AB;border:1px solid #313D3A;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+figure{margin:0 0 16px}
+figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;letter-spacing:.03em}
+.board{background:var(--surface);border:1px solid var(--ink);padding:20px 16px}
+.board svg{width:100%;height:auto;display:block}
+
+.mention{background:var(--surface);border:1px solid var(--line);padding:6px 0;margin-bottom:14px;max-width:70ch}
+.mrow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 182px;color:var(--teal)}
+.mrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.dothis{border:1px solid var(--ink);border-left:5px solid var(--teal);background:var(--surface);padding:15px 17px;margin:0 0 16px;max-width:70ch}
+.dothis h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;margin:0 0 8px;letter-spacing:.06em;color:var(--teal);display:flex;align-items:center;gap:8px}
+.dothis h4::before{content:"▶";font-size:10px}
+.dothis p:last-child,.dothis ol:last-child,.dothis ul:last-child,.dothis .cmd:last-child{margin-bottom:0}
+
+.quiz{border:1px solid var(--ink);background:var(--surface);margin:0 0 10px;max-width:70ch}
+.quiz .q{padding:14px 17px;font-size:15.5px;font-weight:500}
+.quiz .q b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);background:var(--ink);padding:2px 6px;margin-right:9px;font-weight:600;vertical-align:2px}
+.quiz ol{margin:10px 0 0;font-size:15px}
+.quiz details{border-top:1px dashed var(--line)}
+.quiz summary{cursor:pointer;padding:11px 17px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600;list-style:none}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary::before{content:"▸ "}
+.quiz details[open] summary::before{content:"▾ "}
+.quiz summary:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
+.quiz .a{padding:0 17px 15px;font-size:15px;background:var(--teal-soft)}
+.quiz .a p{margin:0 0 9px}
+.quiz .a p:last-child{margin:0}
+.quiz .a .cmd{margin-top:4px}
+
+.done-check{display:flex;align-items:center;gap:11px;margin-top:22px;padding:11px 15px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);cursor:pointer;max-width:70ch;transition:.2s}
+.done-check:has(input:checked){border-left-color:var(--teal);background:var(--teal-soft)}
+.done-check input{position:absolute;opacity:0;width:0;height:0}
+.dbox{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;transition:.15s}
+.dbox::after{content:"";width:9px;height:5px;border-left:2.5px solid var(--surface);border-bottom:2.5px solid var(--surface);transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s;margin-top:-2px}
+.done-check input:checked + .dbox{background:var(--teal);border-color:var(--teal)}
+.done-check input:checked + .dbox::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.done-check input:focus-visible + .dbox{outline:3px solid var(--signal);outline-offset:2px}
+.done-check span{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+
+.gloss{background:var(--surface);border:1px solid var(--ink);margin-bottom:14px}
+.grow{display:flex;gap:14px;padding:10px 16px;align-items:baseline;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 168px;color:var(--teal)}
+.grow span{font-size:14.5px;color:#2B3936;flex:1}
+
+.finish{background:var(--dark);color:var(--paper);padding:30px 26px;margin-top:52px}
+.finish h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(23px,5vw,33px);margin:0 0 14px;line-height:1.05}
+.finish p,.finish li{color:#B7C4C0;max-width:62ch;font-size:15px}
+.finish strong{color:#FFF}
+.finish code{background:#22302D;color:var(--term-green)}
+.finish .cmd{border:1px solid #2A3735;max-width:none}
+footer{margin-top:38px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){footer .hz{animation:none}}
+
+/* ---- additions for the lab docs ---- */
+.cue.react{border-left-color:var(--term-green);background:var(--dark);color:#DDE3E0}
+.cue.react .cue-k{color:var(--term-green)}
+.cue.react code{background:#22302D;color:var(--term-green)}
+.cue.react strong{color:#FFF}
+.refs{font-family:var(--mono);font-size:12px;color:var(--muted);margin:-6px 0 16px;max-width:70ch}
+.refs a{color:var(--teal);font-weight:600}
+.part{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper);background:var(--ink);display:inline-block;padding:5px 10px;margin:64px 0 -28px}
+.toc .rpart{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);padding:10px 16px 6px;border-bottom:1px solid var(--line);background:var(--teal-soft);font-weight:600}
+table.grid{border-collapse:collapse;width:100%;max-width:70ch;background:var(--surface);border:1px solid var(--ink);margin:0 0 16px;font-size:14.5px}
+table.grid th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;text-align:left;color:var(--muted);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--ink)}
+table.grid td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.grid tr:last-child td{border-bottom:0}
+table.grid td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--teal);font-weight:600;white-space:nowrap}
+
+/* ---- core / stretch ---- */
+.lvl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:3px 7px;align-self:center;white-space:nowrap}
+.lvl.core{background:var(--ink);color:var(--signal)}
+.lvl.stretch{border:1px dashed var(--teal);color:var(--teal)}
+.lvl.ref{border:1px solid var(--muted);color:var(--muted)}
+.rrow .rl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:600;flex:0 0 auto;border:1px dashed var(--teal);padding:1px 6px;align-self:center}
+.rrow .rl.ref{color:var(--muted);border:1px solid var(--muted)}
+.rrow.is-extra .rw{color:var(--muted)}
+.stretch-box{border:1px dashed var(--teal);background:rgba(255,255,255,.55);padding:14px 16px 4px;margin:8px 0 18px}
+.stretch-box::before{content:"Stretch — optional. Do it if you can, and ask about it any time.";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600;margin-bottom:10px}
+.stretch-box h3:first-of-type{margin-top:0}
+/* tables whose first column holds long text (error messages): even, wrapping columns */
+table.grid.long-key{table-layout:fixed}
+table.grid.long-key td:first-child{white-space:normal;width:42%;overflow-wrap:anywhere}
+table.grid.long-key th:first-child{width:42%}
+.legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 0;font-size:14px;color:#2B3936}
+
+@media (max-width:640px){
+  .masthead{padding:34px 0 18px}
+  .mrow b,.grow b{flex:1 1 100%}
+  .mrow,.grow{flex-wrap:wrap;gap:4px}
+  .tracker-count{font-size:18px}
+  table.grid td:first-child{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> Spring Boot · B1 · Self-paced</p>
+  <h1>From request<br>to <em>row</em></h1>
+  <p class="lede">In Spring Boot Lab 1 you built a Product API live, typing along with a TA. It worked: a request went in, a row came out of MySQL, and JSON came back. This manual goes back over the code you typed and explains what each line does, what Spring Boot did around it without being asked, and why. One request, <code>GET /api/products/get/1</code>, is the thread through all of it.</p>
+
+  <div class="tracker">
+    <div class="tracker-top">
+      <div class="tracker-count"><b id="done">0</b> / <span id="total">14</span> core</div>
+      <div class="tracker-msg" id="msg">Start with 01 and 02 — every later section zooms into one box of 02's picture.</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="fill" style="width: 0%;"></div></div>
+  </div>
+</header>
+
+<div class="cue calm" style="margin-top:24px">
+  <p class="cue-k">Read this before anything else</p>
+  <p><strong>The lab is done and submitted.</strong> This page explains it. There is nothing to build and nothing to hand in.</p>
+  <p><strong>Keep your own Lab 1 project open</strong>, running, beside this page. Every core section starts from lines you wrote, and says which checkpoint tag and file they come from. The <strong>Try it</strong> boxes are small pokes at that project: send a request, read the SQL in the console, break one line, read the error, put it back.</p>
+  <p><strong>Project missing a step, or won't run?</strong> Use the lab's reference repository at the tag <code>lab1-complete</code>. Section 01 shows how. Everyone uses that same reference.</p>
+  <p><strong>Core and stretch.</strong> <span class="lvl core">Core</span> sections explain the code you have; read them in order. <span class="lvl stretch">Stretch</span> boxes go one step deeper into the same code. Do them if you're curious.</p>
+  <p><strong>The Java underneath</strong> (annotations, generics like <code>JpaRepository&lt;Product, Long&gt;</code>, <code>Optional</code>, what Lombok writes for you) has its own manual: <a href="sb-java.html">B0 · The Java that Spring code leans on</a>. This page links there instead of repeating it.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <div class="tochead">Contents — follow the request, then the code in the order you built it</div>
+  <div class="rpart">Part 1 · The map</div>
+  <a class="rrow" href="#s1"><span class="rt">01</span><span class="rw">How to use this page</span></a>
+  <a class="rrow" href="#s2"><span class="rt">02</span><span class="rw">How one request travels</span></a>
+  <div class="rpart">Part 2 · Before your first line ran</div>
+  <a class="rrow" href="#s3"><span class="rt">03</span><span class="rw">What Initializr gave you</span></a>
+  <a class="rrow" href="#s4"><span class="rt">04</span><span class="rw">Beans, and who fills in @Autowired</span></a>
+  <div class="rpart">Part 3 · Down the layers, in the order you built them</div>
+  <a class="rrow" href="#s5"><span class="rt">05</span><span class="rw">The database, and what ddl-auto did</span></a>
+  <a class="rrow" href="#s6"><span class="rt">06</span><span class="rw">The entity: Product</span></a>
+  <a class="rrow" href="#s7"><span class="rt">07</span><span class="rw">The repository: an interface with no class</span></a>
+  <a class="rrow" href="#s8"><span class="rt">08</span><span class="rw">The service: load, change, save</span></a>
+  <a class="rrow" href="#s9"><span class="rt">09</span><span class="rw">The controller: from URL to method, and back as JSON</span></a>
+  <div class="rpart">Part 4 · The other endpoints</div>
+  <a class="rrow" href="#s10"><span class="rt">10</span><span class="rw">Status codes, and the 404 branch</span></a>
+  <a class="rrow" href="#s11"><span class="rt">11</span><span class="rw">POST and PUT: data coming in</span></a>
+  <a class="rrow" href="#s12"><span class="rt">12</span><span class="rw">Verb-style and resource-style URLs</span></a>
+  <a class="rrow" href="#s13"><span class="rt">13</span><span class="rw">Swagger: the API describing itself</span></a>
+  <div class="rpart">Part 5 · Reference</div>
+  <a class="rrow is-extra" href="#s14"><span class="rt">14</span><span class="rw">When it goes wrong</span><span class="rl ref">reference</span></a>
+  <a class="rrow" href="#s15"><span class="rt">15</span><span class="rw">Using this in your contract backend</span></a>
+  <a class="rrow" href="#gloss"><span class="rt">—</span><span class="rw">Glossary &amp; reference cards</span></a>
+</nav>
+
+<div class="part">Part 1 · The map</div>
+
+<section id="s1">
+  <div class="shead"><span class="chip">01</span><h2>How to use this page</h2><span class="lvl core">Core</span><span class="tagline">your project, the reference, and sending a request</span></div>
+
+  <h3>What to have open</h3>
+  <div class="mention">
+    <div class="mrow"><b>Your Lab 1 project</b><span>In IntelliJ, as you left it. Its console is where the SQL and the errors appear.</span></div>
+    <div class="mrow"><b>MySQL, running</b><span>With the <code>ecommerceDB</code> database and the <code>products</code> table from the lab's SQL script.</span></div>
+    <div class="mrow"><b>A terminal, or Postman</b><span>To send requests. The Try it boxes use <code>curl</code>; Postman works for all of them too.</span></div>
+  </div>
+
+  <h3>The reference project</h3>
+  <p>The TA built the lab in a git repository and tagged each step. If your project is missing something, or you'd rather poke at a clean copy, clone it and switch to the finished Lab 1:</p>
+  <div class="cmd"><span class="p">$</span> git clone https://github.com/sivasomanath2502/ESD_Session.git
+<span class="p">$</span> cd ESD_Session
+<span class="p">$</span> git switch --detach lab1-complete</div>
+  <p>Then open the folder in IntelliJ, put your MySQL password into <code>src/main/resources/application.properties</code> (it says <code>YOUR_PASSWORD</code>), and run it.</p>
+  <div class="cue watch"><p class="cue-k">Don't skip the switch</p><p>Right after cloning you're on the newest commit, which is <strong>Lab 2</strong>: it adds login, so every product request needs a token, and some URLs changed. For this page, always switch to <code>lab1-complete</code>.</p></div>
+
+  <h3>The checkpoints: what each step of the lab added</h3>
+  <p>Each tag is the project at one moment of the lab. Read down the table and you have the lab's order, which is also this page's order from section 05 on.</p>
+  <table class="grid">
+    <tr><th>Tag</th><th>What it added</th><th>Explained in</th></tr>
+    <tr><td>lab1-start</td><td>The Initializr project: <code>pom.xml</code>, <code>mvnw</code>, <code>EcommerceApplication</code></td><td>03</td></tr>
+    <tr><td>lab1-db-config</td><td><code>application.properties</code> and <code>database/lab1_setup.sql</code></td><td>05</td></tr>
+    <tr><td>lab1-entity</td><td><code>entity/Product.java</code></td><td>06</td></tr>
+    <tr><td>lab1-repository</td><td><code>repository/ProductRepository.java</code></td><td>07</td></tr>
+    <tr><td>lab1-get</td><td><code>service/ProductService.java</code> and <code>controller/ProductController.java</code>, with get-all</td><td>04, 08, 09</td></tr>
+    <tr><td>lab1-get-by-id</td><td><code>getProductById</code> in both, with the 404 branch</td><td>09, 10</td></tr>
+    <tr><td>lab1-post</td><td><code>addProduct</code>: POST, <code>@RequestBody</code>, 201</td><td>11</td></tr>
+    <tr><td>lab1-put</td><td><code>updateProduct</code>: PUT, load–change–save</td><td>08, 11</td></tr>
+    <tr><td>lab1-complete</td><td>All of that, plus a DELETE endpoint</td><td>11</td></tr>
+  </table>
+  <p>To see exactly what one step added, ask git for the difference between two tags. Every plus line is a line someone typed in the lab:</p>
+  <div class="cmd"><span class="p">$</span> git diff lab1-get lab1-get-by-id</div>
+
+  <h3>Sending a request</h3>
+  <p><strong>curl</strong> sends one HTTP request from the terminal and prints the answer. It comes with macOS, Linux and current Windows.</p>
+  <div class="cmd"><span class="p">$</span> curl http://localhost:8080/api/products/get-all
+<span class="o">[{"category":"Electronics","description":"15-inch laptop for everyday use","id":1, …}, …]</span>
+<span class="p">$</span> curl -i http://localhost:8080/api/products/get/1
+<span class="cm"># -i also prints the status line and the headers</span>
+<span class="p">$</span> curl -v http://localhost:8080/api/products/get/1
+<span class="cm"># -v also prints what curl sent</span></div>
+  <div class="cue"><p class="cue-k">On Windows</p><p>In PowerShell, type <code>curl.exe</code>, not <code>curl</code>: plain <code>curl</code> there is a different command. For requests with a JSON body (section 11), Postman or Swagger (section 13) is less fiddly than quoting JSON in PowerShell.</p></div>
+  <p><strong>Postman</strong> does the same with a form: method, URL, and for POST and PUT a body (<em>Body → raw → JSON</em>). <strong>A browser</strong> can only send GET requests from the address bar, which is why the lab used it for the GET endpoints only.</p>
+
+  <div class="dothis">
+    <h4>Try it — is everything running?</h4>
+    <ol>
+      <li>Start your Lab 1 app in IntelliJ.</li>
+      <li>Run <code>curl http://localhost:8080/api/products/get-all</code>. You get the three seed products as JSON (more, if you added some in the lab).</li>
+      <li>Look at the IntelliJ console: a <code>Hibernate:</code> line followed by a <code>select</code>. That's the SQL your request caused.</li>
+    </ol>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 01 done — my Lab 1 app runs and answers get-all</span></label>
+</section>
+
+<section id="s2">
+  <div class="shead"><span class="chip">02</span><h2>How one request travels</h2><span class="lvl core">Core</span><span class="tagline">GET /api/products/get/1, to MySQL and back</span></div>
+
+  <p>The lab's central slide, <em>How One Request Travels</em>, followed <code>GET /api/products/get-all</code> through the layers. Here is its sibling, <code>GET /api/products/get/1</code>, on the same trip, with every box named after code you wrote. Every later section zooms into one box of this picture.</p>
+
+  <figure class="board">
+    <svg viewBox="0 0 780 292" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A request from the client goes to ProductController.getProductById, then ProductService.getProductById, then ProductRepository.findById, which sends a select to MySQL. The row comes back as an Optional of Product, then a Product, then a 200 response with JSON.">
+      <defs>
+        <marker id="b1req" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0B5D51"/></marker>
+        <marker id="b1res" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8A6D08"/></marker>
+      </defs>
+      <text x="0" y="16" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="13" fill="#0F1A18">ONE REQUEST, THERE AND BACK</text>
+
+      <text x="144" y="54" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="#0B5D51">1 GET /api/products/get/1</text>
+      <text x="308" y="54" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="#0B5D51">2 getProductById(1)</text>
+      <text x="472" y="54" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="#0B5D51">3 findById(1)</text>
+      <text x="636" y="54" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="#0B5D51">4 select … where id=?</text>
+      <line x1="144" y1="60" x2="144" y2="118" stroke="#0B5D51" stroke-width="1" stroke-dasharray="2 3"/>
+      <line x1="308" y1="60" x2="308" y2="118" stroke="#0B5D51" stroke-width="1" stroke-dasharray="2 3"/>
+      <line x1="472" y1="60" x2="472" y2="118" stroke="#0B5D51" stroke-width="1" stroke-dasharray="2 3"/>
+      <line x1="636" y1="60" x2="636" y2="118" stroke="#0B5D51" stroke-width="1" stroke-dasharray="2 3"/>
+
+      <rect x="150" y="74" width="480" height="140" fill="none" stroke="#0B5D51" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <text x="158" y="90" font-family="IBM Plex Mono, monospace" font-size="10" font-weight="600" fill="#0B5D51">YOUR APP · TOMCAT :8080</text>
+
+      <rect x="0" y="100" width="124" height="84" fill="#FFFFFF" stroke="#0F1A18" stroke-width="2"/>
+      <text x="62" y="138" text-anchor="middle" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="16" fill="#0F1A18">Client</text>
+      <text x="62" y="160" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="#5A6B67">curl · Postman</text>
+
+      <rect x="164" y="100" width="124" height="84" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="226" y="128" text-anchor="middle" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="15" fill="#0F1A18">Product</text>
+      <text x="226" y="145" text-anchor="middle" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="15" fill="#0F1A18">Controller</text>
+      <rect x="174" y="156" width="104" height="19" fill="#101614"/>
+      <text x="226" y="169" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#F5C518">getProductById</text>
+
+      <rect x="328" y="100" width="124" height="84" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="390" y="128" text-anchor="middle" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="15" fill="#0F1A18">Product</text>
+      <text x="390" y="145" text-anchor="middle" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="15" fill="#0F1A18">Service</text>
+      <rect x="338" y="156" width="104" height="19" fill="#101614"/>
+      <text x="390" y="169" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#F5C518">getProductById</text>
+
+      <rect x="492" y="100" width="124" height="84" fill="#FFFFFF" stroke="#0B5D51" stroke-width="2"/>
+      <text x="554" y="128" text-anchor="middle" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="15" fill="#0F1A18">Product</text>
+      <text x="554" y="145" text-anchor="middle" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="15" fill="#0F1A18">Repository</text>
+      <rect x="502" y="156" width="104" height="19" fill="#101614"/>
+      <text x="554" y="169" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#F5C518">findById</text>
+
+      <rect x="656" y="100" width="124" height="84" fill="#E4EEEB" stroke="#0F1A18" stroke-width="2"/>
+      <text x="718" y="138" text-anchor="middle" font-family="IBM Plex Sans Condensed, sans-serif" font-weight="700" font-size="16" fill="#0F1A18">MySQL</text>
+      <text x="718" y="160" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#0F1A18">products</text>
+      <text x="718" y="204" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="#0F1A18">5 finds row 1</text>
+
+      <line x1="126" y1="124" x2="160" y2="124" stroke="#0B5D51" stroke-width="2.5" marker-end="url(#b1req)"/>
+      <line x1="290" y1="124" x2="324" y2="124" stroke="#0B5D51" stroke-width="2.5" marker-end="url(#b1req)"/>
+      <line x1="454" y1="124" x2="488" y2="124" stroke="#0B5D51" stroke-width="2.5" marker-end="url(#b1req)"/>
+      <line x1="618" y1="124" x2="652" y2="124" stroke="#0B5D51" stroke-width="2.5" marker-end="url(#b1req)"/>
+      <line x1="160" y1="164" x2="128" y2="164" stroke="#8A6D08" stroke-width="2.5" marker-end="url(#b1res)"/>
+      <line x1="324" y1="164" x2="292" y2="164" stroke="#8A6D08" stroke-width="2.5" marker-end="url(#b1res)"/>
+      <line x1="488" y1="164" x2="456" y2="164" stroke="#8A6D08" stroke-width="2.5" marker-end="url(#b1res)"/>
+      <line x1="652" y1="164" x2="620" y2="164" stroke="#8A6D08" stroke-width="2.5" marker-end="url(#b1res)"/>
+
+      <line x1="144" y1="170" x2="144" y2="228" stroke="#8A6D08" stroke-width="1" stroke-dasharray="2 3"/>
+      <line x1="308" y1="170" x2="308" y2="228" stroke="#8A6D08" stroke-width="1" stroke-dasharray="2 3"/>
+      <line x1="472" y1="170" x2="472" y2="228" stroke="#8A6D08" stroke-width="1" stroke-dasharray="2 3"/>
+      <line x1="636" y1="170" x2="636" y2="228" stroke="#8A6D08" stroke-width="1" stroke-dasharray="2 3"/>
+      <text x="144" y="242" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="#8A6D08">9 200 + JSON</text>
+      <text x="308" y="242" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="#8A6D08">8 Product</text>
+      <text x="472" y="242" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="#8A6D08">7 Optional&lt;Product&gt;</text>
+      <text x="636" y="242" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="#8A6D08">6 one row</text>
+
+      <line x1="0" y1="278" x2="30" y2="278" stroke="#0B5D51" stroke-width="2.5" marker-end="url(#b1req)"/>
+      <text x="40" y="282" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#0F1A18">request, steps 1–5</text>
+      <line x1="200" y1="278" x2="230" y2="278" stroke="#8A6D08" stroke-width="2.5" marker-end="url(#b1res)"/>
+      <text x="240" y="282" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#0F1A18">response, steps 6–9</text>
+    </svg>
+    <figcaption>Steps 1 and 9 cross the edge of your app: Tomcat and Spring's DispatcherServlet pick your method and write its answer as JSON. Steps 2 to 8 are calls between your own classes.</figcaption>
+  </figure>
+
+  <h3>The nine steps, against your code</h3>
+  <p>Line numbers are in <code>controller/ProductController.java</code> and <code>service/ProductService.java</code> at tag <code>lab1-complete</code>.</p>
+  <table class="grid">
+    <tr><th>Step</th><th>What happens</th><th>Your code</th></tr>
+    <tr><td>1</td><td>curl connects to port 8080 and sends a few lines of text: the request. <strong>Tomcat</strong>, the web server Spring Boot started inside your app, reads them and hands the request to Spring's <strong>DispatcherServlet</strong>. It finds the method whose annotations match <em>GET</em> and <code>/api/products/get/{id}</code>, turns the text <code>"1"</code> into the <code>Long</code> 1, and calls it.</td><td>Controller, lines 25–26</td></tr>
+    <tr><td>2</td><td>Your controller asks the service.</td><td>Controller, line 28</td></tr>
+    <tr><td>3</td><td>The service asks the repository.</td><td>Service, line 21</td></tr>
+    <tr><td>4</td><td>The object behind your repository interface asks Hibernate to load Product 1. Hibernate writes the SQL, borrows a database connection, and sends it.</td><td>none (section 07)</td></tr>
+    <tr><td>5</td><td>MySQL finds the row with id 1.</td><td>your table</td></tr>
+    <tr><td>6</td><td>One row comes back. Hibernate creates an empty <code>Product</code> and fills each field from a column.</td><td><code>Product.java</code></td></tr>
+    <tr><td>7</td><td><code>findById</code> returns an <code>Optional&lt;Product&gt;</code>; <code>.orElse(null)</code> unwraps it.</td><td>Service, line 21</td></tr>
+    <tr><td>8</td><td>The product isn't <code>null</code>, so the controller returns <code>ResponseEntity.ok(product)</code>.</td><td>Controller, lines 30–35</td></tr>
+    <tr><td>9</td><td>Spring reads the <code>ResponseEntity</code>: status 200, body a <code>Product</code>. <strong>Jackson</strong> turns the Product into JSON by calling its getters. Tomcat sends it back.</td><td>none (section 09)</td></tr>
+  </table>
+
+  <h3>What actually travels: text</h3>
+  <p>HTTP is plain text. <code>curl -v</code> prints both halves: lines starting <code>&gt;</code> are what curl sent, lines starting <code>&lt;</code> are what came back. Without the arrows, the request is:</p>
+  <div class="cmd"><span class="tg">GET /api/products/get/1 HTTP/1.1</span>
+<span class="at">Host</span>:<span class="st"> localhost:8080</span>
+<span class="at">User-Agent</span>:<span class="st"> curl/…</span>
+<span class="at">Accept</span>:<span class="st"> */*</span></div>
+  <div class="mention">
+    <div class="mrow"><b>first line</b><span>The <strong>method</strong> (GET), the <strong>path</strong>, and the protocol version.</span></div>
+    <div class="mrow"><b>headers</b><span>One per line, <code>Name: value</code>. <code>Accept: */*</code> means "any format will do". A GET has no body, so the request ends here.</span></div>
+  </div>
+  <p>And the response:</p>
+  <div class="cmd"><span class="tg">HTTP/1.1 200</span>
+<span class="at">Content-Type</span>:<span class="st"> application/json</span>
+
+{<span class="at">"category"</span>:<span class="st">"Electronics"</span>,<span class="at">"description"</span>:<span class="st">"15-inch laptop for everyday use"</span>,<span class="at">"id"</span>:<span class="st">1</span>,<span class="at">"name"</span>:<span class="st">"Laptop"</span>,<span class="at">"price"</span>:<span class="st">65000.00</span>,<span class="at">"stock"</span>:<span class="st">10</span>}</div>
+  <div class="mention">
+    <div class="mrow"><b>status line</b><span>The <strong>status code</strong>: 200 means it worked. Tomcat leaves out the word "OK"; the number is what counts. Section 10 has the codes you'll meet.</span></div>
+    <div class="mrow"><b>Content-Type</b><span>How to read the body: here, as JSON. curl shows a few more headers (a date, how the body is sent); your code didn't set those.</span></div>
+    <div class="mrow"><b>blank line, then body</b><span>The JSON Jackson wrote from the Product. The keys come out in alphabetical order; section 09 says why.</span></div>
+  </div>
+
+  <h3>The SQL in your console</h3>
+  <p>Because your <code>application.properties</code> turns on <code>show-sql</code> and <code>format_sql</code>, Hibernate prints each statement it sends:</p>
+  <div class="cmd">Hibernate:
+    <span class="tg">select</span>
+        p1_0.id,
+        p1_0.category,
+        p1_0.description,
+        p1_0.name,
+        p1_0.price,
+        p1_0.stock
+    <span class="tg">from</span>
+        products p1_0
+    <span class="tg">where</span>
+        p1_0.id=?</div>
+  <p>You didn't write it; Hibernate did, from your entity: the table name from <code>@Table</code>, one column per field. <code>p1_0</code> is a short alias Hibernate makes up for the table. The <code>?</code> is a placeholder: the value 1 travels separately from the SQL text, so a value can never be mistaken for SQL. (A stretch box in section 07 shows how to see the values.) One request, one SELECT.</p>
+
+  <div class="dothis">
+    <h4>Try it — follow the request yourself</h4>
+    <ol>
+      <li><code>curl -v http://localhost:8080/api/products/get/1</code>. Find the request lines (<code>&gt;</code>), the status line, the <code>Content-Type</code> and the JSON.</li>
+      <li>Look at the console: one <code>select … where p1_0.id=?</code>. Send the same request again: another select. Each request goes all the way to MySQL.</li>
+      <li><code>curl -i http://localhost:8080/api/products/get/999</code>: a 404 and your own sentence. The console still shows one select. The lookup ran, and found nothing.</li>
+      <li><code>curl -i http://localhost:8080/api/products/get/abc</code>: a 400, and <strong>no select at all</strong>. Spring couldn't turn <code>abc</code> into a <code>Long</code> at step 1, so your method never ran.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Which of your classes decides that <code>GET /api/products/get/1</code> should run <code>getProductById</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>None of them. Spring's DispatcherServlet decides, at step 1, using the annotations you put on the controller: <code>@RequestMapping("/api/products")</code> on the class and <code>@GetMapping("/get/{id}")</code> on the method. Section 09 shows how it matches.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>At which step does a <code>Product</code> object first exist? At which step does JSON first exist?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The Product appears at step 6, when Hibernate builds it from the row. JSON appears only at step 9, when Jackson writes it. Between them, your classes pass ordinary Java objects; none of your code ever touches JSON or SQL text.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 02 done — I've followed get/1 with curl -v and seen its SELECT</span></label>
+</section>
+
+<div class="part">Part 2 · Before your first line ran</div>
+
+<section id="s3">
+  <div class="shead"><span class="chip">03</span><h2>What Initializr gave you</h2><span class="lvl core">Core</span><span class="tagline">pom.xml, mvnw, the application class, auto-configuration</span></div>
+
+  <p>At tag <code>lab1-start</code> the project had two Java files, and neither was yours. This section is about what those files and Spring Boot do every time you press Run, before any line of yours is involved.</p>
+
+  <h3>pom.xml: the libraries you asked for</h3>
+  <p>On Spring Initializr you ticked <em>Spring Web</em>, <em>Spring Data JPA</em>, <em>MySQL Driver</em>, <em>Lombok</em> and <em>Springdoc OpenAPI</em>. They became this (<code>pom.xml</code> at <code>lab1-start</code>, lines 5–10 and 32–66, trimmed):</p>
+  <div class="cmd">&lt;<span class="tg">parent</span>&gt;
+    &lt;<span class="tg">groupId</span>&gt;org.springframework.boot&lt;/<span class="tg">groupId</span>&gt;
+    &lt;<span class="tg">artifactId</span>&gt;spring-boot-starter-parent&lt;/<span class="tg">artifactId</span>&gt;
+    &lt;<span class="tg">version</span>&gt;4.1.1&lt;/<span class="tg">version</span>&gt;
+&lt;/<span class="tg">parent</span>&gt;
+…
+&lt;<span class="tg">dependencies</span>&gt;
+    &lt;<span class="tg">dependency</span>&gt;
+        &lt;<span class="tg">groupId</span>&gt;org.springframework.boot&lt;/<span class="tg">groupId</span>&gt;
+        &lt;<span class="tg">artifactId</span>&gt;spring-boot-starter-data-jpa&lt;/<span class="tg">artifactId</span>&gt;
+    &lt;/<span class="tg">dependency</span>&gt;
+    &lt;<span class="tg">dependency</span>&gt;
+        &lt;<span class="tg">groupId</span>&gt;org.springframework.boot&lt;/<span class="tg">groupId</span>&gt;
+        &lt;<span class="tg">artifactId</span>&gt;spring-boot-starter-webmvc&lt;/<span class="tg">artifactId</span>&gt;
+    &lt;/<span class="tg">dependency</span>&gt;
+    &lt;<span class="tg">dependency</span>&gt;
+        &lt;<span class="tg">groupId</span>&gt;org.springdoc&lt;/<span class="tg">groupId</span>&gt;
+        &lt;<span class="tg">artifactId</span>&gt;springdoc-openapi-starter-webmvc-ui&lt;/<span class="tg">artifactId</span>&gt;
+        &lt;<span class="tg">version</span>&gt;3.1.0&lt;/<span class="tg">version</span>&gt;
+    &lt;/<span class="tg">dependency</span>&gt;
+    &lt;<span class="tg">dependency</span>&gt;
+        &lt;<span class="tg">groupId</span>&gt;com.mysql&lt;/<span class="tg">groupId</span>&gt;
+        &lt;<span class="tg">artifactId</span>&gt;mysql-connector-j&lt;/<span class="tg">artifactId</span>&gt;
+        &lt;<span class="tg">scope</span>&gt;runtime&lt;/<span class="tg">scope</span>&gt;
+    &lt;/<span class="tg">dependency</span>&gt;
+    &lt;<span class="tg">dependency</span>&gt;
+        &lt;<span class="tg">groupId</span>&gt;org.projectlombok&lt;/<span class="tg">groupId</span>&gt;
+        &lt;<span class="tg">artifactId</span>&gt;lombok&lt;/<span class="tg">artifactId</span>&gt;
+        &lt;<span class="tg">optional</span>&gt;true&lt;/<span class="tg">optional</span>&gt;
+    &lt;/<span class="tg">dependency</span>&gt;
+    <span class="cm">&lt;!-- plus spring-boot-starter-data-jpa-test and spring-boot-starter-webmvc-test, scope test --&gt;</span>
+&lt;/<span class="tg">dependencies</span>&gt;</div>
+  <p>A <strong>starter</strong> is a dependency with no code of its own: it pulls in a set of libraries that are known to work together. One line in your pom, a dozen libraries on the classpath.</p>
+  <div class="mention">
+    <div class="mrow"><b>spring-boot-starter-parent</b><span>Picks a version for every library Spring Boot knows about. That's why the starters have no <code>&lt;version&gt;</code>. springdoc isn't one of them, so it carries its own.</span></div>
+    <div class="mrow"><b>…-starter-webmvc</b><span>"Spring Web" on Initializr. Brings Spring MVC (DispatcherServlet, <code>@RestController</code>, <code>@GetMapping</code>…), an embedded <strong>Tomcat</strong>, and <strong>Jackson</strong> for JSON. <em>On Boot 3 this starter was called <code>spring-boot-starter-web</code>.</em></span></div>
+    <div class="mrow"><b>…-starter-data-jpa</b><span>Brings <strong>Hibernate</strong> (it writes the SQL), <strong>Spring Data JPA</strong> (<code>JpaRepository</code>) and <strong>HikariCP</strong> (a pool of open database connections).</span></div>
+    <div class="mrow"><b>mysql-connector-j, runtime</b><span>The JDBC driver: the code that speaks MySQL's network protocol. <code>runtime</code> means "needed to run, never imported by your code" — you never write a MySQL class name.</span></div>
+    <div class="mrow"><b>lombok, optional</b><span>Writes getters, setters and constructors while compiling (<a href="sb-java.html">B0</a>). Not needed once the code is compiled.</span></div>
+    <div class="mrow"><b>springdoc-…-ui</b><span>The Swagger page (section 13). <em>Boot 4 needs springdoc 3.x; Boot 3 used 2.x.</em></span></div>
+    <div class="mrow"><b>the two -test starters</b><span>JUnit, MockMvc and friends, for tests (<a href="sb-testing.html">B4</a>). <em>On Boot 3 there was one <code>spring-boot-starter-test</code>.</em></span></div>
+  </div>
+
+  <h3>mvnw: Maven without installing Maven</h3>
+  <p><code>mvnw</code> (macOS, Linux) and <code>mvnw.cmd</code> (Windows) are the <strong>Maven wrapper</strong>. The first time you run one, it downloads the exact Maven version named in <code>.mvn/wrapper/maven-wrapper.properties</code>, then uses it. IntelliJ has its own Maven, so you didn't need the wrapper in the lab; it's for the terminal, and for anyone who clones the project.</p>
+  <div class="cmd"><span class="p">$</span> ./mvnw spring-boot:run
+<span class="cm"># Windows: mvnw.cmd spring-boot:run — the same app, the same log, no IntelliJ. Ctrl+C stops it.</span></div>
+
+  <h3>The one class Initializr wrote</h3>
+  <p><code>EcommerceApplication.java</code>, unchanged since <code>lab1-start</code>:</p>
+  <div class="cmd"><span class="tg">package</span> com.esd.ecommerce;
+
+<span class="tg">import</span> org.springframework.boot.SpringApplication;
+<span class="tg">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;
+
+<span class="at">@SpringBootApplication</span>
+<span class="tg">public</span> <span class="tg">class</span> EcommerceApplication {
+
+	<span class="tg">public</span> <span class="tg">static</span> <span class="tg">void</span> <span class="at">main</span>(String[] args) {
+		SpringApplication.<span class="at">run</span>(EcommerceApplication.<span class="tg">class</span>, args);
+	}
+
+}</div>
+  <p><code>@SpringBootApplication</code> is three annotations in one:</p>
+  <div class="mention">
+    <div class="mrow"><b>@SpringBootConfiguration</b><span>This class is configuration: it may define beans (section 04).</span></div>
+    <div class="mrow"><b>@EnableAutoConfiguration</b><span>Switch on auto-configuration, below.</span></div>
+    <div class="mrow"><b>@ComponentScan</b><span>Look for your classes, starting from this class's package. More on that at the end of this section.</span></div>
+  </div>
+  <p><code>SpringApplication.run(…)</code> creates Spring's container, runs the scan and the auto-configuration, starts Tomcat, and returns. <code>main</code> then ends, but Tomcat's threads keep the program alive, waiting for requests.</p>
+
+  <h3>Auto-configuration: what you didn't write</h3>
+  <p>You never wrote code that opens MySQL connections, or turns objects into JSON, or listens on a port. Spring Boot set all of that up at startup, by looking at two things: which libraries are on the classpath (your pom), and what's in <code>application.properties</code>. Each <strong>auto-configuration</strong> is a rule of the form <em>"if this library is present, and you haven't defined your own, create one of these"</em>.</p>
+  <table class="grid">
+    <tr><th>You have</th><th>Spring Boot creates</th></tr>
+    <tr><td>MySQL driver + spring.datasource.url</td><td>a <code>DataSource</code>: a HikariCP pool of connections to that database</td></tr>
+    <tr><td>Hibernate + that DataSource</td><td>an <code>EntityManagerFactory</code>: Hibernate, set up from the <code>spring.jpa.*</code> properties</td></tr>
+    <tr><td>Spring Data JPA</td><td>an object for each interface that extends <code>JpaRepository</code> (section 07)</td></tr>
+    <tr><td>Spring MVC + Tomcat</td><td>an embedded Tomcat on port 8080, and the DispatcherServlet</td></tr>
+    <tr><td>Jackson</td><td>the JSON mapper used for every <code>@RequestBody</code> and every object you return</td></tr>
+    <tr><td>springdoc</td><td><code>/v3/api-docs</code> and the Swagger UI page</td></tr>
+  </table>
+  <p>The TA called Spring Boot "convention over configuration": the conventions are these defaults, and <code>application.properties</code> is where you change them. For example, <code>server.port=8081</code> moves Tomcat to another port.</p>
+
+  <h3>Read your startup log</h3>
+  <p>Every one of those rules leaves a trace when you press Run. Here are the lines that matter. Each real line also starts with a timestamp, a level (<code>INFO</code>, <code>WARN</code>), a thread and a logger name, and there are more lines between these:</p>
+  <div class="cmd">Starting EcommerceApplication using Java 17…
+Tomcat initialized with port 8080 (http)
+HikariPool-1 - Starting...
+HikariPool-1 - Start completed.
+Initialized JPA EntityManagerFactory for persistence unit 'default'
+spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. …
+Tomcat started on port 8080 (http) …
+Started EcommerceApplication in … seconds …</div>
+  <p>Tomcat comes up, the connection pool connects to MySQL, Hibernate starts, and the app reports it's ready. The one <code>WARN</code> you see every time, about <code>open-in-view</code>, is about how long Hibernate keeps its session open during a request. It's harmless in this app; leave it.</p>
+  <p>Your first request adds one more line: <code>Initializing Spring DispatcherServlet 'dispatcherServlet'</code>. Spring sets the DispatcherServlet up lazily, on the first request, not at startup.</p>
+
+  <div class="dothis">
+    <h4>Try it — see what auto-configuration did</h4>
+    <ol>
+      <li>Restart your app and find each line above in the console. Send one request and find the DispatcherServlet line.</li>
+      <li>Add <code>debug=true</code> to <code>application.properties</code> and restart. Search the console for <code>CONDITIONS EVALUATION REPORT</code>. Under <em>Positive matches</em> is every auto-configuration that switched on, and why. Find <code>DataSourceAutoConfiguration</code>.</li>
+      <li>Remove <code>debug=true</code> again. The report is long.</li>
+    </ol>
+  </div>
+
+  <h3>Component scan: why the main class sits in the top package</h3>
+  <p><code>@ComponentScan</code> starts at the package of <code>EcommerceApplication</code>, <code>com.esd.ecommerce</code>, and looks in it and in every package below it: <code>com.esd.ecommerce.controller</code>, <code>.service</code>, <code>.repository</code>, <code>.entity</code>. Any class there marked <code>@RestController</code>, <code>@Service</code>, <code>@Repository</code> or <code>@Component</code> becomes a bean (section 04). The same starting package is used to find your entities and your repositories.</p>
+  <p>That's why Initializr puts the application class at the top of your packages, and why all your classes go <em>below</em> it. A class anywhere else is invisible to Spring.</p>
+  <div class="cue watch"><p class="cue-k">The silent 404</p><p>A controller in the wrong package doesn't fail loudly. The app starts with no error, and every URL of that controller answers 404. It's easy to do by accident in IntelliJ: create a package called <code>com.esd.controller</code> instead of <code>com.esd.ecommerce.controller</code>, and you've done it.</p></div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Your pom has no <code>&lt;version&gt;</code> for <code>spring-boot-starter-data-jpa</code>. Which version do you get?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The one <code>spring-boot-starter-parent</code> 4.1.1 picks. The parent manages versions for every library Spring Boot knows about, so they all match each other.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>You add <code>com.esd.shop.CartController</code> with <code>@RestController</code> and <code>@GetMapping("/cart")</code>. The app starts without errors, and <code>GET /cart</code> is a 404. Why?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>com.esd.shop</code> isn't <code>com.esd.ecommerce</code> or below it, so the component scan never sees the class. It never becomes a bean, and its mapping is never registered. Move it to <code>com.esd.ecommerce.controller</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 03 done — I can say what Spring Boot set up before my code ran</span></label>
+</section>
+
+<section id="s4">
+  <div class="shead"><span class="chip">04</span><h2>Beans, and who fills in @Autowired</h2><span class="lvl core">Core</span><span class="tagline">the container, field injection, constructor injection</span></div>
+
+  <p>From <code>service/ProductService.java</code>, tag <code>lab1-get</code>, lines 10–14:</p>
+  <div class="cmd"><span class="at">@Service</span>
+<span class="tg">public</span> <span class="tg">class</span> ProductService {
+
+    <span class="at">@Autowired</span>
+    <span class="tg">private</span> ProductRepository productRepository;</div>
+  <p>And the same pattern in <code>controller/ProductController.java</code> (<code>lab1-complete</code>, lines 12–17):</p>
+  <div class="cmd"><span class="at">@RestController</span>
+<span class="at">@RequestMapping</span>(<span class="st">"/api/products"</span>)
+<span class="tg">public</span> <span class="tg">class</span> ProductController {
+
+    <span class="at">@Autowired</span>
+    <span class="tg">private</span> ProductService productService;</div>
+  <p>Nobody in your code writes <code>new ProductService()</code>. Nobody writes <code>new ProductRepository()</code> either; you couldn't, it's an interface. Yet <code>productRepository</code> isn't <code>null</code> when <code>getAllProducts</code> runs. Who made these objects, and who put one inside the other?</p>
+
+  <h3>The container and its beans</h3>
+  <p>At startup Spring creates an <strong>application context</strong>, usually called the <strong>container</strong>: a collection of objects that Spring creates, wires together and keeps for the life of the app. Each of those objects is a <strong>bean</strong>. Your app's beans come from three places:</p>
+  <ul>
+    <li>the classes the component scan finds with a stereotype annotation: your controller and your service;</li>
+    <li>the objects auto-configuration makes (section 03): the DataSource, Hibernate, Jackson's mapper, Tomcat…;</li>
+    <li>one object per repository interface, made by Spring Data (section 07).</li>
+  </ul>
+  <table class="grid">
+    <tr><th>Annotation</th><th>Means</th></tr>
+    <tr><td>@Component</td><td>"Make one of these and keep it." The other three are <code>@Component</code> with a more specific name.</td></tr>
+    <tr><td>@Service</td><td>A component that holds application logic. Yours: <code>ProductService</code>.</td></tr>
+    <tr><td>@Repository</td><td>A component that talks to the database. Yours: <code>ProductRepository</code>.</td></tr>
+    <tr><td>@RestController</td><td>A component that handles HTTP requests (section 09). Yours: <code>ProductController</code>.</td></tr>
+  </table>
+  <p>By default there is <strong>one</strong> of each bean. One <code>ProductService</code> is made at startup and shared by every request, on every Tomcat thread, until the app stops.</p>
+  <div class="cue watch"><p class="cue-k">One object, many requests at once</p><p>Because the service is shared, a field like <code>private Product lastProduct;</code> in it would be shared by every request in flight. Keep per-request data in local variables and parameters. Fields in a bean are for its dependencies, like <code>productRepository</code>.</p></div>
+
+  <h3>Dependency injection</h3>
+  <p><code>ProductService</code> needs a <code>ProductRepository</code> to do its job: that's a <strong>dependency</strong>. The class doesn't create it; it only declares that it needs one, and the container supplies it. That's <strong>dependency injection</strong>. The container works out the order: repository first, then the service with the repository put in, then the controller with the service put in.</p>
+
+  <h3>How @Autowired on a private field works</h3>
+  <ol>
+    <li>The container calls <code>ProductService</code>'s no-argument constructor. Java gives a class one when you write none. At this moment, <code>productRepository</code> is <code>null</code>.</li>
+    <li>It looks for fields marked <code>@Autowired</code>, finds a bean of the field's type (there is exactly one <code>ProductRepository</code>), and sets the private field using <strong>reflection</strong>: Java's way for a library to reach into an object's private members while the program runs.</li>
+    <li>Only then does anyone else get the bean.</li>
+  </ol>
+  <p>So it works, but only when Spring builds the object. Build it yourself and nobody fills the field:</p>
+  <div class="cmd">ProductService service = <span class="tg">new</span> <span class="at">ProductService</span>();   <span class="cm">// the lab's class</span>
+service.<span class="at">getAllProducts</span>();                          <span class="cm">// NullPointerException: productRepository is null</span></div>
+
+  <h3>Constructor injection: what Lab 2 switched to</h3>
+  <p>Lab 2 wrote the same service like this (<code>service/ProductService.java</code> at <code>lab2-complete</code>, lines 14–18):</p>
+  <div class="cmd"><span class="at">@Service</span>
+<span class="at">@RequiredArgsConstructor</span>
+<span class="tg">public</span> <span class="tg">class</span> ProductService {
+
+    <span class="tg">private</span> <span class="tg">final</span> ProductRepository productRepository;</div>
+  <p><code>@RequiredArgsConstructor</code> is Lombok: it writes a constructor that takes one argument for every <code>final</code> field (<a href="sb-java.html">B0</a> shows the generated code). Without Lombok, the class would be:</p>
+  <div class="cmd"><span class="at">@Service</span>
+<span class="tg">public</span> <span class="tg">class</span> ProductService {
+
+    <span class="tg">private</span> <span class="tg">final</span> ProductRepository productRepository;
+
+    <span class="tg">public</span> <span class="at">ProductService</span>(ProductRepository productRepository) {
+        <span class="tg">this</span>.productRepository = productRepository;
+    }
+
+    <span class="tg">public</span> List&lt;Product&gt; <span class="at">getAllProducts</span>() {
+        <span class="tg">return</span> productRepository.<span class="at">findAll</span>();
+    }
+    <span class="cm">// … the other methods, unchanged</span>
+}</div>
+  <p>When a class has exactly one constructor, Spring uses it to create the bean and passes in a bean for each parameter. No <code>@Autowired</code> is needed; it's allowed, just unnecessary. The controller works the same way:</p>
+  <div class="cmd"><span class="at">@RestController</span>
+<span class="at">@RequestMapping</span>(<span class="st">"/api/products"</span>)
+<span class="tg">public</span> <span class="tg">class</span> ProductController {
+
+    <span class="tg">private</span> <span class="tg">final</span> ProductService productService;
+
+    <span class="tg">public</span> <span class="at">ProductController</span>(ProductService productService) {
+        <span class="tg">this</span>.productService = productService;
+    }
+    <span class="cm">// … the same methods as before</span>
+}</div>
+
+  <h3>Why constructor injection is the usual choice</h3>
+  <div class="mention">
+    <div class="mrow"><b>final</b><span>The field is set once, in the constructor, and can never be <code>null</code> or replaced afterwards. The compiler checks it.</span></div>
+    <div class="mrow"><b>visible</b><span>The constructor lists everything the class needs. A constructor with eight parameters tells you the class is doing too much; eight <code>@Autowired</code> fields hide it.</span></div>
+    <div class="mrow"><b>testable without Spring</b><span><code>new ProductService(fakeRepository)</code> works in a plain unit test. The lab's version, made with <code>new</code>, has a <code>null</code> repository (above).</span></div>
+    <div class="mrow"><b>no half-built objects</b><span>If a dependency is missing, the object can't be created at all, so there's never a moment when it exists with a <code>null</code> field.</span></div>
+  </div>
+  <p>Both styles work, and Spring supports both. Field injection is the shortest thing to type, which suits a live session. Lab 2, the contract backend, and most Spring code you'll read use constructors, and the Spring reference documentation recommends constructor injection for dependencies a class can't work without.</p>
+
+  <div class="dothis">
+    <h4>Try it — take a bean away</h4>
+    <ol>
+      <li>Remove <code>@Service</code> from <code>ProductService</code> and restart. The app stops, and the console shows:</li>
+    </ol>
+    <div class="cmd">***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Field productService in com.esd.ecommerce.controller.ProductController required a bean of type 'com.esd.ecommerce.service.ProductService' that could not be found.
+…
+Action:
+
+Consider defining a bean of type 'com.esd.ecommerce.service.ProductService' in your configuration.</div>
+    <ol start="2">
+      <li>Read it as a sentence: the field <code>productService</code> in <code>ProductController</code> needs a <code>ProductService</code> bean, and there isn't one. Without <code>@Service</code>, the scan skipped the class.</li>
+      <li>Put <code>@Service</code> back and restart.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Two people call get-all at the same moment. How many <code>ProductService</code> objects are involved?</div>
+    <details><summary>Show answer</summary><div class="a"><p>One. Each request runs on its own Tomcat thread, but both threads call methods on the same single <code>ProductService</code> bean. That's fine here because the service keeps nothing per request in its fields.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Which of these runs in a plain JUnit test, with no Spring at all: the lab's <code>new ProductService()</code> then <code>getAllProducts()</code>, or Lab 2's <code>new ProductService(fakeRepository)</code> then <code>getAllProducts()</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Only Lab 2's. The lab's version has no way to receive a repository except Spring's reflection, so <code>productRepository</code> stays <code>null</code> and the call throws a <code>NullPointerException</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 04 done — I can explain both kinds of injection</span></label>
+</section>
+
+<div class="part">Part 3 · Down the layers, in the order you built them</div>
+
+<section id="s5">
+  <div class="shead"><span class="chip">05</span><h2>The database, and what ddl-auto did</h2><span class="lvl core">Core</span><span class="tagline">application.properties, your hand-made table</span></div>
+
+  <p><code>src/main/resources/application.properties</code>, tag <code>lab1-db-config</code>, all seven lines:</p>
+  <div class="cmd"><span class="at">spring.datasource.url</span>=<span class="st">jdbc:mysql://localhost:3306/ecommerceDB</span>
+<span class="at">spring.datasource.username</span>=<span class="st">root</span>
+<span class="at">spring.datasource.password</span>=<span class="st">YOUR_PASSWORD</span>
+
+<span class="at">spring.jpa.hibernate.ddl-auto</span>=<span class="st">update</span>
+<span class="at">spring.jpa.show-sql</span>=<span class="st">true</span>
+<span class="at">spring.jpa.properties.hibernate.format_sql</span>=<span class="st">true</span></div>
+  <div class="mention">
+    <div class="mrow"><b>datasource.url</b><span>A JDBC URL. <code>jdbc:mysql://</code> picks the driver, <code>localhost:3306</code> is where MySQL listens (3306 is its usual port), <code>/ecommerceDB</code> is the database.</span></div>
+    <div class="mrow"><b>username, password</b><span>MySQL's own login, the one you use with <code>mysql -u root -p</code>.</span></div>
+    <div class="mrow"><b>hibernate.ddl-auto</b><span>What Hibernate may do to your tables at startup. Below.</span></div>
+    <div class="mrow"><b>show-sql</b><span>Print every SQL statement Hibernate sends, after <code>Hibernate:</code>.</span></div>
+    <div class="mrow"><b>…format_sql</b><span>Spread each statement over several indented lines. Anything after <code>spring.jpa.properties.</code> is handed straight to Hibernate.</span></div>
+  </div>
+  <div class="cue watch"><p class="cue-k">Passwords in files</p><p>This file usually ends up in git. A local lab password there is fine; a real one never is. That's why the reference repository says <code>YOUR_PASSWORD</code>.</p></div>
+
+  <h3>The table you made by hand</h3>
+  <p>Before any Java, you ran the lab's script in the MySQL client (<code>database/lab1_setup.sql</code>, tag <code>lab1-db-config</code>):</p>
+  <div class="cmd"><span class="tg">CREATE</span> <span class="tg">DATABASE</span> <span class="tg">IF</span> <span class="tg">NOT</span> <span class="tg">EXISTS</span> ecommerceDB;
+
+<span class="tg">USE</span> ecommerceDB;
+
+<span class="tg">CREATE</span> <span class="tg">TABLE</span> <span class="tg">IF</span> <span class="tg">NOT</span> <span class="tg">EXISTS</span> products (
+    id <span class="tg">BIGINT</span> <span class="tg">PRIMARY</span> <span class="tg">KEY</span> <span class="tg">AUTO_INCREMENT</span>,
+    name <span class="tg">VARCHAR</span>(<span class="st">100</span>) <span class="tg">NOT</span> <span class="tg">NULL</span>,
+    description <span class="tg">VARCHAR</span>(<span class="st">500</span>),
+    price <span class="tg">DECIMAL</span>(<span class="st">10</span>, <span class="st">2</span>) <span class="tg">NOT</span> <span class="tg">NULL</span>,
+    category <span class="tg">VARCHAR</span>(<span class="st">50</span>),
+    stock <span class="tg">INT</span> <span class="tg">NOT</span> <span class="tg">NULL</span>
+);
+
+<span class="tg">DELETE</span> <span class="tg">FROM</span> products;
+
+<span class="tg">INSERT</span> <span class="tg">INTO</span> products (name, description, price, category, stock)
+<span class="tg">VALUES</span>
+(<span class="st">'Laptop'</span>, <span class="st">'15-inch laptop for everyday use'</span>, <span class="st">65000.00</span>, <span class="st">'Electronics'</span>, <span class="st">10</span>),
+(<span class="st">'Wireless Mouse'</span>, <span class="st">'Ergonomic wireless mouse'</span>, <span class="st">1200.00</span>, <span class="st">'Accessories'</span>, <span class="st">25</span>),
+(<span class="st">'Mechanical Keyboard'</span>, <span class="st">'RGB mechanical keyboard'</span>, <span class="st">3500.00</span>, <span class="st">'Accessories'</span>, <span class="st">15</span>);</div>
+  <p>The TA did this on purpose, so you'd see the real table and rows before JPA hid them behind Java objects.</p>
+
+  <h3>What ddl-auto=update did to it</h3>
+  <p><strong>DDL</strong> (data definition language) is the part of SQL that changes structure: <code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>. <code>ddl-auto</code> says how much DDL Hibernate may run at startup, comparing your entities with the tables it finds:</p>
+  <table class="grid">
+    <tr><th>Value</th><th>At startup, Hibernate…</th></tr>
+    <tr><td>none</td><td>does nothing to the schema.</td></tr>
+    <tr><td>validate</td><td>checks that every entity's table and columns exist, and refuses to start if one is missing.</td></tr>
+    <tr><td>update</td><td>adds missing tables and missing columns. Never drops or changes anything that's there.</td></tr>
+    <tr><td>create</td><td>drops the tables and creates them again from the entities. Your rows are gone.</td></tr>
+    <tr><td>create-drop</td><td>like <code>create</code>, and drops the tables again when the app stops.</td></tr>
+  </table>
+  <p>Your table already had a column for every field of <code>Product</code>, so <code>update</code> found nothing to add and ran no DDL at all; look for an <code>alter table</code> in your startup log and you won't find one. And since <code>update</code> never changes an existing column, the table kept exactly what your script gave it: <code>VARCHAR(100)</code>, <code>DECIMAL(10,2)</code>, and <code>NOT NULL</code> on <code>name</code>, <code>price</code> and <code>stock</code>.</p>
+  <p>Two things follow, and you can see both:</p>
+  <ol>
+    <li><strong>Add a field, and update adds a column.</strong> Give <code>Product</code> a new field, restart, and the log shows an <code>alter table products add column …</code>; the existing rows get <code>NULL</code> in it. Delete the field again and the column stays. <code>update</code> never drops.</li>
+    <li><strong>The NOT NULLs belong to the database, not the entity.</strong> Your entity has no rule that <code>name</code> must be present. The table does. POST a product without a <code>name</code> and MySQL refuses the INSERT: you get a <strong>500</strong>, and the log says <code>Column 'name' cannot be null</code>. A PUT that leaves out <code>stock</code> fails the same way. Checking input before it reaches the database is <a href="sb-good-slice.html">B2</a>'s subject.</li>
+  </ol>
+  <p>If the table <em>hadn't</em> existed, <code>update</code> would have created it from the entity, with Hibernate's defaults: <code>varchar(255)</code> for every String, <code>decimal(38,2)</code> for the price, and no <code>NOT NULL</code> except on the id.</p>
+  <p>What <code>update</code> can't do is create the <em>database</em>. If <code>ecommerceDB</code> doesn't exist, or the URL misspells it, the app stops at startup.</p>
+  <div class="cue calm"><p class="cue-k">Where this goes</p><p><code>update</code> is a development convenience, and the TA chose it for that. Teams with real data usually hand the schema to a migration tool such as Flyway, one versioned SQL file per change, and set <code>ddl-auto</code> to <code>validate</code> or <code>none</code>.</p></div>
+
+  <div class="dothis">
+    <h4>Try it — break the connection, read the error</h4>
+    <ol>
+      <li>In <code>application.properties</code>, misspell the database: <code>…/ecommerceDBB</code>. Restart.</li>
+      <li>The app stops. The last lines may talk about a <em>Dialect</em> or <em>JDBC metadata</em>: that's Hibernate failing later, because it never got a connection. Scroll up to the first <code>WARN</code> or <code>Caused by:</code>. It says <code>Unknown database</code> and the name you typed.</li>
+      <li>Fix the name. Now change the password to something wrong and restart: <code>Access denied for user 'root'@'localhost'</code>. Fix it.</li>
+      <li>Stop MySQL (or don't start it) and run the app: <code>Communications link failure</code>. MySQL isn't listening.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Your <code>Product</code> entity has no "not null" rule anywhere. Why does a POST without <code>price</code> give a 500?</div>
+    <details><summary>Show answer</summary><div class="a"><p>The table came from your SQL script, which says <code>price DECIMAL(10, 2) NOT NULL</code>. <code>ddl-auto=update</code> never changes an existing column, so the constraint is still there, and MySQL rejects the INSERT. The 500 is the database saying no, not your code.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>A teammate sets <code>ddl-auto=create</code> to "make sure the table is right". What happens to the three seed rows on the next start?</div>
+    <details><summary>Show answer</summary><div class="a"><p>They're gone. <code>create</code> drops the table and creates an empty one from the entity, on every start. (And the new table has Hibernate's defaults, so the <code>NOT NULL</code>s from your script are gone too.)</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 05 done — I know what ddl-auto=update did to my table</span></label>
+</section>
+
+<section id="s6">
+  <div class="shead"><span class="chip">06</span><h2>The entity: Product</h2><span class="lvl core">Core</span><span class="tagline">one class, one table; one object, one row</span></div>
+
+  <p><code>entity/Product.java</code>, tag <code>lab1-entity</code>, lines 8–29 (the imports are <code>jakarta.persistence.*</code> and <code>lombok.*</code>):</p>
+  <div class="cmd"><span class="at">@Entity</span>
+<span class="at">@Table</span>(name = <span class="st">"products"</span>)
+<span class="at">@Getter</span>
+<span class="at">@Setter</span>
+<span class="at">@NoArgsConstructor</span>
+<span class="at">@AllArgsConstructor</span>
+<span class="tg">public</span> <span class="tg">class</span> Product {
+
+    <span class="at">@Id</span>
+    <span class="at">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+    <span class="tg">private</span> Long id;
+
+    <span class="tg">private</span> String name;
+
+    <span class="tg">private</span> String description;
+
+    <span class="tg">private</span> BigDecimal price;
+
+    <span class="tg">private</span> String category;
+
+    <span class="tg">private</span> Integer stock;
+}</div>
+  <p>An <strong>entity</strong> is a class whose objects are rows. <strong>JPA</strong> (Jakarta Persistence) is the standard that defines these annotations; <strong>Hibernate</strong> is the library that implements it, reads the annotations, and writes the SQL.</p>
+  <div class="mention">
+    <div class="mrow"><b>@Entity</b><span>Hibernate manages this class: one object ↔ one row. Without it, <code>Product</code> is an ordinary class, and the app won't start (Try it, below).</span></div>
+    <div class="mrow"><b>@Table(name = "products")</b><span>The table's name. Leave it out and Spring Boot uses the class name in snake_case: <code>product</code>, which your script never created.</span></div>
+    <div class="mrow"><b>@Id</b><span>This field is the primary key. Every entity has exactly one.</span></div>
+    <div class="mrow"><b>@GeneratedValue(IDENTITY)</b><span>The database assigns the id, with MySQL's <code>AUTO_INCREMENT</code>. So a new product's id is <code>null</code> until its row is inserted, and saving it has to run the INSERT straight away to learn the id.</span></div>
+    <div class="mrow"><b>Lombok's four</b><span>Getters, setters, a no-argument constructor and an all-arguments constructor, written for you (<a href="sb-java.html">B0</a>).</span></div>
+  </div>
+
+  <h3>The no-argument constructor: who needs it</h3>
+  <p>Two libraries build <code>Product</code> objects without knowing anything about your fields in advance, and both start the same way: create an empty object with the no-argument constructor, then fill it in.</p>
+  <ul>
+    <li><strong>Hibernate</strong>, at step 6 of section 02: an empty <code>Product</code>, then each field set from a column. JPA requires every entity to have a no-argument constructor for this reason.</li>
+    <li><strong>Jackson</strong>, for <code>@RequestBody</code> (section 11): an empty <code>Product</code>, then one setter call per key in the JSON.</li>
+  </ul>
+  <p>That's what <code>@NoArgsConstructor</code> is for. <code>@AllArgsConstructor</code> is for you, when you want a complete product in one line.</p>
+
+  <h3>Fields and columns</h3>
+  <p>Each field maps to the column with the same name, in snake_case: a field <code>minStock</code> would map to a column <code>min_stock</code>, and a class <code>StockAlert</code> to a table <code>stock_alert</code>. Your names are single words, so they match the script exactly.</p>
+  <p>Each field, its Java type, the column your script made, and what Hibernate would have made on its own (section 05):</p>
+  <div class="mention">
+    <div class="mrow"><b>id · Long</b><span>script: <code>BIGINT AUTO_INCREMENT</code> · Hibernate: <code>bigint</code>, auto-increment</span></div>
+    <div class="mrow"><b>name · String</b><span>script: <code>VARCHAR(100) NOT NULL</code> · Hibernate: <code>varchar(255)</code></span></div>
+    <div class="mrow"><b>description · String</b><span>script: <code>VARCHAR(500)</code> · Hibernate: <code>varchar(255)</code></span></div>
+    <div class="mrow"><b>price · BigDecimal</b><span>script: <code>DECIMAL(10,2) NOT NULL</code> · Hibernate: <code>decimal(38,2)</code></span></div>
+    <div class="mrow"><b>category · String</b><span>script: <code>VARCHAR(50)</code> · Hibernate: <code>varchar(255)</code></span></div>
+    <div class="mrow"><b>stock · Integer</b><span>script: <code>INT NOT NULL</code> · Hibernate: <code>integer</code></span></div>
+  </div>
+  <p><strong>Why <code>Long</code> and <code>Integer</code>, not <code>long</code> and <code>int</code>?</strong> A wrapper type can be <code>null</code>. A new product's id <em>is</em> null until the database assigns one, and Spring Data uses exactly that to decide between INSERT and UPDATE (section 07). <strong>Why <code>BigDecimal</code> for the price?</strong> It stores decimals exactly; <code>double</code> can't even hold 0.10 exactly (<a href="sb-java.html">B0</a>).</p>
+
+  <div class="dothis">
+    <h4>Try it — take @Entity away</h4>
+    <ol>
+      <li>Comment out <code>@Entity</code> and restart. The app stops. Look for <code>Not a managed type: class com.esd.ecommerce.entity.Product</code>.</li>
+      <li>Read it: your repository says <code>JpaRepository&lt;Product, Long&gt;</code>, but Hibernate doesn't manage <code>Product</code>, so Spring Data can't build the repository, and nothing that needs it can be built either.</li>
+      <li>Put <code>@Entity</code> back.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>A POST body has no <code>id</code>. What is <code>product.getId()</code> just before <code>save(product)</code>, and just after?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Before: <code>null</code>. After: the id MySQL's <code>AUTO_INCREMENT</code> gave the new row (4, if you'd only had the three seed rows). Hibernate runs the INSERT at once and puts the new id into the object.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 06 done — I can explain every annotation on Product</span></label>
+</section>
+
+<section id="s7">
+  <div class="shead"><span class="chip">07</span><h2>The repository: an interface with no class</h2><span class="lvl core">Core</span><span class="tagline">JpaRepository, the proxy, save, derived queries</span></div>
+
+  <p><code>repository/ProductRepository.java</code>, tag <code>lab1-repository</code>, lines 7–9:</p>
+  <div class="cmd"><span class="at">@Repository</span>
+<span class="tg">public</span> <span class="tg">interface</span> ProductRepository <span class="tg">extends</span> JpaRepository&lt;Product,Long&gt; {
+}</div>
+  <p>Three lines, no method bodies, and no class anywhere that implements the interface. Yet <code>productRepository.findAll()</code> returned your three rows.</p>
+
+  <h3>What JpaRepository&lt;Product, Long&gt; gives you</h3>
+  <p>The two type arguments say: this repository stores <code>Product</code> objects, and their <code>@Id</code> is a <code>Long</code> (<a href="sb-java.html">B0</a> explains generics). In return, your interface inherits a set of ready methods. These are the ones the lab used, and the SQL each one prints:</p>
+  <div class="mention">
+    <div class="mrow"><b>findAll()</b><span>Returns a <code>List&lt;Product&gt;</code>. SQL: one <code>select … from products</code>. Used by <code>getAllProducts</code>.</span></div>
+    <div class="mrow"><b>findById(id)</b><span>Returns an <code>Optional&lt;Product&gt;</code>. SQL: one <code>select … where id=?</code>. Used by <code>getProductById</code> and <code>updateProduct</code>.</span></div>
+    <div class="mrow"><b>save(product)</b><span>Returns the saved <code>Product</code>. SQL: an <code>insert</code> (no id) or an <code>update</code> (id set). Used by <code>addProduct</code> and <code>updateProduct</code>.</span></div>
+    <div class="mrow"><b>deleteById(id)</b><span>Returns nothing. SQL: a <code>select</code>, then a <code>delete</code>. Used by <code>deleteProduct</code> (lab1-complete).</span></div>
+    <div class="mrow"><b>count()</b><span>Returns a <code>long</code>. SQL: a <code>select count(…)</code>.</span></div>
+  </div>
+  <p><code>findById</code> returns an <code>Optional</code> because the row might not exist; your service turns "empty" into <code>null</code> with <code>.orElse(null)</code> (section 08). <a href="sb-java.html">B0</a> covers <code>Optional</code>.</p>
+
+  <h3>Who implements it</h3>
+  <p>At startup, Spring Data JPA finds every interface in your packages that extends one of its repository types, and builds an object for each: a <strong>proxy</strong>, a class generated while the app runs, which implements your interface and passes each call on to <code>SimpleJpaRepository</code>, Spring Data's ready-made class with the real <code>findAll</code>, <code>findById</code>, <code>save</code>… That proxy is the bean the container injects into <code>ProductService</code>.</p>
+  <p><code>@Repository</code> on the interface is optional: Spring Data finds the interface without it. It does no harm.</p>
+  <div class="dothis">
+    <h4>Try it — meet the class nobody wrote</h4>
+    <ol>
+      <li>Make this the first line of <code>getAllProducts()</code> in your service: <code>System.out.println(productRepository.getClass());</code></li>
+      <li>Restart and call get-all. The console prints something like <code>class jdk.proxy2.$Proxy115</code>: a class generated at startup, which exists in no source file.</li>
+      <li>Remove the line.</li>
+    </ol>
+  </div>
+
+  <h3>save(): insert or update?</h3>
+  <p><code>save</code> looks at the id. <strong><code>null</code></strong>: a new product, so an <code>INSERT</code>, and the new id is put into the object. <strong>Not null</strong>: an existing product, so Hibernate makes sure it has that row loaded, copies your values onto it, and runs an <code>UPDATE</code>. That's how <code>addProduct</code> and <code>updateProduct</code> can both end in <code>save()</code>.</p>
+
+  <h3>Derived queries: a method name is a query</h3>
+  <p>Lab 2 added one line to this interface (<code>repository/ProductRepository.java</code> at <code>lab2-complete</code>, line 12):</p>
+  <div class="cmd"><span class="tg">public</span> List&lt;Product&gt; <span class="at">findByCategory</span>(String category);</div>
+  <p>No body, and no SQL. At startup Spring Data reads the method's name: <code>findBy</code>, then <code>Category</code>, which is a field of <code>Product</code>. From that it builds <code>select … from products where category=?</code>. These are <strong>derived queries</strong>. The name is made of pieces:</p>
+  <table class="grid">
+    <tr><th>Piece</th><th>Means</th></tr>
+    <tr><td>findBy · countBy · existsBy</td><td>What to return: the rows, how many, or whether any</td></tr>
+    <tr><td>Category · Name · Price</td><td>A field of <code>Product</code>, with a capital letter</td></tr>
+    <tr><td>And · Or</td><td>Combine two conditions</td></tr>
+    <tr><td>LessThan · GreaterThan · Between · Containing · StartingWith</td><td>The comparison (plain = equals)</td></tr>
+    <tr><td>IgnoreCase</td><td>Compare text without caring about case</td></tr>
+    <tr><td>OrderBy…Asc · OrderBy…Desc</td><td>Sort the result</td></tr>
+  </table>
+  <p>A few more you could add to <code>ProductRepository</code>:</p>
+  <div class="cmd">List&lt;Product&gt; <span class="at">findByCategoryIgnoreCase</span>(String category);
+List&lt;Product&gt; <span class="at">findByPriceLessThan</span>(BigDecimal price);
+List&lt;Product&gt; <span class="at">findByNameContainingIgnoreCase</span>(String text);
+List&lt;Product&gt; <span class="at">findByCategoryOrderByPriceAsc</span>(String category);
+<span class="tg">long</span> <span class="at">countByCategory</span>(String category);
+<span class="tg">boolean</span> <span class="at">existsByName</span>(String name);</div>
+  <p>With the three seed rows: <code>findByPriceLessThan(new BigDecimal("5000"))</code> gives the mouse and the keyboard; <code>findByNameContainingIgnoreCase("key")</code> gives the keyboard; <code>findByCategoryOrderByPriceAsc("Accessories")</code> gives the mouse, then the keyboard; <code>countByCategory("Accessories")</code> is 2.</p>
+  <div class="cue watch"><p class="cue-k">Case, and which database you're on</p><p>MySQL compares text without caring about case by default, so on your MySQL <code>findByCategory("accessories")</code> also finds the two Accessories products. Many other databases (H2, which tests often use, and PostgreSQL) find nothing. If you mean "ignore case", say so in the name: <code>IgnoreCase</code>.</p></div>
+
+  <div class="dothis">
+    <h4>Try it — a name Spring Data can't read</h4>
+    <ol>
+      <li>Add Lab 2's <code>findByCategory</code> to your repository and restart: nothing visible happens, because nothing calls it yet. That's fine.</li>
+      <li>Now misspell it: <code>findByCategry</code>. Restart. The app stops at startup, not at the first call, with <code>No property 'categry' found for type 'Product'</code>, often followed by a guess: <code>Did you mean 'category'</code>.</li>
+      <li>Fix the spelling.</li>
+    </ol>
+  </div>
+
+  <div class="stretch-box">
+    <h3>See the values behind the question marks</h3>
+    <p>The SQL log shows <code>where p1_0.id=?</code>, not the 1. To see the values Hibernate binds to each <code>?</code>, add this line to <code>application.properties</code> and restart:</p>
+    <div class="cmd"><span class="at">logging.level.org.hibernate.orm.jdbc.bind</span>=<span class="st">trace</span></div>
+    <p>After each statement the console now shows lines starting <code>binding parameter</code>, each with the position, the type and the value. Send a PUT and you'll see every value the UPDATE sends. Remove the line when you're done; it's noisy.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>What SQL does <code>save(product)</code> run when <code>product.getId()</code> is 7 and row 7 exists? When the id is <code>null</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Id 7: an <code>UPDATE … where id=?</code> (with a <code>SELECT</code> first if Hibernate doesn't already have row 7 loaded). Id <code>null</code>: an <code>INSERT</code>, and the generated id is put into the object.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Write a derived query for "products in a category, cheapest first".</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>List&lt;Product&gt; findByCategoryOrderByPriceAsc(String category);</code></p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 07 done — I know who implements my repository</span></label>
+</section>
+
+<section id="s8">
+  <div class="shead"><span class="chip">08</span><h2>The service: load, change, save</h2><span class="lvl core">Core</span><span class="tagline">ProductService, method by method</span></div>
+
+  <p><code>service/ProductService.java</code> at <code>lab1-put</code>, lines 16–43 (the class and its field are in section 04):</p>
+  <div class="cmd"><span class="tg">public</span> List&lt;Product&gt; <span class="at">getAllProducts</span>() {
+    <span class="tg">return</span> productRepository.<span class="at">findAll</span>();
+}
+
+<span class="tg">public</span> Product <span class="at">getProductById</span>(Long id) {
+    <span class="tg">return</span> productRepository.<span class="at">findById</span>(id).<span class="at">orElse</span>(<span class="tg">null</span>);
+}
+
+<span class="tg">public</span> Product <span class="at">addProduct</span>(Product product) {
+    <span class="tg">return</span> productRepository.<span class="at">save</span>(product);
+}
+
+<span class="tg">public</span> Product <span class="at">updateProduct</span>(Long id, Product product) {
+
+    Product existingProduct = productRepository.<span class="at">findById</span>(id).<span class="at">orElse</span>(<span class="tg">null</span>);
+
+    <span class="tg">if</span> (existingProduct == <span class="tg">null</span>) {
+        <span class="tg">return</span> <span class="tg">null</span>;
+    }
+
+    existingProduct.<span class="at">setName</span>(product.<span class="at">getName</span>());
+    existingProduct.<span class="at">setDescription</span>(product.<span class="at">getDescription</span>());
+    existingProduct.<span class="at">setPrice</span>(product.<span class="at">getPrice</span>());
+    existingProduct.<span class="at">setCategory</span>(product.<span class="at">getCategory</span>());
+    existingProduct.<span class="at">setStock</span>(product.<span class="at">getStock</span>());
+
+    <span class="tg">return</span> productRepository.<span class="at">save</span>(existingProduct);
+}</div>
+  <div class="mention">
+    <div class="mrow"><b>getAllProducts</b><span>Straight through to <code>findAll()</code>.</span></div>
+    <div class="mrow"><b>getProductById</b><span>Unwraps the <code>Optional</code>: the product, or <code>null</code> for "not found". The controller checks for that <code>null</code> (section 10). Lab 2 replaced the <code>null</code> with an exception, <code>ProductNotFoundException</code> (<a href="sb-good-slice.html">B2</a>).</span></div>
+    <div class="mrow"><b>addProduct</b><span>A product that came from a request has no id, so <code>save</code> runs an INSERT and returns it with its new id.</span></div>
+    <div class="mrow"><b>updateProduct</b><span>Load, change, save. Below.</span></div>
+  </div>
+  <p>Most of these methods are a single repository call, which is normal for a first version. The service is where an application's rules go as it grows (Lab 2 added "not found" handling and trimming of names here). Keeping it apart from the controller means those rules don't care whether a call came over HTTP, from a test, or from another service.</p>
+  <div class="cue"><p class="cue-k">"Why not call the repository from the controller?"</p><p>A fair question: it would work today. The split keeps HTTP (paths, status codes, JSON) in the controller and the application's logic in the service, so each can change without the other. When the logic grows, it grows in one place.</p></div>
+
+  <h3>PUT is load, change, save</h3>
+  <ol>
+    <li><strong>Load.</strong> <code>findById(id)</code> gets the product as it is now, or <code>null</code>, and then the method returns <code>null</code> (the controller turns that into a 404).</li>
+    <li><strong>Change.</strong> Copy five fields from the request's <code>Product</code> onto the loaded one. Not the id: the id comes from the URL. If the JSON body also has an <code>"id"</code>, it's ignored here.</li>
+    <li><strong>Save.</strong> <code>save(existingProduct)</code>: it has an id, so Hibernate runs an UPDATE.</li>
+  </ol>
+  <p>In the console, a PUT prints a <code>select</code> (the load) and then an <code>update</code> (the save).</p>
+  <p>Copying <em>every</em> field has a consequence: it's a <strong>full replacement</strong>. A key missing from the JSON is <code>null</code> in the request's <code>Product</code>, and that <code>null</code> is copied over the real value. Send a PUT without <code>description</code> and the description is gone. Send one without <code>stock</code> and your MySQL table's <code>NOT NULL</code> rejects the UPDATE with a 500 (section 05). That's what PUT means: "here is the whole new version". The HTTP method for "change only these fields" is PATCH; the lab doesn't have one.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b><code>PUT /api/products/update/1</code> with the body <code>{"id": 3, "name": "Gaming Laptop", …}</code>. Which row changes, 1 or 3?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Row 1. The service loads product 1 (the id from the URL) and copies only name, description, price, category and stock. The <code>"id": 3</code> was set on the request's <code>Product</code> by Jackson, and then never used.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>What does the console show for one successful PUT?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Two statements: a <code>select … where p1_0.id=?</code> from <code>findById</code>, then an <code>update products set … where id=?</code> from <code>save</code>.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 08 done — I can explain load, change, save</span></label>
+</section>
+
+<section id="s9">
+  <div class="shead"><span class="chip">09</span><h2>The controller: from URL to method, and back as JSON</h2><span class="lvl core">Core</span><span class="tagline">mappings, @PathVariable, Jackson</span></div>
+
+  <p><code>controller/ProductController.java</code>, tag <code>lab1-get</code>, lines 11–22:</p>
+  <div class="cmd"><span class="at">@RestController</span>
+<span class="at">@RequestMapping</span>(<span class="st">"/api/products"</span>)
+<span class="tg">public</span> <span class="tg">class</span> ProductController {
+
+    <span class="at">@Autowired</span>
+    <span class="tg">private</span> ProductService productService;
+
+    <span class="at">@GetMapping</span>(<span class="st">"/get-all"</span>)
+    <span class="tg">public</span> ResponseEntity&lt;List&lt;Product&gt;&gt; <span class="at">getAllProducts</span>() {
+        List&lt;Product&gt; products = productService.<span class="at">getAllProducts</span>();
+        <span class="tg">return</span> ResponseEntity.<span class="at">ok</span>(products);
+    }</div>
+  <div class="mention">
+    <div class="mrow"><b>@RestController</b><span><code>@Controller</code> + <code>@ResponseBody</code>: a component that handles requests, and whose methods' return values are written into the response body, as JSON for objects. (A plain <code>@Controller</code> is for web pages built from HTML templates.)</span></div>
+    <div class="mrow"><b>@RequestMapping(…)</b><span>On the class: a prefix for every mapping inside it.</span></div>
+    <div class="mrow"><b>@GetMapping("/get-all")</b><span>This method handles GET requests to <code>/api/products/get-all</code>. It's short for <code>@RequestMapping(method = GET, …)</code>. Its siblings are <code>@PostMapping</code>, <code>@PutMapping</code> and <code>@DeleteMapping</code>.</span></div>
+    <div class="mrow"><b>ResponseEntity&lt;…&gt;</b><span>The status, headers and body of the response (section 10).</span></div>
+  </div>
+  <p>And from <code>lab1-get-by-id</code>, the method signature of the spine's endpoint:</p>
+  <div class="cmd"><span class="at">@GetMapping</span>(<span class="st">"/get/{id}"</span>)
+<span class="tg">public</span> ResponseEntity&lt;?&gt; <span class="at">getProductById</span>(<span class="at">@PathVariable</span> Long id) {</div>
+  <p><code>{id}</code> in the pattern is a <strong>path variable</strong>. <code>@PathVariable Long id</code> says: take that part of the path, convert it to a <code>Long</code>, pass it in. They're matched by name: <code>{id}</code> goes to the parameter called <code>id</code>.</p>
+
+  <h3>How Spring picks the method</h3>
+  <p>At startup, Spring collects every mapping from every controller. For each request, the DispatcherServlet compares the request's method and path with that list:</p>
+  <table class="grid">
+    <tr><th>Request</th><th>What happens</th></tr>
+    <tr><td>GET /api/products/get-all</td><td><code>getAllProducts()</code> runs.</td></tr>
+    <tr><td>GET /api/products/get/1</td><td><code>getProductById(1)</code> runs.</td></tr>
+    <tr><td>GET /api/products/get/abc</td><td>The path matches, but <code>abc</code> isn't a <code>Long</code>. <strong>400</strong>, and your method never runs. Same for <code>get/1.5</code>.</td></tr>
+    <tr><td>POST /api/products/get-all</td><td>The path exists, but not for POST. <strong>405</strong> Method Not Allowed, with an <code>Allow</code> header naming GET.</td></tr>
+    <tr><td>GET /api/products/get-al</td><td>Nothing matches. <strong>404</strong>, with Spring Boot's own error JSON (section 10).</td></tr>
+  </table>
+  <p>Paths aren't the only way to pass values. A <strong>query parameter</strong>, as in <code>/api/products?category=Accessories</code>, reaches a method through <code>@RequestParam</code>. The lab didn't use any (Lab 2's category search put the category in the path, <code>/get-category/{category}</code>); the contract's catalogue filters do (<a href="api-contract.html#s9">contract §09</a>).</p>
+
+  <h3>JSON out: Jackson</h3>
+  <p><code>getAllProducts</code> returns a <code>List&lt;Product&gt;</code> inside the <code>ResponseEntity</code>. Spring hands it to <strong>Jackson</strong>, which:</p>
+  <ul>
+    <li>calls each getter (<code>getId()</code>, <code>getName()</code>…, the ones Lombok's <code>@Getter</code> wrote) and uses the name after <code>get</code>, first letter lowercased, as the key. Jackson reads getters, not your private fields;</li>
+    <li>writes a <code>List</code> as a JSON array <code>[…]</code>, one object per product;</li>
+    <li>writes a <code>BigDecimal</code> as a number that keeps its two decimals: <code>65000.00</code>;</li>
+    <li>writes a <code>null</code> field as <code>null</code>; the key is still there.</li>
+  </ul>
+  <div class="cmd">[
+  {<span class="at">"category"</span>:<span class="st">"Electronics"</span>,<span class="at">"description"</span>:<span class="st">"15-inch laptop for everyday use"</span>,<span class="at">"id"</span>:<span class="st">1</span>,<span class="at">"name"</span>:<span class="st">"Laptop"</span>,<span class="at">"price"</span>:<span class="st">65000.00</span>,<span class="at">"stock"</span>:<span class="st">10</span>},
+  {<span class="at">"category"</span>:<span class="st">"Accessories"</span>,<span class="at">"description"</span>:<span class="st">"Ergonomic wireless mouse"</span>,<span class="at">"id"</span>:<span class="st">2</span>,<span class="at">"name"</span>:<span class="st">"Wireless Mouse"</span>,<span class="at">"price"</span>:<span class="st">1200.00</span>,<span class="at">"stock"</span>:<span class="st">25</span>},
+  {<span class="at">"category"</span>:<span class="st">"Accessories"</span>,<span class="at">"description"</span>:<span class="st">"RGB mechanical keyboard"</span>,<span class="at">"id"</span>:<span class="st">3</span>,<span class="at">"name"</span>:<span class="st">"Mechanical Keyboard"</span>,<span class="at">"price"</span>:<span class="st">3500.00</span>,<span class="at">"stock"</span>:<span class="st">15</span>}
+]</div>
+  <p>curl prints that on one line; it's spread out here. The array's order is whatever order MySQL returned: <code>findAll()</code> has no <code>ORDER BY</code>, so no order is promised, even if it's usually by id.</p>
+  <div class="cue"><p class="cue-k">Why are the keys in alphabetical order?</p><p>Spring Boot 4 uses Jackson 3, which sorts an object's keys alphabetically by default. On Boot 3, with Jackson 2, they came out in field order. It doesn't matter to any client: a JSON object's keys have no order, and a client reads them by name. (Jackson 3 lives in packages starting <code>tools.jackson</code>, Jackson 2 in <code>com.fasterxml.jackson</code>. Your code never imports either, so nothing else changes for you.)</p></div>
+
+  <div class="dothis">
+    <h4>Try it — the browser's view</h4>
+    <ol>
+      <li>Open <code>http://localhost:8080/api/products/get-all</code> in a browser. The same JSON; some browsers show it with a viewer.</li>
+      <li>Open <code>…/api/products/get/abc</code>. You get a page titled <strong>Whitelabel Error Page</strong> with status 400. That's Spring Boot's error page for browsers. <code>curl -i</code> on the same URL gets the same error as JSON.</li>
+      <li>Open <code>…/api/products/get/999</code>. Just your sentence: that 404 is your code's, not Spring's.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Which annotation makes the <code>List&lt;Product&gt;</code> go back to the client as JSON?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>@RestController</code>, through the <code>@ResponseBody</code> it contains: "the return value is the response body". Jackson does the conversion, because the body is an object and the client accepts JSON.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>What does <code>GET /api/products/get/1.5</code> return, and does your method run?</div>
+    <details><summary>Show answer</summary><div class="a"><p>400 Bad Request. <code>1.5</code> can't become a <code>Long</code>, so Spring stops before calling <code>getProductById</code>. No SQL appears in the console.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 09 done — I can say how a URL reaches a method</span></label>
+</section>
+
+<div class="part">Part 4 · The other endpoints</div>
+
+<section id="s10">
+  <div class="shead"><span class="chip">10</span><h2>Status codes, and the 404 branch</h2><span class="lvl core">Core</span><span class="tagline">ResponseEntity, and what a String body means</span></div>
+
+  <p><code>controller/ProductController.java</code>, tag <code>lab1-get-by-id</code>, lines 25–36:</p>
+  <div class="cmd"><span class="at">@GetMapping</span>(<span class="st">"/get/{id}"</span>)
+<span class="tg">public</span> ResponseEntity&lt;?&gt; <span class="at">getProductById</span>(<span class="at">@PathVariable</span> Long id) {
+
+    Product product = productService.<span class="at">getProductById</span>(id);
+
+    <span class="tg">if</span> (product == <span class="tg">null</span>) {
+        <span class="tg">return</span> ResponseEntity.<span class="at">status</span>(HttpStatus.NOT_FOUND)
+                .<span class="at">body</span>(<span class="st">"Product with ID "</span> + id + <span class="st">" not found"</span>);
+    }
+
+    <span class="tg">return</span> ResponseEntity.<span class="at">ok</span>(product);
+}</div>
+
+  <h3>ResponseEntity: the whole response</h3>
+  <p>A <code>ResponseEntity</code> carries a status, headers and a body. You built three kinds in the lab, and Lab 2 added a fourth:</p>
+  <div class="mention">
+    <div class="mrow"><b>ResponseEntity.ok(x)</b><span>Status 200, body <code>x</code>.</span></div>
+    <div class="mrow"><b>.status(HttpStatus.CREATED).body(x)</b><span>Status 201, body <code>x</code> (section 11).</span></div>
+    <div class="mrow"><b>.status(HttpStatus.NOT_FOUND).body(…)</b><span>Status 404, with whatever body you give it.</span></div>
+    <div class="mrow"><b>.noContent().build()</b><span>Status 204, no body at all (Lab 2's delete).</span></div>
+  </div>
+  <p>If a method returns a plain <code>Product</code> instead of a <code>ResponseEntity</code>, Spring always sends 200. <code>ResponseEntity</code> is how you choose.</p>
+
+  <h3>The status codes you've met</h3>
+  <table class="grid">
+    <tr><th>Code</th><th>Means</th><th>Where you saw it</th></tr>
+    <tr><td>200 OK</td><td>It worked; here's the body.</td><td>get-all, get/1, update, Lab 1's delete</td></tr>
+    <tr><td>201 Created</td><td>A new resource exists; here it is.</td><td>add-product</td></tr>
+    <tr><td>204 No Content</td><td>It worked; there's no body.</td><td>Lab 2's delete</td></tr>
+    <tr><td>400 Bad Request</td><td>The request itself is wrong.</td><td>get/abc; broken JSON in a POST</td></tr>
+    <tr><td>404 Not Found</td><td>Nothing there.</td><td>get/999 (yours); a mistyped path (Spring's)</td></tr>
+    <tr><td>405 Method Not Allowed</td><td>The path exists, not with this method.</td><td>POST to get-all</td></tr>
+    <tr><td>415 Unsupported Media Type</td><td>The body isn't in a format this endpoint reads.</td><td>a POST body sent as Text instead of JSON</td></tr>
+    <tr><td>500 Internal Server Error</td><td>The server failed.</td><td>a POST without <code>name</code> (section 05)</td></tr>
+  </table>
+  <p>The first digit is the family: <strong>2xx</strong> success, <strong>4xx</strong> the client got something wrong, <strong>5xx</strong> the server did.</p>
+
+  <h3>Why ResponseEntity&lt;?&gt;</h3>
+  <p>The method returns a <code>Product</code> on one branch and a <code>String</code> on the other. One return type has to cover both, so it's <code>ResponseEntity&lt;?&gt;</code>: a ResponseEntity of anything (<a href="sb-java.html">B0</a> explains the <code>?</code> wildcard). The price is that the compiler no longer checks what goes inside.</p>
+
+  <h3>What the String body means for a client</h3>
+  <p>Compare what <code>curl -i</code> shows for the two branches:</p>
+  <div class="cmd"><span class="tg">HTTP/1.1 200</span>
+<span class="at">Content-Type</span>:<span class="st"> application/json</span>
+
+{<span class="at">"category"</span>:<span class="st">"Electronics"</span>,<span class="at">"description"</span>:<span class="st">"15-inch laptop for everyday use"</span>,<span class="at">"id"</span>:<span class="st">1</span>,<span class="at">"name"</span>:<span class="st">"Laptop"</span>,<span class="at">"price"</span>:<span class="st">65000.00</span>,<span class="at">"stock"</span>:<span class="st">10</span>}</div>
+  <div class="cmd"><span class="tg">HTTP/1.1 404</span>
+<span class="at">Content-Type</span>:<span class="st"> text/plain;charset=UTF-8</span>
+
+Product with ID 999 not found</div>
+  <p>Spring picks the body's format from its Java type. An object goes through Jackson and becomes JSON. A <code>String</code> is sent as it is, as plain text. So:</p>
+  <ul>
+    <li>A client that reads every response as JSON, as most front-end code does with <code>response.json()</code>, fails on this 404: <code>Product with ID 999 not found</code> isn't JSON.</li>
+    <li>Your 404 (no such product) and Spring's 404 (no such URL) look different: Spring's is JSON with <code>"status"</code>, <code>"error"</code> and <code>"path"</code> keys; yours is a sentence. A client has to handle both.</li>
+  </ul>
+  <p>That's why Lab 2 changed it: <code>getProductById</code> throws a <code>ProductNotFoundException</code>, and one handler turns every error into the same JSON shape, <code>ApiErrorResponse</code>. <a href="sb-good-slice.html">B2</a> explains how. The contract asks for exactly that: one JSON error shape for every non-2xx response (<a href="api-contract.html#s10">contract §10</a>).</p>
+  <p>For comparison, here is Spring Boot's own error, for <code>get/abc</code> (you didn't write this one; the timestamp is cut short):</p>
+  <div class="cmd">{<span class="at">"timestamp"</span>:<span class="st">"…"</span>,<span class="at">"status"</span>:<span class="st">400</span>,<span class="at">"error"</span>:<span class="st">"Bad Request"</span>,<span class="at">"path"</span>:<span class="st">"/api/products/get/abc"</span>}</div>
+
+  <div class="dothis">
+    <h4>Try it — two branches, two formats</h4>
+    <ol>
+      <li><code>curl -i http://localhost:8080/api/products/get/1</code> and <code>…/get/999</code>. Compare the <code>Content-Type</code> lines.</li>
+      <li><code>curl -i http://localhost:8080/api/products/get-al</code> (mistyped). A 404 too, but JSON, from Spring Boot. No SQL appears in your console: none of your code ran.</li>
+    </ol>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>Suppose the method had no null check:
+      <div class="cmd"><span class="at">@GetMapping</span>(<span class="st">"/get/{id}"</span>)
+<span class="tg">public</span> ResponseEntity&lt;Product&gt; <span class="at">getProductById</span>(<span class="at">@PathVariable</span> Long id) {
+    <span class="tg">return</span> ResponseEntity.<span class="at">ok</span>(productService.<span class="at">getProductById</span>(id));
+}</div>
+      What does <code>GET /api/products/get/999</code> return?</div>
+    <details><summary>Show answer</summary><div class="a"><p>200 OK with an empty body. <code>ResponseEntity.ok(null)</code> is a "success" with nothing in it, which a client can't tell from a real answer without checking the body. That's the reason for the null check.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Which status fits: a POST that created a product? A DELETE that removed one and sends nothing back? <code>GET /api/products/get/abc</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>201 Created, 204 No Content, 400 Bad Request.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 10 done — I know what each status means, and why the 404 is text</span></label>
+</section>
+
+<section id="s11">
+  <div class="shead"><span class="chip">11</span><h2>POST and PUT: data coming in</h2><span class="lvl core">Core</span><span class="tagline">@RequestBody, 201, idempotence, DELETE</span></div>
+
+  <p><code>controller/ProductController.java</code>, tags <code>lab1-post</code> and <code>lab1-put</code>, lines 38–59:</p>
+  <div class="cmd"><span class="at">@PostMapping</span>(<span class="st">"/add-product"</span>)
+<span class="tg">public</span> ResponseEntity&lt;Product&gt; <span class="at">addProduct</span>(<span class="at">@RequestBody</span> Product product) {
+
+    Product savedProduct = productService.<span class="at">addProduct</span>(product);
+
+    <span class="tg">return</span> ResponseEntity.<span class="at">status</span>(HttpStatus.CREATED).<span class="at">body</span>(savedProduct);
+}
+
+<span class="at">@PutMapping</span>(<span class="st">"/update/{id}"</span>)
+<span class="tg">public</span> ResponseEntity&lt;?&gt; <span class="at">updateProduct</span>(
+        <span class="at">@PathVariable</span> Long id,
+        <span class="at">@RequestBody</span> Product product) {
+
+    Product updatedProduct = productService.<span class="at">updateProduct</span>(id, product);
+
+    <span class="tg">if</span> (updatedProduct == <span class="tg">null</span>) {
+        <span class="tg">return</span> ResponseEntity.<span class="at">status</span>(HttpStatus.NOT_FOUND)
+                .<span class="at">body</span>(<span class="st">"Product with ID "</span> + id + <span class="st">" not found"</span>);
+    }
+
+    <span class="tg">return</span> ResponseEntity.<span class="at">ok</span>(updatedProduct);
+}</div>
+
+  <h3>@RequestBody: from JSON to a Product</h3>
+  <p>A GET carries everything in its URL. A POST or a PUT also carries a <strong>body</strong>, and here that body is the product, as JSON:</p>
+  <div class="cmd"><span class="tg">POST /api/products/add-product HTTP/1.1</span>
+<span class="at">Host</span>:<span class="st"> localhost:8080</span>
+<span class="at">Content-Type</span>:<span class="st"> application/json</span>
+
+{
+  <span class="at">"name"</span>: <span class="st">"USB-C Hub"</span>,
+  <span class="at">"description"</span>: <span class="st">"7-in-1 USB-C Hub"</span>,
+  <span class="at">"price"</span>: <span class="st">2499.00</span>,
+  <span class="at">"category"</span>: <span class="st">"Accessories"</span>,
+  <span class="at">"stock"</span>: <span class="st">20</span>
+}</div>
+  <p><code>@RequestBody Product product</code> tells Spring: read the body, and turn it into this parameter. Spring first checks the <code>Content-Type</code> header, which must say <code>application/json</code>. Then Jackson creates an empty <code>Product</code> with the no-argument constructor and calls one setter for each key in the JSON: <code>setName("USB-C Hub")</code>, <code>setPrice(2499.00)</code>… Your method receives a ready object. The answer:</p>
+  <div class="cmd"><span class="tg">HTTP/1.1 201</span>
+<span class="at">Content-Type</span>:<span class="st"> application/json</span>
+
+{<span class="at">"category"</span>:<span class="st">"Accessories"</span>,<span class="at">"description"</span>:<span class="st">"7-in-1 USB-C Hub"</span>,<span class="at">"id"</span>:<span class="st">4</span>,<span class="at">"name"</span>:<span class="st">"USB-C Hub"</span>,<span class="at">"price"</span>:<span class="st">2499.00</span>,<span class="at">"stock"</span>:<span class="st">20</span>}</div>
+  <p>What Jackson does with the keys it finds, and doesn't find:</p>
+  <div class="mention">
+    <div class="mrow"><b>a key with a setter</b><span>Set on the Product.</span></div>
+    <div class="mrow"><b>a key you leave out</b><span>Never set, so the field stays <code>null</code>. Leave out <code>description</code> in a POST and the new product has none.</span></div>
+    <div class="mrow"><b>a key Product doesn't have</b><span>Ignored, no error: <code>"colour": "red"</code> just disappears. (That's Jackson 3's default, and the contract's rule too.)</span></div>
+    <div class="mrow"><b>an "id" key</b><span>Set as well. Then <code>save()</code> sees an id and runs an UPDATE instead of an INSERT: <code>POST</code> with <code>"id": 1</code> overwrites the laptop, and still answers 201. Lab 2's request class, <code>ProductRequest</code>, has no id field at all, which closes this door (<a href="sb-good-slice.html">B2</a>).</span></div>
+    <div class="mrow"><b>not JSON at all</b><span>A trailing comma, single quotes, a missing value: <strong>400</strong> before your method runs, and the log has a <code>WARN</code> naming <code>HttpMessageNotReadableException</code>.</span></div>
+    <div class="mrow"><b>not application/json</b><span>In Postman, a body left on <em>Text</em> is sent as <code>text/plain</code>. <strong>415</strong> Unsupported Media Type.</span></div>
+  </div>
+
+  <h3>201 Created</h3>
+  <p>201 says: this request created something new. Your code sends the saved product back, new id included, so the client learns the id without asking again. Many APIs also send a <code>Location</code> header with the new product's URL. Yours doesn't, and the contract allows either.</p>
+
+  <h3>Methods, and which ones are safe to repeat</h3>
+  <div class="mention">
+    <div class="mrow"><b>GET</b><span>Read. Safe and idempotent. Yours: get-all, get/{id}.</span></div>
+    <div class="mrow"><b>POST</b><span>Create. Neither safe nor idempotent. Yours: add-product.</span></div>
+    <div class="mrow"><b>PUT</b><span>Replace the thing at this URL. Idempotent, not safe. Yours: update/{id}.</span></div>
+    <div class="mrow"><b>DELETE</b><span>Remove. Idempotent, not safe. Yours: delete/{id}.</span></div>
+  </div>
+  <p><strong>Safe</strong>: changes nothing on the server. <strong>Idempotent</strong>: sending it twice leaves the server in the same state as sending it once. POST the USB-C Hub twice and you have two hubs, ids 4 and 5. PUT the same body to <code>update/1</code> twice and product 1 ends up exactly the same; the second PUT changes nothing. DELETE product 1 twice and it's gone after the first; the second finds nothing to remove.</p>
+  <p>This matters when a request times out and nobody knows whether it arrived. A client can simply send a GET, PUT or DELETE again. Sending a POST again may create a duplicate.</p>
+
+  <h3>DELETE: only at lab1-complete</h3>
+  <p>The live session stopped at PUT, and the TA's plan left DELETE out. The final tag <code>lab1-complete</code> has one anyway (lines 61–67), so you may or may not have it:</p>
+  <div class="cmd"><span class="at">@DeleteMapping</span>(<span class="st">"/delete/{id}"</span>)
+<span class="tg">public</span> ResponseEntity&lt;String&gt; <span class="at">deleteProduct</span>(<span class="at">@PathVariable</span> Long id) {
+
+    productService.<span class="at">deleteProduct</span>(id);
+
+    <span class="tg">return</span> ResponseEntity.<span class="at">ok</span>(<span class="st">"Product with ID "</span> + id + <span class="st">" deleted successfully"</span>);
+}</div>
+  <p>The service calls <code>deleteById(id)</code>, which looks the row up and deletes it if it's there, and quietly does nothing if it isn't. So <code>DELETE /api/products/delete/999</code> also answers 200 "Product with ID 999 deleted successfully". Lab 2's version looks the product up first, throws <code>ProductNotFoundException</code> if it's missing, and on success sends 204 with no body (<code>lab2-complete</code>, line 71):</p>
+  <div class="cmd"><span class="tg">return</span> ResponseEntity.<span class="at">noContent</span>().<span class="at">build</span>();</div>
+
+  <div class="dothis">
+    <h4>Try it — send data, watch the SQL</h4>
+    <p>With curl (macOS, Linux, Git Bash), or the same requests in Postman with <em>Body → raw → JSON</em>:</p>
+    <div class="cmd"><span class="p">$</span> curl -i -X POST http://localhost:8080/api/products/add-product \
+<span class="p">&gt;</span>   -H "Content-Type: application/json" \
+<span class="p">&gt;</span>   -d '{"name":"USB-C Hub","description":"7-in-1 USB-C Hub","price":2499.00,"category":"Accessories","stock":20}'</div>
+    <ol>
+      <li>Send it: 201, and a new id. The console shows one <code>insert into products</code>.</li>
+      <li>Send it again: another 201, the next id. POST isn't idempotent.</li>
+      <li>PUT the lab's Gaming Laptop to product 1, twice (below). Both answers are identical. The console shows a <code>select</code> then an <code>update</code>.</li>
+      <li>PUT again with <code>"description"</code> removed from the JSON, then GET product 1: the description is <code>null</code>.</li>
+      <li>In Postman, switch the body type from JSON to Text and send: 415.</li>
+    </ol>
+    <div class="cmd"><span class="p">$</span> curl -i -X PUT http://localhost:8080/api/products/update/1 \
+<span class="p">&gt;</span>   -H "Content-Type: application/json" \
+<span class="p">&gt;</span>   -d '{"name":"Gaming Laptop","description":"15-inch gaming laptop","price":85000.00,"category":"Electronics","stock":8}'</div>
+    <p>On Windows PowerShell, use <code>curl.exe</code>, put the command on one line, and expect trouble with the quotes; Postman or Swagger (section 13) is easier there.</p>
+  </div>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>A client sends <code>POST /api/products/add-product</code> with <code>"id": 2</code> in the body. What happens?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Jackson sets the id to 2, so <code>save()</code> treats the product as existing and runs an UPDATE on row 2: the Wireless Mouse is overwritten. The answer is still 201, because the controller always says CREATED. Nothing new was created.</p></div></details>
+  </div>
+  <div class="quiz">
+    <div class="q"><b>Q2</b>Is your PUT still idempotent when its body leaves out <code>description</code>?</div>
+    <details><summary>Show answer</summary><div class="a"><p>Yes. After one send or after two, product 1 is in the same state: those values, with <code>description</code> null. Idempotent means "same state after repeating", not "harmless".</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 11 done — I've sent a POST and a PUT and read their SQL</span></label>
+</section>
+
+<section id="s12">
+  <div class="shead"><span class="chip">12</span><h2>Verb-style and resource-style URLs</h2><span class="lvl core">Core</span><span class="tagline">two ways to name the same endpoints</span></div>
+
+  <table class="grid long-key">
+    <tr><th>The lab's URLs</th><th>Resource style</th></tr>
+    <tr><td>GET /api/products/get-all</td><td><code>GET /api/products</code></td></tr>
+    <tr><td>GET /api/products/get/{id}</td><td><code>GET /api/products/{id}</code></td></tr>
+    <tr><td>POST /api/products/add-product</td><td><code>POST /api/products</code></td></tr>
+    <tr><td>PUT /api/products/update/{id}</td><td><code>PUT /api/products/{id}</code></td></tr>
+    <tr><td>DELETE /api/products/delete/{id}</td><td><code>DELETE /api/products/{id}</code></td></tr>
+  </table>
+  <p>The lab's URLs name the action twice: in the method (GET) and in the path (<code>get-all</code>). That made each endpoint easy to tell apart while typing them live, and it works perfectly well.</p>
+  <p>Resource-style URLs name the action once. The path names a <em>thing</em>: the collection <code>/api/products</code>, or one item <code>/api/products/1</code>. The HTTP method says what to do with it. Filters go in query parameters: <code>GET /api/products?category=Accessories</code>. Most public HTTP APIs use this style, and so does the course's contract (<a href="api-contract.html#s4">contract §04</a>).</p>
+  <p>Moving from one to the other changes only the strings in the mapping annotations, such as <code>@GetMapping("/{id}")</code> instead of <code>@GetMapping("/get/{id}")</code>. The methods, the service and everything below stay the same. Lab 2 kept the lab's style and renamed one endpoint, <code>get/{id}</code> to <code>get-id/{id}</code>, so a client written for Lab 1 needs that one URL changed.</p>
+
+  <div class="quiz">
+    <div class="q"><b>Q1</b>In resource style, what's the request for "replace product 3"? And for "all products in the Accessories category"?</div>
+    <details><summary>Show answer</summary><div class="a"><p><code>PUT /api/products/3</code> with the full product as the body. <code>GET /api/products?category=Accessories</code>: still the collection, narrowed by a query parameter.</p></div></details>
+  </div>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 12 done — I can write the lab's URLs in resource style</span></label>
+</section>
+
+<section id="s13">
+  <div class="shead"><span class="chip">13</span><h2>Swagger: the API describing itself</h2><span class="lvl core">Core</span><span class="tagline">springdoc, /v3/api-docs, Swagger UI</span></div>
+
+  <p>The last dependency in your pom, springdoc, reads your controllers' mappings at startup, the same list the DispatcherServlet uses, and publishes a description of your API. You wrote nothing for it.</p>
+  <div class="mention">
+    <div class="mrow"><b>/v3/api-docs</b><span>The description, as JSON, in the <strong>OpenAPI</strong> format: every path, its method, its parameters, and the shape of <code>Product</code>.</span></div>
+    <div class="mrow"><b>/swagger-ui/index.html</b><span><strong>Swagger UI</strong>: a web page built from that JSON, where you can send each request with a form.</span></div>
+  </div>
+  <div class="dothis">
+    <h4>Try it — your API, described</h4>
+    <ol>
+      <li>Open <code>http://localhost:8080/swagger-ui/index.html</code>. Your endpoints are listed under <em>product-controller</em>.</li>
+      <li>Open <code>GET /api/products/get/{id}</code>, click <em>Try it out</em>, enter 1, click <em>Execute</em>. Swagger shows the curl command it ran, the status, the response headers and the body. Try 999.</li>
+      <li>Open <code>http://localhost:8080/v3/api-docs</code> and find <code>"/api/products/get/{id}"</code> in it. That JSON is all Swagger UI knows.</li>
+    </ol>
+  </div>
+  <p>OpenAPI is also the format of the course contract, <code>openapi.yaml</code>. The difference is direction: springdoc writes a description <em>from</em> your code; the contract was written first, by hand, and your backend has to match it (<a href="api-contract.html#s3">contract §03</a>).</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 13 done — I've sent a request from Swagger UI</span></label>
+</section>
+
+<div class="part">Part 5 · Reference</div>
+
+<section id="s14">
+  <div class="shead"><span class="chip">14</span><h2>When it goes wrong</h2><span class="lvl ref">Reference</span><span class="tagline">the message, and what it means</span></div>
+
+  <table class="grid long-key">
+    <tr><th>You see</th><th>It usually means</th></tr>
+    <tr><td>Web server failed to start. Port 8080 was already in use.</td><td>A copy of the app is still running, often from pressing Run twice in IntelliJ. Stop the old one (the red square in the Run window), or move this one with <code>server.port=8081</code>.</td></tr>
+    <tr><td>Field productService in … required a bean of type '…ProductService' that could not be found.</td><td>That class isn't a bean: <code>@Service</code> is missing, or the class sits outside <code>com.esd.ecommerce</code> (03, 04).</td></tr>
+    <tr><td>Not a managed type: class …Product</td><td><code>@Entity</code> is missing, or the entity sits outside <code>com.esd.ecommerce</code> (06).</td></tr>
+    <tr><td>No property 'categry' found for type 'Product'</td><td>A derived query's name doesn't match a field of the entity (07).</td></tr>
+    <tr><td>Unknown database '…'</td><td>The database name in <code>spring.datasource.url</code> is misspelt, or the SQL script never ran (05).</td></tr>
+    <tr><td>Access denied for user 'root'@'localhost'</td><td>Wrong MySQL password in <code>application.properties</code> (05).</td></tr>
+    <tr><td>Communications link failure</td><td>MySQL isn't running, or isn't on port 3306 (05).</td></tr>
+    <tr><td>… Dialect … / … JDBC metadata …</td><td>Hibernate couldn't connect to the database. The real reason is further up: one of the three rows above (05).</td></tr>
+    <tr><td>404, JSON with "error":"Not Found"</td><td>No mapping matched: a typo in the path, or the controller is outside the package (03, 09).</td></tr>
+    <tr><td>404, Product with ID 5 not found</td><td>Your own 404: there's no product 5. Check get-all for the ids that exist.</td></tr>
+    <tr><td>405 Method Not Allowed</td><td>The wrong method for that path, e.g. POST to get-all (09).</td></tr>
+    <tr><td>415 Unsupported Media Type</td><td>The body was sent as Text. In Postman: <em>Body → raw → JSON</em> (11).</td></tr>
+    <tr><td>400 on a POST or PUT, log WARN with HttpMessageNotReadableException</td><td>The JSON is broken: a trailing comma, single quotes, a missing value, or no body at all (11).</td></tr>
+    <tr><td>500, log says Column 'name' cannot be null</td><td>A <code>NOT NULL</code> column from your SQL script, and the JSON left that field out (05).</td></tr>
+    <tr><td>Whitelabel Error Page</td><td>Any error, seen in a browser. The status code is on the page (09).</td></tr>
+    <tr><td>cannot find symbol: method getName()</td><td>Lombok isn't generating code. In IntelliJ: <em>Settings → Build, Execution, Deployment → Compiler → Annotation Processors → Enable annotation processing</em>.</td></tr>
+    <tr><td>release version 17 not supported</td><td>IntelliJ is compiling with a JDK older than 17: <em>File → Project Structure → Project → SDK</em>.</td></tr>
+  </table>
+
+  <div class="cue"><p class="cue-k">Reading a failed start</p><p>If the console shows an <code>APPLICATION FAILED TO START</code> box, read its <em>Description</em> first; it's written for you. If there's no box, find the <strong>last</strong> <code>Caused by:</code> in the stack trace: that's the root cause, and everything above it failed because of it. <a href="sb-testing.html">B4</a> teaches reading stack traces properly.</p></div>
+
+  <label class="done-check"><input type="checkbox" class="chk-s"><span class="dbox"></span><span>Section 14 read</span></label>
+</section>
+
+<section id="s15">
+  <div class="shead"><span class="chip">15</span><h2>Using this in your contract backend</h2><span class="lvl core">Core</span><span class="tagline">a pointer, not a build</span></div>
+
+  <p>The course's backend contract (<a href="api-contract.html">API contract</a>) is the same kind of app as Lab 1, grown: a <code>Course</code> instead of a <code>Product</code>, everything under <code>/api</code>, resource-style URLs, and JSON errors. Its first milestone, <strong>level A, the catalogue</strong>, is where this page's ideas land:</p>
+  <ul>
+    <li>an entity with more fields, and repository queries for its filters (sections 06 and 07);</li>
+    <li>two GET endpoints in resource style, with lists in a fixed order (sections 09 and 12);</li>
+    <li>query parameters for the filters, through <code>@RequestParam</code> (section 09);</li>
+    <li>a JSON error for "not found" instead of a String (section 10, then <a href="sb-good-slice.html">B2</a>).</li>
+  </ul>
+  <p>Read <a href="api-contract.html#s8">contract §08, The gap from your Spring Boot labs</a>, then <a href="api-contract.html#s9">§09, Level A</a>. In <code>esd-labs/api-contract</code>, <code>npm run conformance -- --level A</code> checks your backend against it.</p>
+
+  <label class="done-check"><input type="checkbox" class="chk"><span class="dbox"></span><span>Section 15 read — I know where level A picks this up</span></label>
+</section>
+
+<section id="gloss">
+  <div class="shead"><span class="chip">—</span><h2>Glossary</h2><span class="tagline">come back to this</span></div>
+  <div class="gloss">
+    <div class="grow"><b>application context</b><span>Spring's container: the beans it creates, wires together and keeps while the app runs.</span></div>
+    <div class="grow"><b>auto-configuration</b><span>Spring Boot's rules that create beans from what's on the classpath and in <code>application.properties</code>, unless you define your own.</span></div>
+    <div class="grow"><b>bean</b><span>An object the container created and manages. One of each, by default.</span></div>
+    <div class="grow"><b>component scan</b><span>The search for annotated classes, starting at the application class's package and going down.</span></div>
+    <div class="grow"><b>Content-Type</b><span>The header that says what format a body is in, e.g. <code>application/json</code>.</span></div>
+    <div class="grow"><b>DDL</b><span>SQL that changes structure: <code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>.</span></div>
+    <div class="grow"><b>dependency injection</b><span>A class declares what it needs; the container supplies it, through a constructor or a field.</span></div>
+    <div class="grow"><b>derived query</b><span>A repository method whose name Spring Data turns into a query: <code>findByCategory</code>.</span></div>
+    <div class="grow"><b>DispatcherServlet</b><span>Spring MVC's front door: matches each request to a controller method, and writes the response.</span></div>
+    <div class="grow"><b>entity</b><span>A class whose objects are rows of a table (<code>@Entity</code>).</span></div>
+    <div class="grow"><b>Hibernate</b><span>The JPA implementation in your app: maps entities to tables and writes the SQL.</span></div>
+    <div class="grow"><b>HikariCP</b><span>The connection pool: a few open database connections, lent out for each query.</span></div>
+    <div class="grow"><b>idempotent</b><span>Sending it twice leaves the server in the same state as sending it once. GET, PUT, DELETE.</span></div>
+    <div class="grow"><b>Jackson</b><span>The library that turns objects into JSON and JSON into objects.</span></div>
+    <div class="grow"><b>JDBC</b><span>Java's standard way of talking to a database. The MySQL driver implements it.</span></div>
+    <div class="grow"><b>JPA</b><span>Jakarta Persistence: the standard annotations and API for mapping objects to tables.</span></div>
+    <div class="grow"><b>OpenAPI</b><span>A standard format for describing an HTTP API. Swagger UI displays it.</span></div>
+    <div class="grow"><b>path variable</b><span>A <code>{name}</code> part of a URL pattern, bound with <code>@PathVariable</code>.</span></div>
+    <div class="grow"><b>proxy</b><span>A class generated while the app runs, which implements an interface and passes calls on.</span></div>
+    <div class="grow"><b>query parameter</b><span><code>?name=value</code> after the path, bound with <code>@RequestParam</code>.</span></div>
+    <div class="grow"><b>repository</b><span>The layer that talks to the database. Yours is an interface; Spring Data implements it.</span></div>
+    <div class="grow"><b>ResponseEntity</b><span>A response's status, headers and body, returned from a controller method.</span></div>
+    <div class="grow"><b>safe method</b><span>One that changes nothing on the server. GET.</span></div>
+    <div class="grow"><b>service</b><span>The layer for the application's logic, between controller and repository.</span></div>
+    <div class="grow"><b>starter</b><span>A dependency that pulls in a set of libraries known to work together.</span></div>
+    <div class="grow"><b>status code</b><span>The three-digit result of a request: 2xx success, 4xx client error, 5xx server error.</span></div>
+    <div class="grow"><b>Tomcat</b><span>The web server inside your app, started by Spring Boot on port 8080.</span></div>
+  </div>
+</section>
+
+<div class="finish">
+  <h2>How to know you understand Lab 1</h2>
+  <p>You've got it if you can do all of these <em>without looking anything up</em>:</p>
+  <ol>
+    <li>Draw the nine steps of <code>GET /api/products/get/1</code>, naming the class or method at each.</li>
+    <li>Say what <code>@SpringBootApplication</code> is made of, and name three things auto-configuration created for you.</li>
+    <li>Say why the application class sits in the top package.</li>
+    <li>Explain why <code>productRepository</code> isn't null in the lab's service, and why it is after <code>new ProductService()</code>.</li>
+    <li>Rewrite <code>ProductService</code> with constructor injection, and give two reasons it's the usual choice.</li>
+    <li>Say what <code>ddl-auto=update</code> did to your hand-made table, and why a POST without a name gives a 500.</li>
+    <li>Name four methods <code>JpaRepository</code> gave you, and write a derived query for "products in a category, cheapest first".</li>
+    <li>Predict the SQL each endpoint prints.</li>
+    <li>Say why the 404 branch returns <code>ResponseEntity&lt;?&gt;</code>, and what a JSON client does with its body.</li>
+    <li>Say which of GET, POST, PUT and DELETE are idempotent, and show it with two requests.</li>
+    <li>Write the lab's five URLs in resource style.</li>
+  </ol>
+
+  <h2 style="margin-top:30px;font-size:20px">Annotations card</h2>
+  <div class="cmd"><span class="at">@SpringBootApplication</span>   <span class="cm">// @SpringBootConfiguration + @EnableAutoConfiguration + @ComponentScan</span>
+<span class="at">@RestController</span>          <span class="cm">// @Controller + @ResponseBody: the return value is the response body</span>
+<span class="at">@RequestMapping</span>(<span class="st">"/api/products"</span>)   <span class="cm">// a path prefix for the whole class</span>
+<span class="at">@GetMapping</span>(<span class="st">"/get/{id}"</span>) <span class="cm">// GET + path; also @PostMapping @PutMapping @DeleteMapping</span>
+<span class="at">@PathVariable</span> Long id    <span class="cm">// {id} from the path, converted to Long</span>
+<span class="at">@RequestBody</span> Product p   <span class="cm">// the JSON body as a Product (Content-Type: application/json)</span>
+<span class="at">@Service</span>  <span class="at">@Repository</span>    <span class="cm">// @Component with a name: make one, keep it, inject it</span>
+<span class="at">@Autowired</span>               <span class="cm">// inject into this field (a single constructor needs nothing)</span>
+<span class="at">@Entity</span>  <span class="at">@Table</span>(name = <span class="st">"products"</span>)  <span class="at">@Id</span>  <span class="at">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)</div>
+
+  <h2 style="margin-top:24px;font-size:20px">SQL log card</h2>
+  <div class="cmd">GET    /get-all        select … from products
+GET    /get/{id}       select … where p1_0.id=?
+GET    /get/abc        nothing: 400 before your code runs
+POST   /add-product    insert into products …
+PUT    /update/{id}    select …, then update products set … where id=?
+DELETE /delete/{id}    select …, then delete from products where id=?</div>
+
+  <h2 style="margin-top:24px;font-size:20px">HTTP card</h2>
+  <div class="cmd">GET     read              safe, idempotent       200 · 404
+POST    create            neither                201 (+ the new resource)
+PUT     replace           idempotent             200 · 404
+DELETE  remove            idempotent             200 or 204
+400 bad request · 405 wrong method · 415 wrong Content-Type · 500 server failed</div>
+
+  <h2 style="margin-top:24px;font-size:20px">curl card</h2>
+  <div class="cmd"><span class="p">$</span> curl http://localhost:8080/api/products/get-all
+<span class="p">$</span> curl -i http://localhost:8080/api/products/get/1
+<span class="cm"># -i: status line and headers too;  -v: what curl sent as well</span>
+<span class="p">$</span> curl -i -X POST http://localhost:8080/api/products/add-product -H "Content-Type: application/json" -d '{"name":"USB-C Hub","price":2499.00,"category":"Accessories","stock":20}'
+<span class="cm"># Windows PowerShell: curl.exe, one line</span></div>
+</div>
+
+<footer>M.Tech CSE · ESD · Spring Boot<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+</div>
+<script>
+(function(){
+  /* ---- make every section heading its own link ---- */
+  document.querySelectorAll('section[id]').forEach(function(sec){
+    var h=sec.querySelector('.shead h2');
+    if(!h||h.querySelector('.anch')) return;
+    var a=document.createElement('a');
+    a.className='anch';
+    a.href='#'+sec.id;
+    a.textContent='#';
+    a.setAttribute('aria-label','Link to this section');
+    h.appendChild(a);
+  });
+
+  /* ---- handle all in-page links ourselves ---- */
+  function goTo(id,push){
+    var el=document.getElementById(id);
+    if(!el) return false;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(push){ try{ history.replaceState(null,'','#'+id); }catch(err){} }
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!id) return;
+    if(goTo(id,true)) e.preventDefault();
+  });
+
+  /* ---- honour a hash in the URL on first load ---- */
+  if(location.hash.length>1){
+    var target=decodeURIComponent(location.hash.slice(1));
+    window.addEventListener('load',function(){setTimeout(function(){goTo(target,false)},60)});
+  }
+
+  /* ---- progress: CORE sections drive the bar; stretch boxes are tracked separately.
+         Both are remembered in this browser, so they survive a reload. ---- */
+  function load(key){ try{ return JSON.parse(localStorage.getItem(key)||'[]'); }catch(err){ return []; } }
+  function save(key,list){ try{ localStorage.setItem(key,JSON.stringify(list.map(function(c){return c.checked}))); }catch(err){} }
+  var KEY='esd-sb-request-flow-progress', SKEY='esd-sb-request-flow-stretch';
+  var checks=[].slice.call(document.querySelectorAll('.chk'));
+  var extras=[].slice.call(document.querySelectorAll('.chk-s'));
+  var saved=load(KEY), savedS=load(SKEY);
+  checks.forEach(function(c,i){ if(saved[i]) c.checked=true; });
+  extras.forEach(function(c,i){ if(savedS[i]) c.checked=true; });
+  var doneEl=document.getElementById('done'),totalEl=document.getElementById('total');
+  var fill=document.getElementById('fill'),msg=document.getElementById('msg');
+  totalEl.textContent=checks.length;
+  var notes=["Start with 01 and 02 — every later section zooms into one box of 02's picture.", "Good start. Keep your Lab 1 project running beside this page.", "Past halfway — you've been down every layer.", "Nearly there: the other endpoints, and the tools.", "Core done. Try the stretch boxes, or open the contract and look at level A."];
+  function update(){
+    var n=checks.filter(function(c){return c.checked}).length;
+    var pct=checks.length?n/checks.length:0;
+    doneEl.textContent=n;
+    fill.style.width=(pct*100)+'%';
+    fill.classList.toggle('done',n===checks.length);
+    var s=extras.filter(function(c){return c.checked}).length;
+    msg.textContent=(n===checks.length?notes[4]:notes[Math.min(3,Math.floor(pct*4))])+(s?'  ·  stretch: '+s+' / '+extras.length:'');
+    save(KEY,checks); save(SKEY,extras);
+  }
+  checks.concat(extras).forEach(function(c){c.addEventListener('change',update)});
+  update();
+  document.querySelectorAll('.cmd').forEach(function(block){
+    var b=document.createElement('button');
+    b.className='copy';b.type='button';b.textContent='Copy';
+    b.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var c=block.cloneNode(true);
+      c.querySelectorAll('.copy,.o,.cm').forEach(function(n){n.remove()});
+      var s=c.textContent.split('\n').map(function(l){return l.replace(/^[$>]\s?/,'').trimEnd()}).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(ok,function(){})}
+      else{var ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(err){}document.body.removeChild(ta)}
+    });
+    block.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>

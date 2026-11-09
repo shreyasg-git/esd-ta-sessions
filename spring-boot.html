@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ESD — Spring Boot, explained</title>
+<meta name="description" content="ESD, M.Tech CSE — the Spring Boot labs explained: the code you wrote in Lab 1, Lab 2 and the Bug Lab, piece by piece.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DDE3E0;--surface:#FFFFFF;--ink:#0F1A18;--muted:#5A6B67;--line:#C4CFCB;
+  --teal:#0B5D51;--teal-soft:#E4EEEB;--signal:#F5C518;--dark:#101614;--dark-2:#1B2422;
+  --term-green:#7FD1B9;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 100px;position:relative}
+
+.masthead{padding:64px 0 8px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow span{background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:2px}
+h1{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(42px,10vw,88px);line-height:.9;letter-spacing:-.02em;margin:0 0 22px}
+h1 em{font-style:normal;color:var(--teal)}
+.lede{font-size:clamp(16px,2.3vw,20px);max-width:60ch;margin:0 0 26px;color:#2B3936}
+
+.factbar{display:flex;flex-wrap:wrap;border:1px solid var(--ink);background:var(--surface);margin-bottom:8px}
+.fact{padding:12px 18px;border-right:1px solid var(--line);flex:1 1 auto;min-width:150px}
+.fact:last-child{border-right:0}
+.fact dt{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
+.fact dd{margin:0;font-family:var(--cond);font-weight:700;font-size:19px;text-transform:uppercase;line-height:1.15}
+
+.sectitle{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:52px 0 14px;display:flex;align-items:center;gap:14px}
+.sectitle::after{content:"";height:1px;background:var(--line);flex:1}
+
+/* ---------- cards ---------- */
+.cards{display:grid;gap:16px}
+.partition{display:flex;align-items:center;gap:16px;margin:22px 0 10px}
+.partition .wave{flex:1;min-width:24px;height:12px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12' viewBox='0 0 24 12'%3E%3Cpath d='M0 6 Q6 0 12 6 T24 6' fill='none' stroke='%230B5D51' stroke-width='2'/%3E%3C/svg%3E") repeat-x left center/24px 12px}
+.partition span{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);background:var(--signal);padding:5px 10px;font-weight:600;white-space:nowrap}
+.card{
+  display:block;text-decoration:none;color:inherit;background:var(--surface);
+  border:1px solid var(--ink);border-left:6px solid var(--teal);
+  padding:22px 24px;position:relative;
+  transition:transform .16s cubic-bezier(.4,0,.2,1),box-shadow .16s,border-left-color .16s;
+}
+.card:hover{transform:translateX(4px);box-shadow:-6px 6px 0 rgba(15,26,24,.12);border-left-color:var(--signal)}
+.card:focus-visible{outline:3px solid var(--signal);outline-offset:3px}
+.card-top{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.card-num{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--paper);background:var(--teal);padding:3px 9px;letter-spacing:.04em}
+.card h2{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:clamp(22px,4vw,30px);line-height:1.05;margin:0;flex:1;min-width:220px}
+.card .badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;background:var(--signal);color:var(--ink);padding:4px 8px;font-weight:600;white-space:nowrap}
+.card p{margin:0 0 14px;color:#2B3936;font-size:15.5px;max-width:62ch}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.tags i{font-style:normal;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--teal);background:var(--teal-soft);border:1px solid #CDDDD8;padding:3px 8px}
+.card-go{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:14px;letter-spacing:.05em;color:var(--teal);display:inline-flex;align-items:center;gap:8px}
+.card-go::after{content:"→";transition:transform .16s}
+.card:hover .card-go::after{transform:translateX(5px)}
+.card .file{font-family:var(--mono);font-size:10.5px;color:var(--muted);float:right;margin-top:3px}
+
+/* ---------- how to use ---------- */
+.how{background:var(--surface);border:1px solid var(--ink);padding:6px 0;margin-bottom:14px}
+.hrow{display:flex;gap:14px;padding:11px 18px;align-items:baseline;border-bottom:1px dashed var(--line)}
+.hrow:last-child{border-bottom:0}
+.hrow b{font-family:var(--mono);font-size:12.5px;font-weight:600;flex:0 0 176px;color:var(--teal)}
+.hrow span{font-size:14.5px;color:#2B3936;flex:1}
+
+
+footer{margin-top:40px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:2}
+footer .mk{display:inline-block;color:var(--ink);letter-spacing:.06em}
+footer .hz{color:#C2352B;font-size:12.5px;display:inline-block;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+
+@media (max-width:640px){
+  .masthead{padding:40px 0 6px}
+  .fact{border-right:0;border-bottom:1px solid var(--line);flex:1 1 100%}
+  .fact:last-child{border-bottom:0}
+  .hrow b{flex:1 1 100%}
+  .hrow{flex-wrap:wrap;gap:4px}
+  .card{padding:18px 18px;border-left-width:5px}
+  .card .file{float:none;display:block;margin:0 0 8px}
+  .card:hover{transform:none;box-shadow:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow"><span>M.Tech CSE</span><span>ESD</span> Spring Boot</p>
+  <h1>Spring Boot,<br><em>explained</em></h1>
+  <p class="lede">The three Spring Boot labs are done and submitted. These pages go back through the code you wrote in them, piece by piece, so that every line makes sense the next time you open it. Self-paced, and nothing to submit.</p>
+
+  <dl class="factbar">
+    <div class="fact"><dt>Documents</dt><dd>5</dd></div>
+    <div class="fact"><dt>Pace</dt><dd>Entirely yours</dd></div>
+    <div class="fact"><dt>To submit</dt><dd>Nothing</dd></div>
+    <div class="fact"><dt>Best used</dt><dd>Beside your code</dd></div>
+  </dl>
+</header>
+
+<p class="sectitle">The documents</p>
+
+<div class="cards">
+
+  <a class="card" href="sb-java.html">
+    <span class="file">sb-java.html</span>
+    <div class="card-top">
+      <span class="card-num">00</span>
+      <h2>The Java that Spring code leans on</h2>
+      <span class="badge">Optional prep</span>
+    </div>
+    <p>Every piece of Java hiding in your lab project, read as plain Java: what an annotation is and who reads it, what Lombok writes for you, the generics on <code>JpaRepository</code>, <code>Optional</code>, lambdas, streams and the exceptions you throw. Assignment 1 is the bridge.</p>
+    <div class="tags">
+      <i>annotations</i><i>Lombok</i><i>packages &amp; imports</i><i>generics</i><i>Optional</i><i>lambdas</i><i>method references</i><i>streams</i><i>exceptions</i><i>BigDecimal</i><i>equals &amp; hashCode</i>
+    </div>
+    <span class="card-go">Open</span>
+  </a>
+
+  <a class="card" href="sb-request-flow.html">
+    <span class="file">sb-request-flow.html</span>
+    <div class="card-top">
+      <span class="card-num">01</span>
+      <h2>From request to row</h2>
+      <span class="badge">Lab 1</span>
+    </div>
+    <p>Follow one request, <code>GET /api/products/get/1</code>, from the network through your controller, service and repository to the SQL Hibernate prints, and back out as JSON. Then everything the lab moved past quickly: what Initializr and auto-configuration set up, beans and injection, the entity, the repository, status codes, POST and PUT.</p>
+    <div class="tags">
+      <i>request flow</i><i>auto-configuration</i><i>beans</i><i>dependency injection</i><i>@Entity</i><i>ddl-auto</i><i>JpaRepository</i><i>derived queries</i><i>@RestController</i><i>ResponseEntity</i><i>status codes</i><i>Swagger</i>
+    </div>
+    <span class="card-go">Open</span>
+  </a>
+
+  <a class="card" href="sb-good-slice.html">
+    <span class="file">sb-good-slice.html</span>
+    <div class="card-top">
+      <span class="card-num">02</span>
+      <h2>A slice you can defend</h2>
+      <span class="badge">Lab 2</span>
+    </div>
+    <p>The non-security half of Lab 2: why <code>ProductRequest</code> and <code>ProductResponse</code> exist, mapping by hand, the validation rules and <code>@Valid</code>, <code>ProductNotFoundException</code>, and the handler that turns every failure into one error shape. Ends with an audit of your own slice.</p>
+    <div class="tags">
+      <i>DTOs</i><i>mapping</i><i>Bean Validation</i><i>@Valid</i><i>custom exceptions</i><i>@RestControllerAdvice</i><i>ApiErrorResponse</i><i>400 / 404 / 409</i><i>delete &amp; 204</i><i>findByCategory</i>
+    </div>
+    <span class="card-go">Open</span>
+  </a>
+
+  <a class="card" href="sb-security.html">
+    <span class="file">sb-security.html</span>
+    <div class="card-top">
+      <span class="card-num">03</span>
+      <h2>Who are you, and what may you do</h2>
+      <span class="badge">Lab 2</span>
+    </div>
+    <p>The security scaffold, class by class: stateless sessions, the filter chain, BCrypt, login through <code>AuthenticationManager</code>, how <code>JwtService</code> builds and signs your token, and what the decoder checks — and what it doesn't. Decode your own token right in the page.</p>
+    <div class="tags">
+      <i>Spring Security</i><i>SecurityFilterChain</i><i>BCrypt</i><i>UserDetailsService</i><i>JWT</i><i>JwtEncoder</i><i>JwtDecoder</i><i>roles</i><i>401 vs 403</i><i>logout &amp; revocation</i><i>CSRF</i>
+    </div>
+    <span class="card-go">Open</span>
+  </a>
+
+  <a class="card" href="sb-testing.html">
+    <span class="file">sb-testing.html</span>
+    <div class="card-top">
+      <span class="card-num">04</span>
+      <h2>Prove it works</h2>
+      <span class="badge">Bug Lab</span>
+    </div>
+    <p>How the Bug Lab's tests were built and how to read one that fails, then the method behind every fix — predict, trigger, fix, re-trigger — on bugs planted in the Product app. Stack traces, logs and the SQL, Swagger and curl, and your first tests of your own.</p>
+    <div class="tags">
+      <i>MockMvc</i><i>jsonPath</i><i>reading failures</i><i>stack traces</i><i>logging</i><i>SQL logs</i><i>Swagger</i><i>H2 console</i><i>predict → trigger → fix</i><i>@SpringBootTest</i>
+    </div>
+    <span class="card-go">Open</span>
+  </a>
+
+</div>
+
+<p class="sectitle">How to use them</p>
+
+<div class="how">
+  <div class="hrow"><b>Order</b><span>00 is optional: read it if the Java in your project feels unfamiliar. 01 to 04 follow the labs in the order you did them.</span></div>
+  <div class="hrow"><b>Keep your project open</b><span>Every core section starts from lines of your own lab code, labelled with the git tag and file. Open that file beside the page and read along.</span></div>
+  <div class="hrow"><b>Missed a step?</b><span>Clone <a href="https://github.com/sivasomanath2502/ESD_Session" target="_blank" rel="noopener"><code>ESD_Session</code></a> and run <code>git switch --detach lab1-complete</code> (or <code>lab2-complete</code>) to get the code exactly as the lab ended.</span></div>
+  <div class="hrow"><b>Try it</b><span>The Try-it boxes are small pokes at code you already have: send a request, read the SQL, break one line and read the error, then put it back. You are not redoing the lab.</span></div>
+  <div class="hrow"><b>Tick as you go</b><span>Each document tracks which sections you've read while the tab is open, so you can see how far through you are.</span></div>
+  <div class="hrow"><b>Use the questions</b><span>Answer each one before opening the reveal. Getting one wrong is information, not failure — go back to the section it came from.</span></div>
+</div>
+
+<footer>M.Tech CSE · ESD · Spring Boot<br><span class="mk">Made with <span class="hz">&#10084;</span> by Shreyas</span></footer>
+
+</div>
+</body>
+</html>
